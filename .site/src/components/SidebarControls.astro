@@ -1,0 +1,92 @@
+<doc-sidebar-controls hidden>
+  <div class="tree-controls" role="group" aria-label="문서 목록 펼침 설정">
+    <button type="button" data-action="expand" aria-controls="document-tree">전체 펼치기</button>
+    <span aria-hidden="true">/</span>
+    <button type="button" data-action="collapse" aria-controls="document-tree">전체 접기</button>
+  </div>
+</doc-sidebar-controls>
+
+<script>
+  class DocSidebarControls extends HTMLElement {
+    connectedCallback() {
+      const tree = document.getElementById('document-tree');
+      if (!tree || this.dataset.initialized) return;
+      this.dataset.initialized = 'true';
+      this.hidden = false;
+
+      const groups = Array.from(tree.querySelectorAll<HTMLDetailsElement>('details'));
+      const expand = this.querySelector<HTMLButtonElement>('[data-action="expand"]');
+      const collapse = this.querySelector<HTMLButtonElement>('[data-action="collapse"]');
+
+      // Saved disclosure state must not hide the page reached by a direct link.
+      let ancestor = tree.querySelector('[aria-current="page"]')?.closest('details');
+      while (ancestor && tree.contains(ancestor)) {
+        ancestor.open = true;
+        ancestor = ancestor.parentElement?.closest('details') ?? null;
+      }
+
+      const updateButtons = () => {
+        // Keep both controls focusable after an action, including keyboard activation.
+        expand?.setAttribute('aria-disabled', String(groups.every((group) => group.open)));
+        collapse?.setAttribute('aria-disabled', String(groups.every((group) => !group.open)));
+      };
+      this.addEventListener('click', (event) => {
+        const button = event.target instanceof Element
+          ? event.target.closest<HTMLButtonElement>('button[data-action]')
+          : null;
+        if (!button || button.getAttribute('aria-disabled') === 'true') return;
+        const open = button.dataset.action === 'expand';
+        for (const group of groups) group.open = open;
+        updateButtons();
+      });
+      for (const group of groups) group.addEventListener('toggle', updateButtons);
+      updateButtons();
+    }
+  }
+  if (!customElements.get('doc-sidebar-controls')) {
+    customElements.define('doc-sidebar-controls', DocSidebarControls);
+  }
+</script>
+
+<style>
+  doc-sidebar-controls {
+    display: block;
+    color: var(--sl-color-gray-3);
+    font-size: var(--sl-text-sm);
+  }
+  doc-sidebar-controls[hidden] {
+    display: none;
+  }
+  .tree-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-inline: 0.5rem;
+  }
+  button {
+    border: 0;
+    border-radius: 0.25rem;
+    padding: 0.35rem 0;
+    background: none;
+    color: var(--sl-color-gray-2);
+    font: inherit;
+    cursor: pointer;
+  }
+  button:hover {
+    color: var(--sl-color-text-accent);
+  }
+  button[aria-disabled='true'] {
+    color: var(--sl-color-gray-3);
+    cursor: default;
+  }
+  button:focus-visible {
+    outline: 2px solid var(--sl-color-text-accent);
+    outline-offset: 3px;
+  }
+  @media (min-width: 50rem) {
+    :global(html[data-navigation-mode='compact']:not([data-navigation-drawer='open']))
+      doc-sidebar-controls {
+      display: none;
+    }
+  }
+</style>

@@ -1,0 +1,21 @@
+---
+import DefaultSidebar from '@astrojs/starlight/components/Sidebar.astro';
+import Topics from 'starlight-sidebar-topics/components/Sidebar.astro';
+import SidebarControls from './SidebarControls.astro';
+
+const { id } = Astro.locals.starlightRoute;
+const topic = id.split('/')[0];
+const hasControls = topic === 'gpu' || topic === 'inference';
+---
+
+<Topics />
+{
+  hasControls ? (
+    <>
+      <SidebarControls />
+      <div id="document-tree">
+        <DefaultSidebar />
+      </div>
+    </>
+  ) : <DefaultSidebar />
+}

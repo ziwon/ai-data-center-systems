@@ -285,6 +285,7 @@ async function walk(currentDir) {
 function shouldPublishMarkdown(relative) {
   if (relative === 'AGENTS.md') return false;
   if (relative.startsWith('.')) return false;
+  if (/\.(?:bak|backup)\.md$/i.test(relative)) return false;
   return relative === 'README.md' || docRoots.some((docRoot) => relative.startsWith(`${docRoot}/`));
 }
 

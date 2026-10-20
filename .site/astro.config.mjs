@@ -196,10 +196,12 @@ export default defineConfig({
       description:
         'AI data center networking, LLM inference, training, MLOps, storage, and systems performance engineering study notes.',
       favicon: '/favicon.svg',
+      routeMiddleware: './src/topic-navigation.ts',
       components: {
         Header: './src/components/Header.astro',
         PageFrame: './src/components/PageFrame.astro',
         PageSidebar: './src/components/PageSidebar.astro',
+        Sidebar: './src/components/Sidebar.astro',
       },
       head: [
         ...googleAnalyticsHeadEntries(googleAnalyticsId),

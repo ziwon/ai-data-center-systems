@@ -29,6 +29,10 @@ async function walk(currentDir) {
 }
 
 async function collapseSidebarGroups(filePath) {
+  // Topic navigation preserves Starlight's expanded hubs and current-page ancestry.
+  const topic = path.relative(distRoot, filePath).split(path.sep)[0];
+  if (topic === 'gpu' || topic === 'inference') return;
+
   const html = await readFile(filePath, 'utf8');
   const nextHtml = html.replace(/<details open class="astro-3ii7xxms">/g, () => {
     removedOpenAttributes += 1;
