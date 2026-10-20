@@ -25,7 +25,7 @@ function simplify(entry: SidebarEntry): SidebarEntry {
   return { ...entry, entries };
 }
 
-function gpuSidebar(entries: SidebarEntry[], isHub: boolean): SidebarEntry[] {
+function gpuSidebar(entries: SidebarEntry[]): SidebarEntry[] {
   const sectionFor = (entry: SidebarEntry) => {
     const href = links([entry])[0]?.href;
     return sections.findIndex(([directory]) => href?.startsWith(`/gpu/${directory}/`));
@@ -45,7 +45,7 @@ function gpuSidebar(entries: SidebarEntry[], isHub: boolean): SidebarEntry[] {
     return {
       ...result,
       label: `${label} · ${count}`,
-      collapsed: !isHub,
+      collapsed: true,
       entries: result.entries.map((child) =>
         child.type === 'link' && child.href === indexHref
           ? { ...child, label: directory === 'articles' ? '아티클 모아보기' : '강좌 안내' }
@@ -55,7 +55,7 @@ function gpuSidebar(entries: SidebarEntry[], isHub: boolean): SidebarEntry[] {
   }).sort((a, b) => sectionFor(a) - sectionFor(b));
 }
 
-function inferenceSidebar(entries: SidebarEntry[], isHub: boolean): SidebarEntry[] {
+function inferenceSidebar(entries: SidebarEntry[]): SidebarEntry[] {
   const root = '/inference/';
   const course = `${root}efficient-llm-inference-systems/`;
   const appendix = `${course}appendix/`;
@@ -65,7 +65,7 @@ function inferenceSidebar(entries: SidebarEntry[], isHub: boolean): SidebarEntry
   const documents = links(entries);
   const remaining = new Set(documents);
   const labels: Record<string, string> = {
-    [root]: 'Inference 전체 목록',
+    [root]: 'Inference 목록',
     [course]: '강좌 안내',
     [`${course}week01/`]: 'Week 1 — Understanding Performance Metrics',
     [appendix]: '참고자료 모아보기',
@@ -91,7 +91,7 @@ function inferenceSidebar(entries: SidebarEntry[], isHub: boolean): SidebarEntry
     const count = selected.filter((link) => !indexIsGuide || link.href !== prefix).length;
     groups.push({
       type: 'group', label: `${label} · ${count}`, entries: children,
-      collapsed: !isHub, badge: undefined,
+      collapsed: true, badge: undefined,
     });
   };
 
@@ -115,10 +115,9 @@ export const onRequest = defineRouteMiddleware(({ locals }) => {
   const topic = route.id.split('/')[0];
   if (topic !== 'gpu' && topic !== 'inference') return;
 
-  const isHub = route.id === topic;
   route.sidebar = topic === 'gpu'
-    ? gpuSidebar(route.sidebar, isHub)
-    : inferenceSidebar(route.sidebar, isHub);
+    ? gpuSidebar(route.sidebar)
+    : inferenceSidebar(route.sidebar);
 
   // Keep next/previous links in the same order as the visible navigation.
   const documents = links(route.sidebar);

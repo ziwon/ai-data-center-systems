@@ -29,7 +29,7 @@ async function walk(currentDir) {
 }
 
 async function collapseSidebarGroups(filePath) {
-  // Topic navigation preserves Starlight's expanded hubs and current-page ancestry.
+  // Topic navigation preserves Starlight's current-page ancestry.
   const topic = path.relative(distRoot, filePath).split(path.sep)[0];
   if (topic === 'gpu' || topic === 'inference') return;
 

@@ -1,8 +1,8 @@
 <doc-sidebar-controls hidden>
   <div class="tree-controls" role="group" aria-label="문서 목록 펼침 설정">
-    <button type="button" data-action="expand" aria-controls="document-tree">전체 펼치기</button>
+    <button type="button" data-action="expand" aria-controls="document-tree" aria-label="모든 문서 분류 펼치기">펼치기</button>
     <span aria-hidden="true">/</span>
-    <button type="button" data-action="collapse" aria-controls="document-tree">전체 접기</button>
+    <button type="button" data-action="collapse" aria-controls="document-tree" aria-label="모든 문서 분류 접기">접기</button>
   </div>
 </doc-sidebar-controls>
 
@@ -18,7 +18,9 @@
       const expand = this.querySelector<HTMLButtonElement>('[data-action="expand"]');
       const collapse = this.querySelector<HTMLButtonElement>('[data-action="collapse"]');
 
-      // Saved disclosure state must not hide the page reached by a direct link.
+      // Start collapsed even if Starlight restored an earlier expanded tree.
+      for (const group of groups) group.open = false;
+      // Keep the current document visible when entering an individual page.
       let ancestor = tree.querySelector('[aria-current="page"]')?.closest('details');
       while (ancestor && tree.contains(ancestor)) {
         ancestor.open = true;
