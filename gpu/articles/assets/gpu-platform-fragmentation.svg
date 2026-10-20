@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="590" viewBox="0 0 1200 590" role="img" aria-labelledby="title desc">
+  <title id="title">같은 여유 GPU 56개, 서로 다른 배치 가능성</title>
+  <desc id="desc">노드 8대가 각각 GPU 8개를 가진 가상 클러스터. 왼쪽은 노드마다 GPU 하나를 사용해 여유 GPU가 56개여도 GPU 8개를 요구하는 worker를 배치할 노드가 없다. 오른쪽은 8개의 단일 GPU 작업을 한 노드에 모아 GPU 8개가 모두 빈 노드 7대를 남긴다. 이는 처음부터 다른 배치 정책을 적용한 비교이며 실행 중 작업의 무비용 이동을 뜻하지 않는다.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .panel { fill: none; stroke: #D8D1C7; stroke-width: 1.4; }
+    .free { fill: none; stroke: #D8D1C7; stroke-width: 1.4; }
+    .used { fill: #6F6A63; stroke: #6F6A63; stroke-width: 1.4; }
+    .candidate { fill: none; stroke: #111111; stroke-width: 2; }
+    text { font-family: Arial, "Noto Sans CJK KR", "Noto Sans KR", sans-serif; }
+    .label { fill: #050505; font-size: 21px; font-weight: 700; }
+    .text { fill: #050505; font-size: 17px; }
+    .small { fill: #6F6A63; font-size: 15px; }
+    .result { fill: #050505; font-size: 20px; font-weight: 700; }
+    .blocked { fill: #D9392E; font-size: 20px; font-weight: 700; }
+  </style>
+  <defs>
+    <!-- One row is one node with eight physical GPUs. -->
+    <g id="free-row">
+      <rect class="free" x="0" y="0" width="32" height="30"/>
+      <rect class="free" x="44" y="0" width="32" height="30"/>
+      <rect class="free" x="88" y="0" width="32" height="30"/>
+      <rect class="free" x="132" y="0" width="32" height="30"/>
+      <rect class="free" x="176" y="0" width="32" height="30"/>
+      <rect class="free" x="220" y="0" width="32" height="30"/>
+      <rect class="free" x="264" y="0" width="32" height="30"/>
+      <rect class="free" x="308" y="0" width="32" height="30"/>
+    </g>
+    <g id="sparse-row">
+      <use href="#free-row"/>
+      <rect class="used" x="0" y="0" width="32" height="30"/>
+    </g>
+    <g id="full-row">
+      <rect class="used" x="0" y="0" width="32" height="30"/>
+      <rect class="used" x="44" y="0" width="32" height="30"/>
+      <rect class="used" x="88" y="0" width="32" height="30"/>
+      <rect class="used" x="132" y="0" width="32" height="30"/>
+      <rect class="used" x="176" y="0" width="32" height="30"/>
+      <rect class="used" x="220" y="0" width="32" height="30"/>
+      <rect class="used" x="264" y="0" width="32" height="30"/>
+      <rect class="used" x="308" y="0" width="32" height="30"/>
+    </g>
+  </defs>
+
+  <rect class="bg" width="1200" height="590"/>
+  <rect class="panel" x="40" y="28" width="520" height="500"/>
+  <rect class="panel" x="640" y="28" width="520" height="500"/>
+
+  <text class="label" x="64" y="63">노드마다 하나씩 배치</text>
+  <text class="small" x="64" y="93">사용 8 · 여유 56 · 온전한 노드 0</text>
+  <text class="label" x="664" y="63">한 노드에 모아 배치</text>
+  <text class="small" x="664" y="93">사용 8 · 여유 56 · 온전한 노드 7</text>
+
+  <!-- Identical demand: eight independent, single-GPU jobs. -->
+  <g transform="translate(162 137)">
+    <use href="#sparse-row" y="0"/>
+    <use href="#sparse-row" y="42"/>
+    <use href="#sparse-row" y="84"/>
+    <use href="#sparse-row" y="126"/>
+    <use href="#sparse-row" y="168"/>
+    <use href="#sparse-row" y="210"/>
+    <use href="#sparse-row" y="252"/>
+    <use href="#sparse-row" y="294"/>
+  </g>
+  <g transform="translate(762 137)">
+    <use href="#full-row" y="0"/>
+    <use href="#free-row" y="42"/>
+    <use href="#free-row" y="84"/>
+    <use href="#free-row" y="126"/>
+    <use href="#free-row" y="168"/>
+    <use href="#free-row" y="210"/>
+    <use href="#free-row" y="252"/>
+    <use href="#free-row" y="294"/>
+    <rect class="candidate" x="-6" y="36" width="352" height="42"/>
+  </g>
+
+  <g class="text">
+    <text x="64" y="158">Node 1</text>
+    <text x="64" y="200">Node 2</text>
+    <text x="64" y="242">Node 3</text>
+    <text x="64" y="284">Node 4</text>
+    <text x="64" y="326">Node 5</text>
+    <text x="64" y="368">Node 6</text>
+    <text x="64" y="410">Node 7</text>
+    <text x="64" y="452">Node 8</text>
+    <text x="664" y="158">Node 1</text>
+    <text x="664" y="200">Node 2</text>
+    <text x="664" y="242">Node 3</text>
+    <text x="664" y="284">Node 4</text>
+    <text x="664" y="326">Node 5</text>
+    <text x="664" y="368">Node 6</text>
+    <text x="664" y="410">Node 7</text>
+    <text x="664" y="452">Node 8</text>
+  </g>
+
+  <text class="blocked" x="64" y="500">8-GPU worker 배치 불가</text>
+  <text class="result" x="664" y="500">8-GPU worker 배치 가능</text>
+
+  <rect class="used" x="64" y="554" width="18" height="18"/>
+  <text class="small" x="92" y="569">사용 중</text>
+  <rect class="free" x="202" y="554" width="18" height="18"/>
+  <text class="small" x="230" y="569">여유 GPU</text>
+  <rect class="candidate" x="360" y="554" width="30" height="18"/>
+  <text class="small" x="400" y="569">배치 가능한 노드의 예</text>
+  <text class="small" x="762" y="569">한 칸 = GPU 1개 · 한 행 = 노드 1대</text>
+</svg>
