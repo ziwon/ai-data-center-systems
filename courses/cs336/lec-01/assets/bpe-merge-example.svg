@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="430" viewBox="0 0 1240 430" role="img" aria-labelledby="title desc">
+  <title id="title">Byte pair encoding merge example</title>
+  <desc id="desc">The byte sequence for the cat in the hat shrinks from 18 tokens to 16 after merging t and h, and then to 14 after merging th and e. Each merge adds one vocabulary entry.</desc>
+  <style>
+    .bg { fill: #F3EFE7; }
+    .divider { stroke: #D8D1C7; stroke-width: 1; }
+    .connector { fill: none; stroke: #111111; stroke-width: 1.5; }
+    .token { fill: none; stroke: #111111; stroke-width: 1.5; }
+    .merged { fill: none; stroke: #D9392E; stroke-width: 2.5; }
+    .label { fill: #050505; font-family: Inter, Arial, sans-serif; font-size: 17px; font-weight: 600; }
+    .detail { fill: #6F6A63; font-family: Inter, Arial, sans-serif; font-size: 13px; }
+    .tokenText { fill: #050505; font-family: SFMono-Regular, Consolas, monospace; font-size: 17px; font-weight: 600; text-anchor: middle; dominant-baseline: middle; }
+    .mergedText { fill: #D9392E; font-family: SFMono-Regular, Consolas, monospace; font-size: 17px; font-weight: 700; text-anchor: middle; dominant-baseline: middle; }
+    .count { fill: #050505; font-family: Inter, Arial, sans-serif; font-size: 20px; font-weight: 700; text-anchor: end; }
+    .countLabel { fill: #6F6A63; font-family: Inter, Arial, sans-serif; font-size: 12px; text-anchor: end; }
+    .note { fill: #6F6A63; font-family: Inter, Arial, sans-serif; font-size: 14px; }
+    .noteStrong { fill: #050505; font-family: Inter, Arial, sans-serif; font-size: 14px; font-weight: 700; }
+  </style>
+
+  <rect class="bg" width="1240" height="430"/>
+  <line class="divider" x1="36" y1="140" x2="1204" y2="140"/>
+  <line class="divider" x1="36" y1="265" x2="1204" y2="265"/>
+
+  <g aria-label="Initial byte tokens">
+    <text class="label" x="36" y="57">Initial bytes</text>
+    <text class="detail" x="36" y="81">one UTF-8 byte = one token</text>
+
+    <g transform="translate(250 42)">
+      <rect class="token" x="0" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="21" y="27">t</text>
+      <rect class="token" x="48" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="69" y="27">h</text>
+      <rect class="token" x="96" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="117" y="27">e</text>
+      <rect class="token" x="144" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="165" y="27">·</text>
+      <rect class="token" x="192" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="213" y="27">c</text>
+      <rect class="token" x="240" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="261" y="27">a</text>
+      <rect class="token" x="288" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="309" y="27">t</text>
+      <rect class="token" x="336" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="357" y="27">·</text>
+      <rect class="token" x="384" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="405" y="27">i</text>
+      <rect class="token" x="432" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="453" y="27">n</text>
+      <rect class="token" x="480" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="501" y="27">·</text>
+      <rect class="token" x="528" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="549" y="27">t</text>
+      <rect class="token" x="576" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="597" y="27">h</text>
+      <rect class="token" x="624" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="645" y="27">e</text>
+      <rect class="token" x="672" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="693" y="27">·</text>
+      <rect class="token" x="720" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="741" y="27">h</text>
+      <rect class="token" x="768" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="789" y="27">a</text>
+      <rect class="token" x="816" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="837" y="27">t</text>
+    </g>
+
+    <text class="count" x="1204" y="66">18</text>
+    <text class="countLabel" x="1204" y="84">TOKENS</text>
+  </g>
+
+  <g aria-label="First merge combines t and h">
+    <text class="label" x="36" y="182">merge 1</text>
+    <text class="detail" x="36" y="206">t + h → 256</text>
+
+    <path class="connector" d="M214 173h16m-6-6 6 6-6 6"/>
+    <g transform="translate(250 167)">
+      <rect class="merged" x="0" y="0" width="60" height="52" rx="3"/><text class="mergedText" x="30" y="27">th</text>
+      <rect class="token" x="66" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="87" y="27">e</text>
+      <rect class="token" x="114" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="135" y="27">·</text>
+      <rect class="token" x="162" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="183" y="27">c</text>
+      <rect class="token" x="210" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="231" y="27">a</text>
+      <rect class="token" x="258" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="279" y="27">t</text>
+      <rect class="token" x="306" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="327" y="27">·</text>
+      <rect class="token" x="354" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="375" y="27">i</text>
+      <rect class="token" x="402" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="423" y="27">n</text>
+      <rect class="token" x="450" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="471" y="27">·</text>
+      <rect class="merged" x="498" y="0" width="60" height="52" rx="3"/><text class="mergedText" x="528" y="27">th</text>
+      <rect class="token" x="564" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="585" y="27">e</text>
+      <rect class="token" x="612" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="633" y="27">·</text>
+      <rect class="token" x="660" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="681" y="27">h</text>
+      <rect class="token" x="708" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="729" y="27">a</text>
+      <rect class="token" x="756" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="777" y="27">t</text>
+    </g>
+
+    <text class="count" x="1204" y="191">16</text>
+    <text class="countLabel" x="1204" y="209">TOKENS</text>
+  </g>
+
+  <g aria-label="Second merge combines th and e">
+    <text class="label" x="36" y="307">merge 2</text>
+    <text class="detail" x="36" y="331">token 256 + e → 257</text>
+
+    <path class="connector" d="M214 298h16m-6-6 6 6-6 6"/>
+    <g transform="translate(250 292)">
+      <rect class="merged" x="0" y="0" width="74" height="52" rx="3"/><text class="mergedText" x="37" y="27">the</text>
+      <rect class="token" x="80" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="101" y="27">·</text>
+      <rect class="token" x="128" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="149" y="27">c</text>
+      <rect class="token" x="176" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="197" y="27">a</text>
+      <rect class="token" x="224" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="245" y="27">t</text>
+      <rect class="token" x="272" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="293" y="27">·</text>
+      <rect class="token" x="320" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="341" y="27">i</text>
+      <rect class="token" x="368" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="389" y="27">n</text>
+      <rect class="token" x="416" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="437" y="27">·</text>
+      <rect class="merged" x="464" y="0" width="74" height="52" rx="3"/><text class="mergedText" x="501" y="27">the</text>
+      <rect class="token" x="544" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="565" y="27">·</text>
+      <rect class="token" x="592" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="613" y="27">h</text>
+      <rect class="token" x="640" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="661" y="27">a</text>
+      <rect class="token" x="688" y="0" width="42" height="52" rx="3"/><text class="tokenText" x="709" y="27">t</text>
+    </g>
+
+    <text class="count" x="1204" y="316">14</text>
+    <text class="countLabel" x="1204" y="334">TOKENS</text>
+  </g>
+
+  <line class="divider" x1="36" y1="382" x2="1204" y2="382"/>
+  <text class="noteStrong" x="36" y="410">Each merge:</text>
+  <text class="note" x="126" y="410">vocabulary +1</text>
+  <text class="noteStrong" x="270" y="410">corpus sequence:</text>
+  <text class="note" x="405" y="410">− pair frequency</text>
+</svg>

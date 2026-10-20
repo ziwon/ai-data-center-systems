@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="440" viewBox="0 0 960 440" role="img" aria-labelledby="title desc">
+  <title id="title">Sparse mixture of experts routing</title>
+  <desc id="desc">A token representation flows through masked self-attention, then a router selects top K feed-forward experts. Only selected experts are active for that token.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .box { fill: none; stroke: #111111; stroke-width: 1.4; rx: 6; }
+    .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; rx: 6; }
+    .expert { fill: none; stroke: #111111; stroke-width: 1.2; rx: 6; }
+    .active { fill: none; stroke: #D9392E; stroke-width: 2.3; rx: 6; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.4; marker-end: url(#arrow); }
+    .muted { fill: none; stroke: #6F6A63; stroke-width: 1.1; stroke-dasharray: 4 4; marker-end: url(#arrowSoft); }
+    .hot { fill: none; stroke: #D9392E; stroke-width: 2; marker-end: url(#arrowRed); }
+    .text { fill: #050505; font-family: Arial, sans-serif; font-size: 16px; font-weight: 700; }
+    .small { fill: #6F6A63; font-family: Arial, sans-serif; font-size: 13px; }
+    .mono { fill: #050505; font-family: "Courier New", monospace; font-size: 14px; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#111111"/>
+    </marker>
+    <marker id="arrowSoft" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#6F6A63"/>
+    </marker>
+    <marker id="arrowRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#D9392E"/>
+    </marker>
+  </defs>
+  <rect class="bg" width="960" height="440"/>
+
+  <rect class="box" x="45" y="165" width="155" height="82"/>
+  <text class="text" x="122.5" y="197" text-anchor="middle">Token state</text>
+  <text class="small" x="122.5" y="222" text-anchor="middle">contextual vector</text>
+
+  <rect class="soft" x="255" y="165" width="170" height="82"/>
+  <text class="text" x="340" y="197" text-anchor="middle">Router G(x)</text>
+  <text class="small" x="340" y="222" text-anchor="middle">softmax over experts</text>
+
+  <rect class="active" x="535" y="55" width="160" height="64"/>
+  <text class="text" x="615" y="84" text-anchor="middle">Expert 1</text>
+  <text class="small" x="615" y="106" text-anchor="middle">active</text>
+
+  <rect class="expert" x="535" y="145" width="160" height="64"/>
+  <text class="text" x="615" y="174" text-anchor="middle">Expert 2</text>
+  <text class="small" x="615" y="196" text-anchor="middle">inactive</text>
+
+  <rect class="active" x="535" y="235" width="160" height="64"/>
+  <text class="text" x="615" y="264" text-anchor="middle">Expert 3</text>
+  <text class="small" x="615" y="286" text-anchor="middle">active</text>
+
+  <rect class="expert" x="535" y="325" width="160" height="64"/>
+  <text class="text" x="615" y="354" text-anchor="middle">Expert 4</text>
+  <text class="small" x="615" y="376" text-anchor="middle">inactive</text>
+
+  <rect class="box" x="775" y="165" width="140" height="82"/>
+  <text class="text" x="845" y="197" text-anchor="middle">Combine</text>
+  <text class="mono" x="845" y="222" text-anchor="middle">sum G_i E_i</text>
+
+  <path class="line" d="M200 206 L255 206"/>
+  <path class="hot" d="M425 193 C470 150 485 93 535 88"/>
+  <path class="muted" d="M425 202 C470 190 485 178 535 177"/>
+  <path class="hot" d="M425 218 C470 235 485 263 535 267"/>
+  <path class="muted" d="M425 225 C470 290 485 352 535 357"/>
+
+  <path class="hot" d="M695 87 C740 105 755 175 775 190"/>
+  <path class="hot" d="M695 267 C740 250 755 220 775 210"/>
+  <text class="small" x="480" y="32" text-anchor="middle">Top-K sparse routing: only selected FFN experts run for this token</text>
+</svg>

@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 520" role="img" aria-labelledby="title desc">
+  <title id="title">Reasoning token budget</title>
+  <desc id="desc">A diagram showing the trade-off between reasoning tokens, quality, latency, and cost with a plateau after useful thinking.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .axis { stroke: #111111; stroke-width: 1.7; fill: none; marker-end: url(#arrow); }
+    .grid { stroke: #D8D1C7; stroke-width: 1; fill: none; }
+    .curve { stroke: #111111; stroke-width: 2.4; fill: none; }
+    .cost { stroke: #6F6A63; stroke-width: 1.8; stroke-dasharray: 7 7; fill: none; }
+    .accent { stroke: #D9392E; stroke-width: 2.3; fill: none; }
+    .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.4; rx: 8; }
+    .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; rx: 8; }
+    .text { fill: #050505; font-family: Arial, Helvetica, sans-serif; font-size: 20px; font-weight: 700; }
+    .small { fill: #6F6A63; font-family: Arial, Helvetica, sans-serif; font-size: 15px; }
+    .tiny { fill: #6F6A63; font-family: Arial, Helvetica, sans-serif; font-size: 13px; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#111111"/>
+    </marker>
+  </defs>
+  <rect class="bg" width="1120" height="520"/>
+
+  <path class="grid" d="M130 390 H960 M130 300 H960 M130 210 H960 M130 120 H960"/>
+  <path class="grid" d="M250 80 V390 M410 80 V390 M570 80 V390 M730 80 V390 M890 80 V390"/>
+  <path class="axis" d="M130 390 H982"/>
+  <path class="axis" d="M130 390 V66"/>
+
+  <text class="small" x="444" y="450">reasoning tokens / test-time compute</text>
+  <text class="small" x="30" y="86" transform="rotate(-90 30 86)">quality or cost</text>
+
+  <path class="curve" d="M150 360 C230 310 290 250 370 202 C470 142 600 118 730 116 C820 116 900 118 948 120"/>
+  <path class="cost" d="M150 366 C290 338 430 300 570 254 C710 208 850 154 948 104"/>
+  <path class="accent" d="M710 390 V94"/>
+
+  <rect class="box" x="642" y="54" width="214" height="54"/>
+  <text class="text" x="674" y="88">Useful budget</text>
+
+  <rect class="soft" x="164" y="128" width="210" height="74"/>
+  <text class="text" x="196" y="166">Too little</text>
+  <text class="small" x="196" y="188">under-thinking</text>
+
+  <rect class="soft" x="748" y="196" width="232" height="78"/>
+  <text class="text" x="784" y="234">Too much</text>
+  <text class="small" x="784" y="256">latency and cost keep rising</text>
+
+  <text class="small" x="712" y="414">budget boundary</text>
+  <text class="small" x="790" y="128">quality plateau</text>
+  <text class="small" x="876" y="96">cost / latency</text>
+  <text class="tiny" x="150" y="482">Reasoning models need routing or budget control so easy prompts do not consume long chains.</text>
+</svg>

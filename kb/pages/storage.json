@@ -1,0 +1,295 @@
+{
+  "version": 1,
+  "current": {
+    "id": "/storage/",
+    "title": "Storage",
+    "route": "/storage/",
+    "group": "storage",
+    "keywords": [
+      "storage"
+    ],
+    "excerpt": "AI workload storage notes covering checkpoint data paths, ZFS, MLPerf Storage, storage benchmarking, and data pipeline performance."
+  },
+  "nodes": [
+    {
+      "id": "/storage/",
+      "title": "Storage",
+      "route": "/storage/",
+      "group": "storage",
+      "keywords": [
+        "storage"
+      ],
+      "excerpt": "AI workload storage notes covering checkpoint data paths, ZFS, MLPerf Storage, storage benchmarking, and data pipeline performance."
+    },
+    {
+      "id": "/",
+      "title": "AI Data Center Systems",
+      "route": "/",
+      "group": "home",
+      "keywords": [
+        "courses",
+        "systems",
+        "organized",
+        "tracks",
+        "mlops",
+        "mlperf",
+        "storage",
+        "clos",
+        "study",
+        "training"
+      ],
+      "excerpt": "A study wiki for AI data center networking, LLM inference, distributed training, MLOps, storage, and systems performance engineering."
+    },
+    {
+      "id": "/mlops/",
+      "title": "MLOps: 모델을 배포하는 기술이 아니라 변경을 통제하는 운영 시스템",
+      "route": "/mlops/",
+      "group": "mlops",
+      "keywords": [
+        "데이터",
+        "feature",
+        "schema",
+        "재학습",
+        "freshness",
+        "drift",
+        "snapshot",
+        "revision",
+        "artifact",
+        "mlops"
+      ],
+      "excerpt": "Production MLOps guide covering lifecycle control, reproducibility, lineage, CI/CD/CT, feature stores, progressive delivery, monitoring, and LLMOps."
+    },
+    {
+      "id": "/storage/mlperf-storage/",
+      "title": "MLPerf Storage Benchmark",
+      "route": "/storage/mlperf-storage/",
+      "group": "storage",
+      "keywords": [
+        "storage",
+        "object",
+        "vectordb",
+        "인덱스",
+        "benchmark",
+        "i/o",
+        "cache",
+        "체크포인트",
+        "s3-compatible",
+        "checkpointing"
+      ],
+      "excerpt": "MLCommons Storage는 ML 워크로드를 지원하는 스토리지 시스템의 성능을 측정하기 위한 MLPerf Storage Benchmark Suite입니다. 단순 파일시스템 벤치마크가 아니라 학습 데이터 로딩, 체크포인트 저장/복구, LLM KV cache offload,..."
+    },
+    {
+      "id": "/storage/zfs/",
+      "title": "AI 학습 워크로드를 위한 ZFS 튜닝 가이드",
+      "route": "/storage/zfs/",
+      "group": "storage",
+      "keywords": [
+        "zfs",
+        "hdd",
+        "vdev",
+        "nvme",
+        "special",
+        "juicefs",
+        "nas",
+        "metadata",
+        "스토리지",
+        "tip"
+      ],
+      "excerpt": "이 분류가 중요한 이유는, AI 학습 워크로드에서는 단순히 “200TB 저장 가능”보다 다음 요소가 더 중요하기 때문이다."
+    },
+    {
+      "id": "/network/chap09/",
+      "title": "Chapter 9: Storage Network Design and Technologies for AI Data Centers",
+      "route": "/network/chap09/",
+      "group": "network",
+      "keywords": [
+        "storage",
+        "file",
+        "nvme-o-tcp",
+        "fabric",
+        "nvme-o-rdma",
+        "infiniband",
+        "a/b",
+        "network",
+        "checkpoint",
+        "training"
+      ],
+      "excerpt": "This chapter explains why storage networking is a separate design topic in AI data centers."
+    },
+    {
+      "id": "/systems-performance/chap05/",
+      "title": "Chapter 5: GPU-Based Storage I/O Optimizations",
+      "route": "/systems-performance/chap05/",
+      "group": "systems-performance",
+      "keywords": [
+        "gds",
+        "storage",
+        "cpu",
+        "gpu",
+        "filesystem",
+        "read",
+        "path",
+        "dataset",
+        "checkpoint",
+        "preprocessing"
+      ],
+      "excerpt": "이번 장의 목표는 storage를 단순한 dataset 보관소가 아니라 GPU goodput을 결정하는 실행 경로의 일부 로 이해하는 것이다."
+    },
+    {
+      "id": "/systems-performance/",
+      "title": "AI Systems Performance Engineering",
+      "route": "/systems-performance/",
+      "group": "systems-performance",
+      "keywords": [
+        "engineering",
+        "2025.12",
+        "2026.04",
+        "2025.08",
+        "books",
+        "uncore",
+        "numa-aware",
+        "talks",
+        "gpu-local",
+        "kubelet"
+      ],
+      "excerpt": "AI systems performance engineering notes covering GPU hardware, Linux and container tuning, CUDA, PyTorch, profiling, and distributed communication."
+    }
+  ],
+  "edges": [
+    {
+      "source": "/",
+      "target": "/mlops/",
+      "type": "link+semantic",
+      "weight": 1,
+      "terms": [
+        "mlops"
+      ]
+    },
+    {
+      "source": "/",
+      "target": "/storage/",
+      "type": "link+semantic",
+      "weight": 1,
+      "terms": [
+        "storage"
+      ]
+    },
+    {
+      "source": "/",
+      "target": "/systems-performance/",
+      "type": "link+semantic",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/mlops/",
+      "target": "/storage/",
+      "type": "link",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/mlops/",
+      "target": "/systems-performance/",
+      "type": "link",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/storage/",
+      "target": "/storage/mlperf-storage/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": [
+        "storage"
+      ]
+    },
+    {
+      "source": "/storage/",
+      "target": "/storage/zfs/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/systems-performance/",
+      "target": "/systems-performance/chap05/",
+      "type": "link+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/network/chap09/",
+      "target": "/systems-performance/chap05/",
+      "type": "semantic",
+      "weight": 0.711,
+      "terms": [
+        "storage",
+        "checkpoint"
+      ]
+    },
+    {
+      "source": "/network/chap09/",
+      "target": "/storage/zfs/",
+      "type": "semantic",
+      "weight": 0.695,
+      "terms": []
+    },
+    {
+      "source": "/storage/zfs/",
+      "target": "/systems-performance/chap05/",
+      "type": "semantic",
+      "weight": 0.687,
+      "terms": []
+    },
+    {
+      "source": "/",
+      "target": "/network/chap09/",
+      "type": "semantic",
+      "weight": 0.651,
+      "terms": [
+        "storage",
+        "training"
+      ]
+    },
+    {
+      "source": "/network/chap09/",
+      "target": "/storage/",
+      "type": "semantic",
+      "weight": 0.632,
+      "terms": [
+        "storage"
+      ]
+    },
+    {
+      "source": "/storage/",
+      "target": "/systems-performance/chap05/",
+      "type": "semantic",
+      "weight": 0.616,
+      "terms": [
+        "storage"
+      ]
+    },
+    {
+      "source": "/storage/",
+      "target": "/systems-performance/",
+      "type": "semantic",
+      "weight": 0.613,
+      "terms": []
+    },
+    {
+      "source": "/mlops/",
+      "target": "/storage/mlperf-storage/",
+      "type": "semantic",
+      "weight": 0.589,
+      "terms": []
+    },
+    {
+      "source": "/storage/mlperf-storage/",
+      "target": "/storage/zfs/",
+      "type": "section",
+      "weight": 0.297,
+      "terms": []
+    }
+  ]
+}

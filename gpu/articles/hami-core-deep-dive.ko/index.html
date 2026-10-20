@@ -1,0 +1,522 @@
+<!DOCTYPE html><html lang="en" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-bguv2lll"> <head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>HAMi-core 심층 분석: `libvgpu.so`는 GPU를 어떻게 나누는가 | AI Data Center Systems</title><link rel="canonical" href="https://adcs.restack.tech/gpu/articles/hami-core-deep-dive.ko/"/><link rel="sitemap" href="/sitemap-index.xml"/><script async src="https://www.googletagmanager.com/gtag/js?id=G-76LFZJVBTE"></script><script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-76LFZJVBTE');
+      </script><script async crossorigin="anonymous" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8128231647578658"></script><link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v6.4.8"/><meta name="generator" content="Starlight v0.40.0"/><meta property="og:title" content="HAMi-core 심층 분석: `libvgpu.so`는 GPU를 어떻게 나누는가"/><meta property="og:url" content="https://adcs.restack.tech/gpu/articles/hami-core-deep-dive.ko/"/><meta property="og:locale" content="en"/><meta property="og:description" content="HAMi의 Kubernetes 구성 요소는 Pod를 배치하고 GPU 메모리·코어 quota를 정한 뒤, 컨테이너에 libvgpu.so 를 주입한다. 그러나 GPU 분할의 핵심은 그다음에 있다. 컨테이너 안에서 libvgpu.so 가 CUDA와 NVML 호출 경로에 개입해..."/><meta property="og:site_name" content="AI Data Center Systems"/><meta name="description" content="HAMi의 Kubernetes 구성 요소는 Pod를 배치하고 GPU 메모리·코어 quota를 정한 뒤, 컨테이너에 libvgpu.so 를 주입한다. 그러나 GPU 분할의 핵심은 그다음에 있다. 컨테이너 안에서 libvgpu.so 가 CUDA와 NVML 호출 경로에 개입해..."/><meta property="og:type" content="article"/><meta property="og:image" content="https://adcs.restack.tech/og/gpu/articles/hami-core-deep-dive.ko.png?v=2"/><meta property="og:image:width" content="1200"/><meta property="og:image:height" content="630"/><meta name="twitter:image" content="https://adcs.restack.tech/og/gpu/articles/hami-core-deep-dive.ko.png?v=2"/><meta name="twitter:card" content="summary_large_image"/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/_astro/print.DNXP8c50.css" media="print"><link rel="stylesheet" href="/_astro/common.DYbqSTpl.css"><script type="module" src="/_astro/page.CtJXHRyR.js"></script></head> <body class="astro-bguv2lll"> <a href="#_top" class="astro-7q3lir66">Skip to content</a> <script>
+  (() => {
+    try {
+      const savedMode = localStorage.getItem('adcs-navigation-mode');
+      document.documentElement.dataset.navigationMode = savedMode === 'compact' ? 'compact' : 'normal';
+    } catch {
+      document.documentElement.dataset.navigationMode = 'normal';
+    }
+  })();
+</script> <div class="page sl-flex astro-4toy2ex6"> <header class="header astro-4toy2ex6"><div class="header astro-3ef6ksr2"> <div class="title-wrapper sl-flex astro-3ef6ksr2"> <a href="/" class="site-title sl-flex astro-m46x6ez3">  <span class="astro-m46x6ez3" translate="no"> AI Data Center Systems </span> </a> <button class="navigation-mode-toggle print:hidden astro-3ef6ksr2" type="button" aria-label="Compact navigation" aria-pressed="false" title="Use compact navigation"> <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" class="astro-3ef6ksr2"> <rect x="3" y="4" width="18" height="16" rx="2" class="astro-3ef6ksr2"></rect> <path d="M9 4v16M6.5 10 4.5 12l2 2" class="astro-3ef6ksr2"></path> </svg> </button> </div> <div class="sl-flex print:hidden astro-3ef6ksr2"> <site-search class="astro-3ef6ksr2 astro-v37mnknz" data-translations="{&quot;placeholder&quot;:&quot;Search&quot;}"> <button data-open-modal disabled aria-label="Search" aria-keyshortcuts="Control+K" class="astro-v37mnknz"> <svg aria-hidden="true" class="astro-v37mnknz astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg> <span class="sl-hidden md:sl-block astro-v37mnknz" aria-hidden="true">Search</span> <kbd class="sl-hidden md:sl-flex astro-v37mnknz" style="display: none;"> <kbd class="astro-v37mnknz">Ctrl</kbd><kbd class="astro-v37mnknz">K</kbd> </kbd> </button> <dialog style="padding:0" aria-label="Search" class="astro-v37mnknz"> <div class="dialog-frame sl-flex astro-v37mnknz">  <button data-close-modal class="sl-flex md:sl-hidden astro-v37mnknz"> Cancel </button> <div class="search-container astro-v37mnknz"> <div id="starlight__search" class="astro-v37mnknz"></div> </div> </div> </dialog> </site-search>  <script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script> <script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.D1WXcfCt.js"></script>  </div> <div class="sl-hidden md:sl-flex print:hidden right-group astro-3ef6ksr2"> <div class="sl-flex social-icons astro-3ef6ksr2"> <a href="https://github.com/ziwon/ai-data-center-systems" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">GitHub</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script> <script type="module">const r="starlight-theme",o=e=>e==="auto"||e==="dark"||e==="light"?e:"auto",c=()=>o(typeof localStorage<"u"&&localStorage.getItem(r));function n(e){typeof localStorage<"u"&&localStorage.setItem(r,e==="light"||e==="dark"?e:"")}const l=()=>matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";function t(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e==="auto"?l():e,n(e)}matchMedia("(prefers-color-scheme: light)").addEventListener("change",()=>{c()==="auto"&&t("auto")});class s extends HTMLElement{constructor(){super(),t(c()),this.querySelector("select")?.addEventListener("change",a=>{a.currentTarget instanceof HTMLSelectElement&&t(o(a.currentTarget.value))})}}customElements.define("starlight-theme-select",s);</script> <script type="module">class s extends HTMLElement{constructor(){super();const e=this.querySelector("select");e&&(e.addEventListener("change",t=>{t.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=t.currentTarget.value)}),window.addEventListener("pageshow",t=>{if(!t.persisted)return;const n=e.querySelector("option[selected]")?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}}customElements.define("starlight-lang-select",s);</script> </div> </div></header> <nav class="sidebar print:hidden astro-4toy2ex6" aria-label="Main"> <starlight-menu-button class="print:hidden astro-jif73yzw"> <button aria-expanded="false" aria-label="Menu" aria-controls="starlight__sidebar" class="sl-flex md:sl-hidden astro-jif73yzw"> <svg aria-hidden="true" class="open-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg> <svg aria-hidden="true" class="close-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg> </button> </starlight-menu-button> <script type="module">class s extends HTMLElement{constructor(){super(),this.btn=this.querySelector("button"),this.btn.addEventListener("click",()=>this.toggleExpanded());const t=this.closest("nav");t&&t.addEventListener("keyup",e=>this.closeOnEscape(e))}setExpanded(t){this.setAttribute("aria-expanded",String(t)),document.body.toggleAttribute("data-mobile-menu-expanded",t)}toggleExpanded(){this.setExpanded(this.getAttribute("aria-expanded")!=="true")}closeOnEscape(t){t.code==="Escape"&&(this.setExpanded(!1),this.btn.focus())}}customElements.define("starlight-menu-button",s);</script>  <div id="starlight__sidebar" class="sidebar-pane astro-4toy2ex6"> <div class="navigation-controls astro-4toy2ex6"> <button class="navigation-drawer-toggle astro-4toy2ex6" type="button" aria-controls="starlight__sidebar-content" aria-expanded="false" title="Open navigation"> <svg class="navigation-menu-icon astro-4toy2ex6" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"> <path d="M4 6h16M4 12h16M4 18h16" class="astro-4toy2ex6"></path> </svg> <svg class="navigation-close-icon astro-4toy2ex6" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"> <path d="m6 6 12 12M18 6 6 18" class="astro-4toy2ex6"></path> </svg> <span class="navigation-drawer-label astro-4toy2ex6">Open navigation</span> </button> </div> <div id="starlight__sidebar-content" class="sidebar-content sl-flex astro-4toy2ex6"> <ul class="starlight-sidebar-topics astro-2fh6iaza"> <li class="astro-2fh6iaza"> <a aria-label="Network" title="Network" href="/network/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8.7 10a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-6.27-6.3a1 1 0 0 0-1.42 1.42ZM21 14a1 1 0 0 0-1 1v3.59L15.44 14A1 1 0 0 0 14 15.44L18.59 20H15a1 1 0 0 0 0 2h6a1 1 0 0 0 .38-.08 1 1 0 0 0 .54-.54A1 1 0 0 0 22 21v-6a1 1 0 0 0-1-1Zm.92-11.38a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-6a1 1 0 0 0 0 2h3.59L2.29 20.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V9a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z"/></svg> </div> <div class="astro-2fh6iaza"> Network  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="GPU &amp; Accelerator Systems" title="GPU &amp; Accelerator Systems" href="/gpu/" class="starlight-sidebar-topics-current astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> </div> <div class="astro-2fh6iaza"> GPU &amp; Accelerator Systems  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Storage" title="Storage" href="/storage/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8 16.5a1 1 0 1 0 1 1 1 1 0 0 0-1-1M12 2C8 2 4 3.37 4 6v12c0 2.63 4 4 8 4s8-1.37 8-4V6c0-2.63-4-4-8-4m6 16c0 .71-2.28 2-6 2s-6-1.29-6-2v-3.27A13 13 0 0 0 12 16a13 13 0 0 0 6-1.27Zm0-6c0 .71-2.28 2-6 2s-6-1.29-6-2V8.73A13 13 0 0 0 12 10a13 13 0 0 0 6-1.27Zm-6-4C8.28 8 6 6.71 6 6s2.28-2 6-2 6 1.29 6 2-2.28 2-6 2m-4 2.5a1 1 0 1 0 1 1 1 1 0 0 0-1-1"/></svg> </div> <div class="astro-2fh6iaza"> Storage  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Training" title="Training" href="/training/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1 1v8a1 1 0 0 0 2 0v-8a1 1 0 0 0-1-1m5-10a1 1 0 0 0-1 1v18a1 1 0 0 0 2 0V3a1 1 0 0 0-1-1m10 14a1 1 0 0 0-1 1v4a1 1 0 0 0 2 0v-4a1 1 0 0 0-1-1m-5-8a1 1 0 0 0-1 1v12a1 1 0 0 0 2 0V9a1 1 0 0 0-1-1"/></svg> </div> <div class="astro-2fh6iaza"> Training  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Inference" title="Inference" data-topic-icon="brain" href="/inference/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 22H5a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3h1a4 4 0 0 1 7.3-2.18c.448.64.692 1.4.7 2.18h3a1 1 0 0 1 1 1v3a4 4 0 0 1 2.18 7.3A3.86 3.86 0 0 1 18 18v3a1 1 0 0 1-1 1ZM5 8a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11v-3.18a1 1 0 0 1 1.33-.95 1.77 1.77 0 0 0 1.74-.23 2 2 0 0 0 .93-1.37 2 2 0 0 0-.48-1.59 1.89 1.89 0 0 0-2.17-.55 1 1 0 0 1-1.33-.95V8h-3.2a1 1 0 0 1-1-1.33 1.77 1.77 0 0 0-.23-1.74 1.939 1.939 0 0 0-3-.43A2 2 0 0 0 8 6c.002.23.046.456.13.67A1 1 0 0 1 7.18 8H5Z"/></svg> </div> <div class="astro-2fh6iaza"> Inference  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="MLOps" title="MLOps" data-topic-icon="cycle" href="/mlops/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8.7 10a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-6.27-6.3a1 1 0 0 0-1.42 1.42ZM21 14a1 1 0 0 0-1 1v3.59L15.44 14A1 1 0 0 0 14 15.44L18.59 20H15a1 1 0 0 0 0 2h6a1 1 0 0 0 .38-.08 1 1 0 0 0 .54-.54A1 1 0 0 0 22 21v-6a1 1 0 0 0-1-1Zm.92-11.38a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-6a1 1 0 0 0 0 2h3.59L2.29 20.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V9a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z"/></svg> </div> <div class="astro-2fh6iaza"> MLOps  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Systems Performance" title="Systems Performance" href="/systems-performance/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path fill-rule="evenodd" d="M1.44 8.855v-.001l3.527-3.516c.34-.344.802-.541 1.285-.548h6.649l.947-.947c3.07-3.07 6.207-3.072 7.62-2.868a1.821 1.821 0 0 1 1.557 1.557c.204 1.413.203 4.55-2.868 7.62l-.946.946v6.649a1.845 1.845 0 0 1-.549 1.286l-3.516 3.528a1.844 1.844 0 0 1-3.11-.944l-.858-4.275-4.52-4.52-2.31-.463-1.964-.394A1.847 1.847 0 0 1 .98 10.693a1.843 1.843 0 0 1 .46-1.838Zm5.379 2.017-3.873-.776L6.32 6.733h4.638l-4.14 4.14Zm8.403-5.655c2.459-2.46 4.856-2.463 5.89-2.33.134 1.035.13 3.432-2.329 5.891l-6.71 6.71-3.561-3.56 6.71-6.711Zm-1.318 15.837-.776-3.873 4.14-4.14v4.639l-3.364 3.374Z" clip-rule="evenodd"/><path d="M9.318 18.345a.972.972 0 0 0-1.86-.561c-.482 1.435-1.687 2.204-2.934 2.619a8.22 8.22 0 0 1-1.23.302c.062-.365.157-.79.303-1.229.415-1.247 1.184-2.452 2.62-2.935a.971.971 0 1 0-.62-1.842c-.12.04-.236.084-.35.13-2.02.828-3.012 2.588-3.493 4.033a10.383 10.383 0 0 0-.51 2.845l-.001.016v.063c0 .536.434.972.97.972H2.24a7.21 7.21 0 0 0 .878-.065c.527-.063 1.248-.19 2.02-.447 1.445-.48 3.205-1.472 4.033-3.494a5.828 5.828 0 0 0 .147-.407Z"/></svg> </div> <div class="astro-2fh6iaza"> Systems Performance  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Courses" title="Courses" href="/courses/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.17 2.06A13.1 13.1 0 0 0 19 1.87a12.94 12.94 0 0 0-7 2.05 12.94 12.94 0 0 0-7-2 13.1 13.1 0 0 0-2.17.19 1 1 0 0 0-.83 1v12a1 1 0 0 0 1.17 1 10.9 10.9 0 0 1 8.25 1.91l.12.07h.11a.91.91 0 0 0 .7 0h.11l.12-.07A10.899 10.899 0 0 1 20.83 16 1 1 0 0 0 22 15V3a1 1 0 0 0-.83-.94ZM11 15.35a12.87 12.87 0 0 0-6-1.48H4v-10c.333-.02.667-.02 1 0a10.86 10.86 0 0 1 6 1.8v9.68Zm9-1.44h-1a12.87 12.87 0 0 0-6 1.48V5.67a10.86 10.86 0 0 1 6-1.8c.333-.02.667-.02 1 0v10.04Zm1.17 4.15a13.098 13.098 0 0 0-2.17-.19 12.94 12.94 0 0 0-7 2.05 12.94 12.94 0 0 0-7-2.05c-.727.003-1.453.066-2.17.19A1 1 0 0 0 2 19.21a1 1 0 0 0 1.17.79 10.9 10.9 0 0 1 8.25 1.91 1 1 0 0 0 1.16 0A10.9 10.9 0 0 1 20.83 20a1 1 0 0 0 1.17-.79 1 1 0 0 0-.83-1.15Z"/></svg> </div> <div class="astro-2fh6iaza"> Courses  </div> </a> </li> </ul>  <doc-sidebar-controls hidden="true" class="astro-v3kklmrl"> <div class="tree-controls astro-v3kklmrl" role="group" aria-label="문서 목록 펼침 설정"> <button type="button" data-action="expand" aria-controls="document-tree" aria-label="모든 문서 분류 펼치기" class="astro-v3kklmrl">펼치기</button> <span aria-hidden="true" class="astro-v3kklmrl">/</span> <button type="button" data-action="collapse" aria-controls="document-tree" aria-label="모든 문서 분류 접기" class="astro-v3kklmrl">접기</button> </div> </doc-sidebar-controls> <script type="module">class d extends HTMLElement{connectedCallback(){const n=document.getElementById("document-tree");if(!n||this.dataset.initialized)return;this.dataset.initialized="true",this.hidden=!1;const e=Array.from(n.querySelectorAll("details")),r=this.querySelector('[data-action="expand"]'),i=this.querySelector('[data-action="collapse"]');for(const t of e)t.open=!1;let o=n.querySelector('[aria-current="page"]')?.closest("details");for(;o&&n.contains(o);)o.open=!0,o=o.parentElement?.closest("details")??null;const a=()=>{r?.setAttribute("aria-disabled",String(e.every(t=>t.open))),i?.setAttribute("aria-disabled",String(e.every(t=>!t.open)))};this.addEventListener("click",t=>{const s=t.target instanceof Element?t.target.closest("button[data-action]"):null;if(!s||s.getAttribute("aria-disabled")==="true")return;const l=s.dataset.action==="expand";for(const c of e)c.open=l;a()});for(const t of e)t.addEventListener("toggle",a);a()}}customElements.get("doc-sidebar-controls")||customElements.define("doc-sidebar-controls",d);</script> <div id="document-tree"> <sl-sidebar-state-persist data-hash="0sgoec7" class="astro-kku4brbg"> <script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script>  <ul class="top-level astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/gpu/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">GPU 전체 목록</span>  </a> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">기술 아티클 · 3</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="0"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/gpu/articles/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">아티클 모아보기</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/articles/gpu-infrastructure-operations-and-platform-design.ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">GPU 인프라 운영과 플랫폼 설계: 하드웨어 장애 분석부터 멀티테넌시까지</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/articles/hami-core-deep-dive.ko/" aria-current="page" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">HAMi-core 심층 분석: `libvgpu.so`는 GPU를 어떻게 나누는가</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/articles/hami-dra-gpu-sharing.ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">DRA와 HAMi로 보는 Kubernetes GPU 분할</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">CS149 · 병렬 컴퓨팅 · 10</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="1"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/gpu/cs149/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">강좌 안내</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/cs149/lec01/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 1: Why Parallelism? Why Efficiency?</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/cs149/lec02/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 2: A Modern Multi-Core Processor</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/cs149/lec03/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 3: Multi-Core Architecture, Part II and ISPC</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/cs149/lec04/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 4: Parallel Programming Basics</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/cs149/lec05/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 5: Performance Optimization I — Work Distribution and Scheduling</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/cs149/lec06/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 6: Performance Optimization II — Locality, Communication, and Contention</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/cs149/lec07/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 7: GPU Architecture and CUDA Programming</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/cs149/lec08/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 8: Data-Parallel Thinking</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/cs149/lec09/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 9: Distributed Data-Parallel Computing Using Spark</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/cs149/lec10/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 10: Efficiently Evaluating DNNs on GPUs</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">PMPP · CUDA 프로그래밍 · 4</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="2"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/gpu/pmpp/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">강좌 안내</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/pmpp/lec02/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 2: Data Parallel Programming and the CUDA Programming Model</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/pmpp/lec03/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 3: Multidimensional Grids and Data</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/pmpp/lec04/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 4: GPU Architecture</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/pmpp/lec05/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 5: Memory Architecture and Tiling</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">참고자료 · 2</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="3"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/gpu/appendix/architecture/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">GPU Architecture (reference)</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/appendix/cuda/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">CUDA (reference)</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">실습 · 2</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="4"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/gpu/labs/kernels/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Kernel Case Studies (practice)</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/labs/profiling/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Profiling (practice)</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <a href="/gpu/heterogeneous-systems/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">Heterogeneous Systems (Onur Mutlu)</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/gpu-mode/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">GPU MODE</span>  </a> </li> </ul>  <script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script> </sl-sidebar-state-persist> <div class="md:sl-hidden"> <div class="mobile-preferences sl-flex astro-wu23bvmt"> <div class="social-icons astro-wu23bvmt"> <a href="https://github.com/ziwon/ai-data-center-systems" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">GitHub</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script>   </div> </div> </div>  </div> </div> </nav> <div class="main-frame astro-4toy2ex6">  <script type="module">const a=document.getElementById("starlight__sidebar"),n=a?.querySelector("sl-sidebar-state-persist"),o="sl-sidebar-state",i=()=>{let t=[];const e=n?.dataset.hash||"";try{const s=sessionStorage.getItem(o),r=JSON.parse(s||"{}");Array.isArray(r.open)&&r.hash===e&&(t=r.open)}catch{}return{hash:e,open:t,scroll:a?.scrollTop||0}},c=t=>{try{sessionStorage.setItem(o,JSON.stringify(t))}catch{}},d=()=>c(i()),l=(t,e)=>{const s=i();s.open[e]=t,c(s)};n?.addEventListener("click",t=>{if(!(t.target instanceof Element))return;const e=t.target.closest("summary")?.closest("details");if(!e)return;const s=e.querySelector("sl-sidebar-restore"),r=parseInt(s?.dataset.index||"");isNaN(r)||l(!e.open,r)});addEventListener("visibilitychange",()=>{document.visibilityState==="hidden"&&d()});addEventListener("pageHide",d);</script> <div class="lg:sl-flex astro-67yu43on"> <aside class="right-sidebar-container print:hidden astro-67yu43on"> <div class="right-sidebar astro-67yu43on"> <div class="lg:sl-hidden astro-rl4sue7z"><mobile-starlight-toc data-min-h="2" data-max-h="2" class="astro-doynk5tl"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-doynk5tl"><details id="starlight__mobile-toc" class="astro-doynk5tl"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-doynk5tl"><span class="toggle sl-flex astro-doynk5tl">On this page<svg aria-hidden="true" class="caret astro-doynk5tl astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-doynk5tl"></span></summary><div class="dropdown astro-doynk5tl"><ul class="isMobile astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#한-줄-요약" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">한 줄 요약</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#kubernetes에서-컨테이너-안으로-넘어오는-값" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Kubernetes에서 컨테이너 안으로 넘어오는 값</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#훅은-어디에서-적용되는가" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">훅은 어디에서 적용되는가</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#초기화는-두-단계다" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">초기화는 두 단계다</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#메모리-가상화-gpu가-작아-보이게-만들기" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">메모리 가상화: GPU가 작아 보이게 만들기</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#메모리-제한-할당-전에-oom을-반환한다" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">메모리 제한: 할당 전에 OOM을 반환한다</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#다중-프로세스-사용량-집계-공유-영역이-필요한-이유" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">다중 프로세스 사용량 집계: 공유 영역이 필요한 이유</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#연산-제한-sm-파티션이-아니라-속도-제한기다" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">연산 제한: SM 파티션이 아니라 속도 제한기다</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#nvml-훅-nvidia-smi가-보는-세계" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">NVML 훅: nvidia-smi가 보는 세계</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#어디까지-믿을-수-있는-격리인가" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">어디까지 믿을 수 있는 격리인가</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#실험으로-확인할-것" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">실험으로 확인할 것</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#운영-팁" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">운영 팁</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#결론" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">결론</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#참고-자료" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">참고 자료</span> </a>  </li> </ul></div></details></nav></mobile-starlight-toc><script type="module" src="/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.hwBsy0Mo.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-rl4sue7z"><div class="sl-container astro-rl4sue7z"><kb-graph-card> <button class="kb-graph-card" type="button" data-open aria-haspopup="dialog"> <span class="kb-graph-copy"> <span class="kb-graph-title">Knowledge graph</span> <span class="kb-graph-subtitle" data-count>Loading related docs</span> </span> <span class="kb-graph-thumb" aria-hidden="true" data-map></span> <span class="kb-graph-expand" aria-hidden="true">Expand</span> </button> <dialog class="kb-graph-dialog" aria-label="Knowledge graph" data-dialog> <div class="kb-graph-panel"> <div class="kb-graph-panel-header"> <div> <p>Knowledge graph</p> <h2 data-heading>Related documents</h2> </div> <div class="kb-graph-tabs" role="tablist" aria-label="Knowledge graph views"> <button type="button" role="tab" aria-selected="true" data-tab="page">This page</button> <button type="button" role="tab" aria-selected="false" data-tab="global">Full graph</button> </div> <button type="button" data-close aria-label="Close knowledge graph">×</button> </div> <div class="kb-graph-stage" data-stage data-view="page"> <div data-page-stage></div> <div data-global-stage hidden></div> </div> </div> </dialog> </kb-graph-card> <script type="module" src="/_astro/KnowledgeGraphCard.astro_astro_type_script_index_0_lang.C475L69c.js"></script><starlight-toc data-min-h="2" data-max-h="2"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">On this page</h2><ul class="astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#한-줄-요약" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">한 줄 요약</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#kubernetes에서-컨테이너-안으로-넘어오는-값" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Kubernetes에서 컨테이너 안으로 넘어오는 값</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#훅은-어디에서-적용되는가" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">훅은 어디에서 적용되는가</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#초기화는-두-단계다" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">초기화는 두 단계다</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#메모리-가상화-gpu가-작아-보이게-만들기" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">메모리 가상화: GPU가 작아 보이게 만들기</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#메모리-제한-할당-전에-oom을-반환한다" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">메모리 제한: 할당 전에 OOM을 반환한다</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#다중-프로세스-사용량-집계-공유-영역이-필요한-이유" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">다중 프로세스 사용량 집계: 공유 영역이 필요한 이유</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#연산-제한-sm-파티션이-아니라-속도-제한기다" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">연산 제한: SM 파티션이 아니라 속도 제한기다</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#nvml-훅-nvidia-smi가-보는-세계" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">NVML 훅: nvidia-smi가 보는 세계</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#어디까지-믿을-수-있는-격리인가" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">어디까지 믿을 수 있는 격리인가</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#실험으로-확인할-것" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">실험으로 확인할 것</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#운영-팁" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">운영 팁</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#결론" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">결론</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#참고-자료" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">참고 자료</span> </a>  </li> </ul></nav></starlight-toc><script type="module" src="/_astro/TableOfContents.astro_astro_type_script_index_0_lang.FuRcXuRY.js"></script></div></div> </div> </aside> <div class="main-pane astro-67yu43on">  <main data-pagefind-body class="astro-bguv2lll" lang="en" dir="ltr">    <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <h1 id="_top" class="astro-j6tvhyss">HAMi-core 심층 분석: `libvgpu.so`는 GPU를 어떻게 나누는가</h1> </div> </div> <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <starlight-image-zoom> <template class="astro-vjux6bgf"> <dialog class="starlight-image-zoom-dialog astro-vjux6bgf"> <button aria-label="Unzoom image" class="starlight-image-zoom-control astro-vjux6bgf"> <svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" class="astro-vjux6bgf"> <use href="#starlight-image-zoom-icon-unzoom" class="astro-vjux6bgf"></use> </svg> </button> <figure class="astro-vjux6bgf"></figure> </dialog> </template> <svg xmlns="http://www.w3.org/2000/svg" style="display:none" class="astro-vjux6bgf"> <symbol id="starlight-image-zoom-icon-zoom" viewBox="0 0 24 24" class="astro-vjux6bgf"> <path d="M9.79 12.79 4 18.59V17a1 1 0 0 0-2 0v4a1 1 0 0 0 .08.38 1 1 0 0 0 .54.54A1 1 0 0 0 3 22h4a1 1 0 0 0 0-2H5.41l5.8-5.79a1 1 0 0 0-1.42-1.42ZM21.92 2.62a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-4a1 1 0 0 0 0 2h1.59l-5.8 5.79a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V7a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z" class="astro-vjux6bgf"></path> </symbol> <symbol id="starlight-image-zoom-icon-unzoom" viewBox="0 0 24 24" class="astro-vjux6bgf"> <path d="M21.71 2.29a1 1 0 0 0-1.42 0l-5.79 5.8V6.5a1 1 0 0 0-2 0v4a1 1 0 0 0 .08.38 1 1 0 0 0 .54.54 1 1 0 0 0 .38.08h4a1 1 0 0 0 0-2h-1.59l5.8-5.79a1 1 0 0 0 0-1.42ZM10.88 12.58a1 1 0 0 0-.38-.08h-4a1 1 0 0 0 0 2h1.59l-5.8 5.79a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l5.79-5.8v1.59a1 1 0 0 0 2 0v-4a1 1 0 0 0-.08-.38 1 1 0 0 0-.54-.54Z" class="astro-vjux6bgf"></path> </symbol> </svg> </starlight-image-zoom>   <script type="module" src="/_astro/ImageZoom.astro_astro_type_script_index_0_lang.CZmBqK-T.js"></script> <div class="sl-markdown-content"> <p>HAMi의 Kubernetes 구성 요소는 Pod를 배치하고 GPU 메모리·코어 quota를 정한 뒤,
+컨테이너에 <code dir="auto">libvgpu.so</code>를 주입한다. 그러나 GPU 분할의 핵심은 그다음에 있다.
+컨테이너 안에서 <code dir="auto">libvgpu.so</code>가 CUDA와 NVML 호출 경로에 개입해 애플리케이션이
+인식하는 GPU의 크기와 사용할 수 있는 자원을 바꾼다.</p>
+<p>HAMi-core는 이 역할을 맡는 컨테이너 내부 GPU 자원 제어기다. 공식 README도
+HAMi-core를 CUDA 런타임과 CUDA 드라이버 사이의 API 호출을 가로채는 라이브러리로
+설명한다. 이 글에서는 HAMi-core가 만드는 “가상 GPU”가 정확히 어느 지점에서
+형성되는지와 그 한계를 코드 경로를 중심으로 살펴본다.</p>
+<p>소스 기준은 2026년 7월 7일에 확인한 <code dir="auto">Project-HAMi/HAMi</code> <code dir="auto">2487a24</code>와
+<code dir="auto">Project-HAMi/HAMi-core</code> <code dir="auto">8f3a89c</code>다. 구현은 계속 달라질 수 있으므로 세부 함수명보다
+제어 흐름과 제한이 적용되는 위치를 파악하는 편이 좋다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="한-줄-요약">한 줄 요약</h2><a class="sl-anchor-link" href="#한-줄-요약"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “한 줄 요약”</span></a></div>
+<p>HAMi-core는 GPU를 하드웨어 수준에서 분할하지 않는다. 대신 컨테이너에
+<code dir="auto">libvgpu.so</code>를 미리 로드하고 CUDA 드라이버 API와 NVML API를 후킹해 다음 세 가지를
+수행한다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>기능</th><th>구현 위치</th><th>성격</th></tr></thead><tbody><tr><td>메모리 가상화</td><td><code dir="auto">cuDeviceTotalMem_v2</code>, NVML 메모리 조회 훅</td><td>애플리케이션에 GPU 메모리 크기가 quota인 것처럼 보이게 함</td></tr><tr><td>메모리 제한</td><td><code dir="auto">cuMemAlloc_v2</code>, <code dir="auto">cuMemAllocManaged</code>, 할당기·사용량 집계</td><td>quota를 초과한 할당을 OOM으로 차단</td></tr><tr><td>연산 스로틀링</td><td><code dir="auto">cuLaunchKernel</code>, <code dir="auto">cuLaunchKernelEx</code>, <code dir="auto">rate_limiter</code></td><td>커널 실행 경로에서 소프트웨어 속도 제한 적용</td></tr></tbody></table>
+<p>가장 중요한 점은 메모리와 연산의 제한 강도가 서로 다르다는 것이다. 메모리 할당은
+명시적인 API 이벤트이므로 quota 검사와 사용량 집계를 적용하기 쉽다. 반면 연산은
+SM을 물리적으로 분할하는 것이 아니라 커널 실행 시점에 소프트웨어적으로 조절하는
+방식에 가깝다.</p>
+<p><starlight-image-zoom-zoomable><img src="/gpu/articles/assets/hami-core-hook-path.svg" alt="HAMi-core hook path"><button aria-label="Zoom image: HAMi-core hook path" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<div class="sl-heading-wrapper level-h2"><h2 id="kubernetes에서-컨테이너-안으로-넘어오는-값">Kubernetes에서 컨테이너 안으로 넘어오는 값</h2><a class="sl-anchor-link" href="#kubernetes에서-컨테이너-안으로-넘어오는-값"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Kubernetes에서 컨테이너 안으로 넘어오는 값”</span></a></div>
+<p>HAMi-core는 독립적으로 동작하지 않는다. Kubernetes 측 HAMi Device Plugin이
+컨테이너가 시작되기 전에 필요한 값을 주입한다. NVIDIA Device Plugin의 <code dir="auto">Allocate</code>
+경로는 non-MIG 모드에서 대략 다음 항목을 컨테이너 응답에 넣는다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>주입 항목</th><th>의미</th></tr></thead><tbody><tr><td><code dir="auto">CUDA_DEVICE_MEMORY_LIMIT_&#x3C;index></code></td><td>논리 GPU별 메모리 quota. 예: <code dir="auto">CUDA_DEVICE_MEMORY_LIMIT_0=12000m</code></td></tr><tr><td><code dir="auto">CUDA_DEVICE_SM_LIMIT</code></td><td>연산 사용률 상한. 예: <code dir="auto">40</code></td></tr><tr><td><code dir="auto">CUDA_DEVICE_MEMORY_SHARED_CACHE</code></td><td>프로세스 간 메모리 사용량 집계에 쓰는 캐시 경로</td></tr><tr><td><code dir="auto">CUDA_OVERSUBSCRIBE</code></td><td>메모리 배율·초과 할당 설정을 전달</td></tr><tr><td><code dir="auto">LIBCUDA_LOG_LEVEL</code></td><td>HAMi-core 로그 수준</td></tr><tr><td><code dir="auto">/usr/local/vgpu/libvgpu.so</code> 또는 훅 경로의 <code dir="auto">libvgpu.so</code></td><td>실제 훅 라이브러리</td></tr><tr><td><code dir="auto">/etc/ld.so.preload</code></td><td>컨테이너 프로세스가 <code dir="auto">libvgpu.so</code>를 먼저 로드하도록 하는 설정</td></tr><tr><td><code dir="auto">/tmp/vgpulock</code></td><td>여러 프로세스가 공유하는 잠금 디렉터리</td></tr></tbody></table>
+<p>즉 HAMi 스케줄러가 “이 Pod에는 GPU 메모리 12GB, 코어 40%”를 할당하면, Device
+Plugin은 이 결정을 환경 변수와 마운트로 바꿔 컨테이너에 전달한다. HAMi-core는 이
+값을 읽어 애플리케이션 프로세스 안에서 제한을 적용하기 시작한다.</p>
+<p>이 경계가 HAMi의 핵심이다.</p>
+<div class="expressive-code"><link rel="stylesheet" href="/_astro/ec.v4551.css"><script type="module" src="/_astro/ec.0vx5m.js"></script><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Kubernetes 스케줄러의 결정</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> Pod annotation</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> Device Plugin Allocate</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> 환경 변수·마운트 주입</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> libvgpu.so 런타임 훅</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Kubernetes 스케줄러의 결정  -> Pod annotation  -> Device Plugin Allocate  -> 환경 변수·마운트 주입  -> libvgpu.so 런타임 훅"><div></div></button></div></figure></div>
+<div class="sl-heading-wrapper level-h2"><h2 id="훅은-어디에서-적용되는가">훅은 어디에서 적용되는가</h2><a class="sl-anchor-link" href="#훅은-어디에서-적용되는가"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “훅은 어디에서 적용되는가”</span></a></div>
+<p>HAMi-core의 진입점은 <code dir="auto">src/libvgpu.c</code>다. 여기서 가장 눈에 띄는 부분은 <code dir="auto">dlsym</code> 자체를
+재정의한다는 점이다. 많은 CUDA 프레임워크는 CUDA 드라이버 심볼을 직접 연결하거나
+<code dir="auto">dlsym</code>으로 찾는다. HAMi-core는 <code dir="auto">dlsym(handle, symbol)</code> 호출을 가로챈 뒤 심볼 이름이
+<code dir="auto">cu...</code>로 시작하면 CUDA 훅 테이블을, <code dir="auto">nvml...</code>로 시작하면 NVML 훅 테이블을 먼저
+확인한다.</p>
+<p>단순화하면 다음과 같다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">애플리케이션이 dlsym("cuMemAlloc_v2") 호출</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> libvgpu.so의 dlsym 재정의</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> 심볼이 "cu"로 시작하는지 확인</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> HAMi-core의 cuMemAlloc_v2 래퍼 반환</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> 래퍼가 quota 검사·사용량 집계 수행</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> 허용되면 실제 cuMemAlloc_v2 호출</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="애플리케이션이 dlsym(&#x22;cuMemAlloc_v2&#x22;) 호출  -> libvgpu.so의 dlsym 재정의  -> 심볼이 &#x22;cu&#x22;로 시작하는지 확인  -> HAMi-core의 cuMemAlloc_v2 래퍼 반환  -> 래퍼가 quota 검사·사용량 집계 수행  -> 허용되면 실제 cuMemAlloc_v2 호출"><div></div></button></div></figure></div>
+<p><code dir="auto">libvgpu.c</code>에는 <code dir="auto">DLSYM_HOOK_FUNC(cuMemAlloc_v2)</code>,
+<code dir="auto">DLSYM_HOOK_FUNC(cuDeviceTotalMem_v2)</code>, <code dir="auto">DLSYM_HOOK_FUNC(cuLaunchKernel)</code> 같은 항목이
+길게 나열되어 있다. 별도의 <code dir="auto">src/cuda/hook.c</code>에 있는 <code dir="auto">cuda_library_entry[]</code>는 후킹할
+CUDA 심볼 목록을 관리한다. 이 목록에는 메모리 할당, 컨텍스트, 스트림, 커널 실행,
+CUDA 그래프, 가상 메모리 API까지 포함된다.</p>
+<p>NVML도 같은 방식으로 후킹한다. <code dir="auto">__dlsym_hook_section_nvml()</code>는
+<code dir="auto">nvmlDeviceGetMemoryInfo</code>, <code dir="auto">nvmlDeviceGetUtilizationRates</code>,
+<code dir="auto">nvmlDeviceGetComputeRunningProcesses</code> 같은 관측 API를 가로챈다. 따라서 <code dir="auto">nvidia-smi</code>나
+프레임워크의 NVML 기반 모니터링도 HAMi-core가 만든 메모리 뷰를 보게 된다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="초기화는-두-단계다">초기화는 두 단계다</h2><a class="sl-anchor-link" href="#초기화는-두-단계다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “초기화는 두 단계다”</span></a></div>
+<p>HAMi-core의 초기화는 <code dir="auto">preInit()</code>과 <code dir="auto">postInit()</code>로 나뉜다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>단계</th><th>호출 계기</th><th>주요 작업</th></tr></thead><tbody><tr><td><code dir="auto">preInit()</code></td><td>CUDA 심볼 조회 또는 <code dir="auto">cuInit</code> 전후</td><td>로그 초기화, 실제 <code dir="auto">dlsym</code> 확보, 실제 CUDA 라이브러리 로드, 훅 테이블 초기화</td></tr><tr><td><code dir="auto">postInit()</code></td><td><code dir="auto">cuInit</code> 성공 후 또는 커널 실행 전 <code dir="auto">ensure_post_init()</code></td><td>할당기 초기화, 가시 장치 매핑, 호스트 PID 탐지, 사용률 감시자 초기화</td></tr></tbody></table>
+<p>이렇게 초기화를 나누는 이유는 CUDA 프로세스의 실제 상태가 <code dir="auto">cuInit</code> 전후로 다르기
+때문이다. CUDA 라이브러리 심볼을 후킹하는 작업은 일찍 해야 하지만, 프로세스가 어떤
+GPU context를 만들었는지와 NVML에서 어떤 호스트 PID로 보이는지는 CUDA 초기화 후에야
+안정적으로 알 수 있다.</p>
+<p><code dir="auto">postInit()</code>에서 특히 중요한 단계는 호스트 PID 탐지다. 컨테이너 내부 PID와 호스트에서
+NVML이 인식하는 PID가 다를 수 있으므로, HAMi-core는 NVML의 실행 중인 프로세스 목록을
+비교하고 기본 컨텍스트를 유지한 뒤 새로 나타난 PID를 찾아 사용량 집계에 연결한다.
+이 과정이 성공하면 <code dir="auto">pidfound=1</code>이 되고 커널 실행 속도 제한기도 활성화될 수 있다.
+실패하면 컨테이너 PID 기반 사용량 집계로 대체한다.</p>
+<p>최근 코드에서는 <code dir="auto">postInit()</code>의 호스트 PID 탐지를 공유 메모리 세마포어로 직렬화한다.
+별도로 <code dir="auto">utils.c</code>에는 <code dir="auto">/tmp/vgpulock/lock</code>에 <code dir="auto">flock()</code>을 거는 통합 잠금 구현도 남아
+있다. 두 동기화 방식은 HAMi-core가 프로세스 로컬 라이브러리이면서도 노드와
+프로세스 간 공통 사용량을 집계해야 한다는 구조적 특성을 보여 준다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="메모리-가상화-gpu가-작아-보이게-만들기">메모리 가상화: GPU가 작아 보이게 만들기</h2><a class="sl-anchor-link" href="#메모리-가상화-gpu가-작아-보이게-만들기"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “메모리 가상화: GPU가 작아 보이게 만들기”</span></a></div>
+<p>GPU 메모리 분할에서 첫 번째 가상화 효과는 “이 GPU의 총 메모리가 quota만큼만 있는
+것처럼 보이게 하는 것”이다. 예를 들어 물리 GPU가 80GB여도 Pod가 <code dir="auto">gpumem: 12000</code>을
+받았다면, 애플리케이션은 12GB GPU를 받은 것처럼 동작해야 한다.</p>
+<p>CUDA driver API 쪽에서는 <code dir="auto">cuDeviceTotalMem_v2</code> hook이 이 역할을 한다. 원래 함수는
+물리 GPU의 total memory를 돌려주지만, HAMi-core wrapper는
+<code dir="auto">get_current_device_memory_limit(dev)</code> 값을 <code dir="auto">bytes</code>에 넣고 <code dir="auto">CUDA_SUCCESS</code>를 반환한다.</p>
+<p>이는 애플리케이션 호환성에 중요하다. 많은 프레임워크는 모델을 적재하기 전에
+<code dir="auto">total_memory</code>를 보고 배치 크기, 작업 공간, 캐시 정책을 결정한다. 여기서 물리 GPU의
+전체 메모리가 보이면 프레임워크가 quota보다 큰 계획을 세우고 나중에 OOM을 만날 수
+있다.</p>
+<p>NVML 훅도 같은 이유로 필요하다. <code dir="auto">nvidia-smi</code>와 모니터링 에이전트가 보는 메모리의
+total/used/free 값이 quota와 맞아야 사용자 경험과 과금 지표가 일관된다.</p>
+<p>하지만 이 단계는 어디까지나 관측값을 가상화하는 것이다. 실제 물리 GPU 메모리가
+분할되어 별도의 주소 공간이 생긴 것은 아니다. 실제 제한은 할당 경로에서 적용된다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="메모리-제한-할당-전에-oom을-반환한다">메모리 제한: 할당 전에 OOM을 반환한다</h2><a class="sl-anchor-link" href="#메모리-제한-할당-전에-oom을-반환한다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “메모리 제한: 할당 전에 OOM을 반환한다”</span></a></div>
+<p>메모리 quota 적용의 중심은 <code dir="auto">src/cuda/memory.c</code>와 <code dir="auto">src/allocator/allocator.c</code>다.</p>
+<p>대표 경로는 다음과 같다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">cuMemAlloc_v2(dptr, bytesize)</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> ENSURE_RUNNING()</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> allocate_raw()</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> add_chunk()</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> oom_check(dev, bytesize)</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> real cuMemAlloc_v2 or cuMemoryAllocate</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> add_gpu_device_memory_usage()</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="cuMemAlloc_v2(dptr, bytesize)  -> ENSURE_RUNNING()  -> allocate_raw()  -> add_chunk()  -> oom_check(dev, bytesize)  -> real cuMemAlloc_v2 or cuMemoryAllocate  -> add_gpu_device_memory_usage()"><div></div></button></div></figure></div>
+<p><code dir="auto">oom_check(dev, addon)</code>는 현재 장치 메모리 사용량과 quota를 비교한다. 새 할당을
+더했을 때 한도를 넘으면 <code dir="auto">CUDA_ERROR_OUT_OF_MEMORY</code> 계열 오류를 반환한다. 애플리케이션
+입장에서는 일반적인 CUDA OOM처럼 보인다.</p>
+<p>최근 할당기 구현에서 눈에 띄는 점은 비용이 큰 GPU 할당을 잠금 밖에서 수행하려는
+구조다. <code dir="auto">add_chunk()</code>는 먼저 OOM 사전 검사를 하고 실제 <code dir="auto">cuMemAlloc_v2</code> 또는
+<code dir="auto">cuMemoryAllocate</code>를 호출한 뒤, 추적 목록과 공유 사용량 갱신은 mutex 안에서 처리한다.
+중간에 다른 프로세스가 메모리를 사용했을 수 있으므로 추적 직전에 OOM 검사를 한 번
+더 수행하고, 한도를 넘으면 방금 받은 할당을 해제한다.</p>
+<p>이 설계에는 다음과 같은 절충점이 있다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>선택</th><th>장점</th><th>남는 위험</th></tr></thead><tbody><tr><td>할당 전 OOM 사전 검사</td><td>quota 초과를 빠르게 차단</td><td>검사와 실제 할당 사이에 경쟁 상태가 생길 수 있음</td></tr><tr><td>GPU 할당을 잠금 밖에서 수행</td><td>전역 잠금 유지 시간 감소</td><td>추적 직전 재검사가 필요함</td></tr><tr><td>공유 사용량 집계</td><td>여러 프로세스를 하나의 quota 아래 묶을 수 있음</td><td>종료된 프로세스 슬롯 정리와 잠금 경합이 필요함</td></tr></tbody></table>
+<p><code dir="auto">cuMemAllocManaged</code>, <code dir="auto">cuMemAllocPitch_v2</code>, 호스트 메모리 할당 계열도 별도의 래퍼를
+갖는다. 모든 CUDA 메모리 API가 완전히 같은 정확도로 집계되는 것은 아니므로, 새 CUDA
+API가 추가될 때는 훅 테이블과 할당기 경로도 함께 따라가야 한다. HAMi-core에 CUDA
+훅 일관성을 검사하는 스크립트가 있는 이유도 여기에 있다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="다중-프로세스-사용량-집계-공유-영역이-필요한-이유">다중 프로세스 사용량 집계: 공유 영역이 필요한 이유</h2><a class="sl-anchor-link" href="#다중-프로세스-사용량-집계-공유-영역이-필요한-이유"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “다중 프로세스 사용량 집계: 공유 영역이 필요한 이유”</span></a></div>
+<p>하나의 Pod 안에서도 GPU 프로세스는 여러 개일 수 있다. Python 데이터 로더, 모델 워커,
+vLLM 엔진 프로세스, 프레임워크 자식 프로세스가 모두 GPU 메모리를 사용할 수 있다.
+quota가 컨테이너 단위라면 프로세스별 사용량을 합산해야 한다.</p>
+<p>HAMi-core는 이를 위해 공유 메모리 영역과 세마포어를 사용한다. <code dir="auto">multiprocess</code>
+디렉터리에는 메모리 한도, 사용률 감시자, 공유 영역 도구가 분리되어 있다. 핵심은
+프로세스 로컬 할당기 목록만으로는 충분하지 않다는 점이다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">프로세스 A가 4GB 할당</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">프로세스 B가 5GB 할당</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">프로세스 C가 6GB 할당 시도</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">quota = 12GB</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">현재 사용량 = 9GB</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">C는 지금까지 0GB를 할당했더라도 실패해야 함</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="프로세스 A가 4GB 할당프로세스 B가 5GB 할당프로세스 C가 6GB 할당 시도quota = 12GB현재 사용량 = 9GBC는 지금까지 0GB를 할당했더라도 실패해야 함"><div></div></button></div></figure></div>
+<p>따라서 할당 경로는 프로세스별 로컬 목록과 공유 사용량을 함께 갱신한다. 프로세스가
+종료될 때는 종료 처리기가 슬롯을 정리해야 하며, 비정상 종료가 발생하면 오래된
+슬롯을 정리해야 한다. <code dir="auto">oom_check()</code>가 한도 초과 시 <code dir="auto">clear_proc_slot</code> 계열 정리를
+시도하는 이유도 여기에 있다.</p>
+<p>운영 관점에서는 이 구조가 두 가지를 의미한다.</p>
+<p>첫째, HAMi-core는 GPU 메모리 quota를 프로세스 로컬 한도로만 구현하지 않는다. 같은
+quota를 공유하는 여러 프로세스를 함께 보기 때문에 추론 워커 풀과 같은
+워크로드에 적합하다.</p>
+<p>둘째, 공유 사용량 집계에서는 잠금과 정리 문제를 피할 수 없다. 고밀도 워크로드에서
+많은 프로세스가 동시에 <code dir="auto">cuInit</code>이나 메모리 할당을 수행하면, 시작 지연 시간이나
+할당 지연 시간이 커질 수 있다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="연산-제한-sm-파티션이-아니라-속도-제한기다">연산 제한: SM 파티션이 아니라 속도 제한기다</h2><a class="sl-anchor-link" href="#연산-제한-sm-파티션이-아니라-속도-제한기다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “연산 제한: SM 파티션이 아니라 속도 제한기다”</span></a></div>
+<p><code dir="auto">CUDA_DEVICE_SM_LIMIT</code> 또는 HAMi의 <code dir="auto">gpucores</code>는 이름 때문에 하드웨어 SM 파티션처럼
+오해하기 쉽다. 그러나 HAMi-core의 non-MIG 경로는 그렇게 동작하지 않는다.</p>
+<p>커널 실행 래퍼를 보면 <code dir="auto">cuLaunchKernel</code>과 <code dir="auto">cuLaunchKernelEx</code>는
+<code dir="auto">ensure_post_init()</code>, <code dir="auto">pre_launch_kernel()</code>, <code dir="auto">rate_limiter(...)</code>를 거친 뒤 실제 CUDA
+실행 함수를 호출한다. <code dir="auto">rate_limiter</code>는 현재 장치, grid 수, block 수, 캐시된 SM 한도,
+사용률 정책을 바탕으로 소프트웨어 토큰을 조정한다.</p>
+<p>중요한 점은 이 제한이 “SM의 40%를 이 컨테이너에 독점 배정한다”는 뜻이 아니라는
+것이다.
+더 정확한 표현은 다음과 같다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">커널 실행 흐름을 관찰하고 지연시켜</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">장기 평균 연산 사용량이 설정한 한도 부근에 머물도록 유도한다.</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="커널 실행 흐름을 관찰하고 지연시켜장기 평균 연산 사용량이 설정한 한도 부근에 머물도록 유도한다."><div></div></button></div></figure></div>
+<p>따라서 메모리 quota와 연산 quota의 실패 양상은 서로 다르다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>항목</th><th>메모리 quota</th><th>연산 quota</th></tr></thead><tbody><tr><td>개입 지점</td><td>할당 API</td><td>커널 실행 API</td></tr><tr><td>실패 형태</td><td><code dir="auto">CUDA_ERROR_OUT_OF_MEMORY</code></td><td>실행 지연, 처리량 감소</td></tr><tr><td>강제력</td><td>비교적 명확함</td><td>워크로드 특성에 민감한 소프트 한도</td></tr><tr><td>하드웨어 격리</td><td>없음</td><td>없음</td></tr><tr><td>주요 관찰 지표</td><td>최대 메모리 사용량, OOM, 모델 적재 성공률</td><td>p95/p99 지연 시간, 처리량, 인접 워크로드 영향</td></tr></tbody></table>
+<p>짧고 큰 커널을 드문드문 실행하는 워크로드와 작은 커널을 매우 자주 실행하는
+워크로드는 같은 <code dir="auto">gpucores</code> 값에서도 체감 성능이 다를 수 있다. 속도 제한기가 커널
+실행 경로에 있기 때문이다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="nvml-훅-nvidia-smi가-보는-세계">NVML 훅: <code dir="auto">nvidia-smi</code>가 보는 세계</h2><a class="sl-anchor-link" href="#nvml-훅-nvidia-smi가-보는-세계"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “NVML 훅: nvidia-smi가 보는 세계”</span></a></div>
+<p>HAMi-core가 CUDA만 후킹했다면 애플리케이션의 메모리 할당은 제한할 수 있어도,
+사용자와 운영자가 보는 GPU 상태는 물리 GPU 그대로였을 것이다. NVML 훅이 중요한
+이유다.</p>
+<p>NVML은 <code dir="auto">nvidia-smi</code>, DCGM 계열 익스포터, 프레임워크 모니터링 코드가 GPU 상태를 읽는
+주요 경로다. HAMi-core는 <code dir="auto">nvmlDeviceGetMemoryInfo</code>, <code dir="auto">nvmlDeviceGetUtilizationRates</code>,
+<code dir="auto">nvmlDeviceGetComputeRunningProcesses</code> 등 다수의 NVML 심볼을 후킹한다.</p>
+<p>이 hook은 두 가지 목적을 갖는다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>목적</th><th>설명</th></tr></thead><tbody><tr><td>사용자 경험</td><td>컨테이너 안의 <code dir="auto">nvidia-smi</code>가 quota 기준 메모리를 표시하게 함</td></tr><tr><td>사용량 집계</td><td>호스트 PID, 프로세스 사용률, 메모리 사용량을 HAMi-core 공유 상태와 연결</td></tr></tbody></table>
+<p>이 때문에 HAMi-core는 “제한기”이면서 동시에 “관측값 변환기”이기도 하다. GPU를
+실제로 나누는 것만큼, 사용자가 분할된 GPU를 받은 것처럼 보이게 만드는 일도
+중요하다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="어디까지-믿을-수-있는-격리인가">어디까지 믿을 수 있는 격리인가</h2><a class="sl-anchor-link" href="#어디까지-믿을-수-있는-격리인가"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “어디까지 믿을 수 있는 격리인가”</span></a></div>
+<p>HAMi-core의 구조를 보면 격리 수준을 과대평가하면 안 된다는 결론이 자연스럽게 나온다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>경계</th><th>HAMi-core non-MIG에서의 의미</th></tr></thead><tbody><tr><td>메모리 용량</td><td>CUDA 할당 경로에서 quota를 적용</td></tr><tr><td>SM·연산</td><td>커널 실행 경로에서 소프트 스로틀링</td></tr><tr><td>L2 캐시·메모리 대역폭</td><td>강한 분리 없음</td></tr><tr><td>PCIe/NVLink 대역폭</td><td>강한 분리 없음</td></tr><tr><td>장애 격리</td><td>MIG/vGPU 같은 하드웨어·가상화 경계보다 약함</td></tr><tr><td>보안 경계</td><td>신뢰할 수 없는 테넌트 사이의 강한 경계로 보기 어려움</td></tr></tbody></table>
+<p>즉 HAMi-core는 사용률 개선과 운영상 quota 적용에는 매우 유용하지만 하드웨어
+파티션은 아니다. 외부 고객이 섞이는 클라우드 테넌시, 강한 장애 격리, 인접 워크로드
+간섭 차단이 중요하다면 MIG, vGPU, SR-IOV 같은 백엔드를 별도로 검토해야 한다.</p>
+<p>반대로 같은 조직 안의 추론 서비스, 노트북, 배치 추론, 작은 모델 서빙 환경에서는
+이러한 절충점은 꽤 매력적이다. 전체 GPU를 할당하면 낭비될 VRAM을 작은 quota로
+나누고, 애플리케이션을 거의 수정하지 않은 채 기존 CUDA 프레임워크를 실행할 수 있기
+때문이다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="실험으로-확인할-것">실험으로 확인할 것</h2><a class="sl-anchor-link" href="#실험으로-확인할-것"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “실험으로 확인할 것”</span></a></div>
+<p>HAMi-core를 평가할 때는 문서의 기능 목록보다 실패 양상을 직접 확인하는 편이 낫다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>실험</th><th>확인할 것</th></tr></thead><tbody><tr><td><code dir="auto">cuDeviceTotalMem</code> 확인</td><td>quota를 바꾸면 프레임워크와 <code dir="auto">nvidia-smi</code>가 보는 총 메모리도 바뀌는가</td></tr><tr><td>할당 OOM</td><td>quota보다 큰 <code dir="auto">cuMemAlloc</code>이 물리 여유와 무관하게 실패하는가</td></tr><tr><td>다중 프로세스 quota</td><td>프로세스 A/B/C의 합산 메모리가 quota를 넘을 때 C가 실패하는가</td></tr><tr><td>비정상 종료 정리</td><td>GPU 프로세스 강제 종료 후 오래된 사용량 기록이 정리되는가</td></tr><tr><td>커널 스로틀링</td><td><code dir="auto">gpucores</code> 값을 바꾸면 처리량과 p99 지연 시간이 어떻게 변하는가</td></tr><tr><td>동시 기동 부하</td><td>수십~수백 개 프로세스가 동시에 <code dir="auto">cuInit</code>을 호출할 때 지연 시간이 급증하는가</td></tr><tr><td>NVML 일관성</td><td>컨테이너 내부 <code dir="auto">nvidia-smi</code>, DCGM 익스포터, 프레임워크 지표가 서로 맞는가</td></tr><tr><td>우회 경로</td><td><code dir="auto">/etc/ld.so.preload</code>, 정적 링크, 특권 컨테이너 같은 우회 경로를 통제하는가</td></tr></tbody></table>
+<p>특히 추론 플랫폼에서는 평균 처리량보다 꼬리 지연 시간을 봐야 한다. HAMi-core의
+연산 제한은 커널 실행 경로의 소프트웨어 제어이므로, 인접 워크로드가 있을 때
+p95/p99가 얼마나 흔들리는지가 실제 사용자 경험을 더 잘 보여 준다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="운영-팁">운영 팁</h2><a class="sl-anchor-link" href="#운영-팁"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “운영 팁”</span></a></div>
+<p>첫째, HAMi-core quota는 명목상 SKU 용량에만 맞추지 말고 워크로드의 최대 메모리
+사용량을 기준으로 정해야 한다. LLM 서빙에서는 모델 가중치, KV 캐시, CUDA 그래프
+캡처, 작업 공간, 메모리 할당기 단편화가 모두 최대 사용량에 영향을 준다.</p>
+<p>둘째, <code dir="auto">CUDA_DEVICE_SM_LIMIT</code>를 SLA로 표현하지 않는 편이 좋다. 사용자에게 “SM 40%를
+독점”한다고 말하면 오해를 낳는다. “연산 사용량에 소프트 한도를 적용한다”는 운영
+문구가 더 정확하다.</p>
+<p>셋째, 노드 풀을 분리하는 편이 낫다. HAMi-core 소프트웨어 분할 노드와 MIG 노드,
+전체 GPU 노드를 섞으면 스케줄러 정책과 사용자 기대가 복잡해진다. 워크로드
+클래스별로 노드 풀을 분리하면 실패 양상도 단순해진다.</p>
+<p>넷째, 관측 체계를 HAMi 기준으로 맞춰야 한다. 물리 GPU 전체 사용률만 보면 플랫폼
+효율은 보이지만 테넌트별 quota 준수 여부는 알 수 없다. Pod별 요청 quota, 실제 메모리
+사용량, OOM, 시작 지연 시간, p99 지연 시간을 함께 봐야 한다.</p>
+<p>다섯째, CUDA 버전을 올릴 때는 훅 적용 범위를 확인해야 한다. CUDA 드라이버 API가
+늘어나거나 프레임워크가 새로운 할당 경로를 사용하면, 훅 테이블과 사용량 집계 경로가
+이를 따라가지 못할 수 있다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="결론">결론</h2><a class="sl-anchor-link" href="#결론"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “결론”</span></a></div>
+<p>HAMi-core의 본질은 “CUDA/NVML을 속이는 라이브러리”가 아니라 Kubernetes가 정한 GPU
+quota를 CUDA 프로세스 내부에서 실행 가능한 정책으로 바꾸는 런타임 제한 계층이다.
+메모리는 관측값 가상화와 할당 시점의 OOM으로 비교적 직접적으로 제한한다. 연산은
+커널 실행 경로에서 속도를 제한하는 소프트웨어 제어다.</p>
+<p>그래서 HAMi-core를 평가할 때는 “GPU를 쪼갠다”는 말보다 다음 질문이 더 정확하다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">이 워크로드의 메모리 할당 경로와 커널 실행 패턴을</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">libvgpu.so가 안정적으로 관찰하고 제한할 수 있는가?</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="이 워크로드의 메모리 할당 경로와 커널 실행 패턴을libvgpu.so가 안정적으로 관찰하고 제한할 수 있는가?"><div></div></button></div></figure></div>
+<p>이 질문에 “그렇다”라고 답할 수 있다면 HAMi-core는 GPU 사용률을 크게 높일 수 있다.
+그렇지 않다면 MIG, vGPU, 전체 GPU 할당, 워크로드 수준의 배칭·배치를 다시 검토해야
+한다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="참고-자료">참고 자료</h2><a class="sl-anchor-link" href="#참고-자료"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “참고 자료”</span></a></div>
+<ul>
+<li><a href="https://github.com/Project-HAMi/HAMi-core">Project-HAMi/HAMi-core</a></li>
+<li><a href="https://github.com/Project-HAMi/HAMi-core/blob/master/README.md">HAMi-core README</a></li>
+<li><a href="https://github.com/Project-HAMi/HAMi-core/blob/master/src/libvgpu.c">HAMi-core <code dir="auto">src/libvgpu.c</code></a></li>
+<li><a href="https://github.com/Project-HAMi/HAMi-core/blob/master/src/cuda/memory.c">HAMi-core <code dir="auto">src/cuda/memory.c</code></a></li>
+<li><a href="https://github.com/Project-HAMi/HAMi-core/blob/master/src/allocator/allocator.c">HAMi-core <code dir="auto">src/allocator/allocator.c</code></a></li>
+<li><a href="https://github.com/Project-HAMi/HAMi-core/blob/master/src/multiprocess/multiprocess_memory_limit.c">HAMi-core multiprocess memory limit</a></li>
+<li><a href="https://github.com/Project-HAMi/HAMi/blob/master/pkg/device-plugin/nvidiadevice/nvinternal/plugin/server.go">HAMi NVIDIA device plugin allocation path</a></li>
+</ul> </div> <footer class="sl-flex astro-3yyafb3n"> <div class="meta sl-flex astro-3yyafb3n"> <a href="https://github.com/ziwon/ai-data-center-systems/edit/main/gpu/articles/hami-core-deep-dive.ko.md" class="sl-flex print:hidden astro-eez2twj6"><svg aria-hidden="true" class="astro-eez2twj6 astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.2em;"><path d="M22 7.24a1 1 0 0 0-.29-.71l-4.24-4.24a1 1 0 0 0-1.1-.22 1 1 0 0 0-.32.22l-2.83 2.83L2.29 16.05a1 1 0 0 0-.29.71V21a1 1 0 0 0 1 1h4.24a1 1 0 0 0 .76-.29l10.87-10.93L21.71 8c.1-.1.17-.2.22-.33a1 1 0 0 0 0-.24v-.14l.07-.05ZM6.83 20H4v-2.83l9.93-9.93 2.83 2.83L6.83 20ZM18.17 8.66l-2.83-2.83 1.42-1.41 2.82 2.82-1.41 1.42Z"/></svg>Edit page</a> <p>Last updated: <time datetime="2026-07-22T11:44:30.000Z">Jul 22, 2026</time></p> </div> <div class="pagination-links print:hidden astro-u2l5gyhi" dir="ltr"> <a href="/gpu/articles/gpu-infrastructure-operations-and-platform-design.ko/" rel="prev" class="astro-u2l5gyhi"> <svg aria-hidden="true" class="astro-u2l5gyhi astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17 11H9.41l3.3-3.29a1.004 1.004 0 1 0-1.42-1.42l-5 5a1 1 0 0 0-.21.33 1 1 0 0 0 0 .76 1 1 0 0 0 .21.33l5 5a1.002 1.002 0 0 0 1.639-.325 1 1 0 0 0-.219-1.095L9.41 13H17a1 1 0 0 0 0-2Z"/></svg> <span class="astro-u2l5gyhi"> Previous <br class="astro-u2l5gyhi"> <span class="link-title astro-u2l5gyhi">GPU 인프라 운영과 플랫폼 설계: 하드웨어 장애 분석부터 멀티테넌시까지</span> </span> </a> <a href="/gpu/articles/hami-dra-gpu-sharing.ko/" rel="next" class="astro-u2l5gyhi"> <svg aria-hidden="true" class="astro-u2l5gyhi astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17.92 11.62a1.001 1.001 0 0 0-.21-.33l-5-5a1.003 1.003 0 1 0-1.42 1.42l3.3 3.29H7a1 1 0 0 0 0 2h7.59l-3.3 3.29a1.002 1.002 0 0 0 .325 1.639 1 1 0 0 0 1.095-.219l5-5a1 1 0 0 0 .21-.33 1 1 0 0 0 0-.76Z"/></svg> <span class="astro-u2l5gyhi"> Next <br class="astro-u2l5gyhi"> <span class="link-title astro-u2l5gyhi">DRA와 HAMi로 보는 Kubernetes GPU 분할</span> </span> </a> </div>  </footer> </div> </div>  </main> </div> </div> </div> <ask-docs-widget> <button class="ask-fab" type="button" data-open aria-label="Ask this docs"> <span class="ask-fab-icon" aria-hidden="true">?</span>
+Ask this docs
+</button> <div class="ask-panel" data-panel hidden> <div class="ask-resize-handle" data-resize aria-hidden="true"></div> <div class="ask-panel-inner"> <header class="ask-header"> <div> <p class="ask-eyebrow">AI Data Center Systems</p> <h2 class="ask-title">Ask this docs</h2> </div> <div class="ask-header-controls"> <button class="ask-mode-btn" data-mode-btn="right" title="오른쪽 패널" aria-label="오른쪽 패널"> <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="6" height="16" rx="1.5" opacity="0.35"></rect><rect x="8" y="0" width="8" height="16" rx="1.5"></rect></svg> </button> <button class="ask-mode-btn" data-mode-btn="bottom" title="하단 패널" aria-label="하단 패널"> <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="16" height="6" rx="1.5" opacity="0.35"></rect><rect x="0" y="8" width="16" height="8" rx="1.5"></rect></svg> </button> <button class="ask-mode-btn" data-mode-btn="expand" title="전체 확장" aria-label="전체 확장"> <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 5.5V1h4.5M10.5 1H15v4.5M15 10.5V15h-4.5M5.5 15H1v-4.5"></path></svg> </button> <button class="ask-close-btn" type="button" aria-label="닫기" data-close> <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13"></path></svg> </button> </div> </header> <div class="ask-body"> <label class="ask-field"> <span class="ask-field-row"> <span>Question</span> <span class="ask-char" data-char>0 / 800</span> </span> <textarea name="question" rows="3" maxlength="800" placeholder="이 문서에서 핵심 운영 체크포인트는 무엇인가요?" data-question></textarea> <span class="ask-hint">시간당 최대 20회 · 질문당 최대 800자</span> </label> <div class="ask-actions"> <button class="ask-submit" type="button" data-submit> <svg class="ask-spinner" viewBox="0 0 24 24" fill="none" aria-hidden="true" hidden> <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2.5" stroke-dasharray="56" stroke-dashoffset="14" stroke-linecap="round"></circle> </svg> <span data-submit-label>Ask</span> </button> <p class="ask-status" data-status></p> </div> <section class="ask-answer" data-answer hidden></section> <section class="ask-sources" data-sources hidden> <h3>Sources</h3> <ul class="ask-source-chips" data-source-list></ul> </section> </div> </div> </div> <div class="ask-backdrop" data-backdrop hidden></div> </ask-docs-widget> <script type="module" src="/_astro/AskDocs.astro_astro_type_script_index_0_lang.BbnAb04M.js"></script> </div> <script type="module">const r=document.documentElement,c=document.querySelector("#starlight__sidebar"),s=document.querySelector(".navigation-mode-toggle"),a=document.querySelector(".navigation-drawer-toggle"),u=window.matchMedia("(min-width: 50rem)");function d(){return r.dataset.navigationMode==="compact"}function o(){return r.dataset.navigationDrawer==="open"}function l(){const e=d(),t=e&&o();s?.setAttribute("aria-pressed",String(e)),s?.setAttribute("title",e?"Use normal navigation":"Use compact navigation"),a?.setAttribute("aria-expanded",String(t)),a?.setAttribute("title",t?"Close navigation":"Open navigation");const n=a?.querySelector(".navigation-drawer-label");n&&(n.textContent=t?"Close navigation":"Open navigation")}function i(e,t=!1){const n=!!(e&&d()&&u.matches);r.dataset.navigationDrawer=n?"open":"closed",l(),n?requestAnimationFrame(()=>{const g=c?.querySelector('a[aria-current="page"]'),m=c?.querySelector(".starlight-sidebar-topics-current");(g??m)?.focus()}):t&&a?.focus()}function p(e){r.dataset.navigationMode=e,i(!1);try{localStorage.setItem("adcs-navigation-mode",e)}catch{}l()}s?.addEventListener("click",()=>{p(d()?"normal":"compact")});a?.addEventListener("click",()=>{i(!o(),o())});document.addEventListener("keydown",e=>{e.key==="Escape"&&o()&&i(!1,!0)});document.addEventListener("pointerdown",e=>{!o()||!(e.target instanceof Node)||c?.contains(e.target)||i(!1)});u.addEventListener("change",()=>i(!1));r.dataset.navigationDrawer="closed";l();</script> </body></html>

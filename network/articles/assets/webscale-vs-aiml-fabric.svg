@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="620" viewBox="0 0 1120 620" role="img" aria-labelledby="title desc">
+  <title id="title">Web-scale fabric versus AI/ML scheduled fabric</title>
+  <desc id="desc">A comparison between mixed web-scale traffic and synchronized AI/ML collective traffic on a dedicated backend fabric.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .panel { fill: #F5F1EA; stroke: #D8D1C7; stroke-width: 1.2; }
+    .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.4; }
+    .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; }
+    .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.6; }
+    .softline { fill: none; stroke: #6F6A63; stroke-width: 1.3; }
+    .redline { fill: none; stroke: #D9392E; stroke-width: 2.2; }
+    .text { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #050505; font-size: 16px; }
+    .small { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #6F6A63; font-size: 13px; }
+    .label { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #050505; font-size: 14px; font-weight: 700; }
+    .red { fill: #D9392E; font-weight: 700; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#111111"/>
+    </marker>
+    <marker id="arrow-red" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#D9392E"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1120" height="620"/>
+  <rect class="panel" x="58" y="68" width="478" height="450"/>
+  <rect class="panel" x="584" y="68" width="478" height="450"/>
+
+  <text class="label" x="88" y="110">Web-scale fabric</text>
+  <text class="small" x="88" y="134">Many heterogeneous flows share one general-purpose network.</text>
+
+  <text class="label" x="614" y="110">AI/ML scheduled fabric</text>
+  <text class="small" x="614" y="134">Synchronized jobs need predictable backend bandwidth.</text>
+
+  <rect class="box" x="110" y="188" width="122" height="54"/>
+  <rect class="box" x="110" y="294" width="122" height="54"/>
+  <rect class="box" x="110" y="400" width="122" height="54"/>
+  <text class="text" x="171" y="222" text-anchor="middle">Compute</text>
+  <text class="text" x="171" y="328" text-anchor="middle">Storage</text>
+  <text class="text" x="171" y="434" text-anchor="middle">AI/ML</text>
+
+  <rect class="soft" x="346" y="246" width="122" height="144"/>
+  <text class="text" x="407" y="306" text-anchor="middle">Shared</text>
+  <text class="text" x="407" y="330" text-anchor="middle">Clos</text>
+  <text class="small" x="407" y="354" text-anchor="middle">ECMP</text>
+
+  <path class="softline" d="M232 215 C276 216, 304 260, 346 278" marker-end="url(#arrow)"/>
+  <path class="softline" d="M232 321 C278 318, 306 318, 346 318" marker-end="url(#arrow)"/>
+  <path class="redline" d="M232 427 C284 416, 306 378, 346 350" marker-end="url(#arrow-red)"/>
+  <text class="small" x="86" y="486"><tspan class="red">Problem:</tspan> AI collective traffic competes with ordinary flows.</text>
+
+  <rect class="box" x="634" y="170" width="116" height="54"/>
+  <rect class="box" x="786" y="170" width="116" height="54"/>
+  <rect class="box" x="938" y="170" width="86" height="54"/>
+  <text class="text" x="692" y="204" text-anchor="middle">Web</text>
+  <text class="text" x="844" y="204" text-anchor="middle">Storage</text>
+  <text class="text" x="981" y="204" text-anchor="middle">Control</text>
+
+  <rect class="soft" x="712" y="266" width="236" height="62"/>
+  <text class="text" x="830" y="303" text-anchor="middle">Frontend network</text>
+  <path class="line" d="M692 224 L770 266" marker-end="url(#arrow)"/>
+  <path class="line" d="M844 224 L844 266" marker-end="url(#arrow)"/>
+  <path class="line" d="M981 224 L904 266" marker-end="url(#arrow)"/>
+
+  <rect class="accent" x="682" y="390" width="296" height="66"/>
+  <text class="text" x="830" y="420" text-anchor="middle">Backend AI/ML fabric</text>
+  <text class="small" x="830" y="444" text-anchor="middle">RDMA / collectives / predictable bandwidth</text>
+  <path class="redline" d="M830 328 L830 390" marker-end="url(#arrow-red)"/>
+  <text class="small" x="650" y="486">Separation protects queue budget, lossless tuning, and failure domains.</text>
+
+  <text class="small" x="72" y="570">Reconstructed from the presentation's web-scale versus AI/ML network distinction; not a verbatim slide crop.</text>
+</svg>

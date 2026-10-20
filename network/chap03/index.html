@@ -1,0 +1,1984 @@
+<!DOCTYPE html><html lang="en" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-bguv2lll"> <head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Chapter 3: Network Design Considerations | AI Data Center Systems</title><link rel="canonical" href="https://adcs.restack.tech/network/chap03/"/><link rel="sitemap" href="/sitemap-index.xml"/><script async src="https://www.googletagmanager.com/gtag/js?id=G-76LFZJVBTE"></script><script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-76LFZJVBTE');
+      </script><script async crossorigin="anonymous" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8128231647578658"></script><link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v6.4.8"/><meta name="generator" content="Starlight v0.40.0"/><meta property="og:title" content="Chapter 3: Network Design Considerations"/><meta property="og:url" content="https://adcs.restack.tech/network/chap03/"/><meta property="og:locale" content="en"/><meta property="og:description" content="This chapter explains the major physical and logical design choices for AI data center networks."/><meta property="og:site_name" content="AI Data Center Systems"/><meta name="description" content="This chapter explains the major physical and logical design choices for AI data center networks."/><meta property="og:type" content="article"/><meta property="og:image" content="https://adcs.restack.tech/og/network/chap03.png?v=2"/><meta property="og:image:width" content="1200"/><meta property="og:image:height" content="630"/><meta name="twitter:image" content="https://adcs.restack.tech/og/network/chap03.png?v=2"/><meta name="twitter:card" content="summary_large_image"/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/_astro/print.DNXP8c50.css" media="print"><link rel="stylesheet" href="/_astro/common.DYbqSTpl.css"><script type="module" src="/_astro/page.CtJXHRyR.js"></script></head> <body class="astro-bguv2lll"> <a href="#_top" class="astro-7q3lir66">Skip to content</a> <script>
+  (() => {
+    try {
+      const savedMode = localStorage.getItem('adcs-navigation-mode');
+      document.documentElement.dataset.navigationMode = savedMode === 'compact' ? 'compact' : 'normal';
+    } catch {
+      document.documentElement.dataset.navigationMode = 'normal';
+    }
+  })();
+</script> <div class="page sl-flex astro-4toy2ex6"> <header class="header astro-4toy2ex6"><div class="header astro-3ef6ksr2"> <div class="title-wrapper sl-flex astro-3ef6ksr2"> <a href="/" class="site-title sl-flex astro-m46x6ez3">  <span class="astro-m46x6ez3" translate="no"> AI Data Center Systems </span> </a> <button class="navigation-mode-toggle print:hidden astro-3ef6ksr2" type="button" aria-label="Compact navigation" aria-pressed="false" title="Use compact navigation"> <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" class="astro-3ef6ksr2"> <rect x="3" y="4" width="18" height="16" rx="2" class="astro-3ef6ksr2"></rect> <path d="M9 4v16M6.5 10 4.5 12l2 2" class="astro-3ef6ksr2"></path> </svg> </button> </div> <div class="sl-flex print:hidden astro-3ef6ksr2"> <site-search class="astro-3ef6ksr2 astro-v37mnknz" data-translations="{&quot;placeholder&quot;:&quot;Search&quot;}"> <button data-open-modal disabled aria-label="Search" aria-keyshortcuts="Control+K" class="astro-v37mnknz"> <svg aria-hidden="true" class="astro-v37mnknz astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg> <span class="sl-hidden md:sl-block astro-v37mnknz" aria-hidden="true">Search</span> <kbd class="sl-hidden md:sl-flex astro-v37mnknz" style="display: none;"> <kbd class="astro-v37mnknz">Ctrl</kbd><kbd class="astro-v37mnknz">K</kbd> </kbd> </button> <dialog style="padding:0" aria-label="Search" class="astro-v37mnknz"> <div class="dialog-frame sl-flex astro-v37mnknz">  <button data-close-modal class="sl-flex md:sl-hidden astro-v37mnknz"> Cancel </button> <div class="search-container astro-v37mnknz"> <div id="starlight__search" class="astro-v37mnknz"></div> </div> </div> </dialog> </site-search>  <script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script> <script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.D1WXcfCt.js"></script>  </div> <div class="sl-hidden md:sl-flex print:hidden right-group astro-3ef6ksr2"> <div class="sl-flex social-icons astro-3ef6ksr2"> <a href="https://github.com/ziwon/ai-data-center-systems" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">GitHub</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script> <script type="module">const r="starlight-theme",o=e=>e==="auto"||e==="dark"||e==="light"?e:"auto",c=()=>o(typeof localStorage<"u"&&localStorage.getItem(r));function n(e){typeof localStorage<"u"&&localStorage.setItem(r,e==="light"||e==="dark"?e:"")}const l=()=>matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";function t(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e==="auto"?l():e,n(e)}matchMedia("(prefers-color-scheme: light)").addEventListener("change",()=>{c()==="auto"&&t("auto")});class s extends HTMLElement{constructor(){super(),t(c()),this.querySelector("select")?.addEventListener("change",a=>{a.currentTarget instanceof HTMLSelectElement&&t(o(a.currentTarget.value))})}}customElements.define("starlight-theme-select",s);</script> <script type="module">class s extends HTMLElement{constructor(){super();const e=this.querySelector("select");e&&(e.addEventListener("change",t=>{t.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=t.currentTarget.value)}),window.addEventListener("pageshow",t=>{if(!t.persisted)return;const n=e.querySelector("option[selected]")?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}}customElements.define("starlight-lang-select",s);</script> </div> </div></header> <nav class="sidebar print:hidden astro-4toy2ex6" aria-label="Main"> <starlight-menu-button class="print:hidden astro-jif73yzw"> <button aria-expanded="false" aria-label="Menu" aria-controls="starlight__sidebar" class="sl-flex md:sl-hidden astro-jif73yzw"> <svg aria-hidden="true" class="open-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg> <svg aria-hidden="true" class="close-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg> </button> </starlight-menu-button> <script type="module">class s extends HTMLElement{constructor(){super(),this.btn=this.querySelector("button"),this.btn.addEventListener("click",()=>this.toggleExpanded());const t=this.closest("nav");t&&t.addEventListener("keyup",e=>this.closeOnEscape(e))}setExpanded(t){this.setAttribute("aria-expanded",String(t)),document.body.toggleAttribute("data-mobile-menu-expanded",t)}toggleExpanded(){this.setExpanded(this.getAttribute("aria-expanded")!=="true")}closeOnEscape(t){t.code==="Escape"&&(this.setExpanded(!1),this.btn.focus())}}customElements.define("starlight-menu-button",s);</script>  <div id="starlight__sidebar" class="sidebar-pane astro-4toy2ex6"> <div class="navigation-controls astro-4toy2ex6"> <button class="navigation-drawer-toggle astro-4toy2ex6" type="button" aria-controls="starlight__sidebar-content" aria-expanded="false" title="Open navigation"> <svg class="navigation-menu-icon astro-4toy2ex6" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"> <path d="M4 6h16M4 12h16M4 18h16" class="astro-4toy2ex6"></path> </svg> <svg class="navigation-close-icon astro-4toy2ex6" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"> <path d="m6 6 12 12M18 6 6 18" class="astro-4toy2ex6"></path> </svg> <span class="navigation-drawer-label astro-4toy2ex6">Open navigation</span> </button> </div> <div id="starlight__sidebar-content" class="sidebar-content sl-flex astro-4toy2ex6"> <ul class="starlight-sidebar-topics astro-2fh6iaza"> <li class="astro-2fh6iaza"> <a aria-label="Network" title="Network" href="/network/" class="starlight-sidebar-topics-current astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8.7 10a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-6.27-6.3a1 1 0 0 0-1.42 1.42ZM21 14a1 1 0 0 0-1 1v3.59L15.44 14A1 1 0 0 0 14 15.44L18.59 20H15a1 1 0 0 0 0 2h6a1 1 0 0 0 .38-.08 1 1 0 0 0 .54-.54A1 1 0 0 0 22 21v-6a1 1 0 0 0-1-1Zm.92-11.38a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-6a1 1 0 0 0 0 2h3.59L2.29 20.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V9a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z"/></svg> </div> <div class="astro-2fh6iaza"> Network  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="GPU &amp; Accelerator Systems" title="GPU &amp; Accelerator Systems" href="/gpu/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> </div> <div class="astro-2fh6iaza"> GPU &amp; Accelerator Systems  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Storage" title="Storage" href="/storage/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8 16.5a1 1 0 1 0 1 1 1 1 0 0 0-1-1M12 2C8 2 4 3.37 4 6v12c0 2.63 4 4 8 4s8-1.37 8-4V6c0-2.63-4-4-8-4m6 16c0 .71-2.28 2-6 2s-6-1.29-6-2v-3.27A13 13 0 0 0 12 16a13 13 0 0 0 6-1.27Zm0-6c0 .71-2.28 2-6 2s-6-1.29-6-2V8.73A13 13 0 0 0 12 10a13 13 0 0 0 6-1.27Zm-6-4C8.28 8 6 6.71 6 6s2.28-2 6-2 6 1.29 6 2-2.28 2-6 2m-4 2.5a1 1 0 1 0 1 1 1 1 0 0 0-1-1"/></svg> </div> <div class="astro-2fh6iaza"> Storage  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Training" title="Training" href="/training/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1 1v8a1 1 0 0 0 2 0v-8a1 1 0 0 0-1-1m5-10a1 1 0 0 0-1 1v18a1 1 0 0 0 2 0V3a1 1 0 0 0-1-1m10 14a1 1 0 0 0-1 1v4a1 1 0 0 0 2 0v-4a1 1 0 0 0-1-1m-5-8a1 1 0 0 0-1 1v12a1 1 0 0 0 2 0V9a1 1 0 0 0-1-1"/></svg> </div> <div class="astro-2fh6iaza"> Training  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Inference" title="Inference" data-topic-icon="brain" href="/inference/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 22H5a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3h1a4 4 0 0 1 7.3-2.18c.448.64.692 1.4.7 2.18h3a1 1 0 0 1 1 1v3a4 4 0 0 1 2.18 7.3A3.86 3.86 0 0 1 18 18v3a1 1 0 0 1-1 1ZM5 8a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11v-3.18a1 1 0 0 1 1.33-.95 1.77 1.77 0 0 0 1.74-.23 2 2 0 0 0 .93-1.37 2 2 0 0 0-.48-1.59 1.89 1.89 0 0 0-2.17-.55 1 1 0 0 1-1.33-.95V8h-3.2a1 1 0 0 1-1-1.33 1.77 1.77 0 0 0-.23-1.74 1.939 1.939 0 0 0-3-.43A2 2 0 0 0 8 6c.002.23.046.456.13.67A1 1 0 0 1 7.18 8H5Z"/></svg> </div> <div class="astro-2fh6iaza"> Inference  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="MLOps" title="MLOps" data-topic-icon="cycle" href="/mlops/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8.7 10a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-6.27-6.3a1 1 0 0 0-1.42 1.42ZM21 14a1 1 0 0 0-1 1v3.59L15.44 14A1 1 0 0 0 14 15.44L18.59 20H15a1 1 0 0 0 0 2h6a1 1 0 0 0 .38-.08 1 1 0 0 0 .54-.54A1 1 0 0 0 22 21v-6a1 1 0 0 0-1-1Zm.92-11.38a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-6a1 1 0 0 0 0 2h3.59L2.29 20.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V9a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z"/></svg> </div> <div class="astro-2fh6iaza"> MLOps  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Systems Performance" title="Systems Performance" href="/systems-performance/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path fill-rule="evenodd" d="M1.44 8.855v-.001l3.527-3.516c.34-.344.802-.541 1.285-.548h6.649l.947-.947c3.07-3.07 6.207-3.072 7.62-2.868a1.821 1.821 0 0 1 1.557 1.557c.204 1.413.203 4.55-2.868 7.62l-.946.946v6.649a1.845 1.845 0 0 1-.549 1.286l-3.516 3.528a1.844 1.844 0 0 1-3.11-.944l-.858-4.275-4.52-4.52-2.31-.463-1.964-.394A1.847 1.847 0 0 1 .98 10.693a1.843 1.843 0 0 1 .46-1.838Zm5.379 2.017-3.873-.776L6.32 6.733h4.638l-4.14 4.14Zm8.403-5.655c2.459-2.46 4.856-2.463 5.89-2.33.134 1.035.13 3.432-2.329 5.891l-6.71 6.71-3.561-3.56 6.71-6.711Zm-1.318 15.837-.776-3.873 4.14-4.14v4.639l-3.364 3.374Z" clip-rule="evenodd"/><path d="M9.318 18.345a.972.972 0 0 0-1.86-.561c-.482 1.435-1.687 2.204-2.934 2.619a8.22 8.22 0 0 1-1.23.302c.062-.365.157-.79.303-1.229.415-1.247 1.184-2.452 2.62-2.935a.971.971 0 1 0-.62-1.842c-.12.04-.236.084-.35.13-2.02.828-3.012 2.588-3.493 4.033a10.383 10.383 0 0 0-.51 2.845l-.001.016v.063c0 .536.434.972.97.972H2.24a7.21 7.21 0 0 0 .878-.065c.527-.063 1.248-.19 2.02-.447 1.445-.48 3.205-1.472 4.033-3.494a5.828 5.828 0 0 0 .147-.407Z"/></svg> </div> <div class="astro-2fh6iaza"> Systems Performance  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Courses" title="Courses" href="/courses/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.17 2.06A13.1 13.1 0 0 0 19 1.87a12.94 12.94 0 0 0-7 2.05 12.94 12.94 0 0 0-7-2 13.1 13.1 0 0 0-2.17.19 1 1 0 0 0-.83 1v12a1 1 0 0 0 1.17 1 10.9 10.9 0 0 1 8.25 1.91l.12.07h.11a.91.91 0 0 0 .7 0h.11l.12-.07A10.899 10.899 0 0 1 20.83 16 1 1 0 0 0 22 15V3a1 1 0 0 0-.83-.94ZM11 15.35a12.87 12.87 0 0 0-6-1.48H4v-10c.333-.02.667-.02 1 0a10.86 10.86 0 0 1 6 1.8v9.68Zm9-1.44h-1a12.87 12.87 0 0 0-6 1.48V5.67a10.86 10.86 0 0 1 6-1.8c.333-.02.667-.02 1 0v10.04Zm1.17 4.15a13.098 13.098 0 0 0-2.17-.19 12.94 12.94 0 0 0-7 2.05 12.94 12.94 0 0 0-7-2.05c-.727.003-1.453.066-2.17.19A1 1 0 0 0 2 19.21a1 1 0 0 0 1.17.79 10.9 10.9 0 0 1 8.25 1.91 1 1 0 0 0 1.16 0A10.9 10.9 0 0 1 20.83 20a1 1 0 0 0 1.17-.79 1 1 0 0 0-.83-1.15Z"/></svg> </div> <div class="astro-2fh6iaza"> Courses  </div> </a> </li> </ul> <sl-sidebar-state-persist data-hash="0j7rqvj" class="astro-kku4brbg"> <script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script>  <ul class="top-level astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">AI Data Center Network</span>  </a> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">articles</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="0"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">cloud-data-center-network-now-and-next.ko</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="1"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/articles/cloud-data-center-network-now-and-next.ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Cloud Data Center Network의 지금과 앞으로</span>  </a> </li> </ul> </details> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap01</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="2"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap01/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 1: Wonders in the Workload</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap02</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="3"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap02/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 2: &quot;The Common-Man View&quot; of AI Data Center Fabrics</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap03</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="4"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap03/" aria-current="page" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 3: Network Design Considerations</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap04</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="5"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap04/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 4: Optics and Cable Management</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap05</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="6"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap05/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 5: Thermal and Power Efficiency Considerations</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap06</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="7"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap06/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 6: Efficient Load Balancing</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap07</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="8"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap07/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 7: RoCEv2 Transport and Congestion Management</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap08</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="9"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap08/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 8: IP Routing for AI/ML Fabrics</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap09</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="10"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap09/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 9: Storage Network Design and Technologies for AI Data Centers</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap10</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="11"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap10/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 10: AI Network Performance KPIs</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap11</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="12"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap11/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 11: Monitoring and Telemetry</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap12</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="13"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap12/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 12: Ultra Ethernet Consortium, UEC</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">clos-ebgp-lab</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="14"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/clos-ebgp-lab/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Clos Fabric Lab Series</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">glb-nnhn-bgp-underlay</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="15"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/glb-nnhn-bgp-underlay/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Appendix: BGP-based Underlay and GLB NNHN in AI Data Center Fabrics</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">gpu-cluster-failure-analysis</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="16"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/gpu-cluster-failure-analysis/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">GPU 클러스터 장애 분석: ECC, Xid, RDMA, NCCL Hang은 어떻게 연결되는가</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">ib-packet-analysis</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="17"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/ib-packet-analysis/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">InfiniBand Packet Analysis: A Practical RDMA Transport Primer</span>  </a> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">packet-format-reference</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="18"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/ib-packet-analysis/packet-format-reference/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">InfiniBand Packet Format Reference</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">packet-format-reference_KO</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="19"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/ib-packet-analysis/packet-format-reference_ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">InfiniBand 패킷 형식 참조 문서</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">README_KO</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="20"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/ib-packet-analysis/readme_ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">InfiniBand 패킷 분석: 실전 RDMA 전송 입문서</span>  </a> </li> </ul> </details> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">rdma-examples</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="21"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/rdma-examples/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">RDMA Read/Write 실전 입문</span>  </a> </li> </ul> </details> </li> </ul>  <script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script> </sl-sidebar-state-persist> <div class="md:sl-hidden"> <div class="mobile-preferences sl-flex astro-wu23bvmt"> <div class="social-icons astro-wu23bvmt"> <a href="https://github.com/ziwon/ai-data-center-systems" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">GitHub</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script>   </div> </div> </div> </div> </nav> <div class="main-frame astro-4toy2ex6">  <script type="module">const a=document.getElementById("starlight__sidebar"),n=a?.querySelector("sl-sidebar-state-persist"),o="sl-sidebar-state",i=()=>{let t=[];const e=n?.dataset.hash||"";try{const s=sessionStorage.getItem(o),r=JSON.parse(s||"{}");Array.isArray(r.open)&&r.hash===e&&(t=r.open)}catch{}return{hash:e,open:t,scroll:a?.scrollTop||0}},c=t=>{try{sessionStorage.setItem(o,JSON.stringify(t))}catch{}},d=()=>c(i()),l=(t,e)=>{const s=i();s.open[e]=t,c(s)};n?.addEventListener("click",t=>{if(!(t.target instanceof Element))return;const e=t.target.closest("summary")?.closest("details");if(!e)return;const s=e.querySelector("sl-sidebar-restore"),r=parseInt(s?.dataset.index||"");isNaN(r)||l(!e.open,r)});addEventListener("visibilitychange",()=>{document.visibilityState==="hidden"&&d()});addEventListener("pageHide",d);</script> <div class="lg:sl-flex astro-67yu43on"> <aside class="right-sidebar-container print:hidden astro-67yu43on"> <div class="right-sidebar astro-67yu43on"> <div class="lg:sl-hidden astro-rl4sue7z"><mobile-starlight-toc data-min-h="2" data-max-h="2" class="astro-doynk5tl"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-doynk5tl"><details id="starlight__mobile-toc" class="astro-doynk5tl"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-doynk5tl"><span class="toggle sl-flex astro-doynk5tl">On this page<svg aria-hidden="true" class="caret astro-doynk5tl astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-doynk5tl"></span></summary><div class="dropdown astro-doynk5tl"><ul class="isMobile astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#table-of-contents" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Table of Contents</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#goal" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Goal</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#aiml-workload-processing-and-fabric-types" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">AI/ML Workload Processing and Fabric Types</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#training-data-center-architecture" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Training Data Center Architecture</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#gpu-to-leaf-connectivity" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">GPU-to-Leaf Connectivity</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#rack-design" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Rack Design</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#scheduled-fabric-and-voq" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Scheduled Fabric and VOQ</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#topology-choices" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Topology Choices</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#inference-data-center-architecture" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Inference Data Center Architecture</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#multi-planar-scale-out-architecture" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Multi-Planar Scale-Out Architecture</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#additional-design-notes" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Additional Design Notes</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#chapter-summary" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Chapter Summary</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#key-terms" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Key Terms</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#qa" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Q&amp;A</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#references" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">References</span> </a>  </li> </ul></div></details></nav></mobile-starlight-toc><script type="module" src="/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.hwBsy0Mo.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-rl4sue7z"><div class="sl-container astro-rl4sue7z"><kb-graph-card> <button class="kb-graph-card" type="button" data-open aria-haspopup="dialog"> <span class="kb-graph-copy"> <span class="kb-graph-title">Knowledge graph</span> <span class="kb-graph-subtitle" data-count>Loading related docs</span> </span> <span class="kb-graph-thumb" aria-hidden="true" data-map></span> <span class="kb-graph-expand" aria-hidden="true">Expand</span> </button> <dialog class="kb-graph-dialog" aria-label="Knowledge graph" data-dialog> <div class="kb-graph-panel"> <div class="kb-graph-panel-header"> <div> <p>Knowledge graph</p> <h2 data-heading>Related documents</h2> </div> <div class="kb-graph-tabs" role="tablist" aria-label="Knowledge graph views"> <button type="button" role="tab" aria-selected="true" data-tab="page">This page</button> <button type="button" role="tab" aria-selected="false" data-tab="global">Full graph</button> </div> <button type="button" data-close aria-label="Close knowledge graph">×</button> </div> <div class="kb-graph-stage" data-stage data-view="page"> <div data-page-stage></div> <div data-global-stage hidden></div> </div> </div> </dialog> </kb-graph-card> <script type="module" src="/_astro/KnowledgeGraphCard.astro_astro_type_script_index_0_lang.C475L69c.js"></script><starlight-toc data-min-h="2" data-max-h="2"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">On this page</h2><ul class="astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#table-of-contents" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Table of Contents</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#goal" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Goal</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#aiml-workload-processing-and-fabric-types" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">AI/ML Workload Processing and Fabric Types</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#training-data-center-architecture" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Training Data Center Architecture</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#gpu-to-leaf-connectivity" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">GPU-to-Leaf Connectivity</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#rack-design" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Rack Design</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#scheduled-fabric-and-voq" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Scheduled Fabric and VOQ</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#topology-choices" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Topology Choices</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#inference-data-center-architecture" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Inference Data Center Architecture</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#multi-planar-scale-out-architecture" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Multi-Planar Scale-Out Architecture</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#additional-design-notes" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Additional Design Notes</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#chapter-summary" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Chapter Summary</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#key-terms" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Key Terms</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#qa" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Q&amp;A</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#references" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">References</span> </a>  </li> </ul></nav></starlight-toc><script type="module" src="/_astro/TableOfContents.astro_astro_type_script_index_0_lang.FuRcXuRY.js"></script></div></div> </div> </aside> <div class="main-pane astro-67yu43on">  <main data-pagefind-body class="astro-bguv2lll" lang="en" dir="ltr">    <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <h1 id="_top" class="astro-j6tvhyss">Chapter 3: Network Design Considerations</h1> </div> </div> <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <starlight-image-zoom> <template class="astro-vjux6bgf"> <dialog class="starlight-image-zoom-dialog astro-vjux6bgf"> <button aria-label="Unzoom image" class="starlight-image-zoom-control astro-vjux6bgf"> <svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" class="astro-vjux6bgf"> <use href="#starlight-image-zoom-icon-unzoom" class="astro-vjux6bgf"></use> </svg> </button> <figure class="astro-vjux6bgf"></figure> </dialog> </template> <svg xmlns="http://www.w3.org/2000/svg" style="display:none" class="astro-vjux6bgf"> <symbol id="starlight-image-zoom-icon-zoom" viewBox="0 0 24 24" class="astro-vjux6bgf"> <path d="M9.79 12.79 4 18.59V17a1 1 0 0 0-2 0v4a1 1 0 0 0 .08.38 1 1 0 0 0 .54.54A1 1 0 0 0 3 22h4a1 1 0 0 0 0-2H5.41l5.8-5.79a1 1 0 0 0-1.42-1.42ZM21.92 2.62a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-4a1 1 0 0 0 0 2h1.59l-5.8 5.79a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V7a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z" class="astro-vjux6bgf"></path> </symbol> <symbol id="starlight-image-zoom-icon-unzoom" viewBox="0 0 24 24" class="astro-vjux6bgf"> <path d="M21.71 2.29a1 1 0 0 0-1.42 0l-5.79 5.8V6.5a1 1 0 0 0-2 0v4a1 1 0 0 0 .08.38 1 1 0 0 0 .54.54 1 1 0 0 0 .38.08h4a1 1 0 0 0 0-2h-1.59l5.8-5.79a1 1 0 0 0 0-1.42ZM10.88 12.58a1 1 0 0 0-.38-.08h-4a1 1 0 0 0 0 2h1.59l-5.8 5.79a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l5.79-5.8v1.59a1 1 0 0 0 2 0v-4a1 1 0 0 0-.08-.38 1 1 0 0 0-.54-.54Z" class="astro-vjux6bgf"></path> </symbol> </svg> </starlight-image-zoom>   <script type="module" src="/_astro/ImageZoom.astro_astro_type_script_index_0_lang.CZmBqK-T.js"></script> <div class="sl-markdown-content"> <div class="sl-heading-wrapper level-h2"><h2 id="table-of-contents">Table of Contents</h2><a class="sl-anchor-link" href="#table-of-contents"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Table of Contents”</span></a></div>
+<ul>
+<li><a href="#goal">Goal</a></li>
+<li><a href="#aiml-workload-processing-and-fabric-types">AI/ML Workload Processing and Fabric Types</a>
+<ul>
+<li><a href="#storage-fabric">Storage Fabric</a></li>
+<li><a href="#training-fabric">Training Fabric</a></li>
+<li><a href="#inference-fabric">Inference Fabric</a></li>
+</ul>
+</li>
+<li><a href="#training-data-center-architecture">Training Data Center Architecture</a>
+<ul>
+<li><a href="#design-goals">Design Goals</a></li>
+<li><a href="#gpu-server-network-ports">GPU Server Network Ports</a></li>
+</ul>
+</li>
+<li><a href="#gpu-to-leaf-connectivity">GPU-to-Leaf Connectivity</a>
+<ul>
+<li><a href="#rail-optimized-design-rod">Rail-Optimized Design, ROD</a></li>
+<li><a href="#rows-stripes-and-11-oversubscription">Rows, Stripes, and 1:1 Oversubscription</a></li>
+<li><a href="#intra-rail-vs-inter-rail-communication">Intra-Rail vs. Inter-Rail Communication</a></li>
+<li><a href="#scaling-with-three-stage-clos">Scaling with Three-Stage Clos</a></li>
+<li><a href="#scaling-with-five-stage-and-seven-stage-clos">Scaling with Five-Stage and Seven-Stage Clos</a></li>
+<li><a href="#rail-only-design">Rail-Only Design</a></li>
+<li><a href="#rail-unified-design-rud">Rail-Unified Design, RUD</a></li>
+</ul>
+</li>
+<li><a href="#rack-design">Rack Design</a>
+<ul>
+<li><a href="#top-of-rack">Top-of-Rack</a></li>
+<li><a href="#middle-of-row">Middle-of-Row</a></li>
+<li><a href="#end-of-row">End-of-Row</a></li>
+<li><a href="#rack-design-comparison">Rack Design Comparison</a></li>
+</ul>
+</li>
+<li><a href="#scheduled-fabric-and-voq">Scheduled Fabric and VOQ</a></li>
+<li><a href="#topology-choices">Topology Choices</a>
+<ul>
+<li><a href="#clos">Clos</a></li>
+<li><a href="#dragonfly">Dragonfly</a></li>
+<li><a href="#torus">Torus</a></li>
+</ul>
+</li>
+<li><a href="#inference-data-center-architecture">Inference Data Center Architecture</a></li>
+<li><a href="#multi-planar-scale-out-architecture">Multi-Planar Scale-Out Architecture</a>
+<ul>
+<li><a href="#why-multi-planar-designs-exist">Why Multi-Planar Designs Exist</a></li>
+<li><a href="#breakout-cables-and-packet-spraying">Breakout Cables and Packet Spraying</a></li>
+<li><a href="#multi-domain-designs-and-super-spines">Multi-Domain Designs and Super-Spines</a></li>
+<li><a href="#cabling-and-optics">Cabling and Optics</a></li>
+</ul>
+</li>
+<li><a href="#additional-design-notes">Additional Design Notes</a>
+<ul>
+<li><a href="#design-decision-matrix">Design Decision Matrix</a></li>
+<li><a href="#scale-up-scale-out-and-scale-across">Scale-Up, Scale-Out, and Scale-Across</a></li>
+<li><a href="#oversubscription-calculation">Oversubscription Calculation</a></li>
+<li><a href="#operational-validation-checklist">Operational Validation Checklist</a></li>
+<li><a href="#rocev2-and-uecuet-roadmap">RoCEv2 and UEC/UET Roadmap</a></li>
+</ul>
+</li>
+<li><a href="#chapter-summary">Chapter Summary</a></li>
+<li><a href="#key-terms">Key Terms</a></li>
+<li><a href="#questions">Questions</a></li>
+<li><a href="#answers">Answers</a></li>
+<li><a href="#references">References</a></li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="goal">Goal</h2><a class="sl-anchor-link" href="#goal"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Goal”</span></a></div>
+<p>This chapter explains the major physical and logical design choices for AI data center networks.</p>
+<p>The core idea is:</p>
+<blockquote>
+<p>AI data center design is a trade-off between performance, cost, reliability, scalability, power, cooling, and operational complexity.</p>
+</blockquote>
+<p>The chapter focuses on these topics:</p>
+<ul>
+<li>Storage, training, and inference fabrics</li>
+<li>Rail-Optimized Design, ROD, and Rail-Unified Design, RUD</li>
+<li>GPU-to-leaf connectivity and rail design</li>
+<li>Rack placement for leaf switches: ToR, MoR, and EoR</li>
+<li>Clos, Dragonfly, and Torus topologies</li>
+<li>Scheduled fabric and virtual output queueing</li>
+<li>Multi-planar scale-out architectures</li>
+</ul>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TB
+    classDef server fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef storage fill:#173f32,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef training fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef inference fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef note fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    subgraph Host["AI/ML Server Boundary"]
+        S[GPU Server&#x3C;br/>CPU + GPU + NIC + Storage Ports]:::server
+    end
+
+    subgraph Fabrics["Network Fabrics Around the Server"]
+        SF[Storage Fabric&#x3C;br/>datasets / checkpoints]:::storage
+        TF[Training Fabric&#x3C;br/>backend RDMA / collectives]:::training
+        IF[Inference Fabric&#x3C;br/>frontend serving traffic]:::inference
+    end
+
+    SP[Large data lake&#x3C;br/>NVMe / object / parallel FS]:::note
+    TP[Distributed training job&#x3C;br/>AllReduce / AllGather / ReduceScatter]:::note
+    IP[Users and applications&#x3C;br/>request / response / TTFT]:::note
+
+    S &#x3C;-->|checkpoint read/write| SF
+    S &#x3C;-->|GPU-to-GPU east-west| TF
+    S &#x3C;-->|API and serving path| IF
+
+    SF --> SP
+    TF --> TP
+    IF --> IP</pre>
+<div class="sl-heading-wrapper level-h2"><h2 id="aiml-workload-processing-and-fabric-types">AI/ML Workload Processing and Fabric Types</h2><a class="sl-anchor-link" href="#aiml-workload-processing-and-fabric-types"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “AI/ML Workload Processing and Fabric Types”</span></a></div>
+<p>AI/ML workload processing follows three broad stages:</p>
+<ol>
+<li>Data gathering and preprocessing</li>
+<li>Model selection and training</li>
+<li>Deployment and monitoring</li>
+</ol>
+<p>Each stage stresses the network differently. Storage movement, training communication, and inference serving are often separated into different fabrics or at least different design domains.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Fabric</th><th>Main Role</th><th>Typical Traffic</th><th>Main Design Concern</th></tr></thead><tbody><tr><td>Storage fabric</td><td>Move data sets and checkpoints</td><td>Server-to-storage, checkpoint read/write</td><td>Low latency, high throughput, low loss</td></tr><tr><td>Training fabric</td><td>GPU-to-GPU communication</td><td>East-west RDMA, collectives</td><td>Bandwidth, latency, congestion control</td></tr><tr><td>Inference fabric</td><td>Serve trained models</td><td>User request/response, API traffic</td><td>Latency, throughput, reliability</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h3"><h3 id="storage-fabric">Storage Fabric</h3><a class="sl-anchor-link" href="#storage-fabric"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Storage Fabric”</span></a></div>
+<p>The storage fabric stores gathered and preprocessed data. Small data sets may live inside the training cluster, but large data sets normally require dedicated storage infrastructure.</p>
+<p>Important requirements:</p>
+<ul>
+<li>High throughput for data ingestion and checkpointing</li>
+<li>Low latency for storage access</li>
+<li>Low packet loss or lossless behavior</li>
+<li>Support for InfiniBand or Ethernet with RoCEv2</li>
+<li>Three-stage or five-stage Clos when Ethernet is used</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="training-fabric">Training Fabric</h3><a class="sl-anchor-link" href="#training-fabric"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Training Fabric”</span></a></div>
+<p>The training fabric is the backend network for GPU clusters. It supports distributed training, collective communication, and east-west traffic between GPU servers.</p>
+<p>Training fabric design is the main focus of this chapter because it directly affects GPU utilization and training time.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="inference-fabric">Inference Fabric</h3><a class="sl-anchor-link" href="#inference-fabric"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Inference Fabric”</span></a></div>
+<p>The inference fabric is the production network where trained models answer requests. Its architecture is usually closer to enterprise, cloud, or telco data center networking.</p>
+<p>Inference designs usually do not need strict rail alignment unless the model is very large and requires multi-node inference with RDMA.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="training-data-center-architecture">Training Data Center Architecture</h2><a class="sl-anchor-link" href="#training-data-center-architecture"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Training Data Center Architecture”</span></a></div>
+<p>Training data center architecture must balance several competing goals.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="design-goals">Design Goals</h3><a class="sl-anchor-link" href="#design-goals"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Design Goals”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Goal</th><th>Meaning</th></tr></thead><tbody><tr><td>Performance</td><td>Keep GPU-to-GPU communication fast enough that GPUs do not wait on the network</td></tr><tr><td>Cost efficiency</td><td>Control NIC, optics, switch port, cabling, and facility cost</td></tr><tr><td>Reliability</td><td>Isolate failures and avoid taking down many GPUs with one failed component</td></tr><tr><td>Scalability</td><td>Add more GPUs, rows, blocks, or fabrics without redesigning everything</td></tr></tbody></table>
+<p>The chapter repeatedly returns to this point:</p>
+<blockquote>
+<p>A high-performance AI fabric is not just a bigger data center network. It must be designed around GPU topology, NIC placement, collective communication, and physical constraints.</p>
+</blockquote>
+<div class="sl-heading-wrapper level-h3"><h3 id="gpu-server-network-ports">GPU Server Network Ports</h3><a class="sl-anchor-link" href="#gpu-server-network-ports"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “GPU Server Network Ports”</span></a></div>
+<p>GPU servers commonly include different classes of ports:</p>
+<ul>
+<li>GPU-facing NIC ports for training traffic</li>
+<li>CPU or host ports for frontend and control traffic</li>
+<li>Storage-mapped ports for NVMe or storage access</li>
+</ul>
+<p>Modern GPU servers such as NVIDIA A100/H100-based systems often contain 8 GPUs. Each GPU may be mapped to one or more NICs, but a common cost-conscious design uses one NIC per GPU.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    classDef gpu fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef fabric fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef io fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef host fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    subgraph Server["8-GPU Training Server"]
+        direction TB
+        CPU[CPU Complex&#x3C;br/>control, data loader, host stack]:::host
+        NV[NVLink / NVSwitch&#x3C;br/>scale-up GPU fabric]:::fabric
+
+        subgraph GPUs["GPU + east-west NIC pairs"]
+            direction LR
+            G0[GPU0&#x3C;br/>NIC0]:::gpu
+            G1[GPU1&#x3C;br/>NIC1]:::gpu
+            G2[GPU2&#x3C;br/>NIC2]:::gpu
+            G3[GPU3&#x3C;br/>NIC3]:::gpu
+            G4[GPU4&#x3C;br/>NIC4]:::gpu
+            G5[GPU5&#x3C;br/>NIC5]:::gpu
+            G6[GPU6&#x3C;br/>NIC6]:::gpu
+            G7[GPU7&#x3C;br/>NIC7]:::gpu
+        end
+
+        NS[north-south NIC&#x3C;br/>frontend / storage / management]:::io
+    end
+
+    CPU --- NV
+    NV --- G0
+    NV --- G1
+    NV --- G2
+    NV --- G3
+    NV --- G4
+    NV --- G5
+    NV --- G6
+    NV --- G7
+    CPU --- NS
+
+    G0 -->|400G/800G rail| EWF[east-west training fabric]:::fabric
+    NS -->|customer / storage / OOB| NSF[north-south networks]:::io</pre>
+<p>Inside a server, GPU-to-GPU communication can use high-bandwidth internal fabrics such as NVLink or NVSwitch. Once a workload spans more GPUs than fit in one server, the traffic becomes east-west data center traffic.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="gpu-to-leaf-connectivity">GPU-to-Leaf Connectivity</h2><a class="sl-anchor-link" href="#gpu-to-leaf-connectivity"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “GPU-to-Leaf Connectivity”</span></a></div>
+<p>The chapter compares two major GPU-to-leaf design styles:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Design</th><th>Connectivity Model</th><th>Main Benefit</th><th>Main Trade-Off</th></tr></thead><tbody><tr><td>ROD</td><td>One GPU/NIC connects to one dedicated rail/leaf</td><td>High performance and rail isolation</td><td>More cables, more leaf connections</td></tr><tr><td>RUD</td><td>Multiple GPUs connect to one leaf</td><td>Simpler cabling and potentially lower cost</td><td>More shared fate and path complexity</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h3"><h3 id="rail-optimized-design-rod">Rail-Optimized Design, ROD</h3><a class="sl-anchor-link" href="#rail-optimized-design-rod"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Rail-Optimized Design, ROD”</span></a></div>
+<p>In Rail-Optimized Design, each GPU/NIC in a server maps to a separate rail.</p>
+<p>Example for an 8-GPU server:</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    classDef gpu fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef rail0 fill:#173f32,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef rail1 fill:#5a3520,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef rail7 fill:#5a3520,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef switch fill:#173f32,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    subgraph SA["Server A"]
+        direction TB
+        A0[GPU0 / NIC0]:::gpu
+        A1[GPU1 / NIC1]:::gpu
+        A2[GPU2 / NIC2]:::gpu
+        AX[...]
+        A7[GPU7 / NIC7]:::gpu
+    end
+
+    subgraph RF["Rail-Optimized Leaf Layer"]
+        direction TB
+        R0[Rail 0&#x3C;br/>Leaf 0]:::rail0
+        R1[Rail 1&#x3C;br/>Leaf 1]:::rail1
+        R2[Rail 2&#x3C;br/>Leaf 2]:::switch
+        RX[...]:::switch
+        R7[Rail 7&#x3C;br/>Leaf 7]:::rail7
+    end
+
+    subgraph SB["Server B"]
+        direction TB
+        B0[GPU0 / NIC0]:::gpu
+        B1[GPU1 / NIC1]:::gpu
+        B2[GPU2 / NIC2]:::gpu
+        BX[...]
+        B7[GPU7 / NIC7]:::gpu
+    end
+
+    A0 &#x3C;-->|same GPU index| R0
+    R0 &#x3C;-->|one-hop rail path| B0
+    A1 &#x3C;--> R1
+    R1 &#x3C;--> B1
+    A2 &#x3C;--> R2
+    R2 &#x3C;--> B2
+    AX ~~~ RX
+    RX ~~~ BX
+    A7 &#x3C;--> R7
+    R7 &#x3C;--> B7</pre>
+<p>Why ROD is attractive:</p>
+<ul>
+<li>Each GPU has a predictable network path.</li>
+<li>Rail-local communication can be one hop.</li>
+<li>Faults can be isolated by rail.</li>
+<li>NCCL rings and trees can be aligned with GPU/NIC topology.</li>
+<li>It fits high-throughput AllReduce, AllGather, and ReduceScatter patterns.</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="rows-stripes-and-11-oversubscription">Rows, Stripes, and 1:1 Oversubscription</h3><a class="sl-anchor-link" href="#rows-stripes-and-11-oversubscription"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Rows, Stripes, and 1:1 Oversubscription”</span></a></div>
+<p>A set of 8 leaf switches connecting to the 8 GPU positions across servers is called a row or stripe.</p>
+<p>For example:</p>
+<ul>
+<li>Leaf 0 connects GPU0/NIC0 from many servers.</li>
+<li>Leaf 1 connects GPU1/NIC1 from many servers.</li>
+<li>Leaf 7 connects GPU7/NIC7 from many servers.</li>
+</ul>
+<p>With a 64 x 400G leaf switch:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Port Use</th><th align="right">Count</th><th align="right">Bandwidth</th></tr></thead><tbody><tr><td>Server-facing downlinks</td><td align="right">32</td><td align="right">12.8 Tbps</td></tr><tr><td>Spine-facing uplinks</td><td align="right">32</td><td align="right">12.8 Tbps</td></tr><tr><td>Oversubscription</td><td align="right">-</td><td align="right">1:1</td></tr></tbody></table>
+<p>This 1:1 ratio is important because training traffic can drive GPU NICs at very high utilization.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="intra-rail-vs-inter-rail-communication">Intra-Rail vs. Inter-Rail Communication</h3><a class="sl-anchor-link" href="#intra-rail-vs-inter-rail-communication"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Intra-Rail vs. Inter-Rail Communication”</span></a></div>
+<p>ROD gives the best latency when traffic stays within the same rail.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Traffic Type</th><th>Example</th><th>Path</th><th>Latency</th></tr></thead><tbody><tr><td>Intra-rail</td><td>Server A GPU0 to Server B GPU0</td><td>Leaf only</td><td>Lower</td></tr><tr><td>Inter-rail</td><td>Server A GPU0 to Server B GPU3</td><td>Leaf - spine - leaf</td><td>Higher</td></tr></tbody></table>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    classDef gpu fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef leaf fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef spine fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef fast fill:#173f32,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef slow fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    A0[Server A&#x3C;br/>GPU0 / NIC0]:::gpu
+    L0[Leaf 0&#x3C;br/>Rail 0]:::leaf
+    B0[Server B&#x3C;br/>GPU0 / NIC0]:::gpu
+
+    L3[Leaf 3&#x3C;br/>Rail 3]:::leaf
+    SP[Spine Layer&#x3C;br/>rail transition point]:::spine
+    B3[Server B&#x3C;br/>GPU3 / NIC3]:::gpu
+
+    A0 ==>|intra-rail: same GPU index, one leaf hop| L0
+    L0 ==>|fast path| B0
+
+    A0 -.->|inter-rail: GPU0 to GPU3| L0
+    L0 -.->|extra hop| SP
+    SP -.->|rail change| L3
+    L3 -.->|two-hop fabric path| B3</pre>
+<p>Intra-rail communication is the fast path. Inter-rail communication usually needs the spine layer and doubles the number of network hops.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="scaling-with-three-stage-clos">Scaling with Three-Stage Clos</h3><a class="sl-anchor-link" href="#scaling-with-three-stage-clos"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Scaling with Three-Stage Clos”</span></a></div>
+<p>For a 256-GPU cluster:</p>
+<ul>
+<li>32 servers</li>
+<li>8 GPUs per server</li>
+<li>8 leaf switches</li>
+<li>4 spine switches</li>
+<li>64 x 400G switches</li>
+</ul>
+<p>For a 512-GPU cluster:</p>
+<ul>
+<li>64 servers</li>
+<li>16 leaf switches</li>
+<li>8 spine switches</li>
+<li>Two rows of rail-optimized leaf switches</li>
+</ul>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TB
+    classDef server fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef leaf fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef spine fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef note fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    subgraph R1["Row / Stripe 1: 256 GPUs"]
+        direction TB
+        S1[32 servers&#x3C;br/>8 GPUs each]:::server
+        L1[8 rail leaves&#x3C;br/>Leaf0 ... Leaf7]:::leaf
+        S1 -->|256 x GPU links| L1
+    end
+
+    subgraph R2["Row / Stripe 2: +256 GPUs"]
+        direction TB
+        S2[32 more servers&#x3C;br/>8 GPUs each]:::server
+        L2[8 more rail leaves&#x3C;br/>Leaf0 ... Leaf7]:::leaf
+        S2 -->|256 x GPU links| L2
+    end
+
+    SP[Spine Layer&#x3C;br/>connect rows and inter-rail traffic]:::spine
+    N1[One row: 32 servers = 256 GPUs]:::note
+    N2[Two rows: 64 servers = 512 GPUs]:::note
+
+    L1 &#x3C;-->|uplinks| SP
+    L2 &#x3C;-->|uplinks| SP
+    L1 -.-> N1
+    L2 -.-> N2</pre>
+<p>To scale further, designers can either add more spines or use chassis-based spines with higher port density. Adding many standalone spines can create management and load-balancing complexity.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="scaling-with-five-stage-and-seven-stage-clos">Scaling with Five-Stage and Seven-Stage Clos</h3><a class="sl-anchor-link" href="#scaling-with-five-stage-and-seven-stage-clos"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Scaling with Five-Stage and Seven-Stage Clos”</span></a></div>
+<p>Very large AI clusters may target 32K, 64K, or 128K GPUs. At that scale, a simple three-stage Clos is not enough.</p>
+<p>The chapter describes larger designs using:</p>
+<ul>
+<li>Five-stage Clos: leaf - spine - super-spine - spine - leaf</li>
+<li>Seven-stage Clos for even larger fabrics</li>
+<li>Blocks or bricks connected through super-spines</li>
+<li>Chassis-based spine or super-spine systems</li>
+<li>Controlled oversubscription at upper layers</li>
+</ul>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    classDef endpoint fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef leaf fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef spine fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef super fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef risk fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    A[GPU Server&#x3C;br/>Block A]:::endpoint
+    L1[Leaf]:::leaf
+    S1[Spine]:::spine
+    SS[Super-spine&#x3C;br/>block-to-block scale layer]:::super
+    S2[Spine]:::spine
+    L2[Leaf]:::leaf
+    B[GPU Server&#x3C;br/>Block B]:::endpoint
+
+    A &#x3C;--> L1
+    L1 &#x3C;--> S1
+    S1 &#x3C;--> SS
+    SS &#x3C;--> S2
+    S2 &#x3C;--> L2
+    L2 &#x3C;--> B
+
+    H[Each added stage increases&#x3C;br/>hop count, optics, cabling, and congestion risk]:::risk
+    SS -.->|upper-layer oversubscription often appears here| H</pre>
+<p>The chapter notes that some designs evaluate oversubscription at the super-spine layer, potentially up to high ratios. The trade-off is clear: higher oversubscription reduces cost and port count, but increases the likelihood of congestion and requires stronger congestion control such as DCQCN, ECN, and PFC.</p>
+<div class="sl-heading-wrapper level-h4"><h4 id="example-32k-gpu-rod-over-multi-stage-clos">Example: 32K GPU ROD over Multi-Stage Clos</h4><a class="sl-anchor-link" href="#example-32k-gpu-rod-over-multi-stage-clos"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Example: 32K GPU ROD over Multi-Stage Clos”</span></a></div>
+<p>The following example connects the ROD mental model to a 32K-class Clos design.</p>
+<p>Assume one ROD pod contains:</p>
+<ul>
+<li>32 GPU servers</li>
+<li>8 GPUs per server</li>
+<li>8 rail leaves per pod</li>
+<li>256 GPUs per pod</li>
+</ul>
+<p>Then:</p>
+<div class="expressive-code"><link rel="stylesheet" href="/_astro/ec.v4551.css"><script type="module" src="/_astro/ec.0vx5m.js"></script><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">128 pods x 256 GPUs per pod = 32,768 GPUs</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="128 pods x 256 GPUs per pod = 32,768 GPUs"><div></div></button></div></figure></div>
+<p>In this model, each pod preserves the ROD rule internally: GPU0/NIC0 maps to Rail 0, GPU1/NIC1 maps to Rail 1, and so on. The multi-stage Clos fabric then connects many such ROD pods through spine and super-spine layers.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TB
+    classDef server fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef rail fill:#173f32,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef pod fill:#5a3520,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef spine fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef super fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef note fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    subgraph T3["Tier 3: super-spine layer"]
+        direction LR
+        SS1[Super-spine 1]:::super
+        SS2[Super-spine 2]:::super
+        SSX[...]:::super
+        SSN[Super-spine N]:::super
+    end
+
+    subgraph T2["Tier 2: spine groups"]
+        direction LR
+        SP1[Spine group 1]:::spine
+        SP2[Spine group 2]:::spine
+        SP3[Spine group 3]:::spine
+        SP4[Spine group 4]:::spine
+    end
+
+    subgraph T1["Tier 1: ROD pod layer"]
+        direction LR
+        P1[Pod 001&#x3C;br/>256 GPUs&#x3C;br/>32 servers x 8 GPUs]:::pod
+        P2[Pod 002&#x3C;br/>256 GPUs]:::pod
+        P3[Pod 003&#x3C;br/>256 GPUs]:::pod
+        PX[...]:::pod
+        P128[Pod 128&#x3C;br/>256 GPUs]:::pod
+    end
+
+    subgraph RAIL["Inside one ROD pod"]
+        direction TB
+        S[32 x 8-GPU servers]:::server
+        R0[Rail 0 leaf&#x3C;br/>GPU0 / NIC0]:::rail
+        R1[Rail 1 leaf&#x3C;br/>GPU1 / NIC1]:::rail
+        R2[Rail 2 leaf&#x3C;br/>GPU2 / NIC2]:::rail
+        R3[Rail 3 leaf&#x3C;br/>GPU3 / NIC3]:::rail
+        R4[Rail 4 leaf&#x3C;br/>GPU4 / NIC4]:::rail
+        R5[Rail 5 leaf&#x3C;br/>GPU5 / NIC5]:::rail
+        R6[Rail 6 leaf&#x3C;br/>GPU6 / NIC6]:::rail
+        R7[Rail 7 leaf&#x3C;br/>GPU7 / NIC7]:::rail
+    end
+
+    M[32K-class example:&#x3C;br/>128 pods x 256 GPUs = 32,768 GPUs]:::note
+
+    SS1 --- SP1
+    SS1 --- SP2
+    SS1 --- SP3
+    SS1 --- SP4
+    SS2 --- SP1
+    SS2 --- SP2
+    SS2 --- SP3
+    SS2 --- SP4
+    SSN --- SP1
+    SSN --- SP2
+    SSN --- SP3
+    SSN --- SP4
+
+    SP1 --- P1
+    SP1 --- P2
+    SP1 --- P3
+    SP1 --- P128
+    SP2 --- P1
+    SP2 --- P2
+    SP2 --- P3
+    SP2 --- P128
+    SP3 --- P1
+    SP3 --- P2
+    SP3 --- P3
+    SP3 --- P128
+    SP4 --- P1
+    SP4 --- P2
+    SP4 --- P3
+    SP4 --- P128
+
+    S -.-> R0
+    S -.-> R1
+    S -.-> R2
+    S -.-> R3
+    S -.-> R4
+    S -.-> R5
+    S -.-> R6
+    S -.-> R7
+
+    P1 -.->|internal ROD structure| RAIL
+    T1 -.->|pod count drives GPU scale| M</pre>
+<p>This is only a conceptual scaling model. A real design still needs concrete switch radix, oversubscription targets, cable reach, optics budget, failure domains, ECMP or adaptive load balancing behavior, and workload placement policy.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="rail-only-design">Rail-Only Design</h3><a class="sl-anchor-link" href="#rail-only-design"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Rail-Only Design”</span></a></div>
+<p>Rail-only design removes inter-rail communication from the external fabric.</p>
+<p>The basic idea:</p>
+<ul>
+<li>Same-number GPUs communicate across the external rail fabric.</li>
+<li>Different GPU numbers communicate through the server’s internal GPU switch, such as NVSwitch.</li>
+<li>The external fabric does not need to provide rail-to-rail paths.</li>
+</ul>
+<p>Benefits:</p>
+<ul>
+<li>Lower network cost</li>
+<li>Simpler rail fault isolation</li>
+<li>Easier troubleshooting when workloads do not need inter-rail fabric communication</li>
+</ul>
+<p>Limitations:</p>
+<ul>
+<li>Depends heavily on workload behavior</li>
+<li>Inter-rail needs must be handled inside the server</li>
+<li>May not fit all collective communication patterns</li>
+<li>Adoption and best practices are still evolving</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="rail-unified-design-rud">Rail-Unified Design, RUD</h3><a class="sl-anchor-link" href="#rail-unified-design-rud"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Rail-Unified Design, RUD”</span></a></div>
+<p>In Rail-Unified Design, multiple GPUs from the same server connect to the same leaf.</p>
+<p>Examples:</p>
+<ul>
+<li>8 GPUs connect to one leaf</li>
+<li>4 GPUs connect to one leaf and 4 GPUs connect to another leaf</li>
+<li>Rails are grouped rather than strictly separated one GPU per leaf</li>
+</ul>
+<p>RUD can reduce cabling complexity, but it requires the fabric to segregate rail traffic carefully.</p>
+<p>Important implications:</p>
+<ul>
+<li>A single leaf can become a larger failure domain.</li>
+<li>Deterministic path forwarding becomes more important.</li>
+<li>Some traffic can remain one hop, but other traffic must cross the spine.</li>
+<li>It may be attractive when using larger chassis-based switches or when cabling simplicity matters more than strict rail isolation.</li>
+</ul>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TB
+    classDef gpu fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef leaf fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef spine fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef risk fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    subgraph Server["Server: multiple GPU rails share fewer leaves"]
+        direction LR
+        G0[GPU0]:::gpu
+        G1[GPU1]:::gpu
+        G2[GPU2]:::gpu
+        G3[GPU3]:::gpu
+        G4[GPU4]:::gpu
+        G5[GPU5]:::gpu
+        G6[GPU6]:::gpu
+        G7[GPU7]:::gpu
+    end
+
+    subgraph Leaves["Rail-Unified Leaf Layer"]
+        L0[Leaf A&#x3C;br/>rails 0-3]:::leaf
+        L1[Leaf B&#x3C;br/>rails 4-7]:::leaf
+    end
+
+    SP[Spine Layer&#x3C;br/>needed for some cross-leaf paths]:::spine
+    FD[Failure domain grows:&#x3C;br/>one leaf can affect several GPUs]:::risk
+
+    G0 --> L0
+    G1 --> L0
+    G2 --> L0
+    G3 --> L0
+    G4 --> L1
+    G5 --> L1
+    G6 --> L1
+    G7 --> L1
+
+    L0 &#x3C;--> SP
+    SP &#x3C;--> L1
+    L0 -.->|shared fate| FD
+    L1 -.->|shared fate| FD</pre>
+<div class="sl-heading-wrapper level-h4"><h4 id="example-32k-gpu-rud-over-multi-stage-clos">Example: 32K GPU RUD over Multi-Stage Clos</h4><a class="sl-anchor-link" href="#example-32k-gpu-rud-over-multi-stage-clos"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Example: 32K GPU RUD over Multi-Stage Clos”</span></a></div>
+<p>The same 32K-class scale can also be drawn with a RUD-style pod. The pod size does not have to change:</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">128 pods x 256 GPUs per pod = 32,768 GPUs</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="128 pods x 256 GPUs per pod = 32,768 GPUs"><div></div></button></div></figure></div>
+<p>The difference is inside the pod. Instead of mapping each GPU/NIC position to its own rail leaf, multiple GPU/NIC positions share fewer leaf groups. The example below uses two leaf groups per pod:</p>
+<ul>
+<li>Leaf group A carries GPU0-GPU3 traffic.</li>
+<li>Leaf group B carries GPU4-GPU7 traffic.</li>
+<li>Spine connectivity is still used to connect pods into the larger multi-stage Clos fabric.</li>
+</ul>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TB
+    classDef server fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef leaf fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef pod fill:#5a3520,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef spine fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef super fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef risk fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef note fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    subgraph T3["Tier 3: super-spine layer"]
+        direction LR
+        SS1[Super-spine 1]:::super
+        SS2[Super-spine 2]:::super
+        SSX[...]:::super
+        SSN[Super-spine N]:::super
+    end
+
+    subgraph T2["Tier 2: spine groups"]
+        direction LR
+        SP1[Spine group 1]:::spine
+        SP2[Spine group 2]:::spine
+        SP3[Spine group 3]:::spine
+        SP4[Spine group 4]:::spine
+    end
+
+    subgraph T1["Tier 1: RUD pod layer"]
+        direction LR
+        P1[Pod 001&#x3C;br/>256 GPUs&#x3C;br/>32 servers x 8 GPUs]:::pod
+        P2[Pod 002&#x3C;br/>256 GPUs]:::pod
+        P3[Pod 003&#x3C;br/>256 GPUs]:::pod
+        PX[...]:::pod
+        P128[Pod 128&#x3C;br/>256 GPUs]:::pod
+    end
+
+    subgraph RUD["Inside one RUD pod"]
+        direction TB
+        S[32 x 8-GPU servers]:::server
+        GA[Leaf group A&#x3C;br/>GPU0-GPU3 / NIC0-NIC3]:::leaf
+        GB[Leaf group B&#x3C;br/>GPU4-GPU7 / NIC4-NIC7]:::leaf
+        DPF[Deterministic path forwarding&#x3C;br/>separates rail traffic inside shared leaves]:::note
+        FD[Shared fate grows:&#x3C;br/>one leaf group can affect multiple GPU positions]:::risk
+    end
+
+    M[32K-class example:&#x3C;br/>128 pods x 256 GPUs = 32,768 GPUs]:::risk
+
+    SS1 --- SP1
+    SS1 --- SP2
+    SS1 --- SP3
+    SS1 --- SP4
+    SS2 --- SP1
+    SS2 --- SP2
+    SS2 --- SP3
+    SS2 --- SP4
+    SSN --- SP1
+    SSN --- SP2
+    SSN --- SP3
+    SSN --- SP4
+
+    SP1 --- P1
+    SP1 --- P2
+    SP1 --- P3
+    SP1 --- P128
+    SP2 --- P1
+    SP2 --- P2
+    SP2 --- P3
+    SP2 --- P128
+    SP3 --- P1
+    SP3 --- P2
+    SP3 --- P3
+    SP3 --- P128
+    SP4 --- P1
+    SP4 --- P2
+    SP4 --- P3
+    SP4 --- P128
+
+    S -.->|GPU0-GPU3| GA
+    S -.->|GPU4-GPU7| GB
+    GA -.-> DPF
+    GB -.-> DPF
+    GA -.-> FD
+    GB -.-> FD
+
+    P1 -.->|internal RUD structure| RUD
+    T1 -.->|same pod count, different internal leaf model| M</pre>
+<p>This RUD view is useful for comparing design trade-offs against the ROD example. Both examples can represent the same 32K-class GPU count, but RUD reduces the number of distinct rail-leaf groups inside a pod and therefore increases the importance of deterministic forwarding, failure-domain analysis, and congestion isolation.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="rack-design">Rack Design</h2><a class="sl-anchor-link" href="#rack-design"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Rack Design”</span></a></div>
+<p>Rack design is not a cosmetic detail in AI data centers. It affects:</p>
+<ul>
+<li>Cable length</li>
+<li>Rack power budget</li>
+<li>Cooling requirement</li>
+<li>Switch placement</li>
+<li>Failure domain</li>
+<li>Whether DAC, AEC, AOC, or optics are practical</li>
+</ul>
+<p>A typical rack is 19 inches wide and 42U tall. The chapter notes that DGX H100-class servers are large and power-dense. Four or five such systems plus network gear can push a rack into a much higher power range than traditional data centers.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TB
+    classDef server fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef network fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef cable fill:#5a3520,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef note fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    subgraph TOR["ToR: switch per server rack"]
+        direction TB
+        TSW[Leaf switch&#x3C;br/>inside rack]:::network
+        TS[GPU servers]:::server
+        TC[Short local cables&#x3C;br/>higher rack power/cooling]:::cable
+        TS --> TSW
+        TSW --> TC
+    end
+
+    subgraph MOR["MoR: network rack in the middle"]
+        direction TB
+        MS1[Left server racks]:::server
+        MSW[Leaf/spine rack&#x3C;br/>middle of row]:::network
+        MS2[Right server racks]:::server
+        MC[Medium cable length&#x3C;br/>balanced placement]:::cable
+        MS1 --> MSW
+        MS2 --> MSW
+        MSW --> MC
+    end
+
+    subgraph EOR["EoR: centralized network rack"]
+        direction TB
+        ES[Server row]:::server
+        ESW[Leaf/spine rack&#x3C;br/>end of row]:::network
+        EC[Longest cables&#x3C;br/>lowest server-rack switch power]:::cable
+        ES --> ESW
+        ESW --> EC
+    end
+
+    N[Physical design trades cable length&#x3C;br/>against rack power, cooling, and operations]:::note
+    TOR -.-> N
+    MOR -.-> N
+    EOR -.-> N</pre>
+<div class="sl-heading-wrapper level-h3"><h3 id="top-of-rack">Top-of-Rack</h3><a class="sl-anchor-link" href="#top-of-rack"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Top-of-Rack”</span></a></div>
+<p>In a Top-of-Rack, ToR, design, the leaf switch is installed in each server rack.</p>
+<p>Benefits:</p>
+<ul>
+<li>Shorter cable runs inside the rack</li>
+<li>Simpler local cabling</li>
+<li>Good fit for RUD</li>
+<li>DAC or AEC may be practical for cost savings</li>
+</ul>
+<p>Trade-offs:</p>
+<ul>
+<li>More rack power consumption</li>
+<li>More rack cooling demand</li>
+<li>Switches share the same physical rack environment as servers</li>
+<li>ROD may still require cross-rack cabling because each server connects to multiple leaf switches</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="middle-of-row">Middle-of-Row</h3><a class="sl-anchor-link" href="#middle-of-row"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Middle-of-Row”</span></a></div>
+<p>In a Middle-of-Row, MoR, design, leaf switches are installed in one or more racks near the middle of the server row.</p>
+<p>Benefits:</p>
+<ul>
+<li>Server racks do not carry leaf switch power and cooling load</li>
+<li>Cable distances are shorter than EoR</li>
+<li>Leaf and spine switches can be centralized</li>
+</ul>
+<p>Trade-offs:</p>
+<ul>
+<li>More cabling across racks</li>
+<li>More network rack space</li>
+<li>Cable lengths vary by server rack position</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="end-of-row">End-of-Row</h3><a class="sl-anchor-link" href="#end-of-row"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “End-of-Row”</span></a></div>
+<p>In an End-of-Row, EoR, design, leaf switches are installed at one end of the server row.</p>
+<p>Benefits:</p>
+<ul>
+<li>Centralized network gear</li>
+<li>Server racks avoid switch power and cooling load</li>
+<li>Operationally familiar in some data center designs</li>
+</ul>
+<p>Trade-offs:</p>
+<ul>
+<li>Longest cable runs</li>
+<li>Higher cabling complexity</li>
+<li>More careful planning for optics and cable types</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="rack-design-comparison">Rack Design Comparison</h3><a class="sl-anchor-link" href="#rack-design-comparison"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Rack Design Comparison”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Aspect</th><th>ToR</th><th>MoR</th><th>EoR</th></tr></thead><tbody><tr><td>Leaf location</td><td>In each server rack</td><td>Middle rack(s)</td><td>End rack(s)</td></tr><tr><td>Server rack power</td><td>Higher</td><td>Lower</td><td>Lower</td></tr><tr><td>Server rack cooling</td><td>Higher</td><td>Lower</td><td>Lower</td></tr><tr><td>Cable length</td><td>Shorter locally</td><td>Medium</td><td>Longest</td></tr><tr><td>Cabling complexity</td><td>Lower for local rack, higher for ROD rails</td><td>Medium</td><td>Higher</td></tr><tr><td>Best fit</td><td>RUD, compact designs</td><td>Balanced rows</td><td>Centralized network rows</td></tr></tbody></table>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="scheduled-fabric-and-voq">Scheduled Fabric and VOQ</h2><a class="sl-anchor-link" href="#scheduled-fabric-and-voq"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Scheduled Fabric and VOQ”</span></a></div>
+<p>Scheduled fabric is a newer architecture where the fabric behaves more like a distributed chassis.</p>
+<p>The concept:</p>
+<ul>
+<li>Leaf switches act like line cards.</li>
+<li>Spine switches act like the backplane.</li>
+<li>Packets arriving at ingress leaves are split into small cells.</li>
+<li>Cells are sprayed across fabric links.</li>
+<li>Egress leaves reassemble cells into packets.</li>
+</ul>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    classDef packet fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef leaf fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef queue fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef cell fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef spine fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef schedule fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    P[Original packet&#x3C;br/>from GPU server]:::packet
+    IL[Ingress leaf&#x3C;br/>line-card role]:::leaf
+
+    subgraph IQ["Ingress leaf VOQ state"]
+        direction TB
+        Q1[VOQ for egress leaf A]:::queue
+        Q2[VOQ for egress leaf B]:::queue
+        Q3[VOQ for egress leaf C]:::queue
+        SCH[Scheduler chooses&#x3C;br/>which VOQ sends next]:::schedule
+        Q1 --> SCH
+        Q2 --> SCH
+        Q3 --> SCH
+    end
+
+    subgraph Cells["Cellization"]
+        direction TB
+        C1[Fixed-size cell 1]:::cell
+        C2[Fixed-size cell 2]:::cell
+        C3[Fixed-size cell 3]:::cell
+    end
+
+    subgraph Fabric["Scheduled fabric: spine acts like a backplane"]
+        direction TB
+        SP1[Fabric link / spine 1]:::spine
+        SP2[Fabric link / spine 2]:::spine
+        SP3[Fabric link / spine 3]:::spine
+    end
+
+    EL[Egress leaf&#x3C;br/>packet reassembly]:::leaf
+    OUT[Rebuilt packet&#x3C;br/>to destination GPU]:::packet
+
+    P --> IL
+    IL --> Q1
+    SCH --> C1
+    SCH --> C2
+    SCH --> C3
+    C1 --> SP1
+    SP1 --> EL
+    C2 --> SP2
+    SP2 --> EL
+    C3 --> SP3
+    SP3 --> EL
+    EL --> OUT</pre>
+<p>The chapter highlights virtual output queueing, VOQ, as a key concept. VOQ maintains separate virtual queues per egress destination so congestion on one output does not block unrelated traffic. Cellization is a related scheduled-fabric technique: packets are divided into fixed-size cells for scheduling across the fabric and then reassembled at the egress leaf.</p>
+<p>Benefits:</p>
+<ul>
+<li>Better congestion handling</li>
+<li>Better fabric link utilization</li>
+<li>Reduced head-of-line blocking</li>
+<li>Cell spraying across multiple links</li>
+<li>Potential latency improvement because split/reassembly happens once across the fabric</li>
+</ul>
+<p>Constraints:</p>
+<ul>
+<li>Newer architecture</li>
+<li>Vendor and implementation dependence</li>
+<li>Failure handling must be evaluated</li>
+<li>Congestion behavior under real workloads must be tested</li>
+<li>Potential lock-in at the block, brick, or pod level</li>
+</ul>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="topology-choices">Topology Choices</h2><a class="sl-anchor-link" href="#topology-choices"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Topology Choices”</span></a></div>
+<p>Clos is the default topology for most AI data center fabrics. Dragonfly and Torus are useful to understand as alternatives, but they are usually considered for specific HPC-style environments, special placement models, or very controlled traffic patterns rather than general-purpose AI data centers.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Aspect</th><th>Clos / Fat-tree</th><th>Dragonfly</th><th>Torus</th></tr></thead><tbody><tr><td>Basic idea</td><td>Hierarchical leaf-spine connectivity</td><td>Dense intra-group connectivity with inter-group global links</td><td>Grid-like connectivity between neighboring nodes or racks</td></tr><tr><td>Rack-level view</td><td>Racks connect upward to spine layers</td><td>Racks form groups, and groups are connected through global links</td><td>Racks connect directly to nearby racks</td></tr><tr><td>Path length</td><td>Short and predictable</td><td>Can be designed to be very short</td><td>Depends heavily on location</td></tr><tr><td>Bandwidth</td><td>Can be non-blocking if designed that way</td><td>Sensitive to global-link placement</td><td>Strong for local traffic, weaker for distant traffic</td></tr><tr><td>Cost</td><td>High</td><td>Efficient at very large scale</td><td>Relatively low</td></tr><tr><td>Operational complexity</td><td>Lowest</td><td>High</td><td>High</td></tr><tr><td>Routing</td><td>Standard ECMP/BGP models</td><td>Adaptive or global routing is important</td><td>Dimension-order or adaptive routing</td></tr><tr><td>General DC fit</td><td>Very high</td><td>Low to medium</td><td>Low</td></tr><tr><td>HPC fit</td><td>High</td><td>Very high</td><td>High for specific workloads</td></tr><tr><td>AI training fit</td><td>Most common</td><td>Possible, but placement matters</td><td>Challenging for large LLM all-to-all patterns</td></tr><tr><td>Failure handling</td><td>Good</td><td>Complex</td><td>Possible, but operationally complex</td></tr><tr><td>Cabling</td><td>Many uplinks toward spine layers</td><td>Global-link management is important</td><td>Regular pattern, but placement is constrained</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h3"><h3 id="clos">Clos</h3><a class="sl-anchor-link" href="#clos"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Clos”</span></a></div>
+<p>Clos, also called fat-tree, is the most common data center topology.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TB
+    subgraph Spine["Spine Layer"]
+        SP1["Spine 1"]
+        SP2["Spine 2"]
+        SP3["Spine 3"]
+        SP4["Spine 4"]
+    end
+
+    subgraph Leaf["Leaf / ToR Layer"]
+        L1["Rack 1 ToR/Leaf"]
+        L2["Rack 2 ToR/Leaf"]
+        L3["Rack 3 ToR/Leaf"]
+        L4["Rack 4 ToR/Leaf"]
+    end
+
+    subgraph Servers["Server Racks"]
+        R1["Rack 1 Servers / GPUs"]
+        R2["Rack 2 Servers / GPUs"]
+        R3["Rack 3 Servers / GPUs"]
+        R4["Rack 4 Servers / GPUs"]
+    end
+
+    SP1 --- L1
+    SP1 --- L2
+    SP1 --- L3
+    SP1 --- L4
+
+    SP2 --- L1
+    SP2 --- L2
+    SP2 --- L3
+    SP2 --- L4
+
+    SP3 --- L1
+    SP3 --- L2
+    SP3 --- L3
+    SP3 --- L4
+
+    SP4 --- L1
+    SP4 --- L2
+    SP4 --- L3
+    SP4 --- L4
+
+    L1 --- R1
+    L2 --- R2
+    L3 --- R3
+    L4 --- R4</pre>
+<p>Common forms:</p>
+<ul>
+<li>Three-stage Clos: leaf - spine - leaf</li>
+<li>Five-stage Clos: leaf - spine - super-spine - spine - leaf</li>
+<li>Seven-stage Clos for larger fabrics</li>
+</ul>
+<p>Why Clos is popular:</p>
+<ul>
+<li>Well understood</li>
+<li>Supports non-blocking designs</li>
+<li>Fits IP and Ethernet operational models</li>
+<li>Provides many equal-cost paths</li>
+<li>Scales by adding stages and higher-radix switches</li>
+</ul>
+<p>Main limitations at AI scale:</p>
+<ul>
+<li>More stages mean more hops and more latency.</li>
+<li>Cabling and optics grow quickly.</li>
+<li>Load balancing and congestion control become harder.</li>
+<li>Upper layers may need oversubscription, creating congestion risk.</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="dragonfly">Dragonfly</h3><a class="sl-anchor-link" href="#dragonfly"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Dragonfly”</span></a></div>
+<p>Dragonfly is a hierarchical topology where groups, blocks, bricks, or pods connect to each other in a mesh-like structure.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TB
+    subgraph G1["Group 1"]
+        G1R1["Rack/Router 1"]
+        G1R2["Rack/Router 2"]
+        G1R3["Rack/Router 3"]
+        G1R4["Rack/Router 4"]
+        G1R1 --- G1R2
+        G1R1 --- G1R3
+        G1R2 --- G1R4
+        G1R3 --- G1R4
+    end
+
+    subgraph G2["Group 2"]
+        G2R1["Rack/Router 1"]
+        G2R2["Rack/Router 2"]
+        G2R3["Rack/Router 3"]
+        G2R4["Rack/Router 4"]
+        G2R1 --- G2R2
+        G2R1 --- G2R3
+        G2R2 --- G2R4
+        G2R3 --- G2R4
+    end
+
+    subgraph G3["Group 3"]
+        G3R1["Rack/Router 1"]
+        G3R2["Rack/Router 2"]
+        G3R3["Rack/Router 3"]
+        G3R4["Rack/Router 4"]
+        G3R1 --- G3R2
+        G3R1 --- G3R3
+        G3R2 --- G3R4
+        G3R3 --- G3R4
+    end
+
+    subgraph G4["Group 4"]
+        G4R1["Rack/Router 1"]
+        G4R2["Rack/Router 2"]
+        G4R3["Rack/Router 3"]
+        G4R4["Rack/Router 4"]
+        G4R1 --- G4R2
+        G4R1 --- G4R3
+        G4R2 --- G4R4
+        G4R3 --- G4R4
+    end
+
+    G1R1 === G2R1
+    G1R2 === G3R1
+    G1R3 === G4R1
+    G2R2 === G3R2
+    G2R3 === G4R2
+    G3R3 === G4R3</pre>
+<p>Benefits:</p>
+<ul>
+<li>Lower network diameter than very large multi-stage Clos designs</li>
+<li>Lower latency for some large-cluster communication patterns</li>
+<li>Modular growth by adding groups</li>
+<li>Potentially fewer links than a full multi-stage Clos at large scale</li>
+<li>Fault tolerance through group-level modularity</li>
+</ul>
+<p>Trade-offs:</p>
+<ul>
+<li>More complex routing</li>
+<li>More specialized topology management</li>
+<li>Adaptive routing may be needed to avoid congestion</li>
+<li>Not as operationally familiar as Clos in many data centers</li>
+</ul>
+<p>Dragonfly can use different intra-group designs, including full-graph inter-group topology or Clos-style intra-group topology.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="torus">Torus</h3><a class="sl-anchor-link" href="#torus"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Torus”</span></a></div>
+<p>Torus topology connects nodes to neighbors in one, two, or three dimensions.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TB
+    A1["Rack 1"] --- A2["Rack 2"] --- A3["Rack 3"] --- A4["Rack 4"]
+    B1["Rack 5"] --- B2["Rack 6"] --- B3["Rack 7"] --- B4["Rack 8"]
+    C1["Rack 9"] --- C2["Rack 10"] --- C3["Rack 11"] --- C4["Rack 12"]
+    D1["Rack 13"] --- D2["Rack 14"] --- D3["Rack 15"] --- D4["Rack 16"]
+
+    A1 --- B1
+    A2 --- B2
+    A3 --- B3
+    A4 --- B4
+
+    B1 --- C1
+    B2 --- C2
+    B3 --- C3
+    B4 --- C4
+
+    C1 --- D1
+    C2 --- D2
+    C3 --- D3
+    C4 --- D4
+
+    A1 -. wrap .- A4
+    B1 -. wrap .- B4
+    C1 -. wrap .- C4
+    D1 -. wrap .- D4
+
+    A1 -. wrap .- D1
+    A2 -. wrap .- D2
+    A3 -. wrap .- D3
+    A4 -. wrap .- D4</pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Torus Type</th><th>Node Connectivity</th><th>Mental Model</th></tr></thead><tbody><tr><td>1D torus</td><td>Two neighbors</td><td>Ring</td></tr><tr><td>2D torus</td><td>Four neighbors</td><td>Grid with wrapped edges</td></tr><tr><td>3D torus</td><td>Six neighbors</td><td>Cube with wrapped edges</td></tr></tbody></table>
+<p>Benefits:</p>
+<ul>
+<li>Cost-effective at high scale due to lower port requirements</li>
+<li>Easy to scale in regular patterns</li>
+<li>Good for nearest-neighbor communication</li>
+<li>Can be used to build rail-like topologies without a traditional spine layer</li>
+</ul>
+<p>Limitations:</p>
+<ul>
+<li>Less flexible for arbitrary traffic patterns</li>
+<li>Average latency can be higher for distant nodes</li>
+<li>Routing and failure handling require care</li>
+<li>Application placement matters more</li>
+</ul>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="inference-data-center-architecture">Inference Data Center Architecture</h2><a class="sl-anchor-link" href="#inference-data-center-architecture"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Inference Data Center Architecture”</span></a></div>
+<p>Inference uses a trained model and input data to produce results. The deployment location depends on model size and user demand.</p>
+<p>Inference models may run:</p>
+<ul>
+<li>On mobile devices or laptops</li>
+<li>At edge locations</li>
+<li>In enterprise data centers</li>
+<li>In cloud data centers</li>
+<li>Co-located with training data centers</li>
+</ul>
+<p>Most inference data centers do not require strict rail alignment because inference can often run on one GPU or a small number of GPUs. The network usually follows a Clos-based design similar to normal data center networks.</p>
+<p>Multi-node inference is a special case. If inference spans many GPUs or nodes, RDMA and backend design choices may become relevant again.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="multi-planar-scale-out-architecture">Multi-Planar Scale-Out Architecture</h2><a class="sl-anchor-link" href="#multi-planar-scale-out-architecture"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Multi-Planar Scale-Out Architecture”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="why-multi-planar-designs-exist">Why Multi-Planar Designs Exist</h3><a class="sl-anchor-link" href="#why-multi-planar-designs-exist"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Why Multi-Planar Designs Exist”</span></a></div>
+<p>Traditional three-tier networks hit practical limits when AI clusters grow toward hundreds of thousands of GPUs.</p>
+<p>Problems with very large single-plane fabrics:</p>
+<ul>
+<li>A failure can affect a huge fabric domain.</li>
+<li>Five-stage designs add extra hops.</li>
+<li>Latency-sensitive AI workloads can suffer.</li>
+<li>Operational blast radius becomes large.</li>
+<li>Cabling and optics become difficult to manage.</li>
+</ul>
+<p>Multi-planar architecture addresses this by replacing one massive backend fabric with multiple independent two-tier fabric planes.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    classDef host fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef nic fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef plane1 fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef plane2 fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef plane3 fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef plane4 fill:#173f32,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef fabric fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef note fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    SRC[Source GPU Server]:::host
+    SNIC[800G NIC&#x3C;br/>packet spray + sequencing]:::nic
+    DNIC[Destination NIC&#x3C;br/>reorder + coalesce]:::nic
+    DST[Destination GPU Server]:::host
+
+    subgraph FP1["Fabric Plane 1: independent 2-tier Clos"]
+        direction TB
+        P1L[FP1 leaf]:::plane1
+        P1S[FP1 spine]:::fabric
+        P1L --> P1S
+        P1S --> P1L
+    end
+
+    subgraph FP2["Fabric Plane 2: independent 2-tier Clos"]
+        direction TB
+        P2L[FP2 leaf]:::plane2
+        P2S[FP2 spine]:::fabric
+        P2L --> P2S
+        P2S --> P2L
+    end
+
+    subgraph FP3["Fabric Plane 3: independent 2-tier Clos"]
+        direction TB
+        P3L[FP3 leaf]:::plane3
+        P3S[FP3 spine]:::fabric
+        P3L --> P3S
+        P3S --> P3L
+    end
+
+    subgraph FP4["Fabric Plane 4: independent 2-tier Clos"]
+        direction TB
+        P4L[FP4 leaf]:::plane4
+        P4S[FP4 spine]:::fabric
+        P4L --> P4S
+        P4S --> P4L
+    end
+
+    APP[Application still sees&#x3C;br/>one logical RDMA flow]:::note
+    BR[800G split into&#x3C;br/>4 x 200G plane links]:::note
+
+    SRC --> SNIC
+    SNIC -.-> BR
+    SNIC -->|200G slice| P1L
+    P1L --> DNIC
+    SNIC -->|200G slice| P2L
+    P2L --> DNIC
+    SNIC -->|200G slice| P3L
+    P3L --> DNIC
+    SNIC -->|200G slice| P4L
+    P4L --> DNIC
+    DNIC --> DST
+    APP -.->|ordering hidden below app| SNIC
+    APP -.->|in-order completion| DNIC</pre>
+<p>The application can still see one logical flow, while the NIC and host software distribute packets across multiple planes and reassemble them at the destination.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="breakout-cables-and-packet-spraying">Breakout Cables and Packet Spraying</h3><a class="sl-anchor-link" href="#breakout-cables-and-packet-spraying"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Breakout Cables and Packet Spraying”</span></a></div>
+<p>The chapter gives an example where an 800G NIC breaks out into 4 x 200G links, each connected to a different fabric plane.</p>
+<p>This creates several effects:</p>
+<ul>
+<li>One logical NIC can use multiple physical planes.</li>
+<li>A leaf switch can support more GPU connections.</li>
+<li>The NIC can spray packets across independent paths.</li>
+<li>The receiver NIC reorders and coalesces packets before presenting data to the application.</li>
+<li>RDMA still requires in-order delivery at the application layer, so reassembly is critical.</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="multi-domain-designs-and-super-spines">Multi-Domain Designs and Super-Spines</h3><a class="sl-anchor-link" href="#multi-domain-designs-and-super-spines"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Multi-Domain Designs and Super-Spines”</span></a></div>
+<p>Large multi-planar deployments may still need super-spines to connect multiple multi-planar domains.</p>
+<p>Examples:</p>
+<ul>
+<li>Two fabric planes with two rails per plane</li>
+<li>Dual-planar domains interconnected by super-spines</li>
+<li>Four-plane designs where packets are sprayed across all planes</li>
+</ul>
+<p>Important design points:</p>
+<ul>
+<li>Some server pairs can communicate within one plane without using super-spines.</li>
+<li>Other server pairs must cross the super-spine layer.</li>
+<li>Scheduling collective jobs with topology awareness can reduce the observed latency penalty.</li>
+<li>Reliability improves because multiple planes provide independent paths.</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="cabling-and-optics">Cabling and Optics</h3><a class="sl-anchor-link" href="#cabling-and-optics"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Cabling and Optics”</span></a></div>
+<p>Multi-planar designs can increase cabling complexity because each host and ToR port may connect to multiple planes.</p>
+<p>Mitigation options include:</p>
+<ul>
+<li>Shuffle cables to consolidate and internally map fiber bundles</li>
+<li>Breakout cables for NIC-to-plane connectivity</li>
+<li>Linear Pluggable Optics, LPO</li>
+<li>Linear Receive Optics, LRO</li>
+</ul>
+<p>The chapter notes that LPO and LRO can reduce power by removing some or all DSP functionality from optical modules, relying more on NIC and switch SERDES capabilities. Lower optics power also reduces heat and cooling demand, freeing more facility power for GPU compute.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="additional-design-notes">Additional Design Notes</h2><a class="sl-anchor-link" href="#additional-design-notes"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Additional Design Notes”</span></a></div>
+<p>The PDF explains the architectural options. This section adds a more practical design lens: how to choose, calculate, validate, and track where Ethernet-based AI fabrics are going.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="design-decision-matrix">Design Decision Matrix</h3><a class="sl-anchor-link" href="#design-decision-matrix"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Design Decision Matrix”</span></a></div>
+<p>Different AI fabric designs optimize different constraints. A good design starts by identifying the dominant constraint: JCT, cabling, fault isolation, power, optics, rack layout, or operational simplicity.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Design</th><th>Best Fit</th><th>Avoid When</th><th>Main Risk</th></tr></thead><tbody><tr><td>ROD</td><td>Large training clusters, predictable NCCL topology, strong rail isolation</td><td>Port/cabling budget is too tight</td><td>Physical complexity</td></tr><tr><td>RUD</td><td>Smaller clusters, simplified cabling, chassis or fat-leaf designs</td><td>Rail fault isolation is critical</td><td>Larger shared-fate domain</td></tr><tr><td>Rail-only</td><td>Workloads rarely need inter-rail fabric communication</td><td>Collectives frequently cross rails</td><td>Workload dependency</td></tr><tr><td>Three-stage Clos</td><td>Small to medium clusters with non-blocking leaf-spine design</td><td>Cluster scale exceeds port/radix limits</td><td>Spine count and cabling growth</td></tr><tr><td>Five-stage / Seven-stage Clos</td><td>Very large clusters such as 32K+ GPUs</td><td>Low latency is more important than raw scale</td><td>More hops and upper-layer congestion</td></tr><tr><td>Scheduled fabric</td><td>Very large, congestion-sensitive AI fabrics</td><td>Vendor lock-in or operational complexity is unacceptable</td><td>Architecture dependence</td></tr><tr><td>Multi-planar</td><td>Very large scale, higher reliability, NIC-level packet spraying</td><td>NIC/host reordering and observability are immature</td><td>Debugging complexity</td></tr></tbody></table>
+<blockquote>
+<p>The important question is not “Which topology is best?”
+The better question is “Which bottleneck is this design trying to remove?”</p>
+</blockquote>
+<div class="sl-heading-wrapper level-h3"><h3 id="scale-up-scale-out-and-scale-across">Scale-Up, Scale-Out, and Scale-Across</h3><a class="sl-anchor-link" href="#scale-up-scale-out-and-scale-across"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Scale-Up, Scale-Out, and Scale-Across”</span></a></div>
+<p>AI data center networks are easier to reason about when split into three scaling domains.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TB
+    classDef gpu fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef server fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef fabric fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef site fill:#5a3520,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef wan fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef limit fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    subgraph SA["Scale-Across: multiple sites"]
+        direction LR
+        DC1["AI data center 1"]:::site
+        DCI["DCI / WAN-aware AI fabric&#x3C;br/>distance, jitter, failure domain"]:::wan
+        DC2["AI data center 2"]:::site
+        DC1 &#x3C;--> DCI
+        DCI &#x3C;--> DC2
+    end
+
+    subgraph SO["Scale-Out: one data center cluster"]
+        direction TB
+        FAB["Training fabric&#x3C;br/>rails / leaf-spine / RDMA"]:::fabric
+        S1["GPU server 1"]:::server
+        S2["GPU server 2"]:::server
+        S3["GPU server N"]:::server
+        S1 &#x3C;--> FAB
+        S2 &#x3C;--> FAB
+        S3 &#x3C;--> FAB
+    end
+
+    subgraph SU["Scale-Up: inside one GPU server"]
+        direction LR
+        G0["GPU0"]:::gpu
+        NV["NVLink / NVSwitch / PCIe&#x3C;br/>internal GPU domain"]:::server
+        G7["GPU7"]:::gpu
+        G0 &#x3C;--> NV
+        NV &#x3C;--> G7
+    end
+
+    L1["Scale-up limit:&#x3C;br/>server internal GPU fabric"]:::limit
+    L2["Scale-out limit:&#x3C;br/>power, cooling, optics, cabling"]:::limit
+    L3["Scale-across limit:&#x3C;br/>distance, jitter, site failure domains"]:::limit
+
+    SU --> L1
+    SU --> SO
+    SO --> L2
+    SO --> SA
+    SA --> L3</pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Scale Model</th><th>Boundary</th><th>Typical Technology</th><th>Network Concern</th></tr></thead><tbody><tr><td>Scale-up</td><td>Inside a GPU server or rack-scale system</td><td>NVLink, NVSwitch, PCIe</td><td>GPU locality and internal bandwidth</td></tr><tr><td>Scale-out</td><td>Across many GPU servers in one data center</td><td>InfiniBand, RoCEv2, Spectrum-X Ethernet, Clos, ROD/RUD</td><td>JCT, RDMA, congestion, rail design</td></tr><tr><td>Scale-across</td><td>Across multiple data centers or sites</td><td>DCI, WAN-aware Ethernet, distributed AI fabric</td><td>Distance, jitter, telemetry, long-distance congestion control</td></tr></tbody></table>
+<p>Traditional AI cluster design focuses on scale-up and scale-out. As single facilities hit power, cooling, land, and capacity limits, scale-across becomes more important.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="oversubscription-calculation">Oversubscription Calculation</h3><a class="sl-anchor-link" href="#oversubscription-calculation"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Oversubscription Calculation”</span></a></div>
+<p>Oversubscription should be calculated explicitly for each fabric layer. AI training fabrics often target 1:1 bandwidth in the backend because synchronized GPU traffic can quickly expose bottlenecks.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Server-facing bandwidth = number_of_downlinks x link_speed</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Fabric-facing bandwidth = number_of_uplinks x link_speed</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Oversubscription ratio  = server-facing bandwidth : fabric-facing bandwidth</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Server-facing bandwidth = number_of_downlinks x link_speedFabric-facing bandwidth = number_of_uplinks x link_speedOversubscription ratio  = server-facing bandwidth : fabric-facing bandwidth"><div></div></button></div></figure></div>
+<p>Example with a 64-port 400G leaf:</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">32 x 400G downlinks = 12.8 Tbps</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">32 x 400G uplinks   = 12.8 Tbps</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Oversubscription    = 1:1</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="32 x 400G downlinks = 12.8 Tbps32 x 400G uplinks   = 12.8 TbpsOversubscription    = 1:1"><div></div></button></div></figure></div>
+<p>Example with fewer uplinks:</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">48 x 400G downlinks = 19.2 Tbps</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">16 x 400G uplinks   = 6.4 Tbps</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Oversubscription    = 3:1</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="48 x 400G downlinks = 19.2 Tbps16 x 400G uplinks   = 6.4 TbpsOversubscription    = 3:1"><div></div></button></div></figure></div>
+<p>In AI training, oversubscription is not just a cost optimization. It changes queue behavior, ECN marking, PFC risk, and ultimately Job Completion Time.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="operational-validation-checklist">Operational Validation Checklist</h3><a class="sl-anchor-link" href="#operational-validation-checklist"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Operational Validation Checklist”</span></a></div>
+<p>A design is not finished when the topology diagram looks correct. It must be validated against traffic patterns that resemble real training and inference workloads.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Area</th><th>What to Check</th><th>Why It Matters</th></tr></thead><tbody><tr><td>NCCL performance</td><td>AllReduce, AllGather, ReduceScatter, AlltoAll benchmarks</td><td>Confirms collective communication behavior</td></tr><tr><td>Rail balance</td><td>Per-rail throughput and utilization</td><td>Finds rail hot spots and bad placement</td></tr><tr><td>Link utilization</td><td>Leaf, spine, and super-spine utilization</td><td>Confirms ECMP/DLB/packet spraying effectiveness</td></tr><tr><td>ECN</td><td>ECN marking rate and queue thresholds</td><td>Shows early congestion signals</td></tr><tr><td>PFC</td><td>Pause frame count and pause duration</td><td>Detects lossless Ethernet stress and congestion spreading</td></tr><tr><td>Drops/retransmits</td><td>Packet drops, CNPs, retransmission counters</td><td>Identifies hidden loss or transport instability</td></tr><tr><td>Tail latency</td><td>p95/p99/p999 latency during collectives</td><td>AI jobs are often gated by slowest participants</td></tr><tr><td>Failure handling</td><td>Leaf, spine, NIC, and link failure tests</td><td>Confirms blast radius and convergence behavior</td></tr><tr><td>Job placement</td><td>GPU placement vs rail/topology locality</td><td>Prevents scheduler decisions from fighting the network</td></tr><tr><td>Telemetry</td><td>Per-queue, per-flow, per-port observability</td><td>Makes congestion root cause analysis possible</td></tr></tbody></table>
+<p>Suggested validation flow:</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TB
+    classDef model fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef test fill:#173f32,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef signal fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef decision fill:#173f32,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef fail fill:#173f32,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef pass fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    C[1. Capacity model&#x3C;br/>downlinks, uplinks, radix, oversubscription]:::model
+    W[2. Workload model&#x3C;br/>NCCL collectives, storage, inference, incast]:::model
+    B[3. Baseline counters&#x3C;br/>idle ECN, PFC, drops, queue depth]:::test
+    T[4. Load validation&#x3C;br/>NCCL / RDMA / mixed traffic]:::test
+    S[5. Congestion signals&#x3C;br/>ECN, CNP, PFC, drops, p99 latency, JCT]:::signal
+    D{6. Does measured behavior&#x3C;br/>match the capacity model?}:::decision
+    P[Accept design&#x3C;br/>document operating envelope]:::pass
+    R[Revise design&#x3C;br/>uplinks, placement, QoS, load balancing, pod size]:::fail
+
+    C --> W
+    W --> B
+    B --> T
+    T --> S
+    S --> D
+    D -->|Yes| P
+    D -->|No| R
+    R --> C</pre>
+<div class="sl-heading-wrapper level-h3"><h3 id="rocev2-and-uecuet-roadmap">RoCEv2 and UEC/UET Roadmap</h3><a class="sl-anchor-link" href="#rocev2-and-uecuet-roadmap"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “RoCEv2 and UEC/UET Roadmap”</span></a></div>
+<p>Most Ethernet AI training fabrics today are designed around RoCEv2 plus congestion mechanisms such as ECN, PFC, CNP, and DCQCN. This works, but it also exposes several pain points at very large scale:</p>
+<ul>
+<li>ECMP can be weak when traffic has low entropy.</li>
+<li>PFC can prevent drops but may spread congestion.</li>
+<li>Ordered RDMA semantics make packet spraying harder.</li>
+<li>Incast and synchronized collectives can create short, intense congestion events.</li>
+<li>Debugging end-to-end congestion requires deep telemetry across NICs, switches, and hosts.</li>
+</ul>
+<p>The Ultra Ethernet Consortium, UEC, is working on Ultra Ethernet Transport, UET, as an Ethernet-based stack optimized for AI and HPC. UEC 1.0 was announced in 2025 and focuses on open, interoperable high-performance Ethernet.</p>
+<p>Key ideas to watch:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Area</th><th>Direction</th></tr></thead><tbody><tr><td>Multipathing</td><td>Packet spraying across multiple paths instead of relying only on ECMP flow hashing</td></tr><tr><td>Ordering</td><td>More flexible delivery models for workloads that can tolerate reordering</td></tr><tr><td>Congestion control</td><td>Sender and receiver mechanisms optimized for microsecond-scale AI fabrics</td></tr><tr><td>Packet trimming</td><td>Truncate packets under congestion to give fast congestion/loss signals instead of silent drops</td></tr><tr><td>Security</td><td>Transport security and isolation for hosted or multi-tenant AI environments</td></tr><tr><td>APIs</td><td>libfabric-based APIs for AI/HPC communication semantics</td></tr></tbody></table>
+<blockquote>
+<p>Practical view: RoCEv2 remains important for current deployments, but UEC/UET is worth tracking for future Ethernet AI fabrics because it directly targets packet spraying, congestion control, ordering, and interoperability at AI scale.</p>
+</blockquote>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="chapter-summary">Chapter Summary</h2><a class="sl-anchor-link" href="#chapter-summary"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Chapter Summary”</span></a></div>
+<p>AI network design requires matching the topology to the workload, scale, power budget, and operational model.</p>
+<p>The main takeaways:</p>
+<ul>
+<li>AI data centers use different fabrics for storage, training, and inference.</li>
+<li>Training fabrics are dominated by GPU-to-GPU east-west traffic.</li>
+<li>ROD gives predictable rail alignment and strong isolation, but increases cabling and port demands.</li>
+<li>RUD simplifies some physical design choices, but can increase shared fate and requires careful path control.</li>
+<li>Rack design directly affects power, cooling, cable length, and optics choices.</li>
+<li>Clos remains the default topology, but extreme AI scale can require five-stage, seven-stage, chassis-based, or oversubscribed designs.</li>
+<li>Dragonfly and Torus can reduce hop count or port requirements for selected workloads, but increase routing and placement complexity.</li>
+<li>Scheduled fabric and VOQ aim to improve congestion handling and link utilization.</li>
+<li>Multi-planar fabrics split a huge backend network into independent planes and rely on NIC-level packet spraying and reassembly.</li>
+</ul>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="key-terms">Key Terms</h2><a class="sl-anchor-link" href="#key-terms"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Key Terms”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Term</th><th>Meaning</th></tr></thead><tbody><tr><td>ROD</td><td>Rail-Optimized Design; one GPU/NIC maps to one rail/leaf</td></tr><tr><td>RUD</td><td>Rail-Unified Design; multiple GPUs may connect to one leaf</td></tr><tr><td>Rail</td><td>A network path associated with the same GPU/NIC position across servers</td></tr><tr><td>Row / Stripe</td><td>A set of leaf switches supporting multiple rails across servers</td></tr><tr><td>Intra-rail</td><td>Communication within the same GPU-number rail</td></tr><tr><td>Inter-rail</td><td>Communication between different rails, often through spine switches</td></tr><tr><td>Rail-only design</td><td>Design where the external fabric does not support inter-rail traffic</td></tr><tr><td>Clos</td><td>Leaf-spine or multi-stage fat-tree topology</td></tr><tr><td>Block / Brick</td><td>A scale unit made from rows and spines, often connected by super-spines</td></tr><tr><td>Scheduled fabric</td><td>Fabric that splits packets into cells and schedules them across links</td></tr><tr><td>VOQ</td><td>Virtual Output Queueing; separate queues per output to reduce head-of-line blocking</td></tr><tr><td>Dragonfly</td><td>Hierarchical group-based topology with mesh-like interconnects</td></tr><tr><td>Torus</td><td>Neighbor-connected topology in one, two, or three dimensions</td></tr><tr><td>Multi-planar</td><td>Design using multiple independent fabric planes for scale and reliability</td></tr><tr><td>Shuffle cable</td><td>Cabling system that bundles and internally maps fibers for large cluster connectivity</td></tr><tr><td>LPO</td><td>Linear Pluggable Optics</td></tr><tr><td>LRO</td><td>Linear Receive Optics</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h2"><h2 id="qa">Q&#x26;A</h2><a class="sl-anchor-link" href="#qa"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Q&#x26;A”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="1-what-are-the-three-main-stages-of-aiml-workload-processing-and-how-do-they-map-to-storage-training-and-inference-fabrics">1. What are the three main stages of AI/ML workload processing, and how do they map to storage, training, and inference fabrics?</h3><a class="sl-anchor-link" href="#1-what-are-the-three-main-stages-of-aiml-workload-processing-and-how-do-they-map-to-storage-training-and-inference-fabrics"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “1. What are the three main stages of AI/ML workload processing, and how do they map to storage, training, and inference fabrics?”</span></a></div>
+<p>At a high level, AI/ML processing has three stages: data gathering and preprocessing, model selection and training, and deployment and monitoring.</p>
+<p>From an infrastructure point of view, these stages map to three different traffic domains. Data gathering and preprocessing primarily stress the storage fabric because large data sets must be ingested, cleaned, tagged, and later read by training jobs. Model training stresses the training fabric because GPUs exchange gradients, parameters, activations, and optimizer state through east-west RDMA traffic. Deployment and monitoring stress the inference or frontend fabric because trained models serve user requests, APIs, telemetry, and production traffic.</p>
+<p>In an interview, I would emphasize that these fabrics should not be treated as one generic network. Storage traffic, training traffic, and inference traffic have different failure modes and performance metrics. Storage cares about sustained throughput and checkpoint reliability. Training cares about Job Completion Time, GPU utilization, congestion, and tail latency across collectives. Inference cares about request latency, throughput, availability, and sometimes Time to First Token.</p>
+<p>The design mistake is to collapse all three domains without understanding contention. It can be acceptable in a small deployment, but at scale it becomes hard to reason about congestion, QoS, blast radius, and capacity planning.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="2-why-does-distributed-training-need-a-specialized-backend-fabric-instead-of-a-normal-enterprise-data-center-network">2. Why does distributed training need a specialized backend fabric instead of a normal enterprise data center network?</h3><a class="sl-anchor-link" href="#2-why-does-distributed-training-need-a-specialized-backend-fabric-instead-of-a-normal-enterprise-data-center-network"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “2. Why does distributed training need a specialized backend fabric instead of a normal enterprise data center network?”</span></a></div>
+<p>Distributed training is dominated by synchronized east-west GPU-to-GPU communication. That traffic is high bandwidth, bursty, often long lived, and frequently tied to collective operations such as AllReduce, AllGather, ReduceScatter, and AlltoAll. A normal enterprise network is usually optimized for mixed client-server traffic, oversubscription, north-south access, and general availability. It is not usually designed to keep thousands of GPUs moving in lockstep.</p>
+<p>The key issue is that the slowest participant can gate the whole training step. If one GPU is delayed because its flow hit a congested link, a bad ECMP hash, PFC pause, or incast event, the whole collective can slow down. That means network tail latency becomes GPU idle time, and GPU idle time becomes longer JCT.</p>
+<p>A proper backend training fabric therefore needs high bisection bandwidth, low or controlled oversubscription, predictable rail topology, RDMA support, congestion visibility, ECN/PFC/DCQCN or equivalent mechanisms, and topology-aware job placement. It also needs operational telemetry at the queue, link, NIC, and flow level.</p>
+<p>The practical answer is: a normal data center fabric moves packets; an AI backend fabric protects accelerator utilization.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="3-how-does-rail-optimized-design-differ-from-rail-unified-design">3. How does Rail-Optimized Design differ from Rail-Unified Design?</h3><a class="sl-anchor-link" href="#3-how-does-rail-optimized-design-differ-from-rail-unified-design"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3. How does Rail-Optimized Design differ from Rail-Unified Design?”</span></a></div>
+<p>Rail-Optimized Design, ROD, maps each GPU/NIC position to its own rail or leaf. In an 8-GPU server, GPU0/NIC0 connects to Rail 0, GPU1/NIC1 connects to Rail 1, and so on. Across servers, the same GPU index lands on the same rail. This gives predictable paths, strong rail isolation, and low-latency intra-rail communication.</p>
+<p>Rail-Unified Design, RUD, groups multiple GPU/NIC connections from the same server onto fewer leaf switches. For example, GPUs 0-3 might connect to Leaf A and GPUs 4-7 to Leaf B. This can simplify cabling and reduce some physical complexity, but it increases the failure domain and requires more careful traffic segregation and deterministic path forwarding.</p>
+<p>The trade-off is straightforward:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Design</th><th>Optimizes For</th><th>Pays With</th></tr></thead><tbody><tr><td>ROD</td><td>Performance, rail isolation, predictable topology</td><td>More cables, ports, and rack complexity</td></tr><tr><td>RUD</td><td>Cabling simplicity and potentially lower physical cost</td><td>Larger shared fate and more path-control complexity</td></tr></tbody></table>
+<p>If I were designing for large-scale training, I would start with ROD unless there is a strong physical, cost, or platform reason not to. If I were designing a smaller cluster or using a chassis/fat-leaf design where cabling simplicity matters more, I would evaluate RUD carefully.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="4-why-is-intra-rail-communication-lower-latency-than-inter-rail-communication-in-rod">4. Why is intra-rail communication lower latency than inter-rail communication in ROD?</h3><a class="sl-anchor-link" href="#4-why-is-intra-rail-communication-lower-latency-than-inter-rail-communication-in-rod"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “4. Why is intra-rail communication lower latency than inter-rail communication in ROD?”</span></a></div>
+<p>Intra-rail communication stays within the same GPU index across servers. For example, Server A GPU0 to Server B GPU0 can go through Rail 0 and often only needs the rail leaf path. That is a short and predictable path.</p>
+<p>Inter-rail communication crosses GPU indices. For example, Server A GPU0 to Server B GPU3 starts on Rail 0 but must reach Rail 3. That usually requires going up to the spine layer and then down to the destination rail. The path becomes leaf - spine - leaf instead of just leaf-local rail switching.</p>
+<p>That extra hop matters because AI training traffic is not just sensitive to average latency. It is sensitive to synchronized delay and tail latency. A small amount of extra latency across many collective operations can accumulate into measurable JCT impact.</p>
+<p>The operational consequence is that topology-aware placement and collective algorithm selection matter. If the scheduler places ranks without considering rail locality, it can turn what should be rail-local communication into inter-rail traffic and unnecessarily load the spine layer.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="5-what-limits-the-scale-of-a-three-stage-clos-fabric-for-large-gpu-clusters">5. What limits the scale of a three-stage Clos fabric for large GPU clusters?</h3><a class="sl-anchor-link" href="#5-what-limits-the-scale-of-a-three-stage-clos-fabric-for-large-gpu-clusters"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “5. What limits the scale of a three-stage Clos fabric for large GPU clusters?”</span></a></div>
+<p>A three-stage Clos, leaf - spine - leaf, is simple and effective up to a point. The scale limit comes from switch radix, port count, uplink/downlink allocation, cabling, optics, power, and the number of equal-cost paths the fabric can manage cleanly.</p>
+<p>For example, if a 64-port 400G leaf uses 32 ports down to servers and 32 ports up to spines, one row can support a certain number of GPU-facing links at 1:1 oversubscription. To add more GPUs, you add more rows, more leaves, and more spines. Eventually, the spine layer becomes physically and operationally large. You either run out of practical spine ports, create too many devices to manage, or introduce cabling and optics complexity that becomes hard to operate.</p>
+<p>At large scale, the issue is not only “Can I draw the topology?” It is whether the topology can sustain collective traffic with predictable performance, whether ECMP or load balancing remains effective, whether failure domains are acceptable, and whether the physical build is feasible.</p>
+<p>That is why designs move toward chassis-based spines, five-stage Clos, seven-stage Clos, blocks/bricks, or alternative topologies when GPU counts become very large.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="6-why-might-a-five-stage-or-seven-stage-clos-design-introduce-new-congestion-and-latency-concerns">6. Why might a five-stage or seven-stage Clos design introduce new congestion and latency concerns?</h3><a class="sl-anchor-link" href="#6-why-might-a-five-stage-or-seven-stage-clos-design-introduce-new-congestion-and-latency-concerns"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “6. Why might a five-stage or seven-stage Clos design introduce new congestion and latency concerns?”</span></a></div>
+<p>Five-stage and seven-stage Clos designs add scale by adding hierarchy. That solves port-count limits, but it also adds hops. Every extra stage adds serialization, forwarding latency, optics, cables, buffers, queues, and failure points.</p>
+<p>The bigger concern is the upper layers. In a five-stage Clos, block-to-block traffic crosses the super-spine layer. If that layer is oversubscribed, congestion can become concentrated there. This is especially risky for AI training because collectives can create synchronized bursts across many endpoints at the same time.</p>
+<p>There is also a placement problem. If a job fits inside one block, traffic can remain relatively local. If the job is spread across blocks, it may hit the super-spine frequently. Two jobs with the same GPU count can have different performance depending on placement.</p>
+<p>In practice, five-stage and seven-stage designs require stronger telemetry, congestion control, job scheduling discipline, and capacity modeling. They are not bad designs, but they move the hard problem from “how do I connect enough ports?” to “how do I keep upper-stage congestion from dominating JCT?“</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="7-what-are-the-physical-trade-offs-between-tor-mor-and-eor-rack-designs">7. What are the physical trade-offs between ToR, MoR, and EoR rack designs?</h3><a class="sl-anchor-link" href="#7-what-are-the-physical-trade-offs-between-tor-mor-and-eor-rack-designs"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “7. What are the physical trade-offs between ToR, MoR, and EoR rack designs?”</span></a></div>
+<p>The main trade-off is cable length versus rack power, cooling, and operational centralization.</p>
+<p>Top-of-Rack, ToR, places leaf switches in the server racks. It shortens local cables and can make DAC or AEC practical, which helps cost and signal quality. The downside is that switch power and heat are inside already power-dense GPU racks. For AI racks, that matters because a few GPU servers can already push the rack close to facility limits.</p>
+<p>Middle-of-Row, MoR, centralizes network gear near the middle of the row. It reduces switch load inside server racks while keeping cable lengths moderate. It is often a reasonable compromise, but cable planning becomes more complex than ToR.</p>
+<p>End-of-Row, EoR, centralizes network gear at the end of the row. It keeps server racks cleaner from a switching power/cooling perspective, but cable lengths are longest and optics/cabling choices become more important.</p>
+<p>The design decision should consider rack power budget, airflow, cable type, maximum cable length, serviceability, rail design, and failure domains. In AI data centers, physical design is part of network design. Treating cabling and cooling as an afterthought is how good logical designs become bad deployments.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="8-how-does-scheduled-fabric-use-cells-and-voq-to-reduce-congestion-problems">8. How does scheduled fabric use cells and VOQ to reduce congestion problems?</h3><a class="sl-anchor-link" href="#8-how-does-scheduled-fabric-use-cells-and-voq-to-reduce-congestion-problems"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “8. How does scheduled fabric use cells and VOQ to reduce congestion problems?”</span></a></div>
+<p>Scheduled fabric treats the fabric more like a distributed chassis. The ingress leaf behaves like a line card, the spine layer behaves like a backplane, and packets are split into smaller cells before crossing the fabric. These cells can be scheduled and spread across multiple fabric links, then reassembled at the egress leaf.</p>
+<p>Virtual Output Queueing, VOQ, is important because it avoids head-of-line blocking. Instead of one congested egress destination blocking unrelated traffic, the ingress side maintains separate queues per destination or egress. A scheduler decides when and where cells should move.</p>
+<p>The benefit is more deterministic congestion handling and better link utilization. Instead of relying only on packet-level switching and reactive congestion signals, the fabric can schedule work across the internal fabric more deliberately.</p>
+<p>The trade-off is complexity and dependency on specific silicon and architecture. Scheduled fabric can be very powerful for bursty AI workloads, but it must be evaluated for failure handling, observability, interoperability, and operational model. It is closer to building a distributed system than just deploying a set of independent Ethernet switches.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="9-when-might-dragonfly-or-torus-be-considered-instead-of-clos">9. When might Dragonfly or Torus be considered instead of Clos?</h3><a class="sl-anchor-link" href="#9-when-might-dragonfly-or-torus-be-considered-instead-of-clos"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “9. When might Dragonfly or Torus be considered instead of Clos?”</span></a></div>
+<p>Clos is the default because it is well understood, IP-friendly, and operationally familiar. I would consider Dragonfly or Torus only when the workload and scale justify the extra topology and routing complexity.</p>
+<p>Dragonfly is attractive when the goal is to reduce network diameter at very large scale. It connects groups or blocks with global links and can reduce hop count compared to a very deep Clos. This can help latency and cost, but it usually requires more careful routing, adaptive path selection, and failure-domain thinking.</p>
+<p>Torus is attractive when traffic locality is predictable. A 1D, 2D, or 3D torus can be cost-effective because each node connects to a small number of neighbors. It works well when application placement can keep communication near neighboring nodes. It is less attractive for arbitrary all-to-all traffic where distant nodes communicate frequently.</p>
+<p>The senior-engineer answer is: do not choose Dragonfly or Torus because they look elegant. Choose them only when the application communication pattern, scheduler, routing stack, and operational team can exploit the topology. Otherwise, a well-built Clos is usually the safer design.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="10-how-does-a-multi-planar-architecture-use-breakout-links-and-nic-packet-spraying-to-improve-scale-and-reliability">10. How does a multi-planar architecture use breakout links and NIC packet spraying to improve scale and reliability?</h3><a class="sl-anchor-link" href="#10-how-does-a-multi-planar-architecture-use-breakout-links-and-nic-packet-spraying-to-improve-scale-and-reliability"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “10. How does a multi-planar architecture use breakout links and NIC packet spraying to improve scale and reliability?”</span></a></div>
+<p>Multi-planar architecture splits one large backend fabric into multiple independent fabric planes. Instead of connecting a GPU server NIC to a single fabric path, the NIC can break out a high-speed port, for example 800G into 4 x 200G, and connect each breakout link to a different plane.</p>
+<p>The NIC or host networking stack sprays packets across those planes. The destination NIC receives packets from multiple independent paths, reorders or coalesces them, and presents an in-order completion to the application. From the application perspective, it can still look like one logical RDMA flow.</p>
+<p>This improves scale because each plane is smaller and simpler than one massive fabric. It improves reliability because a failure in one plane does not necessarily remove connectivity; it may reduce capacity while other planes continue forwarding. It can also improve load distribution because traffic is not locked to one ECMP-selected path.</p>
+<p>The main engineering challenge is observability and correctness. Packet spraying creates reordering. Reordering requires NIC/host support. Troubleshooting now spans host software, NIC firmware, fabric planes, telemetry, and application behavior. Multi-planar designs are powerful, but they demand disciplined validation and operations.</p>
+<p>In practice, I would validate this architecture with NCCL benchmarks, failure injection, per-plane utilization, reordering counters, ECN/PFC counters, and job-level JCT measurements before trusting it for production-scale training.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="references">References</h2><a class="sl-anchor-link" href="#references"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “References”</span></a></div>
+<ul>
+<li><a href="https://docs.nvidia.com/enterprise-reference-architectures/">NVIDIA Enterprise Reference Architectures</a></li>
+<li><a href="https://docs.nvidia.com/enterprise-reference-architectures/hgx-ai-factory/latest/network-logical-architecture.html">NVIDIA HGX AI Factory: Networking Logical Architecture</a></li>
+<li><a href="https://docs.nvidia.com/enterprise-reference-architectures/hgx-ai-factory/latest/networking-physical-topologies.html">NVIDIA HGX AI Factory: Networking Physical Topologies</a></li>
+<li><a href="https://www.cisco.com/c/en/us/td/docs/dcn/whitepapers/cisco-data-center-networking-blueprint-for-ai-ml-applications.html">Cisco Data Center Networking Blueprint for AI/ML Applications</a></li>
+<li><a href="https://www.cisco.com/c/en/us/solutions/collateral/silicon-one/evolve-ai-ml-network-silicon-one.html">Cisco Silicon One: Evolve Your AI/ML Network</a></li>
+<li><a href="https://investors.broadcom.com/news-releases/news-release-details/broadcom-unveils-industrys-highest-performance-fabric-ai">Broadcom Jericho3-AI Fabric Announcement</a></li>
+<li><a href="https://ultraethernet.org/">Ultra Ethernet Consortium</a></li>
+<li><a href="https://ultraethernet.org/ultra-ethernet-specification-update/">Ultra Ethernet Specification Update</a></li>
+<li><a href="https://ultraethernet.org/ultra-ethernet-consortium-uec-launches-specification-1-0-transforming-ethernet-for-ai-and-hpc-at-scale/">UEC Specification 1.0 Announcement</a></li>
+</ul> </div> <footer class="sl-flex astro-3yyafb3n"> <div class="meta sl-flex astro-3yyafb3n"> <a href="https://github.com/ziwon/ai-data-center-systems/edit/main/network/chap03/README.md" class="sl-flex print:hidden astro-eez2twj6"><svg aria-hidden="true" class="astro-eez2twj6 astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.2em;"><path d="M22 7.24a1 1 0 0 0-.29-.71l-4.24-4.24a1 1 0 0 0-1.1-.22 1 1 0 0 0-.32.22l-2.83 2.83L2.29 16.05a1 1 0 0 0-.29.71V21a1 1 0 0 0 1 1h4.24a1 1 0 0 0 .76-.29l10.87-10.93L21.71 8c.1-.1.17-.2.22-.33a1 1 0 0 0 0-.24v-.14l.07-.05ZM6.83 20H4v-2.83l9.93-9.93 2.83 2.83L6.83 20ZM18.17 8.66l-2.83-2.83 1.42-1.41 2.82 2.82-1.41 1.42Z"/></svg>Edit page</a> <p>Last updated: <time datetime="2026-07-22T12:47:10.000Z">Jul 22, 2026</time></p> </div> <div class="pagination-links print:hidden astro-u2l5gyhi" dir="ltr"> <a href="/network/chap02/" rel="prev" class="astro-u2l5gyhi"> <svg aria-hidden="true" class="astro-u2l5gyhi astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17 11H9.41l3.3-3.29a1.004 1.004 0 1 0-1.42-1.42l-5 5a1 1 0 0 0-.21.33 1 1 0 0 0 0 .76 1 1 0 0 0 .21.33l5 5a1.002 1.002 0 0 0 1.639-.325 1 1 0 0 0-.219-1.095L9.41 13H17a1 1 0 0 0 0-2Z"/></svg> <span class="astro-u2l5gyhi"> Previous <br class="astro-u2l5gyhi"> <span class="link-title astro-u2l5gyhi">Chapter 2: &quot;The Common-Man View&quot; of AI Data Center Fabrics</span> </span> </a> <a href="/network/chap04/" rel="next" class="astro-u2l5gyhi"> <svg aria-hidden="true" class="astro-u2l5gyhi astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17.92 11.62a1.001 1.001 0 0 0-.21-.33l-5-5a1.003 1.003 0 1 0-1.42 1.42l3.3 3.29H7a1 1 0 0 0 0 2h7.59l-3.3 3.29a1.002 1.002 0 0 0 .325 1.639 1 1 0 0 0 1.095-.219l5-5a1 1 0 0 0 .21-.33 1 1 0 0 0 0-.76Z"/></svg> <span class="astro-u2l5gyhi"> Next <br class="astro-u2l5gyhi"> <span class="link-title astro-u2l5gyhi">Chapter 4: Optics and Cable Management</span> </span> </a> </div>  </footer> </div> </div>  </main> </div> </div> </div> <ask-docs-widget> <button class="ask-fab" type="button" data-open aria-label="Ask this docs"> <span class="ask-fab-icon" aria-hidden="true">?</span>
+Ask this docs
+</button> <div class="ask-panel" data-panel hidden> <div class="ask-resize-handle" data-resize aria-hidden="true"></div> <div class="ask-panel-inner"> <header class="ask-header"> <div> <p class="ask-eyebrow">AI Data Center Systems</p> <h2 class="ask-title">Ask this docs</h2> </div> <div class="ask-header-controls"> <button class="ask-mode-btn" data-mode-btn="right" title="오른쪽 패널" aria-label="오른쪽 패널"> <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="6" height="16" rx="1.5" opacity="0.35"></rect><rect x="8" y="0" width="8" height="16" rx="1.5"></rect></svg> </button> <button class="ask-mode-btn" data-mode-btn="bottom" title="하단 패널" aria-label="하단 패널"> <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="16" height="6" rx="1.5" opacity="0.35"></rect><rect x="0" y="8" width="16" height="8" rx="1.5"></rect></svg> </button> <button class="ask-mode-btn" data-mode-btn="expand" title="전체 확장" aria-label="전체 확장"> <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 5.5V1h4.5M10.5 1H15v4.5M15 10.5V15h-4.5M5.5 15H1v-4.5"></path></svg> </button> <button class="ask-close-btn" type="button" aria-label="닫기" data-close> <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13"></path></svg> </button> </div> </header> <div class="ask-body"> <label class="ask-field"> <span class="ask-field-row"> <span>Question</span> <span class="ask-char" data-char>0 / 800</span> </span> <textarea name="question" rows="3" maxlength="800" placeholder="이 문서에서 핵심 운영 체크포인트는 무엇인가요?" data-question></textarea> <span class="ask-hint">시간당 최대 20회 · 질문당 최대 800자</span> </label> <div class="ask-actions"> <button class="ask-submit" type="button" data-submit> <svg class="ask-spinner" viewBox="0 0 24 24" fill="none" aria-hidden="true" hidden> <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2.5" stroke-dasharray="56" stroke-dashoffset="14" stroke-linecap="round"></circle> </svg> <span data-submit-label>Ask</span> </button> <p class="ask-status" data-status></p> </div> <section class="ask-answer" data-answer hidden></section> <section class="ask-sources" data-sources hidden> <h3>Sources</h3> <ul class="ask-source-chips" data-source-list></ul> </section> </div> </div> </div> <div class="ask-backdrop" data-backdrop hidden></div> </ask-docs-widget> <script type="module" src="/_astro/AskDocs.astro_astro_type_script_index_0_lang.BbnAb04M.js"></script> </div> <script type="module">const r=document.documentElement,c=document.querySelector("#starlight__sidebar"),s=document.querySelector(".navigation-mode-toggle"),a=document.querySelector(".navigation-drawer-toggle"),u=window.matchMedia("(min-width: 50rem)");function d(){return r.dataset.navigationMode==="compact"}function o(){return r.dataset.navigationDrawer==="open"}function l(){const e=d(),t=e&&o();s?.setAttribute("aria-pressed",String(e)),s?.setAttribute("title",e?"Use normal navigation":"Use compact navigation"),a?.setAttribute("aria-expanded",String(t)),a?.setAttribute("title",t?"Close navigation":"Open navigation");const n=a?.querySelector(".navigation-drawer-label");n&&(n.textContent=t?"Close navigation":"Open navigation")}function i(e,t=!1){const n=!!(e&&d()&&u.matches);r.dataset.navigationDrawer=n?"open":"closed",l(),n?requestAnimationFrame(()=>{const g=c?.querySelector('a[aria-current="page"]'),m=c?.querySelector(".starlight-sidebar-topics-current");(g??m)?.focus()}):t&&a?.focus()}function p(e){r.dataset.navigationMode=e,i(!1);try{localStorage.setItem("adcs-navigation-mode",e)}catch{}l()}s?.addEventListener("click",()=>{p(d()?"normal":"compact")});a?.addEventListener("click",()=>{i(!o(),o())});document.addEventListener("keydown",e=>{e.key==="Escape"&&o()&&i(!1,!0)});document.addEventListener("pointerdown",e=>{!o()||!(e.target instanceof Node)||c?.contains(e.target)||i(!1)});u.addEventListener("change",()=>i(!1));r.dataset.navigationDrawer="closed";l();</script> </body></html>

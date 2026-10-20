@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="440" viewBox="0 0 980 440" role="img" aria-labelledby="title desc">
+  <title id="title">DGX H100 rack airflow orientation</title>
+  <desc id="desc">DGX H100 systems use front-to-rear airflow. Network switch airflow must be selected to align cold aisle intake and hot aisle exhaust, using P2C or C2P orientation depending on switch placement.</desc>
+  <rect width="980" height="440" fill="#ffffff"/>
+  <style>
+    .title { font: 700 24px Arial, sans-serif; fill: #0f172a; }
+    .label { font: 700 16px Arial, sans-serif; fill: #0f172a; }
+    .small { font: 13px Arial, sans-serif; fill: #334155; }
+    .cold { fill: #eef6ff; stroke: #2563eb; stroke-width: 2; rx: 10; }
+    .hot { fill: #fff1f2; stroke: #e11d48; stroke-width: 2; rx: 10; }
+    .rack { fill: #f8fafc; stroke: #64748b; stroke-width: 2; rx: 8; }
+    .dgx { fill: #ecfdf5; stroke: #059669; stroke-width: 2; rx: 7; }
+    .switch { fill: #fff7ed; stroke: #ea580c; stroke-width: 2; rx: 7; }
+    .arrow { stroke: #2563eb; stroke-width: 3; fill: none; marker-end: url(#arrowBlue); }
+    .hotarrow { stroke: #e11d48; stroke-width: 3; fill: none; marker-end: url(#arrowRed); }
+    .dash { stroke: #94a3b8; stroke-width: 1.5; stroke-dasharray: 5 4; }
+  </style>
+  <defs>
+    <marker id="arrowBlue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2563eb"/>
+    </marker>
+    <marker id="arrowRed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#e11d48"/>
+    </marker>
+  </defs>
+
+  <text x="38" y="42" class="title">DGX H100/H200 Airflow Planning</text>
+  <text x="38" y="68" class="small">Keep server airflow front-to-rear. Select switch airflow so the rack still intakes from the cold aisle and exhausts to the hot aisle.</text>
+
+  <rect x="36" y="112" width="160" height="250" class="cold"/>
+  <text x="63" y="150" class="label">Cold aisle</text>
+  <text x="58" y="174" class="small">Supply air</text>
+  <text x="54" y="194" class="small">to server fronts</text>
+
+  <rect x="784" y="112" width="160" height="250" class="hot"/>
+  <text x="819" y="150" class="label">Hot aisle</text>
+  <text x="810" y="174" class="small">Exhaust air</text>
+  <text x="808" y="194" class="small">from rack rear</text>
+
+  <rect x="260" y="100" width="450" height="275" class="rack"/>
+  <text x="430" y="128" class="label">Server rack</text>
+
+  <rect x="304" y="155" width="360" height="58" class="dgx"/>
+  <text x="326" y="189" class="label">DGX H100/H200 servers: front-to-rear airflow</text>
+  <path class="arrow" d="M 206 184 L 300 184"/>
+  <path class="hotarrow" d="M 666 184 L 776 184"/>
+
+  <rect x="304" y="242" width="360" height="58" class="switch"/>
+  <text x="326" y="265" class="label">Rear-mounted switch: P2C airflow</text>
+  <text x="326" y="285" class="small">Power-side intake, connector-side exhaust</text>
+  <path class="arrow" d="M 206 271 L 300 271"/>
+  <path class="hotarrow" d="M 666 271 L 776 271"/>
+
+  <line x1="260" y1="326" x2="710" y2="326" class="dash"/>
+  <text x="302" y="350" class="small">If hot aisle temperature is too high, front-mounted C2P switch orientation may be required.</text>
+  <text x="302" y="370" class="small">Avoid mixing airflow directions inside the same rack.</text>
+</svg>

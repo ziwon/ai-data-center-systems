@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="600" viewBox="0 0 1120 600" role="img" aria-labelledby="title desc">
+  <title id="title">AI telemetry signal correlation loop</title>
+  <desc id="desc">Correlation loop connecting workload symptoms, server telemetry, fabric telemetry, storage telemetry, and root-cause hypotheses.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .panel { fill: none; stroke: #D8D1C7; stroke-width: 1.2; }
+    .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.4; }
+    .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; }
+    .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.5; }
+    .accent-line { fill: none; stroke: #D9392E; stroke-width: 2.2; }
+    .muted-line { fill: none; stroke: #D8D1C7; stroke-width: 1.2; stroke-dasharray: 7 6; }
+    .head { font-family: Inter, Arial, sans-serif; font-size: 23px; font-weight: 700; fill: #050505; }
+    .label { font-family: Inter, Arial, sans-serif; font-size: 16px; font-weight: 700; fill: #050505; }
+    .small { font-family: Inter, Arial, sans-serif; font-size: 12px; fill: #6F6A63; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#111111"/>
+    </marker>
+    <marker id="arrowAccent" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#D9392E"/>
+    </marker>
+  </defs>
+  <rect class="bg" width="1120" height="600"/>
+  <rect class="panel" x="42" y="40" width="1036" height="500" rx="8"/>
+  <g transform="translate(86 84)">
+    <rect class="accent" x="330" y="0" width="300" height="86" rx="6"/>
+    <text class="head" x="480" y="34" text-anchor="middle">Workload symptom</text>
+    <text class="small" x="480" y="58" text-anchor="middle">JCT up, GPU idle, p99 up, throughput down</text>
+
+    <rect class="box" x="0" y="174" width="250" height="126" rx="6"/>
+    <text class="label" x="125" y="208" text-anchor="middle">Server telemetry</text>
+    <text class="small" x="125" y="234" text-anchor="middle">GPU utilization, RDMA NIC</text>
+    <text class="small" x="125" y="256" text-anchor="middle">dataloader, checkpoint</text>
+
+    <rect class="accent" x="355" y="174" width="250" height="126" rx="6"/>
+    <text class="label" x="480" y="208" text-anchor="middle">Fabric telemetry</text>
+    <text class="small" x="480" y="234" text-anchor="middle">PFC, ECN, drops, queues</text>
+    <text class="small" x="480" y="256" text-anchor="middle">latency, flow entropy</text>
+
+    <rect class="box" x="710" y="174" width="250" height="126" rx="6"/>
+    <text class="label" x="835" y="208" text-anchor="middle">Storage telemetry</text>
+    <text class="small" x="835" y="234" text-anchor="middle">read/write throughput</text>
+    <text class="small" x="835" y="256" text-anchor="middle">metadata latency</text>
+
+    <path class="line" d="M420 86 C348 121 214 139 125 174" marker-end="url(#arrow)"/>
+    <path class="accent-line" d="M480 86 V174" marker-end="url(#arrowAccent)"/>
+    <path class="line" d="M540 86 C612 121 746 139 835 174" marker-end="url(#arrow)"/>
+
+    <rect class="soft" x="255" y="402" width="450" height="88" rx="6"/>
+    <text class="label" x="480" y="438" text-anchor="middle">Root-cause hypothesis</text>
+    <text class="small" x="480" y="463" text-anchor="middle">One queue, one hop, one rack, one rail, one job, or fabric-wide?</text>
+
+    <path class="muted-line" d="M125 300 C174 355 244 379 315 402" marker-end="url(#arrow)"/>
+    <path class="accent-line" d="M480 300 V402" marker-end="url(#arrowAccent)"/>
+    <path class="muted-line" d="M835 300 C786 355 716 379 645 402" marker-end="url(#arrow)"/>
+  </g>
+</svg>

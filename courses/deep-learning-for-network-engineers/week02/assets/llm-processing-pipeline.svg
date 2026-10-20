@@ -1,0 +1,123 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="1040" viewBox="0 0 920 1040" role="img" aria-labelledby="title desc">
+  <title id="title">LLM processing pipeline</title>
+  <desc id="desc">A vertical pipeline showing how raw text becomes tokens, embeddings, decoder outputs, vocabulary logits, SoftMax probabilities, and the next token.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" orient="90">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+    </marker>
+    <filter id="shadow" x="-8%" y="-12%" width="116%" height="135%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#0f172a" flood-opacity="0.10"/>
+    </filter>
+    <style>
+      text { font-family: Arial, sans-serif; }
+      .bg { fill: #ffffff; }
+      .title { font-size: 28px; font-weight: 700; fill: #0f172a; }
+      .subtitle { font-size: 14px; font-weight: 400; fill: #475569; }
+      .stage-title { font-size: 16px; font-weight: 700; fill: #0f172a; }
+      .stage-small { font-size: 12px; font-weight: 400; fill: #475569; }
+      .group-label { font-size: 12px; font-weight: 700; letter-spacing: 0.5px; fill: #334155; }
+      .input { fill: #eef6ff; stroke: #2563eb; stroke-width: 1.5; }
+      .token { fill: #f8fafc; stroke: #64748b; stroke-width: 1.5; }
+      .param { fill: #f5f3ff; stroke: #7c3aed; stroke-width: 1.5; }
+      .compute { fill: #ecfdf5; stroke: #059669; stroke-width: 1.5; }
+      .output { fill: #fff7ed; stroke: #ea580c; stroke-width: 1.5; }
+      .group-token { fill: #f8fafc; stroke: #64748b; stroke-width: 1.2; stroke-dasharray: 5 4; }
+      .group-param { fill: #faf5ff; stroke: #7c3aed; stroke-width: 1.2; stroke-dasharray: 5 4; }
+      .group-compute { fill: #f0fdf4; stroke: #059669; stroke-width: 1.2; stroke-dasharray: 5 4; }
+      .group-output { fill: #fff7ed; stroke: #ea580c; stroke-width: 1.2; stroke-dasharray: 5 4; }
+      .line { stroke: #475569; stroke-width: 2; fill: none; }
+      .arrow-head { fill: #475569; }
+      .note { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 1; }
+      .note-text { font-size: 13px; font-weight: 400; fill: #334155; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="920" height="1040"/>
+
+  <g transform="translate(0 -80)">
+  <g opacity="0.72">
+    <rect class="group-token" x="70" y="160" width="780" height="176" rx="12"/>
+    <text class="group-label" x="95" y="188">TOKENIZATION</text>
+    <rect class="group-param" x="70" y="366" width="780" height="176" rx="12"/>
+    <text class="group-label" x="95" y="394">EMBEDDING PARAMETERS</text>
+    <rect class="group-compute" x="70" y="572" width="780" height="248" rx="12"/>
+    <text class="group-label" x="95" y="600">TRANSFORMER COMPUTE</text>
+    <rect class="group-output" x="70" y="850" width="780" height="154" rx="12"/>
+    <text class="group-label" x="95" y="878">NEXT TOKEN</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect class="input" x="320" y="104" width="280" height="60" rx="8"/>
+    <text class="stage-title" x="425" y="130">Raw Text</text>
+    <text class="stage-small" x="423" y="150">characters</text>
+
+    <rect class="token" x="320" y="206" width="280" height="60" rx="8"/>
+    <text class="stage-title" x="424" y="232">Tokenizer</text>
+    <text class="stage-small" x="412" y="252">BPE / subword split</text>
+
+    <rect class="token" x="320" y="276" width="280" height="60" rx="8"/>
+    <text class="stage-title" x="422" y="302">Token IDs</text>
+    <text class="stage-small" x="416" y="322">integer index</text>
+
+    <rect class="param" x="320" y="412" width="280" height="60" rx="8"/>
+    <text class="stage-title" x="394" y="438">Embedding Matrix</text>
+    <text class="stage-small" x="413" y="458">vocab x hidden</text>
+
+    <rect class="param" x="320" y="482" width="280" height="60" rx="8"/>
+    <text class="stage-title" x="410" y="508">Word Vectors</text>
+    <text class="stage-small" x="421" y="528">dense vectors</text>
+
+    <rect class="compute" x="320" y="622" width="280" height="60" rx="8"/>
+    <text class="stage-title" x="407" y="648">Add Position</text>
+    <text class="stage-small" x="403" y="668">order information</text>
+
+    <rect class="compute" x="320" y="692" width="280" height="60" rx="8"/>
+    <text class="stage-title" x="394" y="718">Input Embeddings</text>
+    <text class="stage-small" x="406" y="738">word + position</text>
+
+    <rect class="compute" x="320" y="762" width="280" height="60" rx="8"/>
+    <text class="stage-title" x="404" y="788">Decoder Stack</text>
+    <text class="stage-small" x="404" y="808">attention + FFNN</text>
+
+    <rect class="compute" x="320" y="900" width="280" height="60" rx="8"/>
+    <text class="stage-title" x="421" y="926">Projection</text>
+    <text class="stage-small" x="411" y="946">vocabulary logits</text>
+
+    <rect class="output" x="320" y="970" width="280" height="60" rx="8"/>
+    <text class="stage-title" x="428" y="996">SoftMax</text>
+    <text class="stage-small" x="409" y="1016">next-token probability</text>
+  </g>
+
+  <line class="line" x1="460" y1="166" x2="460" y2="198"/>
+  <line class="line" x1="460" y1="266" x2="460" y2="274"/>
+  <line class="line" x1="460" y1="338" x2="460" y2="406"/>
+  <line class="line" x1="460" y1="472" x2="460" y2="480"/>
+  <line class="line" x1="460" y1="544" x2="460" y2="616"/>
+  <line class="line" x1="460" y1="682" x2="460" y2="690"/>
+  <line class="line" x1="460" y1="752" x2="460" y2="760"/>
+  <line class="line" x1="460" y1="824" x2="460" y2="894"/>
+  <line class="line" x1="460" y1="960" x2="460" y2="968"/>
+  <polygon class="arrow-head" points="452,190 468,190 460,202"/>
+  <polygon class="arrow-head" points="452,266 468,266 460,278"/>
+  <polygon class="arrow-head" points="452,398 468,398 460,410"/>
+  <polygon class="arrow-head" points="452,472 468,472 460,484"/>
+  <polygon class="arrow-head" points="452,608 468,608 460,620"/>
+  <polygon class="arrow-head" points="452,682 468,682 460,694"/>
+  <polygon class="arrow-head" points="452,752 468,752 460,764"/>
+  <polygon class="arrow-head" points="452,886 468,886 460,898"/>
+  <polygon class="arrow-head" points="452,960 468,960 460,972"/>
+
+  <g>
+    <rect class="note" x="70" y="1036" width="780" height="54" rx="8"/>
+    <text class="note-text" x="95" y="1061">Network view: embedding, attention, and FFNN blocks become large parameter regions.</text>
+    <text class="note-text" x="95" y="1080">When they no longer fit into one GPU, parallelism drives backend GPU-to-GPU traffic.</text>
+  </g>
+
+  <g>
+    <text class="note-text" x="625" y="236">text units become model-readable IDs</text>
+    <text class="note-text" x="625" y="446">lookup tables become trainable parameters</text>
+    <text class="note-text" x="625" y="724">decoder blocks transform context</text>
+    <text class="note-text" x="625" y="932">logits become probabilities</text>
+  </g>
+  </g>
+</svg>

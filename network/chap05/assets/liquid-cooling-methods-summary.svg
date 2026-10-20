@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="620" viewBox="0 0 980 620" role="img" aria-labelledby="title desc">
+  <title id="title">Four main data center liquid cooling approaches</title>
+  <desc id="desc">A simplified original diagram showing immersion liquid cooling, cold plate liquid cooling, rear-door heat exchanger liquid cooling, and sprayed liquid cooling.</desc>
+  <rect width="980" height="620" fill="#ffffff"/>
+  <style>
+    .title { font: 700 24px Arial, sans-serif; fill: #0f172a; }
+    .label { font: 700 16px Arial, sans-serif; fill: #0f172a; }
+    .small { font: 13px Arial, sans-serif; fill: #334155; }
+    .tiny { font: 12px Arial, sans-serif; fill: #475569; }
+    .panel { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 1.5; rx: 10; }
+    .server { fill: #eef6ff; stroke: #2563eb; stroke-width: 2; rx: 5; }
+    .rack { fill: #f1f5f9; stroke: #64748b; stroke-width: 2; rx: 6; }
+    .cold { stroke: #2563eb; stroke-width: 3; fill: none; marker-end: url(#blueArrow); }
+    .hot { stroke: #e11d48; stroke-width: 3; fill: none; marker-end: url(#redArrow); }
+    .air { stroke: #64748b; stroke-width: 3; fill: none; marker-end: url(#grayArrow); }
+    .coolant { fill: #dbeafe; stroke: #2563eb; stroke-width: 1.5; }
+    .plate { fill: #fde68a; stroke: #d97706; stroke-width: 1.5; }
+    .spray { stroke: #38bdf8; stroke-width: 2; stroke-dasharray: 3 3; }
+    .tank { fill: #ecfeff; stroke: #0891b2; stroke-width: 2; rx: 8; }
+    .hx { fill: #f5f3ff; stroke: #7c3aed; stroke-width: 2; rx: 6; }
+    .door { fill: #fee2e2; stroke: #e11d48; stroke-width: 2; rx: 6; }
+  </style>
+  <defs>
+    <marker id="blueArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#2563eb"/></marker>
+    <marker id="redArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#e11d48"/></marker>
+    <marker id="grayArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b"/></marker>
+  </defs>
+
+  <text x="34" y="38" class="title">Four Main Data Center Liquid Cooling Approaches</text>
+  <text x="34" y="64" class="small">Each approach differs by where coolant removes heat: whole system, chip surface, rack exhaust, or sprayed target.</text>
+
+  <g transform="translate(36,92)">
+    <rect class="panel" x="0" y="0" width="430" height="220"/>
+    <text class="label" x="22" y="32">Immersion Liquid Cooling</text>
+    <text class="tiny" x="22" y="52">침지식 액체 냉각</text>
+    <rect class="tank" x="38" y="74" width="168" height="96"/>
+    <path class="coolant" d="M 42 120 C 76 108 116 130 202 112 L 202 166 L 42 166 Z"/>
+    <rect class="server" x="66" y="102" width="24" height="52"/>
+    <rect class="server" x="104" y="102" width="24" height="52"/>
+    <rect class="server" x="142" y="102" width="24" height="52"/>
+    <text class="tiny" x="58" y="190">servers submerged in dielectric coolant</text>
+    <rect class="hx" x="286" y="86" width="90" height="62"/>
+    <text class="small" x="302" y="112">heat</text>
+    <text class="small" x="294" y="132">rejection</text>
+    <path class="hot" d="M 206 134 C 240 144 256 144 286 136"/>
+    <path class="cold" d="M 286 100 C 252 94 236 90 206 98"/>
+  </g>
+
+  <g transform="translate(514,92)">
+    <rect class="panel" x="0" y="0" width="430" height="220"/>
+    <text class="label" x="22" y="32">Cold Plate Liquid Cooling</text>
+    <text class="tiny" x="22" y="52">콜드 플레이트 액체 냉각</text>
+    <rect class="server" x="40" y="78" width="122" height="86"/>
+    <rect class="plate" x="66" y="98" width="70" height="18"/>
+    <text class="tiny" x="73" y="112">cold plate</text>
+    <text class="small" x="70" y="146">CPU/GPU</text>
+    <rect class="hx" x="286" y="86" width="90" height="62"/>
+    <text class="small" x="302" y="112">heat</text>
+    <text class="small" x="294" y="132">rejection</text>
+    <path class="cold" d="M 286 98 C 232 92 206 92 162 102"/>
+    <path class="hot" d="M 162 128 C 210 144 236 144 286 136"/>
+    <text class="tiny" x="38" y="190">liquid loop touches hot chips, not the whole server</text>
+  </g>
+
+  <g transform="translate(36,350)">
+    <rect class="panel" x="0" y="0" width="430" height="220"/>
+    <text class="label" x="22" y="32">Rear-Door Heat Exchanger</text>
+    <text class="tiny" x="22" y="52">후면 도어 열교환기 액체 냉각</text>
+    <rect class="rack" x="46" y="78" width="116" height="96"/>
+    <rect class="server" x="64" y="94" width="80" height="16"/>
+    <rect class="server" x="64" y="118" width="80" height="16"/>
+    <rect class="server" x="64" y="142" width="80" height="16"/>
+    <rect class="door" x="166" y="78" width="28" height="96"/>
+    <text class="tiny" x="158" y="192">liquid-cooled rear door</text>
+    <path class="air" d="M 18 126 L 46 126"/>
+    <path class="hot" d="M 162 126 L 166 126"/>
+    <path class="cold" d="M 194 100 C 236 86 262 86 292 92"/>
+    <path class="hot" d="M 194 152 C 236 166 262 164 292 156"/>
+    <rect class="hx" x="292" y="98" width="86" height="60"/>
+    <text class="small" x="306" y="123">facility</text>
+    <text class="small" x="302" y="143">water loop</text>
+  </g>
+
+  <g transform="translate(514,350)">
+    <rect class="panel" x="0" y="0" width="430" height="220"/>
+    <text class="label" x="22" y="32">Sprayed Liquid Cooling</text>
+    <text class="tiny" x="22" y="52">분사식 액체 냉각</text>
+    <rect class="server" x="42" y="82" width="122" height="82"/>
+    <line class="spray" x1="64" y1="66" x2="78" y2="100"/>
+    <line class="spray" x1="100" y1="66" x2="104" y2="100"/>
+    <line class="spray" x1="136" y1="66" x2="126" y2="100"/>
+    <rect class="plate" x="70" y="114" width="66" height="18"/>
+    <text class="tiny" x="72" y="128">hot target</text>
+    <rect class="hx" x="286" y="86" width="90" height="62"/>
+    <text class="small" x="302" y="112">heat</text>
+    <text class="small" x="294" y="132">rejection</text>
+    <path class="cold" d="M 286 98 C 220 88 176 72 104 64"/>
+    <path class="hot" d="M 142 138 C 206 150 234 146 286 136"/>
+    <text class="tiny" x="38" y="190">coolant is sprayed directly onto selected heat sources</text>
+  </g>
+</svg>

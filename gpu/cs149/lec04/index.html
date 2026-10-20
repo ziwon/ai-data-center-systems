@@ -1,0 +1,1342 @@
+<!DOCTYPE html><html lang="en" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-bguv2lll"> <head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Lecture 4: Parallel Programming Basics | AI Data Center Systems</title><link rel="canonical" href="https://adcs.restack.tech/gpu/cs149/lec04/"/><link rel="sitemap" href="/sitemap-index.xml"/><script async src="https://www.googletagmanager.com/gtag/js?id=G-76LFZJVBTE"></script><script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-76LFZJVBTE');
+      </script><script async crossorigin="anonymous" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8128231647578658"></script><link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v6.4.8"/><meta name="generator" content="Starlight v0.40.0"/><meta property="og:title" content="Lecture 4: Parallel Programming Basics"/><meta property="og:url" content="https://adcs.restack.tech/gpu/cs149/lec04/"/><meta property="og:locale" content="en"/><meta property="og:description" content="이번 강의의 목표는 sequential program을 parallel program으로 바꾸는 사고 과정을 체계화하는 것이다. 핵심은 thread나 API를 먼저 고르는 것이 아니라, computation의 dependency를 찾아 independent work를 드러낸 뒤..."/><meta property="og:site_name" content="AI Data Center Systems"/><meta name="description" content="이번 강의의 목표는 sequential program을 parallel program으로 바꾸는 사고 과정을 체계화하는 것이다. 핵심은 thread나 API를 먼저 고르는 것이 아니라, computation의 dependency를 찾아 independent work를 드러낸 뒤..."/><meta property="og:type" content="article"/><meta property="og:image" content="https://adcs.restack.tech/og/gpu/cs149/lec04.png?v=2"/><meta property="og:image:width" content="1200"/><meta property="og:image:height" content="630"/><meta name="twitter:image" content="https://adcs.restack.tech/og/gpu/cs149/lec04.png?v=2"/><meta name="twitter:card" content="summary_large_image"/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/_astro/print.DNXP8c50.css" media="print"><link rel="stylesheet" href="/_astro/common.DYbqSTpl.css"><script type="module" src="/_astro/page.CtJXHRyR.js"></script></head> <body class="astro-bguv2lll"> <a href="#_top" class="astro-7q3lir66">Skip to content</a> <script>
+  (() => {
+    try {
+      const savedMode = localStorage.getItem('adcs-navigation-mode');
+      document.documentElement.dataset.navigationMode = savedMode === 'compact' ? 'compact' : 'normal';
+    } catch {
+      document.documentElement.dataset.navigationMode = 'normal';
+    }
+  })();
+</script> <div class="page sl-flex astro-4toy2ex6"> <header class="header astro-4toy2ex6"><div class="header astro-3ef6ksr2"> <div class="title-wrapper sl-flex astro-3ef6ksr2"> <a href="/" class="site-title sl-flex astro-m46x6ez3">  <span class="astro-m46x6ez3" translate="no"> AI Data Center Systems </span> </a> <button class="navigation-mode-toggle print:hidden astro-3ef6ksr2" type="button" aria-label="Compact navigation" aria-pressed="false" title="Use compact navigation"> <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" class="astro-3ef6ksr2"> <rect x="3" y="4" width="18" height="16" rx="2" class="astro-3ef6ksr2"></rect> <path d="M9 4v16M6.5 10 4.5 12l2 2" class="astro-3ef6ksr2"></path> </svg> </button> </div> <div class="sl-flex print:hidden astro-3ef6ksr2"> <site-search class="astro-3ef6ksr2 astro-v37mnknz" data-translations="{&quot;placeholder&quot;:&quot;Search&quot;}"> <button data-open-modal disabled aria-label="Search" aria-keyshortcuts="Control+K" class="astro-v37mnknz"> <svg aria-hidden="true" class="astro-v37mnknz astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg> <span class="sl-hidden md:sl-block astro-v37mnknz" aria-hidden="true">Search</span> <kbd class="sl-hidden md:sl-flex astro-v37mnknz" style="display: none;"> <kbd class="astro-v37mnknz">Ctrl</kbd><kbd class="astro-v37mnknz">K</kbd> </kbd> </button> <dialog style="padding:0" aria-label="Search" class="astro-v37mnknz"> <div class="dialog-frame sl-flex astro-v37mnknz">  <button data-close-modal class="sl-flex md:sl-hidden astro-v37mnknz"> Cancel </button> <div class="search-container astro-v37mnknz"> <div id="starlight__search" class="astro-v37mnknz"></div> </div> </div> </dialog> </site-search>  <script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script> <script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.D1WXcfCt.js"></script>  </div> <div class="sl-hidden md:sl-flex print:hidden right-group astro-3ef6ksr2"> <div class="sl-flex social-icons astro-3ef6ksr2"> <a href="https://github.com/ziwon/ai-data-center-systems" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">GitHub</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script> <script type="module">const r="starlight-theme",o=e=>e==="auto"||e==="dark"||e==="light"?e:"auto",c=()=>o(typeof localStorage<"u"&&localStorage.getItem(r));function n(e){typeof localStorage<"u"&&localStorage.setItem(r,e==="light"||e==="dark"?e:"")}const l=()=>matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";function t(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e==="auto"?l():e,n(e)}matchMedia("(prefers-color-scheme: light)").addEventListener("change",()=>{c()==="auto"&&t("auto")});class s extends HTMLElement{constructor(){super(),t(c()),this.querySelector("select")?.addEventListener("change",a=>{a.currentTarget instanceof HTMLSelectElement&&t(o(a.currentTarget.value))})}}customElements.define("starlight-theme-select",s);</script> <script type="module">class s extends HTMLElement{constructor(){super();const e=this.querySelector("select");e&&(e.addEventListener("change",t=>{t.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=t.currentTarget.value)}),window.addEventListener("pageshow",t=>{if(!t.persisted)return;const n=e.querySelector("option[selected]")?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}}customElements.define("starlight-lang-select",s);</script> </div> </div></header> <nav class="sidebar print:hidden astro-4toy2ex6" aria-label="Main"> <starlight-menu-button class="print:hidden astro-jif73yzw"> <button aria-expanded="false" aria-label="Menu" aria-controls="starlight__sidebar" class="sl-flex md:sl-hidden astro-jif73yzw"> <svg aria-hidden="true" class="open-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg> <svg aria-hidden="true" class="close-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg> </button> </starlight-menu-button> <script type="module">class s extends HTMLElement{constructor(){super(),this.btn=this.querySelector("button"),this.btn.addEventListener("click",()=>this.toggleExpanded());const t=this.closest("nav");t&&t.addEventListener("keyup",e=>this.closeOnEscape(e))}setExpanded(t){this.setAttribute("aria-expanded",String(t)),document.body.toggleAttribute("data-mobile-menu-expanded",t)}toggleExpanded(){this.setExpanded(this.getAttribute("aria-expanded")!=="true")}closeOnEscape(t){t.code==="Escape"&&(this.setExpanded(!1),this.btn.focus())}}customElements.define("starlight-menu-button",s);</script>  <div id="starlight__sidebar" class="sidebar-pane astro-4toy2ex6"> <div class="navigation-controls astro-4toy2ex6"> <button class="navigation-drawer-toggle astro-4toy2ex6" type="button" aria-controls="starlight__sidebar-content" aria-expanded="false" title="Open navigation"> <svg class="navigation-menu-icon astro-4toy2ex6" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"> <path d="M4 6h16M4 12h16M4 18h16" class="astro-4toy2ex6"></path> </svg> <svg class="navigation-close-icon astro-4toy2ex6" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"> <path d="m6 6 12 12M18 6 6 18" class="astro-4toy2ex6"></path> </svg> <span class="navigation-drawer-label astro-4toy2ex6">Open navigation</span> </button> </div> <div id="starlight__sidebar-content" class="sidebar-content sl-flex astro-4toy2ex6"> <ul class="starlight-sidebar-topics astro-2fh6iaza"> <li class="astro-2fh6iaza"> <a aria-label="Network" title="Network" href="/network/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8.7 10a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-6.27-6.3a1 1 0 0 0-1.42 1.42ZM21 14a1 1 0 0 0-1 1v3.59L15.44 14A1 1 0 0 0 14 15.44L18.59 20H15a1 1 0 0 0 0 2h6a1 1 0 0 0 .38-.08 1 1 0 0 0 .54-.54A1 1 0 0 0 22 21v-6a1 1 0 0 0-1-1Zm.92-11.38a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-6a1 1 0 0 0 0 2h3.59L2.29 20.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V9a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z"/></svg> </div> <div class="astro-2fh6iaza"> Network  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="GPU &amp; Accelerator Systems" title="GPU &amp; Accelerator Systems" href="/gpu/" class="starlight-sidebar-topics-current astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> </div> <div class="astro-2fh6iaza"> GPU &amp; Accelerator Systems  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Storage" title="Storage" href="/storage/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8 16.5a1 1 0 1 0 1 1 1 1 0 0 0-1-1M12 2C8 2 4 3.37 4 6v12c0 2.63 4 4 8 4s8-1.37 8-4V6c0-2.63-4-4-8-4m6 16c0 .71-2.28 2-6 2s-6-1.29-6-2v-3.27A13 13 0 0 0 12 16a13 13 0 0 0 6-1.27Zm0-6c0 .71-2.28 2-6 2s-6-1.29-6-2V8.73A13 13 0 0 0 12 10a13 13 0 0 0 6-1.27Zm-6-4C8.28 8 6 6.71 6 6s2.28-2 6-2 6 1.29 6 2-2.28 2-6 2m-4 2.5a1 1 0 1 0 1 1 1 1 0 0 0-1-1"/></svg> </div> <div class="astro-2fh6iaza"> Storage  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Training" title="Training" href="/training/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1 1v8a1 1 0 0 0 2 0v-8a1 1 0 0 0-1-1m5-10a1 1 0 0 0-1 1v18a1 1 0 0 0 2 0V3a1 1 0 0 0-1-1m10 14a1 1 0 0 0-1 1v4a1 1 0 0 0 2 0v-4a1 1 0 0 0-1-1m-5-8a1 1 0 0 0-1 1v12a1 1 0 0 0 2 0V9a1 1 0 0 0-1-1"/></svg> </div> <div class="astro-2fh6iaza"> Training  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Inference" title="Inference" data-topic-icon="brain" href="/inference/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 22H5a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3h1a4 4 0 0 1 7.3-2.18c.448.64.692 1.4.7 2.18h3a1 1 0 0 1 1 1v3a4 4 0 0 1 2.18 7.3A3.86 3.86 0 0 1 18 18v3a1 1 0 0 1-1 1ZM5 8a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11v-3.18a1 1 0 0 1 1.33-.95 1.77 1.77 0 0 0 1.74-.23 2 2 0 0 0 .93-1.37 2 2 0 0 0-.48-1.59 1.89 1.89 0 0 0-2.17-.55 1 1 0 0 1-1.33-.95V8h-3.2a1 1 0 0 1-1-1.33 1.77 1.77 0 0 0-.23-1.74 1.939 1.939 0 0 0-3-.43A2 2 0 0 0 8 6c.002.23.046.456.13.67A1 1 0 0 1 7.18 8H5Z"/></svg> </div> <div class="astro-2fh6iaza"> Inference  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="MLOps" title="MLOps" data-topic-icon="cycle" href="/mlops/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8.7 10a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-6.27-6.3a1 1 0 0 0-1.42 1.42ZM21 14a1 1 0 0 0-1 1v3.59L15.44 14A1 1 0 0 0 14 15.44L18.59 20H15a1 1 0 0 0 0 2h6a1 1 0 0 0 .38-.08 1 1 0 0 0 .54-.54A1 1 0 0 0 22 21v-6a1 1 0 0 0-1-1Zm.92-11.38a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-6a1 1 0 0 0 0 2h3.59L2.29 20.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V9a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z"/></svg> </div> <div class="astro-2fh6iaza"> MLOps  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Systems Performance" title="Systems Performance" href="/systems-performance/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path fill-rule="evenodd" d="M1.44 8.855v-.001l3.527-3.516c.34-.344.802-.541 1.285-.548h6.649l.947-.947c3.07-3.07 6.207-3.072 7.62-2.868a1.821 1.821 0 0 1 1.557 1.557c.204 1.413.203 4.55-2.868 7.62l-.946.946v6.649a1.845 1.845 0 0 1-.549 1.286l-3.516 3.528a1.844 1.844 0 0 1-3.11-.944l-.858-4.275-4.52-4.52-2.31-.463-1.964-.394A1.847 1.847 0 0 1 .98 10.693a1.843 1.843 0 0 1 .46-1.838Zm5.379 2.017-3.873-.776L6.32 6.733h4.638l-4.14 4.14Zm8.403-5.655c2.459-2.46 4.856-2.463 5.89-2.33.134 1.035.13 3.432-2.329 5.891l-6.71 6.71-3.561-3.56 6.71-6.711Zm-1.318 15.837-.776-3.873 4.14-4.14v4.639l-3.364 3.374Z" clip-rule="evenodd"/><path d="M9.318 18.345a.972.972 0 0 0-1.86-.561c-.482 1.435-1.687 2.204-2.934 2.619a8.22 8.22 0 0 1-1.23.302c.062-.365.157-.79.303-1.229.415-1.247 1.184-2.452 2.62-2.935a.971.971 0 1 0-.62-1.842c-.12.04-.236.084-.35.13-2.02.828-3.012 2.588-3.493 4.033a10.383 10.383 0 0 0-.51 2.845l-.001.016v.063c0 .536.434.972.97.972H2.24a7.21 7.21 0 0 0 .878-.065c.527-.063 1.248-.19 2.02-.447 1.445-.48 3.205-1.472 4.033-3.494a5.828 5.828 0 0 0 .147-.407Z"/></svg> </div> <div class="astro-2fh6iaza"> Systems Performance  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Courses" title="Courses" href="/courses/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.17 2.06A13.1 13.1 0 0 0 19 1.87a12.94 12.94 0 0 0-7 2.05 12.94 12.94 0 0 0-7-2 13.1 13.1 0 0 0-2.17.19 1 1 0 0 0-.83 1v12a1 1 0 0 0 1.17 1 10.9 10.9 0 0 1 8.25 1.91l.12.07h.11a.91.91 0 0 0 .7 0h.11l.12-.07A10.899 10.899 0 0 1 20.83 16 1 1 0 0 0 22 15V3a1 1 0 0 0-.83-.94ZM11 15.35a12.87 12.87 0 0 0-6-1.48H4v-10c.333-.02.667-.02 1 0a10.86 10.86 0 0 1 6 1.8v9.68Zm9-1.44h-1a12.87 12.87 0 0 0-6 1.48V5.67a10.86 10.86 0 0 1 6-1.8c.333-.02.667-.02 1 0v10.04Zm1.17 4.15a13.098 13.098 0 0 0-2.17-.19 12.94 12.94 0 0 0-7 2.05 12.94 12.94 0 0 0-7-2.05c-.727.003-1.453.066-2.17.19A1 1 0 0 0 2 19.21a1 1 0 0 0 1.17.79 10.9 10.9 0 0 1 8.25 1.91 1 1 0 0 0 1.16 0A10.9 10.9 0 0 1 20.83 20a1 1 0 0 0 1.17-.79 1 1 0 0 0-.83-1.15Z"/></svg> </div> <div class="astro-2fh6iaza"> Courses  </div> </a> </li> </ul>  <doc-sidebar-controls hidden="true" class="astro-v3kklmrl"> <div class="tree-controls astro-v3kklmrl" role="group" aria-label="문서 목록 펼침 설정"> <button type="button" data-action="expand" aria-controls="document-tree" aria-label="모든 문서 분류 펼치기" class="astro-v3kklmrl">펼치기</button> <span aria-hidden="true" class="astro-v3kklmrl">/</span> <button type="button" data-action="collapse" aria-controls="document-tree" aria-label="모든 문서 분류 접기" class="astro-v3kklmrl">접기</button> </div> </doc-sidebar-controls> <script type="module">class d extends HTMLElement{connectedCallback(){const n=document.getElementById("document-tree");if(!n||this.dataset.initialized)return;this.dataset.initialized="true",this.hidden=!1;const e=Array.from(n.querySelectorAll("details")),r=this.querySelector('[data-action="expand"]'),i=this.querySelector('[data-action="collapse"]');for(const t of e)t.open=!1;let o=n.querySelector('[aria-current="page"]')?.closest("details");for(;o&&n.contains(o);)o.open=!0,o=o.parentElement?.closest("details")??null;const a=()=>{r?.setAttribute("aria-disabled",String(e.every(t=>t.open))),i?.setAttribute("aria-disabled",String(e.every(t=>!t.open)))};this.addEventListener("click",t=>{const s=t.target instanceof Element?t.target.closest("button[data-action]"):null;if(!s||s.getAttribute("aria-disabled")==="true")return;const l=s.dataset.action==="expand";for(const c of e)c.open=l;a()});for(const t of e)t.addEventListener("toggle",a);a()}}customElements.get("doc-sidebar-controls")||customElements.define("doc-sidebar-controls",d);</script> <div id="document-tree"> <sl-sidebar-state-persist data-hash="0sgoec7" class="astro-kku4brbg"> <script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script>  <ul class="top-level astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/gpu/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">GPU 전체 목록</span>  </a> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">기술 아티클 · 3</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="0"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/gpu/articles/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">아티클 모아보기</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/articles/gpu-infrastructure-operations-and-platform-design.ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">GPU 인프라 운영과 플랫폼 설계: 하드웨어 장애 분석부터 멀티테넌시까지</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/articles/hami-core-deep-dive.ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">HAMi-core 심층 분석: `libvgpu.so`는 GPU를 어떻게 나누는가</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/articles/hami-dra-gpu-sharing.ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">DRA와 HAMi로 보는 Kubernetes GPU 분할</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">CS149 · 병렬 컴퓨팅 · 10</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="1"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/gpu/cs149/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">강좌 안내</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/cs149/lec01/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 1: Why Parallelism? Why Efficiency?</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/cs149/lec02/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 2: A Modern Multi-Core Processor</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/cs149/lec03/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 3: Multi-Core Architecture, Part II and ISPC</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/cs149/lec04/" aria-current="page" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 4: Parallel Programming Basics</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/cs149/lec05/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 5: Performance Optimization I — Work Distribution and Scheduling</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/cs149/lec06/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 6: Performance Optimization II — Locality, Communication, and Contention</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/cs149/lec07/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 7: GPU Architecture and CUDA Programming</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/cs149/lec08/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 8: Data-Parallel Thinking</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/cs149/lec09/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 9: Distributed Data-Parallel Computing Using Spark</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/cs149/lec10/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 10: Efficiently Evaluating DNNs on GPUs</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">PMPP · CUDA 프로그래밍 · 4</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="2"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/gpu/pmpp/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">강좌 안내</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/pmpp/lec02/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 2: Data Parallel Programming and the CUDA Programming Model</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/pmpp/lec03/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 3: Multidimensional Grids and Data</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/pmpp/lec04/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 4: GPU Architecture</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/pmpp/lec05/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 5: Memory Architecture and Tiling</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">참고자료 · 2</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="3"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/gpu/appendix/architecture/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">GPU Architecture (reference)</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/appendix/cuda/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">CUDA (reference)</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">실습 · 2</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="4"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/gpu/labs/kernels/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Kernel Case Studies (practice)</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/labs/profiling/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Profiling (practice)</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <a href="/gpu/heterogeneous-systems/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">Heterogeneous Systems (Onur Mutlu)</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/gpu-mode/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">GPU MODE</span>  </a> </li> </ul>  <script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script> </sl-sidebar-state-persist> <div class="md:sl-hidden"> <div class="mobile-preferences sl-flex astro-wu23bvmt"> <div class="social-icons astro-wu23bvmt"> <a href="https://github.com/ziwon/ai-data-center-systems" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">GitHub</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script>   </div> </div> </div>  </div> </div> </nav> <div class="main-frame astro-4toy2ex6">  <script type="module">const a=document.getElementById("starlight__sidebar"),n=a?.querySelector("sl-sidebar-state-persist"),o="sl-sidebar-state",i=()=>{let t=[];const e=n?.dataset.hash||"";try{const s=sessionStorage.getItem(o),r=JSON.parse(s||"{}");Array.isArray(r.open)&&r.hash===e&&(t=r.open)}catch{}return{hash:e,open:t,scroll:a?.scrollTop||0}},c=t=>{try{sessionStorage.setItem(o,JSON.stringify(t))}catch{}},d=()=>c(i()),l=(t,e)=>{const s=i();s.open[e]=t,c(s)};n?.addEventListener("click",t=>{if(!(t.target instanceof Element))return;const e=t.target.closest("summary")?.closest("details");if(!e)return;const s=e.querySelector("sl-sidebar-restore"),r=parseInt(s?.dataset.index||"");isNaN(r)||l(!e.open,r)});addEventListener("visibilitychange",()=>{document.visibilityState==="hidden"&&d()});addEventListener("pageHide",d);</script> <div class="lg:sl-flex astro-67yu43on"> <aside class="right-sidebar-container print:hidden astro-67yu43on"> <div class="right-sidebar astro-67yu43on"> <div class="lg:sl-hidden astro-rl4sue7z"><mobile-starlight-toc data-min-h="2" data-max-h="2" class="astro-doynk5tl"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-doynk5tl"><details id="starlight__mobile-toc" class="astro-doynk5tl"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-doynk5tl"><span class="toggle sl-flex astro-doynk5tl">On this page<svg aria-hidden="true" class="caret astro-doynk5tl astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-doynk5tl"></span></summary><div class="dropdown astro-doynk5tl"><ul class="isMobile astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#table-of-contents" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Table of Contents</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#goal" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Goal</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#lecture-overview" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Lecture Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#visual-map" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Visual Map</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#from-ispc-review-to-parallel-programming-basics" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">From ISPC Review to Parallel Programming Basics</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#the-four-responsibilities-of-a-parallel-program" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">The Four Responsibilities of a Parallel Program</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#speedup-and-amdahls-law" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Speedup and Amdahl’s Law</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#image-example-parallel-map-and-reduction" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Image Example: Parallel Map and Reduction</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#decomposition-and-dependency-analysis" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Decomposition and Dependency Analysis</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#assignment-static-and-dynamic" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Assignment: Static and Dynamic</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#orchestration-and-mapping" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Orchestration and Mapping</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#task-granularity-and-thread-pools" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Task Granularity and Thread Pools</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#the-2d-grid-solver" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">The 2D Grid Solver</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#why-naive-gauss-seidel-is-hard-to-parallelize" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Why Naive Gauss-Seidel Is Hard to Parallelize</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#red-black-ordering" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Red-Black Ordering</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#work-assignment-and-communication" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Work Assignment and Communication</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#data-parallel-expression" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Data-Parallel Expression</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#shared-address-space-and-spmd" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Shared Address Space and SPMD</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#mutual-exclusion-and-atomicity" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Mutual Exclusion and Atomicity</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#local-accumulation-and-reduction" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Local Accumulation and Reduction</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#barrier-synchronization" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Barrier Synchronization</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#reducing-three-barriers-to-one" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Reducing Three Barriers to One</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#comparing-programming-models" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Comparing Programming Models</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#gpu-systems-lens" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">GPU Systems Lens</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#practical-tips-and-notes" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Practical Tips and Notes</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#lecture-summary" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Lecture Summary</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#key-terms" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Key Terms</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#questions" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Questions</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#answers" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Answers</span> </a>  </li> </ul></div></details></nav></mobile-starlight-toc><script type="module" src="/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.hwBsy0Mo.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-rl4sue7z"><div class="sl-container astro-rl4sue7z"><kb-graph-card> <button class="kb-graph-card" type="button" data-open aria-haspopup="dialog"> <span class="kb-graph-copy"> <span class="kb-graph-title">Knowledge graph</span> <span class="kb-graph-subtitle" data-count>Loading related docs</span> </span> <span class="kb-graph-thumb" aria-hidden="true" data-map></span> <span class="kb-graph-expand" aria-hidden="true">Expand</span> </button> <dialog class="kb-graph-dialog" aria-label="Knowledge graph" data-dialog> <div class="kb-graph-panel"> <div class="kb-graph-panel-header"> <div> <p>Knowledge graph</p> <h2 data-heading>Related documents</h2> </div> <div class="kb-graph-tabs" role="tablist" aria-label="Knowledge graph views"> <button type="button" role="tab" aria-selected="true" data-tab="page">This page</button> <button type="button" role="tab" aria-selected="false" data-tab="global">Full graph</button> </div> <button type="button" data-close aria-label="Close knowledge graph">×</button> </div> <div class="kb-graph-stage" data-stage data-view="page"> <div data-page-stage></div> <div data-global-stage hidden></div> </div> </div> </dialog> </kb-graph-card> <script type="module" src="/_astro/KnowledgeGraphCard.astro_astro_type_script_index_0_lang.C475L69c.js"></script><starlight-toc data-min-h="2" data-max-h="2"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">On this page</h2><ul class="astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#table-of-contents" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Table of Contents</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#goal" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Goal</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#lecture-overview" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Lecture Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#visual-map" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Visual Map</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#from-ispc-review-to-parallel-programming-basics" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">From ISPC Review to Parallel Programming Basics</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#the-four-responsibilities-of-a-parallel-program" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">The Four Responsibilities of a Parallel Program</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#speedup-and-amdahls-law" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Speedup and Amdahl’s Law</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#image-example-parallel-map-and-reduction" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Image Example: Parallel Map and Reduction</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#decomposition-and-dependency-analysis" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Decomposition and Dependency Analysis</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#assignment-static-and-dynamic" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Assignment: Static and Dynamic</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#orchestration-and-mapping" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Orchestration and Mapping</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#task-granularity-and-thread-pools" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Task Granularity and Thread Pools</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#the-2d-grid-solver" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">The 2D Grid Solver</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#why-naive-gauss-seidel-is-hard-to-parallelize" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Why Naive Gauss-Seidel Is Hard to Parallelize</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#red-black-ordering" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Red-Black Ordering</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#work-assignment-and-communication" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Work Assignment and Communication</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#data-parallel-expression" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Data-Parallel Expression</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#shared-address-space-and-spmd" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Shared Address Space and SPMD</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#mutual-exclusion-and-atomicity" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Mutual Exclusion and Atomicity</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#local-accumulation-and-reduction" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Local Accumulation and Reduction</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#barrier-synchronization" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Barrier Synchronization</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#reducing-three-barriers-to-one" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Reducing Three Barriers to One</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#comparing-programming-models" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Comparing Programming Models</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#gpu-systems-lens" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">GPU Systems Lens</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#practical-tips-and-notes" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Practical Tips and Notes</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#lecture-summary" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Lecture Summary</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#key-terms" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Key Terms</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#questions" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Questions</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#answers" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Answers</span> </a>  </li> </ul></nav></starlight-toc><script type="module" src="/_astro/TableOfContents.astro_astro_type_script_index_0_lang.FuRcXuRY.js"></script></div></div> </div> </aside> <div class="main-pane astro-67yu43on">  <main data-pagefind-body class="astro-bguv2lll" lang="en" dir="ltr">    <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <h1 id="_top" class="astro-j6tvhyss">Lecture 4: Parallel Programming Basics</h1> </div> </div> <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <starlight-image-zoom> <template class="astro-vjux6bgf"> <dialog class="starlight-image-zoom-dialog astro-vjux6bgf"> <button aria-label="Unzoom image" class="starlight-image-zoom-control astro-vjux6bgf"> <svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" class="astro-vjux6bgf"> <use href="#starlight-image-zoom-icon-unzoom" class="astro-vjux6bgf"></use> </svg> </button> <figure class="astro-vjux6bgf"></figure> </dialog> </template> <svg xmlns="http://www.w3.org/2000/svg" style="display:none" class="astro-vjux6bgf"> <symbol id="starlight-image-zoom-icon-zoom" viewBox="0 0 24 24" class="astro-vjux6bgf"> <path d="M9.79 12.79 4 18.59V17a1 1 0 0 0-2 0v4a1 1 0 0 0 .08.38 1 1 0 0 0 .54.54A1 1 0 0 0 3 22h4a1 1 0 0 0 0-2H5.41l5.8-5.79a1 1 0 0 0-1.42-1.42ZM21.92 2.62a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-4a1 1 0 0 0 0 2h1.59l-5.8 5.79a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V7a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z" class="astro-vjux6bgf"></path> </symbol> <symbol id="starlight-image-zoom-icon-unzoom" viewBox="0 0 24 24" class="astro-vjux6bgf"> <path d="M21.71 2.29a1 1 0 0 0-1.42 0l-5.79 5.8V6.5a1 1 0 0 0-2 0v4a1 1 0 0 0 .08.38 1 1 0 0 0 .54.54 1 1 0 0 0 .38.08h4a1 1 0 0 0 0-2h-1.59l5.8-5.79a1 1 0 0 0 0-1.42ZM10.88 12.58a1 1 0 0 0-.38-.08h-4a1 1 0 0 0 0 2h1.59l-5.8 5.79a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l5.79-5.8v1.59a1 1 0 0 0 2 0v-4a1 1 0 0 0-.08-.38 1 1 0 0 0-.54-.54Z" class="astro-vjux6bgf"></path> </symbol> </svg> </starlight-image-zoom>   <script type="module" src="/_astro/ImageZoom.astro_astro_type_script_index_0_lang.CZmBqK-T.js"></script> <div class="sl-markdown-content"> <p>Source: <a href="https://www.youtube.com/watch?v=0-ztm8SKq70">Stanford CS149 2023 Lecture 4</a></p>
+<p>Course materials:</p>
+<ul>
+<li><a href="https://gfxcourses.stanford.edu/cs149/fall23">CS149 Fall 2023 course page</a></li>
+<li><a href="https://gfxcourses.stanford.edu/cs149/fall23content/media/progbasics/04_progbasics.pdf">Lecture 4 slides PDF</a></li>
+<li><a href="https://ispc.github.io/">ISPC documentation</a></li>
+</ul>
+<blockquote>
+<p>영상의 앞 약 40분은 Lecture 3의 ISPC programming model, <code dir="auto">foreach</code>, reduction,
+task system을 복습하고 thread-pool overhead를 실험한다. Lecture 4의 공식 주제인
+parallel programming case study는 <code dir="auto">40:21</code>부터 시작한다. 영상 마지막에 과제로
+남긴 three-barrier solver의 one-barrier 변환과 programming-model 비교는 강의
+슬라이드를 참고해 보완했다.</p>
+</blockquote>
+<div class="sl-heading-wrapper level-h2"><h2 id="table-of-contents">Table of Contents</h2><a class="sl-anchor-link" href="#table-of-contents"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Table of Contents”</span></a></div>
+<ul>
+<li><a href="#goal">Goal</a></li>
+<li><a href="#lecture-overview">Lecture Overview</a></li>
+<li><a href="#visual-map">Visual Map</a></li>
+<li><a href="#from-ispc-review-to-parallel-programming-basics">From ISPC Review to Parallel Programming Basics</a></li>
+<li><a href="#the-four-responsibilities-of-a-parallel-program">The Four Responsibilities of a Parallel Program</a></li>
+<li><a href="#speedup-and-amdahls-law">Speedup and Amdahl’s Law</a></li>
+<li><a href="#image-example-parallel-map-and-reduction">Image Example: Parallel Map and Reduction</a></li>
+<li><a href="#decomposition-and-dependency-analysis">Decomposition and Dependency Analysis</a></li>
+<li><a href="#assignment-static-and-dynamic">Assignment: Static and Dynamic</a></li>
+<li><a href="#orchestration-and-mapping">Orchestration and Mapping</a></li>
+<li><a href="#task-granularity-and-thread-pools">Task Granularity and Thread Pools</a></li>
+<li><a href="#the-2d-grid-solver">The 2D Grid Solver</a></li>
+<li><a href="#why-naive-gauss-seidel-is-hard-to-parallelize">Why Naive Gauss-Seidel Is Hard to Parallelize</a></li>
+<li><a href="#red-black-ordering">Red-Black Ordering</a></li>
+<li><a href="#work-assignment-and-communication">Work Assignment and Communication</a></li>
+<li><a href="#data-parallel-expression">Data-Parallel Expression</a></li>
+<li><a href="#shared-address-space-and-spmd">Shared Address Space and SPMD</a></li>
+<li><a href="#mutual-exclusion-and-atomicity">Mutual Exclusion and Atomicity</a></li>
+<li><a href="#local-accumulation-and-reduction">Local Accumulation and Reduction</a></li>
+<li><a href="#barrier-synchronization">Barrier Synchronization</a></li>
+<li><a href="#reducing-three-barriers-to-one">Reducing Three Barriers to One</a></li>
+<li><a href="#comparing-programming-models">Comparing Programming Models</a></li>
+<li><a href="#gpu-systems-lens">GPU Systems Lens</a></li>
+<li><a href="#practical-tips-and-notes">Practical Tips and Notes</a></li>
+<li><a href="#lecture-summary">Lecture Summary</a></li>
+<li><a href="#key-terms">Key Terms</a></li>
+<li><a href="#questions">Questions</a></li>
+<li><a href="#answers">Answers</a></li>
+</ul>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="goal">Goal</h2><a class="sl-anchor-link" href="#goal"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Goal”</span></a></div>
+<p>이번 강의의 목표는 sequential program을 parallel program으로 바꾸는 사고 과정을
+체계화하는 것이다. 핵심은 thread나 API를 먼저 고르는 것이 아니라, computation의
+dependency를 찾아 independent work를 드러낸 뒤 그 work를 worker와 hardware에
+배치하고 필요한 communication과 synchronization을 설계하는 데 있다.</p>
+<p>강의가 제시하는 네 단계는 다음과 같다.</p>
+<div class="expressive-code"><link rel="stylesheet" href="/_astro/ec.v4551.css"><script type="module" src="/_astro/ec.0vx5m.js"></script><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">problem</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> decomposition: independent task를 찾는다</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> assignment: task를 worker에게 나눈다</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> orchestration: communication과 synchronization을 조직한다</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> mapping: worker를 hardware execution unit에 대응시킨다</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="problem  -> decomposition: independent task를 찾는다  -> assignment: task를 worker에게 나눈다  -> orchestration: communication과 synchronization을 조직한다  -> mapping: worker를 hardware execution unit에 대응시킨다"><div></div></button></div></figure></div>
+<p>핵심 메시지는 다음과 같다.</p>
+<blockquote>
+<p>Parallel programming은 sequential code에 thread를 덧붙이는 작업이 아니다.
+Dependency를 분석하고, 필요하면 algorithm이나 update order를 바꾸며, 충분한
+parallelism과 낮은 communication/synchronization cost를 함께 만드는 작업이다.
+최대 speedup은 남아 있는 serial work에 제한되고, 올바른 결과를 위해서는 모든
+shared update와 phase dependency가 명시적으로 보존되어야 한다.</p>
+</blockquote>
+<p>이 강의는 다음을 다룬다.</p>
+<ul>
+<li>Speedup의 정의와 Amdahl’s Law</li>
+<li>Decomposition, assignment, orchestration, mapping의 역할</li>
+<li>Independent task를 찾기 위한 dependency analysis</li>
+<li>Static assignment와 dynamic assignment</li>
+<li>Task와 worker thread를 구분해야 하는 이유</li>
+<li>Task granularity, thread creation cost, thread pool</li>
+<li>2D Gauss-Seidel grid solver의 dependency structure</li>
+<li>Red-black coloring을 이용한 algorithmic reordering</li>
+<li>Work assignment가 communication volume에 미치는 영향</li>
+<li>Data-parallel model과 shared-address-space/SPMD model</li>
+<li>Lock, mutual exclusion, atomicity, race condition</li>
+<li>Barrier가 computation을 phase로 나누는 방식</li>
+<li>Local partial accumulation과 hierarchical reduction</li>
+<li>Replication으로 dependency와 barrier 수를 줄이는 방법</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="lecture-overview">Lecture Overview</h2><a class="sl-anchor-link" href="#lecture-overview"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Lecture Overview”</span></a></div>
+<p>영상 전반부는 Lecture 3의 abstraction과 implementation 구분을 다시 확인한다. ISPC
+function call의 semantics는 gang의 여러 program instance가 같은 code를 각각의
+<code dir="auto">programIndex</code>로 실행하는 것이다. 현재 compiler는 이를 SIMD instruction으로
+구현하지만, source-level reasoning은 특정 scheduling이나 vector width에 의존하면 안
+된다. <code dir="auto">foreach</code>는 independent iteration set을 system에 넘기며, task는 한 단계 위에서
+gang 단위 work를 worker thread에 넘긴다.</p>
+<p>Thread-pool demo는 task와 thread가 같은 개념이 아님을 보여 준다. 아주 작은 empty
+task를 대상으로 한 강의실 실험에서 sequential call은 8-thread pool보다 23배
+빨랐고, thread pool은 task마다 C++ thread를 생성하는 방식보다 300배 빨랐다. 이
+숫자는 특정 demo의 결과이지 일반적인 상수가 아니다. 중요한 결론은 useful work가
+작으면 scheduling overhead가 지배하고, task 수만큼 OS thread를 만드는 것은
+oversubscription과 thread lifecycle cost를 유발한다는 점이다.</p>
+<p>본론은 parallel program을 만드는 네 책임을 소개한 뒤 Amdahl’s Law를 image
+brightness/average 예시에 적용한다. 첫 phase만 parallelize하면 전체 speedup은 2로
+제한된다. Average까지 partial reduction으로 바꾸면, input이 processor 수보다 충분히
+클 때 speedup은 <code dir="auto">P</code>에 가까워진다. 이 예시는 serial fraction을 줄이기 위해 algorithm
+전체의 dependency를 봐야 한다는 점을 강조한다.</p>
+<p>후반부는 in-place 2D Gauss-Seidel solver를 case study로 사용한다. 원래 traversal은
+왼쪽 cell과 이전 row의 새 값에 의존하므로 diagonal wavefront parallelism만 드러난다.
+하지만 이 방식은 시작과 끝의 parallelism이 작고 diagonal마다 synchronization이
+필요하다. Domain knowledge를 사용해 checkerboard를 red/black으로 나누면 모든 red
+cell을 병렬 update한 뒤 모든 black cell을 병렬 update할 수 있다.</p>
+<p>같은 solver를 data-parallel model과 shared-address-space/SPMD model로 표현하면서
+abstraction의 차이를 비교한다. Data-parallel version은 assignment, reduction,
+phase-end wait를 system에 맡긴다. SPMD version은 각 thread가 자신의 row block을
+계산하고 lock과 barrier를 직접 사용한다. 마지막으로 local partial을 이용해 lock
+frequency를 줄이고, <code dir="auto">diff</code> accumulator를 여러 copy로 만들어 세 barrier를 하나로
+줄이는 optimization을 살펴본다.</p>
+<p>영상 진행을 기준으로 보면 주요 구간은 다음과 같다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Time</th><th>Topic</th></tr></thead><tbody><tr><td><code dir="auto">00:00–15:15</code></td><td>Assignment 1 질문, ISPC semantics와 SIMD implementation 복습</td></tr><tr><td><code dir="auto">15:16–28:05</code></td><td><code dir="auto">foreach</code>, race, varying partial, <code dir="auto">reduce_add</code></td></tr><tr><td><code dir="auto">28:06–40:20</code></td><td>ISPC task, task와 thread의 차이, thread-pool overhead demo</td></tr><tr><td><code dir="auto">40:21–48:42</code></td><td>Parallelization workflow, speedup, Amdahl’s Law, image example</td></tr><tr><td><code dir="auto">48:43–53:31</code></td><td>Assignment, orchestration, hardware mapping</td></tr><tr><td><code dir="auto">53:32–01:03:38</code></td><td>Grid solver dependency, red-black ordering, communication</td></tr><tr><td><code dir="auto">01:03:39–01:12:34</code></td><td>Data-parallel vs. shared address space, lock과 reduction</td></tr><tr><td><code dir="auto">01:12:35–01:17:14</code></td><td>Barrier semantics, three-barrier dependency, replication hint</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h2"><h2 id="visual-map">Visual Map</h2><a class="sl-anchor-link" href="#visual-map"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Visual Map”</span></a></div>
+<p>Lecture 4는 parallel program을 다음과 같은 decision flow로 설명한다.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    P[Problem&#x3C;br/>fixed computation] --> D[Decomposition&#x3C;br/>find independent tasks]
+    D --> A[Assignment&#x3C;br/>tasks to workers]
+    A --> O[Orchestration&#x3C;br/>communicate and sync]
+    O --> M[Mapping&#x3C;br/>workers to hardware]
+
+    D --> X[Serial dependencies&#x3C;br/>Amdahl limit]
+    A --> L[Load balance and&#x3C;br/>communication volume]
+    O --> S[Locks, reductions,&#x3C;br/>barriers]
+    M --> R[Locality and&#x3C;br/>resource utilization]
+
+    X --> C[Correct and efficient&#x3C;br/>parallel execution]
+    L --> C
+    S --> C
+    R --> C
+
+    classDef primary fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef secondary fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef note fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef accent fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    class P,C primary
+    class D,A,O,M secondary
+    class L,R note
+    class X,S accent</pre>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="from-ispc-review-to-parallel-programming-basics">From ISPC Review to Parallel Programming Basics</h2><a class="sl-anchor-link" href="#from-ispc-review-to-parallel-programming-basics"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “From ISPC Review to Parallel Programming Basics”</span></a></div>
+<p>강의가 본론 전에 ISPC를 길게 복습하는 이유는 parallel abstraction을 정확히 읽는
+습관이 이후 case study에도 그대로 적용되기 때문이다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Concept</th><th>Semantic meaning</th><th>Typical implementation</th></tr></thead><tbody><tr><td>ISPC gang</td><td>함께 function을 실행하는 program instance 집합</td><td>한 CPU thread가 SIMD instruction 실행</td></tr><tr><td><code dir="auto">foreach</code></td><td>Gang 전체가 independent iteration set을 수행</td><td>Iteration을 SIMD lane에 static interleaving</td></tr><tr><td>Reduction</td><td>Instance별 partial을 하나의 uniform value로 결합</td><td>Horizontal add 또는 shuffle sequence</td></tr><tr><td>ISPC task</td><td>한 gang이 수행할 coarse-grained work</td><td>Runtime thread pool의 worker가 task를 가져감</td></tr></tbody></table>
+<p><code dir="auto">foreach</code>와 task는 서로 다른 level의 assignment를 system에 맡긴다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">task list</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> worker thread 0 executes a gang</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> worker thread 1 executes a gang</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> ...</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">inside each gang</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> foreach iterations are assigned to program instances</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> program instances are implemented with SIMD lanes</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="task list  -> worker thread 0 executes a gang  -> worker thread 1 executes a gang  -> ...inside each gang  -> foreach iterations are assigned to program instances  -> program instances are implemented with SIMD lanes"><div></div></button></div></figure></div>
+<p><starlight-image-zoom-zoomable><img src="/gpu/cs149/lec04/assets/ispc-task-dynamic-assignment.png" alt="Dynamic assignment of ISPC tasks to worker threads"><button aria-label="Zoom image: Dynamic assignment of ISPC tasks to worker threads" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<p>강의 슬라이드는 <code dir="auto">launch[100]</code>이 100개의 logical task를 만들더라도 runtime은 작은
+worker thread pool을 유지한다는 점을 시각화한다. 각 worker는 현재 task를 마치면
+shared task list의 next pointer를 통해 아직 완료되지 않은 task를 가져간다. Task
+decomposition과 worker provisioning을 분리하기 때문에 task 수가 hardware context
+수보다 훨씬 많아도 OS thread를 같은 수만큼 만들 필요가 없다.</p>
+<p>따라서 one million tasks를 선언했다고 one million OS threads가 필요하지 않다. Task는
+해야 할 일이고 worker는 그 일을 반복해서 가져가는 execution agent다. 이 구분은 곧
+소개할 decomposition과 assignment의 구분이기도 하다.</p>
+<p>강의는 programming model을 읽을 때 다음 순서를 권한다.</p>
+<ol>
+<li>먼저 language construct가 어떤 result와 ordering을 보장하는지 이해한다.</li>
+<li>그 contract 아래 허용되는 모든 assignment와 schedule에서 program이 correct한지
+확인한다.</li>
+<li>그 다음에 compiler, runtime, hardware가 현재 어떻게 구현하는지 분석한다.</li>
+<li>특정 implementation에 기대는 optimization은 measurement와 portability cost를
+함께 평가한다.</li>
+</ol>
+<div class="sl-heading-wrapper level-h2"><h2 id="the-four-responsibilities-of-a-parallel-program">The Four Responsibilities of a Parallel Program</h2><a class="sl-anchor-link" href="#the-four-responsibilities-of-a-parallel-program"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “The Four Responsibilities of a Parallel Program”</span></a></div>
+<p>Parallel program을 만드는 과정은 네 책임으로 나눌 수 있다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Responsibility</th><th>Main question</th><th>Primary goal</th></tr></thead><tbody><tr><td>Decomposition</td><td>어떤 work가 independent한가?</td><td>충분한 parallel task 생성</td></tr><tr><td>Assignment</td><td>각 task를 어떤 worker가 수행하는가?</td><td>Load balance와 낮은 communication</td></tr><tr><td>Orchestration</td><td>Worker들이 언제 무엇을 주고받고 기다리는가?</td><td>Correct dependency와 낮은 sync cost</td></tr><tr><td>Mapping</td><td>Worker가 어떤 hardware unit에서 실행되는가?</td><td>Locality와 resource utilization</td></tr></tbody></table>
+<p>이 책임을 programmer, compiler, runtime, OS, hardware가 나누어 맡는다. 예를 들어
+programmer가 image의 pixel iteration이 independent하다고 선언하면 compiler가
+iteration을 vector lane에 assign할 수 있다. OS는 software thread를 CPU hardware
+context에 mapping하고, GPU hardware는 CUDA block을 available SM에 mapping한다.</p>
+<p>네 단계는 완전히 독립적이지 않다. Decomposition이 너무 fine-grained하면 task 수는
+많아지지만 scheduling overhead가 커진다. Assignment가 고르게 보여도 관련 data가
+멀리 떨어지면 communication이 늘 수 있다. Barrier를 추가하면 correctness는 쉽게
+표현되지만 빠른 worker가 느린 worker를 기다리면서 utilization이 낮아질 수 있다.</p>
+<aside aria-label="Tip" class="starlight-aside starlight-aside--tip"><p class="starlight-aside__title" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="starlight-aside__icon"><path fill-rule="evenodd" clip-rule="evenodd" d="M1.43909 8.85483L1.44039 8.85354L4.96668 5.33815C5.30653 4.99386 5.7685 4.79662 6.2524 4.78972L6.26553 4.78963L12.9014 4.78962L13.8479 3.84308C16.9187 0.772319 20.0546 0.770617 21.4678 0.975145C21.8617 1.02914 22.2271 1.21053 22.5083 1.4917C22.7894 1.77284 22.9708 2.13821 23.0248 2.53199C23.2294 3.94517 23.2278 7.08119 20.1569 10.1521L19.2107 11.0983V17.7338L19.2106 17.7469C19.2037 18.2308 19.0067 18.6933 18.6624 19.0331L15.1456 22.5608C14.9095 22.7966 14.6137 22.964 14.29 23.0449C13.9663 23.1259 13.6267 23.1174 13.3074 23.0204C12.9881 22.9235 12.7011 22.7417 12.4771 22.4944C12.2533 22.2473 12.1006 21.9441 12.0355 21.6171L11.1783 17.3417L6.65869 12.822L4.34847 12.3589L2.38351 11.965C2.05664 11.8998 1.75272 11.747 1.50564 11.5232C1.25835 11.2992 1.07653 11.0122 0.979561 10.6929C0.882595 10.3736 0.874125 10.034 0.955057 9.7103C1.03599 9.38659 1.20328 9.09092 1.43909 8.85483ZM6.8186 10.8724L2.94619 10.096L6.32006 6.73268H10.9583L6.8186 10.8724ZM15.2219 5.21703C17.681 2.75787 20.0783 2.75376 21.1124 2.8876C21.2462 3.92172 21.2421 6.31895 18.783 8.77812L12.0728 15.4883L8.51172 11.9272L15.2219 5.21703ZM13.9042 21.0538L13.1279 17.1811L17.2676 13.0414V17.68L13.9042 21.0538Z"></path><path d="M9.31827 18.3446C9.45046 17.8529 9.17864 17.3369 8.68945 17.1724C8.56178 17.1294 8.43145 17.1145 8.30512 17.1243C8.10513 17.1398 7.91519 17.2172 7.76181 17.3434C7.62613 17.455 7.51905 17.6048 7.45893 17.7835C6.97634 19.2186 5.77062 19.9878 4.52406 20.4029C4.08525 20.549 3.6605 20.644 3.29471 20.7053C3.35607 20.3395 3.45098 19.9148 3.59711 19.476C4.01221 18.2294 4.78141 17.0237 6.21648 16.5411C6.39528 16.481 6.54504 16.3739 6.65665 16.2382C6.85126 16.0016 6.92988 15.678 6.84417 15.3647C6.83922 15.3466 6.83373 15.3286 6.82767 15.3106C6.74106 15.053 6.55701 14.8557 6.33037 14.7459C6.10949 14.6389 5.84816 14.615 5.59715 14.6994C5.47743 14.7397 5.36103 14.7831 5.24786 14.8294C3.22626 15.6569 2.2347 17.4173 1.75357 18.8621C1.49662 19.6337 1.36993 20.3554 1.30679 20.8818C1.27505 21.1464 1.25893 21.3654 1.25072 21.5213C1.24662 21.5993 1.24448 21.6618 1.24337 21.7066L1.243 21.7226L1.24235 21.7605L1.2422 21.7771L1.24217 21.7827L1.24217 21.7856C1.24217 22.3221 1.67703 22.7579 2.2137 22.7579L2.2155 22.7579L2.22337 22.7578L2.23956 22.7577C2.25293 22.7575 2.27096 22.7572 2.29338 22.7567C2.33821 22.7555 2.40073 22.7534 2.47876 22.7493C2.63466 22.7411 2.85361 22.725 3.11822 22.6932C3.64462 22.6301 4.36636 22.5034 5.13797 22.2464C6.58274 21.7653 8.3431 20.7738 9.17063 18.7522C9.21696 18.639 9.26037 18.5226 9.30064 18.4029C9.30716 18.3835 9.31304 18.364 9.31827 18.3446Z"></path></svg>Tip</p><div class="starlight-aside__content"><p>Parallel code review에서는 “몇 threads인가?”보다 먼저 task graph를 그린다. Node는
+work, edge는 반드시 보존해야 하는 dependency로 표현하면 decomposition과
+orchestration 문제를 분리해서 볼 수 있다.</p></div></aside>
+<div class="sl-heading-wrapper level-h2"><h2 id="speedup-and-amdahls-law">Speedup and Amdahl’s Law</h2><a class="sl-anchor-link" href="#speedup-and-amdahls-law"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Speedup and Amdahl’s Law”</span></a></div>
+<p>고정된 computation에 대해 <code dir="auto">P</code> processors를 사용한 speedup은 다음과 같다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Speedup(P) = T(1) / T(P)</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Speedup(P) = T(1) / T(P)"><div></div></button></div></figure></div>
+<p>Sequential execution time 중 fraction <code dir="auto">S</code>가 dependency 때문에 본질적으로 serial이고,
+나머지 <code dir="auto">1-S</code>가 <code dir="auto">P</code> processors에 완벽하게 분산된다고 하자.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">T(P) / T(1) = S + (1 - S) / P</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Speedup(P) = 1 / (S + (1 - S) / P)</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="T(P) / T(1) = S + (1 - S) / PSpeedup(P) = 1 / (S + (1 - S) / P)"><div></div></button></div></figure></div>
+<p><code dir="auto">P</code>가 무한히 커져도 parallel part만 0에 가까워질 뿐 serial part는 남는다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">lim(P -> infinity) Speedup(P) = 1 / S</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="lim(P -> infinity) Speedup(P) = 1 / S"><div></div></button></div></figure></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Serial fraction <code dir="auto">S</code></th><th>Infinite-processor upper bound</th></tr></thead><tbody><tr><td>10%</td><td>10x</td></tr><tr><td>5%</td><td>20x</td></tr><tr><td>1%</td><td>100x</td></tr><tr><td>0.1%</td><td>1,000x</td></tr></tbody></table>
+<p><starlight-image-zoom-zoomable><img src="/gpu/cs149/lec04/assets/amdahl-speedup.png" alt="Amdahl&#x27;s Law maximum speedup curves"><button aria-label="Zoom image: Amdahl&#x27;s Law maximum speedup curves" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<p>원본 graph는 <code dir="auto">P=64</code>까지 processor를 늘렸을 때 <code dir="auto">S=0.01</code>, <code dir="auto">0.05</code>, <code dir="auto">0.1</code> curve가
+각각 다른 ceiling으로 휘어지는 모습을 보여 준다. Processor가 추가될수록 curve의
+slope가 작아지므로 “core를 더 추가했는데 얻는 speedup”이라는 marginal benefit도
+serial fraction에 의해 빠르게 감소한다.</p>
+<p>강의 슬라이드는 Summit supercomputer의 <code dir="auto">27,648 GPUs × 5,376 FP32 ALUs/GPU = 148,635,648 ALUs</code>를 예로 든다. Application의 0.1%가 serial이면 1억 개가 넘는
+parallel ALU를 보유해도 Amdahl upper bound는 1,000x다. Processor를 늘릴수록 작은
+serial region, global synchronization, sequential reduction의 상대적 영향이 커진다.</p>
+<p>Amdahl’s Law는 실제 runtime을 완전히 예측하는 model이 아니다. Parallel overhead,
+load imbalance, memory bandwidth, cache behavior, communication은 식에 포함되지 않는다.
+따라서 이 식은 optimistic upper bound이며, 실제 speedup은 보통 더 낮다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="image-example-parallel-map-and-reduction">Image Example: Parallel Map and Reduction</h2><a class="sl-anchor-link" href="#image-example-parallel-map-and-reduction"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Image Example: Parallel Map and Reduction”</span></a></div>
+<p><code dir="auto">N × N</code> image에 두 operation을 수행한다고 하자.</p>
+<ol>
+<li>모든 pixel brightness를 2배로 만든다.</li>
+<li>모든 pixel의 average를 계산한다.</li>
+</ol>
+<p>두 phase가 각각 약 <code dir="auto">N²</code> work를 가지면 sequential time은 약 <code dir="auto">2N²</code>이다.</p>
+<p>첫 phase만 <code dir="auto">P</code> processors로 parallelize하고 second phase를 serial로 남기면 다음과
+같다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">T(P) = N²/P + N²</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Speedup(P) = 2N² / (N²/P + N²)</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">           </span></span><span style="--0:#d6deeb;--1:#403f53">-> 2  as P grows</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="T(P) = N²/P + N²Speedup(P) = 2N² / (N²/P + N²)           -> 2  as P grows"><div></div></button></div></figure></div>
+<p>Brightness update가 완벽하게 scale해도 전체 speedup이 2를 넘지 못한다. 전체 work의
+절반인 average phase가 serial이기 때문이다.</p>
+<p>Average도 parallelize하려면 각 processor가 약 <code dir="auto">N²/P</code> pixel의 partial sum을 만들고
+마지막에 <code dir="auto">P</code> partial을 합친다. 단순하게 final combine을 serial로 수행하면 다음과
+같다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">phase 1: N²/P</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">phase 2: N²/P + P</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">T(P) ≈ 2N²/P + P</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="phase 1: N²/Pphase 2: N²/P + PT(P) ≈ 2N²/P + P"><div></div></button></div></figure></div>
+<p><code dir="auto">N</code>이 <code dir="auto">P</code>보다 충분히 크면 <code dir="auto">P</code>개의 partial을 합치는 overhead가 전체 work에 비해
+작아져 speedup은 <code dir="auto">P</code>에 가까워진다. 그러나 input이 작거나 <code dir="auto">P</code>가 매우 크면 final
+combine이 다시 bottleneck이 된다. 실제 system은 tree reduction으로 combine depth를
+<code dir="auto">O(log P)</code>에 가깝게 줄일 수 있다.</p>
+<p>이 예시가 주는 일반 원칙은 다음과 같다.</p>
+<ul>
+<li>Element-wise transform은 independent iteration을 찾기 쉽다.</li>
+<li>Aggregation은 cross-worker communication을 요구한다.</li>
+<li>Reduction을 parallelize해도 partial combine overhead는 사라지지 않는다.</li>
+<li>Parallelism을 한 phase에만 추가해서는 end-to-end speedup을 얻기 어렵다.</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="decomposition-and-dependency-analysis">Decomposition and Dependency Analysis</h2><a class="sl-anchor-link" href="#decomposition-and-dependency-analysis"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Decomposition and Dependency Analysis”</span></a></div>
+<p>Decomposition은 problem을 병렬로 수행할 수 있는 task로 나누는 단계다. 일반적으로
+machine의 모든 execution unit을 busy하게 유지할 만큼 task를 만들어야 한다. 하지만
+task 수가 많다는 사실만으로 parallelism이 생기는 것은 아니다. Dependency edge로
+연결된 task는 required order를 지켜야 한다.</p>
+<p>Dependency를 찾을 때 각 operation의 read/write set을 적으면 도움이 된다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Relationship</th><th>Example</th><th>Consequence</th></tr></thead><tbody><tr><td>Read-after-write</td><td><code dir="auto">B</code>가 <code dir="auto">A</code>가 쓴 값을 읽음</td><td><code dir="auto">A -> B</code> 순서 필요</td></tr><tr><td>Write-after-read</td><td><code dir="auto">B</code>가 <code dir="auto">A</code>가 읽을 값을 덮어씀</td><td>순서 변경 시 <code dir="auto">A</code>의 input 변화</td></tr><tr><td>Write-after-write</td><td>두 task가 같은 location에 씀</td><td>Final value가 order에 의존</td></tr><tr><td>Disjoint access</td><td>서로 겹치지 않는 location 사용</td><td>Parallel execution 가능</td></tr></tbody></table>
+<p>General-purpose compiler가 arbitrary sequential program을 자동으로 완벽히 parallelize하기
+어려운 이유도 dependency 때문이다. Address가 input data에 따라 정해지거나 function
+side effect가 복잡하면 compile time에 independence를 증명하기 어렵다. 그래서 대부분의
+parallel program에서는 programmer가 domain knowledge로 decomposition을 제시한다.</p>
+<p>Decomposition에는 algorithm choice도 포함된다. 기존 sequential execution order가
+dependency를 많이 만든다면, 같은 acceptable solution을 계산하는 다른 algorithm이나
+update order를 선택해 dependency graph 자체를 바꿀 수 있다. Grid solver의 red-black
+ordering이 바로 이 경우다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="assignment-static-and-dynamic">Assignment: Static and Dynamic</h2><a class="sl-anchor-link" href="#assignment-static-and-dynamic"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Assignment: Static and Dynamic”</span></a></div>
+<p>Assignment는 decomposed task를 worker에게 배분하는 단계다. 여기서 worker는 CPU
+thread, ISPC program instance, SIMD lane, GPU thread/block 등 문맥에 따라 달라진다.</p>
+<p>Assignment의 두 가지 주요 목표는 다음과 같다.</p>
+<ul>
+<li>모든 worker가 비슷한 시간 동안 useful work를 수행하도록 load를 balance한다.</li>
+<li>서로 data를 주고받는 task를 적절히 모아 communication과 locality cost를 줄인다.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Strategy</th><th>Decision time</th><th>Strength</th><th>Risk</th></tr></thead><tbody><tr><td>Static assignment</td><td>실행 전 또는 compile time</td><td>낮은 scheduling overhead, 예측 가능</td><td>Irregular work에서 imbalance</td></tr><tr><td>Dynamic assignment</td><td>실행 중</td><td>변화하는 task cost에 적응</td><td>Queue/atomic overhead, locality 손실</td></tr></tbody></table>
+<p>강의의 예시는 abstraction에 따라 assignment 책임이 달라짐을 보여 준다.</p>
+<ul>
+<li>Manual ISPC indexing은 programmer가 iteration을 program instance에 static하게
+assign한다.</li>
+<li>ISPC <code dir="auto">foreach</code>는 programmer가 independence만 선언하고 compiler가 assignment를
+선택한다. 현재 implementation은 static이지만 abstraction은 더 넓은 선택을 허용한다.</li>
+<li>C++ thread example은 array의 앞/뒤 절반을 두 thread에 static blocked assignment한다.</li>
+<li>ISPC task runtime은 완료된 worker가 queue에서 다음 task를 가져가도록 dynamic
+assignment할 수 있다.</li>
+</ul>
+<p>Assignment policy는 correctness가 아니라 performance choice여야 한다. 특정 worker가
+특정 iteration을 맡아야만 correct한 <code dir="auto">foreach</code> program은 abstraction contract를 어긴다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="orchestration-and-mapping">Orchestration and Mapping</h2><a class="sl-anchor-link" href="#orchestration-and-mapping"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Orchestration and Mapping”</span></a></div>
+<p>Orchestration은 parallel worker의 cooperation을 조직한다.</p>
+<ul>
+<li>Shared value와 message의 communication structure</li>
+<li>Dependency를 보존하기 위한 lock, atomic, barrier</li>
+<li>Memory 안의 data layout과 ownership</li>
+<li>Task execution order와 scheduling</li>
+<li>Reduction, broadcast, halo exchange 같은 collective pattern</li>
+</ul>
+<p>Orchestration의 목적은 correctness를 유지하면서 communication, synchronization,
+scheduling overhead를 최소화하고 locality를 보존하는 것이다. Machine에서
+synchronization이 비싸다면 더 큰 phase로 묶거나 local accumulation을 사용해
+synchronization frequency를 낮출 수 있다.</p>
+<p>Mapping은 logical worker를 physical execution resource에 대응시킨다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Mapping agent</th><th>Example</th></tr></thead><tbody><tr><td>Operating system</td><td>Software thread를 CPU core의 hardware context에 배치</td></tr><tr><td>Compiler</td><td>ISPC program instance를 vector lane에 배치</td></tr><tr><td>Runtime</td><td>Task를 worker thread 또는 device queue에 배치</td></tr><tr><td>Hardware</td><td>CUDA thread block을 available GPU SM에 배치</td></tr></tbody></table>
+<p>Related worker를 같은 core나 가까운 memory domain에 놓으면 data sharing과
+communication cost를 줄일 수 있다. 반대로 resource demand가 다른 unrelated work를
+함께 놓아 compute pipeline과 memory pipeline을 보완적으로 사용할 수도 있다. 좋은
+mapping은 workload와 hardware topology에 따라 달라진다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="task-granularity-and-thread-pools">Task Granularity and Thread Pools</h2><a class="sl-anchor-link" href="#task-granularity-and-thread-pools"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Task Granularity and Thread Pools”</span></a></div>
+<p>Task는 work description이고 thread는 task를 실행하는 worker다. 둘을 일대일로 만들면
+task가 많을 때 thread creation, destruction, OS scheduling, context switching cost가
+useful work보다 커질 수 있다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">bad for many small tasks</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">task 0 -> create thread 0 -> run -> join</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">task 1 -> create thread 1 -> run -> join</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">...</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">typical runtime design</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">fixed-size worker pool</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> worker gets next task</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> executes task</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> gets another task</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="bad for many small taskstask 0 -> create thread 0 -> run -> jointask 1 -> create thread 1 -> run -> join...typical runtime designfixed-size worker pool  -> worker gets next task  -> executes task  -> gets another task"><div></div></button></div></figure></div>
+<p>강의 demo는 거의 아무 일도 하지 않는 function을 task로 사용해 overhead를
+의도적으로 확대했다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Strategy</th><th>Lecture demo observation</th></tr></thead><tbody><tr><td>Sequential function calls</td><td>가장 빠름</td></tr><tr><td>Eight-worker thread pool</td><td>Sequential보다 약 23배 느림</td></tr><tr><td>One C++ thread per task</td><td>Thread pool보다 약 300배 느림</td></tr></tbody></table>
+<p>이 결과는 parallel execution이 항상 빠르지 않다는 극단적인 예다. Task가 충분히
+무거워지면 worker pool의 병렬 실행이 sequential보다 빨라진다. 핵심 variable은
+task당 useful work와 dispatch/synchronization overhead의 비율이다.</p>
+<p>강의는 OS context switching과 hardware multi-thread switching도 구분한다. OS는
+software thread의 architectural state를 저장하고 다른 thread를 schedule하므로 매우
+비싸다. Hardware multi-threaded core는 resident context 사이에서 instruction을
+선택하도록 설계되어 훨씬 빠르다. Memory latency를 숨기기 위해 application이 수많은
+OS threads를 oversubscribe하는 것은 hardware multi-threading과 같은 효과가 아니다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="the-2d-grid-solver">The 2D Grid Solver</h2><a class="sl-anchor-link" href="#the-2d-grid-solver"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “The 2D Grid Solver”</span></a></div>
+<p>강의의 main case study는 <code dir="auto">(N+2) × (N+2)</code> grid에서 PDE를 iterative하게 푸는
+Gauss-Seidel-style solver다. Border를 제외한 각 cell을 자신의 현재 값과 상하좌우
+neighbor의 평균으로 in-place update한다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">A[i,j] = 0.2 * (</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">A[i,j]   + A[i,j-1] + A[i-1,j]</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">               </span></span><span style="--0:#d6deeb;--1:#403f53">+ A[i,j+1] + A[i+1,j]</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">)</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="A[i,j] = 0.2 * (    A[i,j]   + A[i,j-1] + A[i-1,j]               + A[i,j+1] + A[i+1,j])"><div></div></button></div></figure></div>
+<p>한 sweep의 total change를 <code dir="auto">diff</code>에 누적하고 average change가 tolerance보다 작으면
+iteration을 멈춘다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="c"><code><div class="ec-line"><div class="code"><span style="--0:#C792EA;--1:#8844AE">while</span><span style="--0:#D6DEEB;--1:#403F53"> (</span><span style="--0:#C792EA;--1:#8844AE">!</span><span style="--0:#D6DEEB;--1:#403F53">done) {</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#C792EA;--1:#8844AE">float</span><span style="--0:#D6DEEB;--1:#403F53"> diff </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--1:#AA0982"><span style="--0:#F78C6C">0.0</span><span style="--0:#FFEB95">f</span></span><span style="--0:#D6DEEB;--1:#403F53">;</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#C792EA;--1:#8844AE">for</span><span style="--0:#D6DEEB;--1:#403F53"> (</span><span style="--0:#C792EA;--1:#8844AE">int</span><span style="--0:#D6DEEB;--1:#403F53"> i </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">1</span><span style="--0:#D6DEEB;--1:#403F53">; i </span><span style="--0:#C792EA;--1:#8844AE">&#x3C;=</span><span style="--0:#D6DEEB;--1:#403F53"> N; </span><span style="--0:#C792EA;--1:#8844AE">++</span><span style="--0:#D6DEEB;--1:#403F53">i) {</span></div></div><div class="ec-line"><div class="code"><span class="indent">        </span><span style="--0:#C792EA;--1:#8844AE">for</span><span style="--0:#D6DEEB;--1:#403F53"> (</span><span style="--0:#C792EA;--1:#8844AE">int</span><span style="--0:#D6DEEB;--1:#403F53"> j </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">1</span><span style="--0:#D6DEEB;--1:#403F53">; j </span><span style="--0:#C792EA;--1:#8844AE">&#x3C;=</span><span style="--0:#D6DEEB;--1:#403F53"> N; </span><span style="--0:#C792EA;--1:#8844AE">++</span><span style="--0:#D6DEEB;--1:#403F53">j) {</span></div></div><div class="ec-line"><div class="code"><span class="indent">            </span><span style="--0:#C792EA;--1:#8844AE">float</span><span style="--0:#D6DEEB;--1:#403F53"> old </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C5E478;--1:#3B61B0">A</span><span style="--0:#D6DEEB;--1:#403F53">[i][j];</span></div></div><div class="ec-line"><div class="code"><span class="indent">            </span><span style="--0:#C5E478;--1:#3B61B0">A</span><span style="--0:#D6DEEB;--1:#403F53">[i][j] </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">update_from_neighbors(A, i, j)</span><span style="--0:#D6DEEB;--1:#403F53">;</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#D6DEEB;--1:#403F53">            </span></span><span style="--0:#D6DEEB;--1:#403F53">diff </span><span style="--0:#C792EA;--1:#8844AE">+=</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--1:#3B61B0"><span style="--0:#82AAFF">abs(</span><span style="--0:#C5E478">A</span><span style="--0:#82AAFF">[i][j] </span></span><span style="--0:#7FDBCA;--1:#096E72">-</span><span style="--0:#82AAFF;--1:#3B61B0"> old)</span><span style="--0:#D6DEEB;--1:#403F53">;</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#D6DEEB;--1:#403F53">        </span></span><span style="--0:#D6DEEB;--1:#403F53">}</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#D6DEEB;--1:#403F53">    </span></span><span style="--0:#D6DEEB;--1:#403F53">}</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#D6DEEB;--1:#403F53">    </span></span><span style="--0:#D6DEEB;--1:#403F53">done </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> diff </span><span style="--0:#7FDBCA;--1:#096E72">/</span><span style="--0:#D6DEEB;--1:#403F53"> (N </span><span style="--0:#7FDBCA;--1:#096E72">*</span><span style="--0:#D6DEEB;--1:#403F53"> N) </span><span style="--0:#C792EA;--1:#8844AE">&#x3C;</span><span style="--0:#D6DEEB;--1:#403F53"> tolerance;</span></div></div><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">}</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="while (!done) {    float diff = 0.0f;    for (int i = 1; i <= N; ++i) {        for (int j = 1; j <= N; ++j) {            float old = A[i][j];            A[i][j] = update_from_neighbors(A, i, j);            diff += abs(A[i][j] - old);        }    }    done = diff / (N * N) < tolerance;}"><div></div></button></div></figure></div>
+<p>이 code를 단순히 nested loop parallelization 대상으로 보면 안 된다. In-place update
+때문에 현재 sweep의 새 값과 아직 update되지 않은 이전 값을 함께 읽으며, traversal
+order가 dependency와 numerical path를 결정한다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="why-naive-gauss-seidel-is-hard-to-parallelize">Why Naive Gauss-Seidel Is Hard to Parallelize</h2><a class="sl-anchor-link" href="#why-naive-gauss-seidel-is-hard-to-parallelize"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Why Naive Gauss-Seidel Is Hard to Parallelize”</span></a></div>
+<p>Row-major traversal에서 한 cell은 같은 row의 왼쪽 cell과 이전 row의 cell이 먼저
+update되기를 기다린다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">dependency direction</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">      </span></span><span style="--0:#d6deeb;--1:#403f53">from previous row</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">             </span></span><span style="--0:#d6deeb;--1:#403f53">↓</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">left  ->  current cell</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="dependency direction      from previous row             ↓left  ->  current cell"><div></div></button></div></figure></div>
+<p><starlight-image-zoom-zoomable><img src="/gpu/cs149/lec04/assets/gauss-seidel-dependencies.png" alt="Gauss-Seidel grid dependencies within one solver iteration"><button aria-label="Zoom image: Gauss-Seidel grid dependencies within one solver iteration" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<p>원본 dependency diagram에서 horizontal arrow는 같은 row의 왼쪽 element가 먼저
+완료되어야 함을, vertical arrow는 이전 row의 element가 먼저 완료되어야 함을
+나타낸다. 이 dependency는 solver 전체가 아니라 한 번의 <code dir="auto">while (!done)</code> iteration
+안에서 형성되는 관계다.</p>
+<p>같은 anti-diagonal 위의 cell은 서로 직접 의존하지 않으므로 wavefront parallelism이
+존재한다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">time 0: 1 cell</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">time 1: 2 cells</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">time 2: 3 cells</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">...</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">middle: O(N) cells</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">...</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">end: 1 cell</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="time 0: 1 celltime 1: 2 cellstime 2: 3 cells...middle: O(N) cells...end: 1 cell"><div></div></button></div></figure></div>
+<p>가능한 implementation은 diagonal의 cell을 task로 나누어 parallel update하고, 모든
+task가 끝난 뒤 다음 diagonal로 이동하는 것이다. Correct하지만 다음 문제가 있다.</p>
+<ul>
+<li>시작과 끝에는 independent work가 적어 machine utilization이 낮다.</li>
+<li>Diagonal 길이가 계속 변해 assignment와 load balancing이 복잡하다.</li>
+<li>거의 모든 diagonal 사이에 synchronization이 필요하다.</li>
+<li>짧은 phase가 많아 barrier overhead와 straggler wait가 커진다.</li>
+</ul>
+<p>Dependency graph에서 parallelism을 찾았다고 좋은 parallel algorithm이 자동으로
+나오는 것은 아니다. Parallelism의 amount, shape, synchronization frequency도 함께
+평가해야 한다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="red-black-ordering">Red-Black Ordering</h2><a class="sl-anchor-link" href="#red-black-ordering"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Red-Black Ordering”</span></a></div>
+<p>Grid를 checkerboard처럼 red와 black cell로 coloring하면 한 color의 cell은 모두 반대
+color의 neighbor만 가진다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">R B R B R B</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">B R B R B R</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">R B R B R B</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">B R B R B R</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="R B R B R BB R B R B RR B R B R BB R B R B R"><div></div></button></div></figure></div>
+<p>이 property를 사용하면 한 iteration을 두 phase로 바꿀 수 있다.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    I[Iteration start] --> R[Update all red cells&#x3C;br/>in parallel]
+    R --> B1[Phase boundary&#x3C;br/>red values complete]
+    B1 --> B[Update all black cells&#x3C;br/>in parallel]
+    B --> B2[Phase boundary&#x3C;br/>black values complete]
+    B2 --> C{Converged?}
+    C -->|no| R
+    C -->|yes| E[Finish]
+
+    classDef primary fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef secondary fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef note fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef accent fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    class I,E primary
+    class B,B2 secondary
+    class C note
+    class R,B1 accent</pre>
+<p>Red phase 안에서는 각 red cell update가 independent하고, black phase 안에서도 각
+black cell update가 independent하다. Diagonal마다 기다리던 algorithm이 color당 큰
+parallel phase 하나를 가지는 algorithm으로 바뀐다.</p>
+<p>이 reordering은 원래 sequential traversal과 bitwise-identical intermediate value를
+계산하지 않는다. Floating-point operation order와 iteration별 value가 달라지고
+convergence path도 달라질 수 있다. 다만 domain knowledge에 따라 같은 PDE solution에
+tolerance 범위로 수렴하는 것이 acceptable하다고 판단한다. Parallelism을 위해
+algorithm을 바꿀 때는 이런 semantic relaxation이 허용되는지 먼저 확인해야 한다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="work-assignment-and-communication">Work Assignment and Communication</h2><a class="sl-anchor-link" href="#work-assignment-and-communication"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Work Assignment and Communication”</span></a></div>
+<p>Red-black decomposition 이후에도 cell을 processor에 assign하는 방법이 남는다. 예를
+들어 row block 또는 interleaved cell assignment를 사용할 수 있다.</p>
+<p>Blocked assignment는 각 processor가 contiguous region을 담당한다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">processor 0: rows 1 ... N/P</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">processor 1: rows N/P+1 ... 2N/P</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">...</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="processor 0: rows 1 ... N/Pprocessor 1: rows N/P+1 ... 2N/P..."><div></div></button></div></figure></div>
+<p>Neighbor update에 필요한 remote data는 partition boundary에 집중된다. 각 region의
+interior는 local data만 사용하므로 boundary-to-volume ratio가 작다.</p>
+<p>Interleaved assignment는 work count를 고르게 만들 수 있지만 adjacent cell이 다른
+processor에 흩어질 수 있다. 그러면 각 iteration에서 더 많은 neighbor value를
+communicate해야 한다. 강의의 grid 예시에서는 blocked assignment가 processor 사이에
+보내야 할 data를 줄인다.</p>
+<p><starlight-image-zoom-zoomable><img src="/gpu/cs149/lec04/assets/grid-assignment-communication.png" alt="Communication volume under blocked and interleaved grid assignment"><button aria-label="Zoom image: Communication volume under blocked and interleaved grid assignment" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<p>슬라이드의 gray row는 <code dir="auto">P2</code>가 한 iteration에서 받아야 하는 remote data다. Blocked
+assignment에서는 gray region이 partition boundary 근처에만 나타나지만, interleaved
+assignment에서는 <code dir="auto">P2</code>와 인접한 row가 grid 전체에 반복된다. 같은 cell update 수를
+배분해도 assignment가 달라지면 communication surface가 크게 달라진다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Assignment quality</th><th>Question</th></tr></thead><tbody><tr><td>Load balance</td><td>각 worker의 useful work가 비슷한가?</td></tr><tr><td>Communication volume</td><td>Partition boundary를 가로지르는 dependency가 몇 개인가?</td></tr><tr><td>Locality</td><td>한 worker가 contiguous/reused data를 접근하는가?</td></tr><tr><td>Synchronization</td><td>Worker가 얼마나 자주 서로 기다려야 하는가?</td></tr></tbody></table>
+<p>“어떤 assignment가 더 좋은가?”의 답은 system에 따라 달라진다. Shared-cache CPU,
+NUMA CPU, multi-GPU, distributed-memory cluster는 communication granularity와 cost가
+다르므로 같은 decomposition에도 다른 assignment가 유리할 수 있다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="data-parallel-expression">Data-Parallel Expression</h2><a class="sl-anchor-link" href="#data-parallel-expression"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Data-Parallel Expression”</span></a></div>
+<p>Data-parallel model에서는 programmer가 independent collection과 operation을 표현하고
+system이 worker assignment와 orchestration의 많은 부분을 담당한다. Red phase만
+단순화한 pseudocode는 다음과 같다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="c"><code><div class="ec-line"><div class="code"><span style="--0:#C792EA;--1:#8844AE">while</span><span style="--0:#D6DEEB;--1:#403F53"> (</span><span style="--0:#C792EA;--1:#8844AE">!</span><span style="--0:#D6DEEB;--1:#403F53">done) {</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#C792EA;--1:#8844AE">float</span><span style="--0:#D6DEEB;--1:#403F53"> diff </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--1:#AA0982"><span style="--0:#F78C6C">0.0</span><span style="--0:#FFEB95">f</span></span><span style="--0:#D6DEEB;--1:#403F53">;</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#82AAFF;--1:#3B61B0">for_all (red cells (i, j))</span><span style="--0:#D6DEEB;--1:#403F53"> {</span></div></div><div class="ec-line"><div class="code"><span class="indent">        </span><span style="--0:#C792EA;--1:#8844AE">float</span><span style="--0:#D6DEEB;--1:#403F53"> old </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C5E478;--1:#3B61B0">A</span><span style="--0:#D6DEEB;--1:#403F53">[i][j];</span></div></div><div class="ec-line"><div class="code"><span class="indent">        </span><span style="--0:#C5E478;--1:#3B61B0">A</span><span style="--0:#D6DEEB;--1:#403F53">[i][j] </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">update_from_neighbors(A, i, j)</span><span style="--0:#D6DEEB;--1:#403F53">;</span></div></div><div class="ec-line"><div class="code"><span class="indent">        </span><span style="--1:#3B61B0"><span style="--0:#82AAFF">reduce_add(diff, abs(</span><span style="--0:#C5E478">A</span><span style="--0:#82AAFF">[i][j] </span></span><span style="--0:#7FDBCA;--1:#096E72">-</span><span style="--0:#82AAFF;--1:#3B61B0"> old))</span><span style="--0:#D6DEEB;--1:#403F53">;</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#D6DEEB;--1:#403F53">    </span></span><span style="--0:#D6DEEB;--1:#403F53">}</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#D6DEEB;--1:#403F53">    </span></span><span style="--0:#D6DEEB;--1:#403F53">done </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> diff </span><span style="--0:#7FDBCA;--1:#096E72">/</span><span style="--0:#D6DEEB;--1:#403F53"> (N </span><span style="--0:#7FDBCA;--1:#096E72">*</span><span style="--0:#D6DEEB;--1:#403F53"> N) </span><span style="--0:#C792EA;--1:#8844AE">&#x3C;</span><span style="--0:#D6DEEB;--1:#403F53"> tolerance;</span></div></div><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">}</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="while (!done) {    float diff = 0.0f;    for_all (red cells (i, j)) {        float old = A[i][j];        A[i][j] = update_from_neighbors(A, i, j);        reduce_add(diff, abs(A[i][j] - old));    }    done = diff / (N * N) < tolerance;}"><div></div></button></div></figure></div>
+<p>이 abstraction에서 역할 분담은 다음과 같다.</p>
+<ul>
+<li>Decomposition: 개별 red cell update가 independent work임을 programmer가 표현한다.</li>
+<li>Assignment: 어떤 worker가 어떤 cell을 처리할지 system이 정한다.</li>
+<li>Orchestration: <code dir="auto">for_all</code> 종료의 implicit wait와 built-in reduction을 system이 제공한다.</li>
+<li>Communication: Array load/store와 reduction primitive에 내포된다.</li>
+</ul>
+<p>Single logical control flow가 <code dir="auto">for_all</code>에 들어갔다가 모든 parallel iteration이 끝난 뒤
+다시 sequential control로 돌아온다고 생각할 수 있다. 이 model은 concise하고
+assignment/synchronization bug의 surface를 줄이지만, system의 scheduling과 data
+placement가 workload에 적합한지는 별도로 측정해야 한다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="shared-address-space-and-spmd">Shared Address Space and SPMD</h2><a class="sl-anchor-link" href="#shared-address-space-and-spmd"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Shared Address Space and SPMD”</span></a></div>
+<p>Shared-address-space model에서는 모든 thread가 같은 address space의 variable을
+load/store하여 communicate한다. 강의는 이를 누구나 읽고 쓸 수 있는 bulletin board에
+비유한다.</p>
+<p>SPMD expression에서는 같은 <code dir="auto">solve</code> function을 여러 thread가 실행하며 각 thread는
+<code dir="auto">threadId</code>로 자신의 blocked row range를 계산한다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="c"><code><div class="ec-line"><div class="code"><span style="--0:#C792EA;--1:#8844AE">int</span><span style="--0:#D6DEEB;--1:#403F53"> thread_id </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">get_thread_id</span><span style="--0:#D6DEEB;--1:#403F53">();</span></div></div><div class="ec-line"><div class="code"><span style="--0:#C792EA;--1:#8844AE">int</span><span style="--0:#D6DEEB;--1:#403F53"> row_begin </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">1</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#7FDBCA;--1:#096E72">+</span><span style="--0:#D6DEEB;--1:#403F53"> thread_id </span><span style="--0:#7FDBCA;--1:#096E72">*</span><span style="--0:#D6DEEB;--1:#403F53"> N </span><span style="--0:#7FDBCA;--1:#096E72">/</span><span style="--0:#D6DEEB;--1:#403F53"> num_threads;</span></div></div><div class="ec-line"><div class="code"><span style="--0:#C792EA;--1:#8844AE">int</span><span style="--0:#D6DEEB;--1:#403F53"> row_end </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">1</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#7FDBCA;--1:#096E72">+</span><span style="--0:#D6DEEB;--1:#403F53"> (thread_id </span><span style="--0:#7FDBCA;--1:#096E72">+</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">1</span><span style="--0:#D6DEEB;--1:#403F53">) </span><span style="--0:#7FDBCA;--1:#096E72">*</span><span style="--0:#D6DEEB;--1:#403F53"> N </span><span style="--0:#7FDBCA;--1:#096E72">/</span><span style="--0:#D6DEEB;--1:#403F53"> num_threads;</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#C792EA;--1:#8844AE">while</span><span style="--0:#D6DEEB;--1:#403F53"> (</span><span style="--0:#C792EA;--1:#8844AE">!</span><span style="--0:#D6DEEB;--1:#403F53">done) {</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#C792EA;--1:#8844AE">float</span><span style="--0:#D6DEEB;--1:#403F53"> my_diff </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--1:#AA0982"><span style="--0:#F78C6C">0.0</span><span style="--0:#FFEB95">f</span></span><span style="--0:#D6DEEB;--1:#403F53">;</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#C792EA;--1:#8844AE">for</span><span style="--0:#D6DEEB;--1:#403F53"> (</span><span style="--0:#C792EA;--1:#8844AE">int</span><span style="--0:#D6DEEB;--1:#403F53"> i </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> row_begin; i </span><span style="--0:#C792EA;--1:#8844AE">&#x3C;</span><span style="--0:#D6DEEB;--1:#403F53"> row_end; </span><span style="--0:#C792EA;--1:#8844AE">++</span><span style="--0:#D6DEEB;--1:#403F53">i) {</span></div></div><div class="ec-line"><div class="code"><span class="indent">        </span><span style="--0:#C792EA;--1:#8844AE">for</span><span style="--0:#D6DEEB;--1:#403F53"> (red cells j in row i) {</span></div></div><div class="ec-line"><div class="code"><span class="indent">            </span><span style="--0:#C792EA;--1:#8844AE">float</span><span style="--0:#D6DEEB;--1:#403F53"> old </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C5E478;--1:#3B61B0">A</span><span style="--0:#D6DEEB;--1:#403F53">[i][j];</span></div></div><div class="ec-line"><div class="code"><span class="indent">            </span><span style="--0:#C5E478;--1:#3B61B0">A</span><span style="--0:#D6DEEB;--1:#403F53">[i][j] </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">update_from_neighbors(A, i, j)</span><span style="--0:#D6DEEB;--1:#403F53">;</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#D6DEEB;--1:#403F53">            </span></span><span style="--0:#D6DEEB;--1:#403F53">my_diff </span><span style="--0:#C792EA;--1:#8844AE">+=</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--1:#3B61B0"><span style="--0:#82AAFF">abs(</span><span style="--0:#C5E478">A</span><span style="--0:#82AAFF">[i][j] </span></span><span style="--0:#7FDBCA;--1:#096E72">-</span><span style="--0:#82AAFF;--1:#3B61B0"> old)</span><span style="--0:#D6DEEB;--1:#403F53">;</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#D6DEEB;--1:#403F53">        </span></span><span style="--0:#D6DEEB;--1:#403F53">}</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#D6DEEB;--1:#403F53">    </span></span><span style="--0:#D6DEEB;--1:#403F53">}</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#919F9F;--1:#5D6376">// combine my_diff and synchronize phases explicitly</span></div></div><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">}</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="int thread_id = get_thread_id();int row_begin = 1 + thread_id * N / num_threads;int row_end = 1 + (thread_id + 1) * N / num_threads;while (!done) {    float my_diff = 0.0f;    for (int i = row_begin; i < row_end; ++i) {        for (red cells j in row i) {            float old = A[i][j];            A[i][j] = update_from_neighbors(A, i, j);            my_diff += abs(A[i][j] - old);        }    }    // combine my_diff and synchronize phases explicitly}"><div></div></button></div></figure></div>
+<p>Programmer는 다음을 직접 결정한다.</p>
+<ul>
+<li><code dir="auto">threadId</code>를 row block에 mapping하는 방법</li>
+<li>Shared grid와 thread-local variable의 구분</li>
+<li><code dir="auto">my_diff</code> partial을 global <code dir="auto">diff</code>에 결합하는 방법</li>
+<li>모든 update가 끝났음을 확인하는 barrier 위치</li>
+<li>다음 iteration이 이전 iteration의 state를 덮어쓰지 않도록 하는 ordering</li>
+</ul>
+<p>Shared address space는 sequential programming의 자연스러운 확장이지만 load/store가
+thread communication이 될 수 있다는 점을 항상 고려해야 한다. 같은 address를
+concurrent하게 접근할 때 적어도 하나가 write라면 synchronization 또는 명확한
+ownership rule이 필요하다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="mutual-exclusion-and-atomicity">Mutual Exclusion and Atomicity</h2><a class="sl-anchor-link" href="#mutual-exclusion-and-atomicity"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Mutual Exclusion and Atomicity”</span></a></div>
+<p>두 thread가 shared <code dir="auto">x</code>에 <code dir="auto">x++</code>를 실행한다고 하자. Source에서는 한 줄이지만
+implementation은 최소한 다음 read-modify-write sequence를 포함한다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">r1 = load x</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">r1 = r1 + 1</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">store x = r1</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="r1 = load xr1 = r1 + 1store x = r1"><div></div></button></div></figure></div>
+<p><code dir="auto">x = 0</code>에서 다음 interleaving이 가능하다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">thread 0: load x -> 0</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">thread 1: load x -> 0</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">thread 0: add -> 1</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">thread 1: add -> 1</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">thread 0: store 1</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">thread 1: store 1</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="thread 0: load x -> 0thread 1: load x -> 0thread 0: add -> 1thread 1: add -> 1thread 0: store 1thread 1: store 1"><div></div></button></div></figure></div>
+<p><starlight-image-zoom-zoomable><img src="/gpu/cs149/lec04/assets/lost-update-interleaving.png" alt="Lost update caused by interleaved read-modify-write instructions"><button aria-label="Zoom image: Lost update caused by interleaved read-modify-write instructions" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<p>원본 interleaving은 source-level <code dir="auto">x++</code> 하나가 load, register add, store의 세
+instruction으로 풀린다는 점을 강조한다. Gray row처럼 두 thread의 instruction이
+사이에 끼어들면 각각의 <code dir="auto">r1</code>은 private copy이므로 둘 다 0에서 1을 계산하고, 마지막
+두 store가 같은 값 1을 써서 update 하나가 사라진다.</p>
+<p>두 번 increment했지만 final value는 1이다. 이것이 lost update이며, program result가
+schedule에 의존하는 race condition이다.</p>
+<p>Lock은 critical section에 한 thread만 들어가도록 mutual exclusion을 제공한다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="c"><code><div class="ec-line"><div class="code"><span style="--0:#82AAFF;--1:#3B61B0">lock</span><span style="--0:#D6DEEB;--1:#403F53">(mutex);</span></div></div><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">diff </span><span style="--0:#C792EA;--1:#8844AE">+=</span><span style="--0:#D6DEEB;--1:#403F53"> my_diff;</span></div></div><div class="ec-line"><div class="code"><span style="--0:#82AAFF;--1:#3B61B0">unlock</span><span style="--0:#D6DEEB;--1:#403F53">(mutex);</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="lock(mutex);diff += my_diff;unlock(mutex);"><div></div></button></div></figure></div>
+<p>다른 선택으로 hardware-supported atomic read-modify-write나 language-level atomic
+block을 사용할 수 있다. 어떤 mechanism을 쓰든 필요한 semantic은 shared update가
+쪼개지지 않는 하나의 atomic action처럼 보이게 하는 것이다.</p>
+<aside aria-label="Caution" class="starlight-aside starlight-aside--caution"><p class="starlight-aside__title" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="starlight-aside__icon"><path d="M12 16C11.8022 16 11.6089 16.0587 11.4444 16.1686C11.28 16.2784 11.1518 16.4346 11.0761 16.6173C11.0004 16.8001 10.9806 17.0011 11.0192 17.1951C11.0578 17.3891 11.153 17.5673 11.2929 17.7071C11.4327 17.847 11.6109 17.9422 11.8049 17.9808C11.9989 18.0194 12.2 17.9996 12.3827 17.9239C12.5654 17.8482 12.7216 17.72 12.8315 17.5556C12.9413 17.3911 13 17.1978 13 17C13 16.7348 12.8946 16.4805 12.7071 16.2929C12.5196 16.1054 12.2652 16 12 16ZM22.67 17.47L14.62 3.47003C14.3598 3.00354 13.9798 2.61498 13.5192 2.3445C13.0586 2.07401 12.5341 1.9314 12 1.9314C11.4659 1.9314 10.9414 2.07401 10.4808 2.3445C10.0202 2.61498 9.64019 3.00354 9.38 3.47003L1.38 17.47C1.11079 17.924 0.966141 18.441 0.960643 18.9688C0.955144 19.4966 1.089 20.0166 1.34868 20.4761C1.60837 20.9356 1.9847 21.3185 2.43968 21.5861C2.89466 21.8536 3.41218 21.9964 3.94 22H20.06C20.5921 22.0053 21.1159 21.8689 21.5779 21.6049C22.0399 21.341 22.4234 20.9589 22.689 20.4978C22.9546 20.0368 23.0928 19.5134 23.0895 18.9814C23.0862 18.4493 22.9414 17.9277 22.67 17.47ZM20.94 19.47C20.8523 19.626 20.7245 19.7556 20.5697 19.8453C20.4149 19.935 20.2389 19.9815 20.06 19.98H3.94C3.76111 19.9815 3.5851 19.935 3.43032 19.8453C3.27553 19.7556 3.14765 19.626 3.06 19.47C2.97223 19.318 2.92602 19.1456 2.92602 18.97C2.92602 18.7945 2.97223 18.622 3.06 18.47L11.06 4.47003C11.1439 4.30623 11.2714 4.16876 11.4284 4.07277C11.5855 3.97678 11.766 3.92599 11.95 3.92599C12.134 3.92599 12.3145 3.97678 12.4716 4.07277C12.6286 4.16876 12.7561 4.30623 12.84 4.47003L20.89 18.47C20.9892 18.6199 21.0462 18.7937 21.055 18.9732C21.0638 19.1527 21.0241 19.3312 20.94 19.49V19.47ZM12 8.00003C11.7348 8.00003 11.4804 8.10538 11.2929 8.29292C11.1054 8.48046 11 8.73481 11 9.00003V13C11 13.2652 11.1054 13.5196 11.2929 13.7071C11.4804 13.8947 11.7348 14 12 14C12.2652 14 12.5196 13.8947 12.7071 13.7071C12.8946 13.5196 13 13.2652 13 13V9.00003C13 8.73481 12.8946 8.48046 12.7071 8.29292C12.5196 8.10538 12.2652 8.00003 12 8.00003Z"></path></svg>Caution</p><div class="starlight-aside__content"><p><code dir="auto">+=</code>, <code dir="auto">++</code>, check-then-update 같은 source expression을 atomic이라고 가정하면 안 된다.
+Compiler와 ISA가 제공하는 atomic type/operation 또는 lock으로 명시해야 한다.</p></div></aside>
+<div class="sl-heading-wrapper level-h2"><h2 id="local-accumulation-and-reduction">Local Accumulation and Reduction</h2><a class="sl-anchor-link" href="#local-accumulation-and-reduction"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Local Accumulation and Reduction”</span></a></div>
+<p>Correctness를 위해 모든 cell update마다 global <code dir="auto">diff</code> lock을 잡을 수 있지만, inner
+loop의 fine-grained synchronization은 worker를 사실상 serialize하고 lock contention을
+키운다.</p>
+<p>더 좋은 방법은 thread마다 private partial을 계산한 뒤 한 번만 global accumulator에
+합치는 것이다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">for each worker:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">my_diff = sum(changes in my assigned cells)   // no lock</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">then:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">lock</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">global_diff += my_diff                        // once per worker</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">unlock</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="for each worker:  my_diff = sum(changes in my assigned cells)   // no lockthen:  lock  global_diff += my_diff                        // once per worker  unlock"><div></div></button></div></figure></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Design</th><th>Shared updates per iteration</th><th>Contention</th></tr></thead><tbody><tr><td>Global update per cell</td><td><code dir="auto">O(N²)</code></td><td>매우 높음</td></tr><tr><td>One partial per worker</td><td><code dir="auto">O(P)</code></td><td>훨씬 낮음</td></tr><tr><td>Tree reduction</td><td><code dir="auto">O(P)</code> total, <code dir="auto">O(log P)</code> depth</td><td>계층적으로 분산 가능</td></tr></tbody></table>
+<p>이 pattern은 Lecture 3의 ISPC varying partial과 <code dir="auto">reduce_add</code>와 같다. 먼저 local/private
+state에서 대부분의 work를 수행하고, cross-worker communication은 마지막 combine에
+제한한다. Local copy를 위한 작은 memory footprint를 사용해 synchronization frequency와
+contention을 줄이는 trade-off다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="barrier-synchronization">Barrier Synchronization</h2><a class="sl-anchor-link" href="#barrier-synchronization"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Barrier Synchronization”</span></a></div>
+<p>Barrier는 모든 participating thread가 도착할 때까지 어느 thread도 다음 phase로
+넘어가지 못하게 한다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">all work before barrier by all threads completes</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">                         </span></span><span style="--0:#d6deeb;--1:#403f53">↓</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">                     </span></span><span style="--0:#d6deeb;--1:#403f53">barrier</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">                         </span></span><span style="--0:#d6deeb;--1:#403f53">↓</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">any work after barrier may begin</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="all work before barrier by all threads completes                         ↓                     barrier                         ↓any work after barrier may begin"><div></div></button></div></figure></div>
+<p><starlight-image-zoom-zoomable><img src="/gpu/cs149/lec04/assets/barrier-synchronization.png" alt="Barrier dividing red and black computation into global phases"><button aria-label="Zoom image: Barrier dividing red and black computation into global phases" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<p>슬라이드 오른쪽의 네 vertical stream은 <code dir="auto">P1</code>부터 <code dir="auto">P4</code>까지의 execution을 나타낸다.
+먼저 barrier에 도착한 worker는 통과하지 못하고, 마지막 worker가 red phase를 끝내야
+모든 worker가 black phase로 진행할 수 있다. Barrier는 필요한 dependency보다 더 넓은
+scope를 막을 수 있다는 의미에서 conservative한 synchronization이다.</p>
+<p>Barrier는 “이후의 모든 work가 이전의 모든 work에 의존한다”는 conservative한
+dependency 표현이다. Red phase와 black phase 사이처럼 실제로 global phase ordering이
+필요할 때 자연스럽다. 하지만 일부 dependency만 필요한데 full barrier를 쓰면 unrelated
+worker까지 기다리게 된다.</p>
+<p>강의의 first shared-address-space solver는 iteration마다 세 barrier를 사용한다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">1. diff = 0</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">   </span></span><span style="--0:#d6deeb;--1:#403f53">barrier A</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">2. compute local work and add partial into diff</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">   </span></span><span style="--0:#d6deeb;--1:#403f53">barrier B</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">3. read diff and decide whether converged</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">   </span></span><span style="--0:#d6deeb;--1:#403f53">barrier C</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">4. next iteration</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="1. diff = 0   barrier A2. compute local work and add partial into diff   barrier B3. read diff and decide whether converged   barrier C4. next iteration"><div></div></button></div></figure></div>
+<p>각 barrier에는 서로 다른 correctness 목적이 있다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Barrier</th><th>Dependency it preserves</th><th>Without it</th></tr></thead><tbody><tr><td>A: reset 후</td><td>모든 reset이 끝난 뒤 contribution 시작</td><td>늦은 reset이 이미 더한 partial을 지움</td></tr><tr><td>B: contribution 후</td><td>모든 partial이 끝난 뒤 convergence check</td><td>불완전한 <code dir="auto">diff</code>로 너무 일찍 종료 가능</td></tr><tr><td>C: check 후</td><td>모두 이전 <code dir="auto">diff</code>를 읽은 뒤 다음 iteration 시작</td><td>빠른 thread가 <code dir="auto">diff</code>를 reset/update해 느린 thread의 check를 오염</td></tr></tbody></table>
+<p>Barrier wait time은 가장 느린 participating worker에 의해 결정된다. 따라서 phase 안의
+load imbalance가 크면 빠른 worker의 idle time도 커진다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="reducing-three-barriers-to-one">Reducing Three Barriers to One</h2><a class="sl-anchor-link" href="#reducing-three-barriers-to-one"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Reducing Three Barriers to One”</span></a></div>
+<p>세 barrier가 필요한 원인은 모든 iteration이 같은 <code dir="auto">diff</code> storage를 reset, update,
+read하기 때문이다. Lecture slides는 successive iteration이 서로 다른 accumulator를
+사용하도록 <code dir="auto">diff</code>를 replicate해 이 storage dependency를 제거한다.</p>
+<p><starlight-image-zoom-zoomable><img src="/gpu/cs149/lec04/assets/barrier-state-versioning.svg" alt="Three barriers on one shared accumulator versus one barrier with rotating accumulator versions"><button aria-label="Zoom image: Three barriers on one shared accumulator versus one barrier with rotating accumulator versions" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<p>왼쪽은 하나의 <code dir="auto">diff</code>를 reset, accumulate, check, 다음 iteration의 reset에 계속
+재사용할 때 세 phase boundary가 필요한 이유를 보여 준다. 오른쪽은 <code dir="auto">diff[0..2]</code>가
+current, next, cooldown 역할을 번갈아 맡도록 해, current slot의 contribution과 next
+slot의 clear가 끝나는 지점에 barrier 하나만 두는 rolling-state 구조다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="c"><code><div class="ec-line"><div class="code"><span style="--0:#C792EA;--1:#8844AE">float</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C5E478;--1:#3B61B0">diff</span><span style="--0:#D6DEEB;--1:#403F53">[</span><span style="--0:#F78C6C;--1:#AA0982">3</span><span style="--0:#D6DEEB;--1:#403F53">] </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> {</span><span style="--1:#AA0982"><span style="--0:#F78C6C">0.0</span><span style="--0:#FFEB95">f</span></span><span style="--0:#D6DEEB;--1:#403F53">, </span><span style="--1:#AA0982"><span style="--0:#F78C6C">0.0</span><span style="--0:#FFEB95">f</span></span><span style="--0:#D6DEEB;--1:#403F53">, </span><span style="--1:#AA0982"><span style="--0:#F78C6C">0.0</span><span style="--0:#FFEB95">f</span></span><span style="--0:#D6DEEB;--1:#403F53">};</span></div></div><div class="ec-line"><div class="code"><span style="--0:#C792EA;--1:#8844AE">int</span><span style="--0:#D6DEEB;--1:#403F53"> index </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">0</span><span style="--0:#D6DEEB;--1:#403F53">;</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#C792EA;--1:#8844AE">while</span><span style="--0:#D6DEEB;--1:#403F53"> (</span><span style="--0:#82AAFF;--1:#3B61B0">true</span><span style="--0:#D6DEEB;--1:#403F53">) {</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#C792EA;--1:#8844AE">float</span><span style="--0:#D6DEEB;--1:#403F53"> my_diff </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">compute_local_change()</span><span style="--0:#D6DEEB;--1:#403F53">;</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#82AAFF;--1:#3B61B0">lock(mutex)</span><span style="--0:#D6DEEB;--1:#403F53">;</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#C5E478;--1:#3B61B0">diff</span><span style="--0:#D6DEEB;--1:#403F53">[index] </span><span style="--0:#C792EA;--1:#8844AE">+=</span><span style="--0:#D6DEEB;--1:#403F53"> my_diff;</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#82AAFF;--1:#3B61B0">unlock(mutex)</span><span style="--0:#D6DEEB;--1:#403F53">;</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#C5E478;--1:#3B61B0">diff</span><span style="--0:#D6DEEB;--1:#403F53">[(index </span><span style="--0:#7FDBCA;--1:#096E72">+</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">1</span><span style="--0:#D6DEEB;--1:#403F53">) </span><span style="--0:#7FDBCA;--1:#096E72">%</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">3</span><span style="--0:#D6DEEB;--1:#403F53">] </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--1:#AA0982"><span style="--0:#F78C6C">0.0</span><span style="--0:#FFEB95">f</span></span><span style="--0:#D6DEEB;--1:#403F53">;</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#82AAFF;--1:#3B61B0">barrier(all_threads)</span><span style="--0:#D6DEEB;--1:#403F53">;</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#C792EA;--1:#8844AE">if</span><span style="--0:#D6DEEB;--1:#403F53"> (</span><span style="--0:#C5E478;--1:#3B61B0">diff</span><span style="--0:#D6DEEB;--1:#403F53">[index] </span><span style="--0:#7FDBCA;--1:#096E72">/</span><span style="--0:#D6DEEB;--1:#403F53"> (N </span><span style="--0:#7FDBCA;--1:#096E72">*</span><span style="--0:#D6DEEB;--1:#403F53"> N) </span><span style="--0:#C792EA;--1:#8844AE">&#x3C;</span><span style="--0:#D6DEEB;--1:#403F53"> tolerance)</span></div></div><div class="ec-line"><div class="code"><span class="indent">        </span><span style="--0:#C792EA;--1:#8844AE">break</span><span style="--0:#D6DEEB;--1:#403F53">;</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#D6DEEB;--1:#403F53">    </span></span><span style="--0:#D6DEEB;--1:#403F53">index </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> (index </span><span style="--0:#7FDBCA;--1:#096E72">+</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">1</span><span style="--0:#D6DEEB;--1:#403F53">) </span><span style="--0:#7FDBCA;--1:#096E72">%</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">3</span><span style="--0:#D6DEEB;--1:#403F53">;</span></div></div><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">}</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="float diff[3] = {0.0f, 0.0f, 0.0f};int index = 0;while (true) {    float my_diff = compute_local_change();    lock(mutex);    diff[index] += my_diff;    unlock(mutex);    diff[(index + 1) % 3] = 0.0f;    barrier(all_threads);    if (diff[index] / (N * N) < tolerance)        break;    index = (index + 1) % 3;}"><div></div></button></div></figure></div>
+<p>한 slot은 current iteration의 contribution을 모으고, 다른 slot은 future iteration을
+위해 clear되며, 이전 slot은 다른 thread가 판단에 사용 중일 수 있다. Barrier 하나는
+current contributions와 next-slot initialization이 모두 끝났음을 보장한다. Current와
+next state가 같은 address를 재사용하지 않으므로 reset-before-update, check-before-next-
+update를 위해 별도 barrier를 둘 필요가 줄어든다.</p>
+<p>이 optimization의 일반 원칙은 다음과 같다.</p>
+<blockquote>
+<p>Storage를 replicate하거나 versioning하여 successive phase가 서로 다른 state를
+사용하게 만들면 false dependency와 synchronization을 줄일 수 있다. 대신 memory
+footprint, indexing complexity, initialization cost가 증가한다.</p>
+</blockquote>
+<p>실제 language memory model에서는 여러 thread가 같은 slot에 <code dir="auto">0</code>을 쓰는 행위도 data
+race가 될 수 있다. 강의의 pseudocode는 algorithmic dependency를 설명하기 위한
+것이다. Production implementation은 designated initializer thread, atomic store,
+per-thread partial array 등 language가 정의한 방식으로 initialization을 구현해야 한다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="comparing-programming-models">Comparing Programming Models</h2><a class="sl-anchor-link" href="#comparing-programming-models"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Comparing Programming Models”</span></a></div>
+<p>같은 red-black grid solver를 두 programming model로 표현하면 책임 배분이 선명해진다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Dimension</th><th>Data-parallel model</th><th>Shared address space + SPMD</th></tr></thead><tbody><tr><td>Logical control</td><td><code dir="auto">for_all</code> 밖은 single control flow</td><td>모든 thread가 같은 function 실행</td></tr><tr><td>Decomposition</td><td>Programmer가 independent elements 선언</td><td>Programmer가 thread별 region 계산</td></tr><tr><td>Assignment</td><td>System이 iteration을 worker에 배치</td><td>Programmer/runtime이 명시적으로 결정</td></tr><tr><td>Communication</td><td>Array load/store와 built-in reduce</td><td>Shared variable load/store</td></tr><tr><td>Synchronization</td><td>Loop end의 implicit wait</td><td>Explicit lock, atomic, barrier</td></tr><tr><td>Reduction</td><td>Built-in collective</td><td>Local partial + explicit combine</td></tr><tr><td>Main advantage</td><td>Concise하고 system optimization 여지 큼</td><td>Placement와 synchronization을 세밀하게 제어</td></tr><tr><td>Main risk</td><td>Hidden scheduling/placement cost</td><td>Race, deadlock, excessive synchronization</td></tr></tbody></table>
+<p>두 model 모두 shared memory load/store로 grid data를 읽고 쓸 수 있다. 차이는
+parallelism과 synchronization을 누가 표현하고 관리하는가에 있다. Higher-level
+abstraction은 programmer burden을 줄이고 system에 더 많은 freedom을 주며,
+lower-level abstraction은 control을 늘리는 대신 correctness proof와 tuning responsibility를
+programmer에게 넘긴다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="gpu-systems-lens">GPU Systems Lens</h2><a class="sl-anchor-link" href="#gpu-systems-lens"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “GPU Systems Lens”</span></a></div>
+<p>이 절과 이어지는 Practical Tips는 강의 개념을 이 repository의 GPU/AI systems
+관점에 적용한 추가 노트다. 강의 영상이나 슬라이드의 직접 주장으로 간주하지 않는다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Lecture 4 concept</th><th>GPU/AI systems interpretation</th></tr></thead><tbody><tr><td>Decomposition</td><td>Tensor element, tile, token, expert, request를 independent work로 나눔</td></tr><tr><td>Assignment</td><td>Thread/block/SM/GPU 또는 rank에 work를 배분</td></tr><tr><td>Orchestration</td><td>Kernel boundary, event, collective, atomic, barrier</td></tr><tr><td>Mapping</td><td>Runtime/hardware가 block을 SM에, collective chunk를 link에 배치</td></tr><tr><td>Amdahl serial fraction</td><td>Host launch, sequential layer, global reduction, synchronization tail</td></tr><tr><td>Red-black reordering</td><td>Algorithm/data layout을 바꿔 더 큰 independent phase 생성</td></tr><tr><td>Local partial</td><td>Warp/block-local reduction 후 global combine</td></tr><tr><td>Blocked assignment</td><td>Tile locality를 높이고 halo/collective traffic을 줄임</td></tr><tr><td>Barrier wait</td><td>Block/rank imbalance 때문에 빠른 worker가 idle</td></tr><tr><td>State replication</td><td>Double/triple buffering, versioned accumulator, pipeline stage buffer</td></tr></tbody></table>
+<p>CUDA에서 grid 전체 thread가 standard in-kernel barrier로 동기화할 수 있다고 가정하면 안
+된다. <code dir="auto">__syncthreads()</code>는 한 block 안에서만 동작한다. Red phase와 black phase 사이의
+global dependency는 보통 separate kernel launch, cooperative groups의 제한된 grid sync,
+또는 algorithm redesign으로 표현한다. Kernel boundary는 global phase ordering을
+제공하지만 launch overhead와 intermediate memory traffic도 만든다.</p>
+<p>AI workload에서는 decomposition level이 여러 층이다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">request / batch</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> model layer</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">-> tensor operation</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">      </span></span><span style="--0:#d6deeb;--1:#403f53">-> tile / block</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">        </span></span><span style="--0:#d6deeb;--1:#403f53">-> warp / lane work</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="request / batch  -> model layer    -> tensor operation      -> tile / block        -> warp / lane work"><div></div></button></div></figure></div>
+<p>각 level에서 task 수와 worker 수를 혼동하지 않아야 한다. 예를 들어 token 수가 많아도
+한 kernel의 tile assignment가 불균형하거나 MoE expert traffic이 skewed하면 SM 또는
+GPU 사이에 straggler가 생긴다. Amdahl’s Law의 serial fraction은 explicit single-thread
+code뿐 아니라 모든 worker가 기다리는 control-plane step과 global collective tail에도
+나타난다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="practical-tips-and-notes">Practical Tips and Notes</h2><a class="sl-anchor-link" href="#practical-tips-and-notes"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Practical Tips and Notes”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="dependency를-code가-아니라-data-version으로-추적하기">Dependency를 code가 아니라 data version으로 추적하기</h3><a class="sl-anchor-link" href="#dependency를-code가-아니라-data-version으로-추적하기"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Dependency를 code가 아니라 data version으로 추적하기”</span></a></div>
+<p>In-place algorithm은 같은 array name 안에 old/new value가 섞여 dependency가 잘 보이지
+않는다. 각 read가 어느 iteration과 phase의 version을 요구하는지 표시한다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">read A[t] or A[t-1]?</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">write A[t] before which consumer?</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="read A[t] or A[t-1]?write A[t] before which consumer?"><div></div></button></div></figure></div>
+<p>필요하면 double buffering으로 old/new array를 분리한다. Memory footprint는 늘지만
+dependency, race, barrier 위치가 단순해질 수 있다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="baseline과-numerator를-고정하기">Baseline과 numerator를 고정하기</h3><a class="sl-anchor-link" href="#baseline과-numerator를-고정하기"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Baseline과 numerator를 고정하기”</span></a></div>
+<p>Speedup은 numerator에 무엇을 넣느냐에 따라 달라진다. Parallel version과 다른
+algorithm, precision, convergence tolerance를 쓰면서 원래 sequential runtime으로
+나누면 misleading할 수 있다. 다음을 함께 기록한다.</p>
+<ul>
+<li>동일한 input과 output tolerance</li>
+<li>Warm-up 포함 여부</li>
+<li>Allocation, transfer, initialization 포함 범위</li>
+<li>One-thread parallel code인지 best sequential code인지</li>
+<li>End-to-end time인지 kernel-only time인지</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="task-granularity를-useful-work-대-overhead로-측정하기">Task granularity를 useful work 대 overhead로 측정하기</h3><a class="sl-anchor-link" href="#task-granularity를-useful-work-대-overhead로-측정하기"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Task granularity를 useful work 대 overhead로 측정하기”</span></a></div>
+<p>Task size를 바꾸며 다음을 측정한다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">useful compute time / (dispatch + queue + synchronization time)</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="useful compute time / (dispatch + queue + synchronization time)"><div></div></button></div></figure></div>
+<p>Task가 너무 작으면 overhead가 지배하고, 너무 크면 parallelism과 load balance가
+나빠진다. Worker별 task count와 busy time을 함께 보면 어느 쪽인지 구분할 수 있다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="reduction을-계층적으로-만들기">Reduction을 계층적으로 만들기</h3><a class="sl-anchor-link" href="#reduction을-계층적으로-만들기"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Reduction을 계층적으로 만들기”</span></a></div>
+<p>모든 thread가 하나의 global atomic에 직접 더하는 구조는 hot spot이 된다. GPU에서는
+lane partial → warp reduction → block reduction → global reduction처럼 계층을 만든다.
+각 단계에서 communication participant 수와 shared update frequency를 줄인다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="barrier-cost를-호출-횟수만으로-판단하지-않기">Barrier cost를 호출 횟수만으로 판단하지 않기</h3><a class="sl-anchor-link" href="#barrier-cost를-호출-횟수만으로-판단하지-않기"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Barrier cost를 호출 횟수만으로 판단하지 않기”</span></a></div>
+<p>같은 barrier 수라도 phase load imbalance에 따라 cost가 크게 달라진다. Profiler에서
+barrier stall time, worker arrival-time spread, tail block/rank를 본다. Barrier 앞의
+work distribution을 고치는 것이 barrier primitive를 바꾸는 것보다 효과적일 수 있다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="blocked-partition의-boundary-to-volume-ratio-확인하기">Blocked partition의 boundary-to-volume ratio 확인하기</h3><a class="sl-anchor-link" href="#blocked-partition의-boundary-to-volume-ratio-확인하기"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Blocked partition의 boundary-to-volume ratio 확인하기”</span></a></div>
+<p>Stencil, convolution, attention tile처럼 neighbor data가 필요한 workload에서는 partition
+volume 대비 halo/boundary 크기를 계산한다. Block을 너무 작게 만들면 parallel task는
+늘지만 duplicated load나 inter-device communication 비율도 커진다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="numerical-convergence와-reproducibility를-따로-검증하기">Numerical convergence와 reproducibility를 따로 검증하기</h3><a class="sl-anchor-link" href="#numerical-convergence와-reproducibility를-따로-검증하기"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Numerical convergence와 reproducibility를 따로 검증하기”</span></a></div>
+<p>Parallel reduction과 red-black ordering은 floating-point addition/update order를 바꾼다.
+Bitwise equality만 보거나 final loss만 보는 대신 다음을 확인한다.</p>
+<ul>
+<li>허용 tolerance 안의 final solution</li>
+<li>Convergence iteration 수와 monotonicity expectation</li>
+<li>여러 schedule/run에서의 variation</li>
+<li>NaN/Inf 발생과 worst-case residual</li>
+</ul>
+<aside aria-label="Caution" class="starlight-aside starlight-aside--caution"><p class="starlight-aside__title" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="starlight-aside__icon"><path d="M12 16C11.8022 16 11.6089 16.0587 11.4444 16.1686C11.28 16.2784 11.1518 16.4346 11.0761 16.6173C11.0004 16.8001 10.9806 17.0011 11.0192 17.1951C11.0578 17.3891 11.153 17.5673 11.2929 17.7071C11.4327 17.847 11.6109 17.9422 11.8049 17.9808C11.9989 18.0194 12.2 17.9996 12.3827 17.9239C12.5654 17.8482 12.7216 17.72 12.8315 17.5556C12.9413 17.3911 13 17.1978 13 17C13 16.7348 12.8946 16.4805 12.7071 16.2929C12.5196 16.1054 12.2652 16 12 16ZM22.67 17.47L14.62 3.47003C14.3598 3.00354 13.9798 2.61498 13.5192 2.3445C13.0586 2.07401 12.5341 1.9314 12 1.9314C11.4659 1.9314 10.9414 2.07401 10.4808 2.3445C10.0202 2.61498 9.64019 3.00354 9.38 3.47003L1.38 17.47C1.11079 17.924 0.966141 18.441 0.960643 18.9688C0.955144 19.4966 1.089 20.0166 1.34868 20.4761C1.60837 20.9356 1.9847 21.3185 2.43968 21.5861C2.89466 21.8536 3.41218 21.9964 3.94 22H20.06C20.5921 22.0053 21.1159 21.8689 21.5779 21.6049C22.0399 21.341 22.4234 20.9589 22.689 20.4978C22.9546 20.0368 23.0928 19.5134 23.0895 18.9814C23.0862 18.4493 22.9414 17.9277 22.67 17.47ZM20.94 19.47C20.8523 19.626 20.7245 19.7556 20.5697 19.8453C20.4149 19.935 20.2389 19.9815 20.06 19.98H3.94C3.76111 19.9815 3.5851 19.935 3.43032 19.8453C3.27553 19.7556 3.14765 19.626 3.06 19.47C2.97223 19.318 2.92602 19.1456 2.92602 18.97C2.92602 18.7945 2.97223 18.622 3.06 18.47L11.06 4.47003C11.1439 4.30623 11.2714 4.16876 11.4284 4.07277C11.5855 3.97678 11.766 3.92599 11.95 3.92599C12.134 3.92599 12.3145 3.97678 12.4716 4.07277C12.6286 4.16876 12.7561 4.30623 12.84 4.47003L20.89 18.47C20.9892 18.6199 21.0462 18.7937 21.055 18.9732C21.0638 19.1527 21.0241 19.3312 20.94 19.49V19.47ZM12 8.00003C11.7348 8.00003 11.4804 8.10538 11.2929 8.29292C11.1054 8.48046 11 8.73481 11 9.00003V13C11 13.2652 11.1054 13.5196 11.2929 13.7071C11.4804 13.8947 11.7348 14 12 14C12.2652 14 12.5196 13.8947 12.7071 13.7071C12.8946 13.5196 13 13.2652 13 13V9.00003C13 8.73481 12.8946 8.48046 12.7071 8.29292C12.5196 8.10538 12.2652 8.00003 12 8.00003Z"></path></svg>Caution</p><div class="starlight-aside__content"><p>“같은 수학식”이 곧 “같은 floating-point trajectory”를 뜻하지 않는다. Algorithmic
+reordering을 적용한 뒤에는 performance뿐 아니라 convergence criterion과 numerical
+acceptance test를 다시 검증한다.</p></div></aside>
+<div class="sl-heading-wrapper level-h3"><h3 id="quick-reference">Quick Reference</h3><a class="sl-anchor-link" href="#quick-reference"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Quick Reference”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Symptom</th><th>First check</th></tr></thead><tbody><tr><td>Core/GPU를 늘려도 speedup이 일찍 포화</td><td>Serial fraction, global reduction, launch/sync tail</td></tr><tr><td>Worker 일부만 계속 바쁨</td><td>Task count, task cost variance, static assignment</td></tr><tr><td>Dynamic scheduling이 오히려 느림</td><td>Task granularity와 queue/atomic overhead</td></tr><tr><td>Grid/stencil communication이 큼</td><td>Blocked partition, halo size, boundary-to-volume ratio</td></tr><tr><td><code dir="auto">x++</code> 결과가 예상보다 작음</td><td>Lost update, non-atomic read-modify-write</td></tr><tr><td>Barrier에서 긴 stall</td><td>Phase imbalance, straggler, 이전 communication</td></tr><tr><td>Global atomic이 bottleneck</td><td>Per-worker partial과 hierarchical reduction</td></tr><tr><td>Barrier를 제거하자 결과가 흔들림</td><td>Reset/update/read 사이의 cross-iteration dependency</td></tr><tr><td>Reordered solver의 값이 다름</td><td>Floating-point order와 convergence tolerance</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h2"><h2 id="lecture-summary">Lecture Summary</h2><a class="sl-anchor-link" href="#lecture-summary"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Lecture Summary”</span></a></div>
+<p>이번 강의는 parallel program을 만드는 일을 decomposition, assignment, orchestration,
+mapping의 네 책임으로 정리했다. 가장 먼저 해야 할 일은 dependency를 찾아 independent
+work를 드러내는 것이다. 그 다음 task를 worker에 배분하고, communication과
+synchronization을 조직하며, worker를 실제 hardware에 mapping한다. 각 책임은
+programmer와 system이 나누어 맡을 수 있다.</p>
+<p>Amdahl’s Law는 serial fraction이 maximum speedup을 제한함을 보여 준다. Image
+brightness phase만 parallelize하면 전체 work의 절반인 average가 serial로 남아
+speedup은 2로 제한된다. Partial sum으로 reduction을 parallelize해야 processor 수에
+가까운 speedup을 기대할 수 있지만, combine overhead와 실제 system bottleneck은 여전히
+남는다.</p>
+<p>2D Gauss-Seidel solver는 dependency analysis와 algorithm redesign의 중요성을 보여
+준다. Original in-place order에는 diagonal parallelism이 있지만 phase가 짧고
+synchronization이 잦다. Red-black coloring으로 update order를 바꾸면 각 color에 큰
+independent phase가 생긴다. 이 변경은 intermediate floating-point result를 바꾸므로
+domain이 허용하는 solution semantics와 tolerance를 확인해야 한다.</p>
+<p>Data-parallel model은 assignment, reduction, implicit phase wait를 system에 맡긴다.
+Shared-address-space/SPMD model은 programmer가 work partition, lock, barrier를 직접
+표현한다. Shared read-modify-write에는 atomicity가 필요하며, per-cell lock 대신
+thread-local partial을 사용하면 contention을 크게 줄일 수 있다. 세 barrier를 하나로
+줄인 예시는 state replication이 storage dependency를 제거하는 일반적인 parallel
+optimization임을 보여 준다.</p>
+<p>최종적으로 기억할 네 문장은 다음과 같다.</p>
+<ul>
+<li>Dependency analysis가 parallel program design의 출발점이다.</li>
+<li>Maximum speedup은 남아 있는 serial work에 제한된다.</li>
+<li>Task, worker, hardware execution unit은 서로 다른 개념이다.</li>
+<li>Locality, communication, synchronization을 무시한 parallelism은 빠른 program을
+보장하지 않는다.</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="key-terms">Key Terms</h2><a class="sl-anchor-link" href="#key-terms"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Key Terms”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Term</th><th>Meaning</th></tr></thead><tbody><tr><td>Speedup</td><td><code dir="auto">T(1) / T(P)</code>, one-processor time 대비 <code dir="auto">P</code>-processor time의 개선 비율</td></tr><tr><td>Amdahl’s Law</td><td>Serial fraction이 parallel speedup의 upper bound를 정한다는 법칙</td></tr><tr><td>Decomposition</td><td>Problem을 independent하게 수행 가능한 task로 나누는 단계</td></tr><tr><td>Dependency</td><td>한 operation이 다른 operation의 result/order를 필요로 하는 관계</td></tr><tr><td>Task</td><td>수행해야 할 logical unit of work</td></tr><tr><td>Worker</td><td>Task를 가져와 실행하는 thread, program instance, process 등의 entity</td></tr><tr><td>Assignment</td><td>Task를 worker에게 배분하는 단계</td></tr><tr><td>Static assignment</td><td>실행 전에 정해지는 work distribution</td></tr><tr><td>Dynamic assignment</td><td>실행 중 worker 상태에 따라 정해지는 work distribution</td></tr><tr><td>Orchestration</td><td>Communication, synchronization, scheduling, data organization을 조정하는 단계</td></tr><tr><td>Mapping</td><td>Logical worker를 physical execution resource에 대응시키는 단계</td></tr><tr><td>Granularity</td><td>한 task 또는 synchronization phase에 포함된 work의 크기</td></tr><tr><td>Thread pool</td><td>고정된 worker thread가 여러 task를 반복 실행하는 runtime structure</td></tr><tr><td>Oversubscription</td><td>Runnable software thread가 hardware execution context보다 과도하게 많은 상태</td></tr><tr><td>Gauss-Seidel method</td><td>새 값을 즉시 반영하며 iterative하게 system을 푸는 method</td></tr><tr><td>Wavefront parallelism</td><td>Dependency frontier를 따라 diagonal/phase 단위로 진행하는 parallelism</td></tr><tr><td>Red-black ordering</td><td>Checkerboard coloring으로 같은 color update를 독립 phase로 만드는 순서</td></tr><tr><td>Shared address space</td><td>여러 thread가 같은 memory address namespace를 읽고 쓰는 model</td></tr><tr><td>SPMD</td><td>여러 worker가 같은 program을 서로 다른 data/ID로 실행하는 model</td></tr><tr><td>Mutual exclusion</td><td>한 번에 하나의 thread만 critical section에 들어가게 하는 property</td></tr><tr><td>Atomicity</td><td>Operation이 중간 interleaving 없이 하나의 indivisible action처럼 보이는 property</td></tr><tr><td>Race condition</td><td>Result가 concurrent access의 timing/order에 의존하는 오류</td></tr><tr><td>Barrier</td><td>모든 participating worker가 도착할 때까지 다음 phase 진행을 막는 primitive</td></tr><tr><td>Reduction</td><td>여러 partial value를 하나의 result로 결합하는 operation</td></tr><tr><td>State replication</td><td>여러 copy/version을 사용해 contention이나 dependency를 줄이는 기법</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h2"><h2 id="questions">Questions</h2><a class="sl-anchor-link" href="#questions"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Questions”</span></a></div>
+<ol>
+<li>Parallel program을 만드는 네 responsibility는 무엇인가?</li>
+<li>Decomposition에서 가장 먼저 찾아야 하는 것은 무엇인가?</li>
+<li><code dir="auto">P</code> processors에서 Amdahl’s Law의 speedup 식은 무엇인가?</li>
+<li>Serial fraction이 5%이면 processor 수를 무한히 늘렸을 때 maximum speedup은
+얼마인가?</li>
+<li>Image brightness phase만 parallelize했을 때 speedup이 2로 제한되는 이유는
+무엇인가?</li>
+<li>Average 계산을 partial reduction으로 바꾸면 어떤 overhead가 새로 생기는가?</li>
+<li>Task와 worker thread는 어떻게 다른가?</li>
+<li>아주 작은 task에서 sequential execution이 thread pool보다 빠를 수 있는 이유는
+무엇인가?</li>
+<li>Static assignment와 dynamic assignment의 주요 trade-off는 무엇인가?</li>
+<li>Orchestration에는 어떤 작업이 포함되는가?</li>
+<li>In-place Gauss-Seidel traversal에서 naive nested-loop parallelization이 잘못될 수
+있는 이유는 무엇인가?</li>
+<li>Diagonal wavefront parallelism의 두 가지 performance 문제는 무엇인가?</li>
+<li>Red-black ordering이 큰 parallel phase를 만드는 이유는 무엇인가?</li>
+<li>Red-black solver가 original traversal과 bitwise-identical하지 않을 수 있는 이유는
+무엇인가?</li>
+<li>Grid solver에서 blocked assignment가 communication을 줄일 수 있는 이유는
+무엇인가?</li>
+<li>Data-parallel model과 shared-address-space/SPMD model은 assignment와
+synchronization 책임을 어떻게 다르게 나누는가?</li>
+<li>두 thread가 동시에 <code dir="auto">x++</code>를 실행할 때 lost update가 생기는 과정을 설명하라.</li>
+<li>Per-cell global lock 대신 thread-local <code dir="auto">my_diff</code>를 사용하면 무엇이 개선되는가?</li>
+<li>Barrier는 computation에 어떤 ordering을 부여하는가?</li>
+<li>Shared solver의 reset 후, contribution 후, check 후 barrier는 각각 어떤 dependency를
+보존하는가?</li>
+<li><code dir="auto">diff</code> accumulator를 replicate하면 barrier 수를 줄일 수 있는 이유는 무엇인가?</li>
+<li>CUDA에서 <code dir="auto">__syncthreads()</code>만으로 red/black phase 사이의 grid-wide dependency를
+표현할 수 없는 이유는 무엇인가?</li>
+</ol>
+<div class="sl-heading-wrapper level-h2"><h2 id="answers">Answers</h2><a class="sl-anchor-link" href="#answers"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Answers”</span></a></div>
+<ol>
+<li>Decomposition, assignment, orchestration, mapping이다.</li>
+<li>Operation 사이의 dependency와 그 dependency가 없는 independent work를 찾아야
+한다.</li>
+<li><code dir="auto">Speedup(P) = 1 / (S + (1-S)/P)</code>다.</li>
+<li><code dir="auto">1 / 0.05 = 20x</code>다.</li>
+<li>전체 <code dir="auto">2N²</code> work 중 <code dir="auto">N²</code>인 average phase가 serial로 남아 processor 수와 무관한
+lower bound가 되기 때문이다.</li>
+<li>Processor별 partial sum을 마지막 result로 합치는 communication과 combine work가
+생긴다. Naive serial combine은 <code dir="auto">O(P)</code>, tree reduction은 약 <code dir="auto">O(log P)</code> depth를
+가진다.</li>
+<li>Task는 해야 할 logical work이고 worker thread는 여러 task를 반복해서 실행하는
+execution agent다. Task 수와 thread 수는 같을 필요가 없다.</li>
+<li>Dispatch, queue, synchronization, thread management cost가 task의 useful work보다
+크기 때문이다.</li>
+<li>Static assignment는 overhead가 낮고 locality를 예측하기 쉽지만 irregular work에서
+imbalance가 생길 수 있다. Dynamic assignment는 balance에 적응하지만 queue/atomic
+overhead와 locality 손실이 생길 수 있다.</li>
+<li>Communication structure, synchronization, data organization, scheduling, reduction
+등을 설계하는 작업이 포함된다.</li>
+<li>In-place update가 현재 sweep에서 이미 갱신된 왼쪽/이전-row 값에 의존하므로
+iteration을 arbitrary order로 실행하면 sequential algorithm과 다른 dependency를
+사용하기 때문이다.</li>
+<li>시작과 끝의 diagonal이 짧아 parallelism이 작고, diagonal 사이에 빈번한
+synchronization이 필요하다.</li>
+<li>Checkerboard에서 같은 color cell은 서로 neighbor가 아니므로 red cell끼리,
+black cell끼리 independent하게 update할 수 있기 때문이다.</li>
+<li>Update order가 바뀌어 각 iteration이 읽는 intermediate value와 floating-point
+operation order가 달라지기 때문이다.</li>
+<li>대부분의 neighbor access가 한 contiguous partition 안에 남고 processor 간
+communication이 partition boundary에만 집중되기 때문이다.</li>
+<li>Data-parallel model은 independent elements를 선언하면 system이 assignment,
+reduction, phase-end wait를 처리한다. Shared-address-space/SPMD model은 programmer가
+thread별 region, lock, barrier를 명시한다.</li>
+<li>두 thread가 모두 old value를 load한 뒤 각각 1을 더해 같은 new value를 store하면
+한 increment가 덮여 final value가 1만 증가한다.</li>
+<li>Shared critical section 진입 횟수가 cell 수 <code dir="auto">O(N²)</code>에서 worker 수 <code dir="auto">O(P)</code>로 줄어
+lock contention과 serialization이 감소한다.</li>
+<li>모든 thread의 barrier 이전 work가 끝난 뒤에만 어떤 thread도 barrier 이후 work를
+시작하게 하는 global phase ordering을 부여한다.</li>
+<li>첫 barrier는 모든 reset이 contribution보다 먼저 끝나게 하고, 둘째는 모든
+contribution이 check보다 먼저 끝나게 하며, 셋째는 모든 check가 다음 iteration의
+reset/update보다 먼저 끝나게 한다.</li>
+<li>Successive iteration이 같은 storage를 reset/update/read하지 않게 되어
+cross-iteration storage dependency가 사라지기 때문이다. Memory footprint와
+version 관리 비용을 지불한다.</li>
+<li><code dir="auto">__syncthreads()</code>의 synchronization scope는 한 thread block뿐이기 때문이다.
+Grid 전체 dependency에는 separate kernel boundary나 지원되는 grid-wide
+synchronization mechanism이 필요하다.</li>
+</ol> </div> <footer class="sl-flex astro-3yyafb3n"> <div class="meta sl-flex astro-3yyafb3n"> <a href="https://github.com/ziwon/ai-data-center-systems/edit/main/gpu/cs149/lec04/README.md" class="sl-flex print:hidden astro-eez2twj6"><svg aria-hidden="true" class="astro-eez2twj6 astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.2em;"><path d="M22 7.24a1 1 0 0 0-.29-.71l-4.24-4.24a1 1 0 0 0-1.1-.22 1 1 0 0 0-.32.22l-2.83 2.83L2.29 16.05a1 1 0 0 0-.29.71V21a1 1 0 0 0 1 1h4.24a1 1 0 0 0 .76-.29l10.87-10.93L21.71 8c.1-.1.17-.2.22-.33a1 1 0 0 0 0-.24v-.14l.07-.05ZM6.83 20H4v-2.83l9.93-9.93 2.83 2.83L6.83 20ZM18.17 8.66l-2.83-2.83 1.42-1.41 2.82 2.82-1.41 1.42Z"/></svg>Edit page</a> <p>Last updated: <time datetime="2026-08-30T07:25:02.000Z">Aug 30, 2026</time></p> </div> <div class="pagination-links print:hidden astro-u2l5gyhi" dir="ltr"> <a href="/gpu/cs149/lec03/" rel="prev" class="astro-u2l5gyhi"> <svg aria-hidden="true" class="astro-u2l5gyhi astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17 11H9.41l3.3-3.29a1.004 1.004 0 1 0-1.42-1.42l-5 5a1 1 0 0 0-.21.33 1 1 0 0 0 0 .76 1 1 0 0 0 .21.33l5 5a1.002 1.002 0 0 0 1.639-.325 1 1 0 0 0-.219-1.095L9.41 13H17a1 1 0 0 0 0-2Z"/></svg> <span class="astro-u2l5gyhi"> Previous <br class="astro-u2l5gyhi"> <span class="link-title astro-u2l5gyhi">Lecture 3: Multi-Core Architecture, Part II and ISPC</span> </span> </a> <a href="/gpu/cs149/lec05/" rel="next" class="astro-u2l5gyhi"> <svg aria-hidden="true" class="astro-u2l5gyhi astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17.92 11.62a1.001 1.001 0 0 0-.21-.33l-5-5a1.003 1.003 0 1 0-1.42 1.42l3.3 3.29H7a1 1 0 0 0 0 2h7.59l-3.3 3.29a1.002 1.002 0 0 0 .325 1.639 1 1 0 0 0 1.095-.219l5-5a1 1 0 0 0 .21-.33 1 1 0 0 0 0-.76Z"/></svg> <span class="astro-u2l5gyhi"> Next <br class="astro-u2l5gyhi"> <span class="link-title astro-u2l5gyhi">Lecture 5: Performance Optimization I — Work Distribution and Scheduling</span> </span> </a> </div>  </footer> </div> </div>  </main> </div> </div> </div> <ask-docs-widget> <button class="ask-fab" type="button" data-open aria-label="Ask this docs"> <span class="ask-fab-icon" aria-hidden="true">?</span>
+Ask this docs
+</button> <div class="ask-panel" data-panel hidden> <div class="ask-resize-handle" data-resize aria-hidden="true"></div> <div class="ask-panel-inner"> <header class="ask-header"> <div> <p class="ask-eyebrow">AI Data Center Systems</p> <h2 class="ask-title">Ask this docs</h2> </div> <div class="ask-header-controls"> <button class="ask-mode-btn" data-mode-btn="right" title="오른쪽 패널" aria-label="오른쪽 패널"> <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="6" height="16" rx="1.5" opacity="0.35"></rect><rect x="8" y="0" width="8" height="16" rx="1.5"></rect></svg> </button> <button class="ask-mode-btn" data-mode-btn="bottom" title="하단 패널" aria-label="하단 패널"> <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="16" height="6" rx="1.5" opacity="0.35"></rect><rect x="0" y="8" width="16" height="8" rx="1.5"></rect></svg> </button> <button class="ask-mode-btn" data-mode-btn="expand" title="전체 확장" aria-label="전체 확장"> <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 5.5V1h4.5M10.5 1H15v4.5M15 10.5V15h-4.5M5.5 15H1v-4.5"></path></svg> </button> <button class="ask-close-btn" type="button" aria-label="닫기" data-close> <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13"></path></svg> </button> </div> </header> <div class="ask-body"> <label class="ask-field"> <span class="ask-field-row"> <span>Question</span> <span class="ask-char" data-char>0 / 800</span> </span> <textarea name="question" rows="3" maxlength="800" placeholder="이 문서에서 핵심 운영 체크포인트는 무엇인가요?" data-question></textarea> <span class="ask-hint">시간당 최대 20회 · 질문당 최대 800자</span> </label> <div class="ask-actions"> <button class="ask-submit" type="button" data-submit> <svg class="ask-spinner" viewBox="0 0 24 24" fill="none" aria-hidden="true" hidden> <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2.5" stroke-dasharray="56" stroke-dashoffset="14" stroke-linecap="round"></circle> </svg> <span data-submit-label>Ask</span> </button> <p class="ask-status" data-status></p> </div> <section class="ask-answer" data-answer hidden></section> <section class="ask-sources" data-sources hidden> <h3>Sources</h3> <ul class="ask-source-chips" data-source-list></ul> </section> </div> </div> </div> <div class="ask-backdrop" data-backdrop hidden></div> </ask-docs-widget> <script type="module" src="/_astro/AskDocs.astro_astro_type_script_index_0_lang.BbnAb04M.js"></script> </div> <script type="module">const r=document.documentElement,c=document.querySelector("#starlight__sidebar"),s=document.querySelector(".navigation-mode-toggle"),a=document.querySelector(".navigation-drawer-toggle"),u=window.matchMedia("(min-width: 50rem)");function d(){return r.dataset.navigationMode==="compact"}function o(){return r.dataset.navigationDrawer==="open"}function l(){const e=d(),t=e&&o();s?.setAttribute("aria-pressed",String(e)),s?.setAttribute("title",e?"Use normal navigation":"Use compact navigation"),a?.setAttribute("aria-expanded",String(t)),a?.setAttribute("title",t?"Close navigation":"Open navigation");const n=a?.querySelector(".navigation-drawer-label");n&&(n.textContent=t?"Close navigation":"Open navigation")}function i(e,t=!1){const n=!!(e&&d()&&u.matches);r.dataset.navigationDrawer=n?"open":"closed",l(),n?requestAnimationFrame(()=>{const g=c?.querySelector('a[aria-current="page"]'),m=c?.querySelector(".starlight-sidebar-topics-current");(g??m)?.focus()}):t&&a?.focus()}function p(e){r.dataset.navigationMode=e,i(!1);try{localStorage.setItem("adcs-navigation-mode",e)}catch{}l()}s?.addEventListener("click",()=>{p(d()?"normal":"compact")});a?.addEventListener("click",()=>{i(!o(),o())});document.addEventListener("keydown",e=>{e.key==="Escape"&&o()&&i(!1,!0)});document.addEventListener("pointerdown",e=>{!o()||!(e.target instanceof Node)||c?.contains(e.target)||i(!1)});u.addEventListener("change",()=>i(!1));r.dataset.navigationDrawer="closed";l();</script> </body></html>

@@ -1,0 +1,920 @@
+{
+  "version": 1,
+  "current": {
+    "id": "/network/glb-nnhn-bgp-underlay/",
+    "title": "Appendix: BGP-based Underlay and GLB NNHN in AI Data Center Fabrics",
+    "route": "/network/glb-nnhn-bgp-underlay/",
+    "group": "network",
+    "keywords": [
+      "bgp",
+      "glb",
+      "nnhn",
+      "leaf",
+      "spine",
+      "underlay",
+      "quality",
+      "juniper",
+      "ingress",
+      "heartbeats"
+    ],
+    "excerpt": "Traditional enterprise data centers used IGPs (OSPF, IS-IS) as the underlay routing protocol. As hyperscale operators scaled out, this model broke down on..."
+  },
+  "nodes": [
+    {
+      "id": "/network/glb-nnhn-bgp-underlay/",
+      "title": "Appendix: BGP-based Underlay and GLB NNHN in AI Data Center Fabrics",
+      "route": "/network/glb-nnhn-bgp-underlay/",
+      "group": "network",
+      "keywords": [
+        "bgp",
+        "glb",
+        "nnhn",
+        "leaf",
+        "spine",
+        "underlay",
+        "quality",
+        "juniper",
+        "ingress",
+        "heartbeats"
+      ],
+      "excerpt": "Traditional enterprise data centers used IGPs (OSPF, IS-IS) as the underlay routing protocol. As hyperscale operators scaled out, this model broke down on..."
+    },
+    {
+      "id": "/network/chap06/",
+      "title": "Chapter 6: Efficient Load Balancing",
+      "route": "/network/chap06/",
+      "group": "network",
+      "keywords": [
+        "glb",
+        "dlb",
+        "leaf",
+        "spine",
+        "ecmp",
+        "telb",
+        "packet",
+        "flow",
+        "path",
+        "flows"
+      ],
+      "excerpt": "This chapter explains how load balancing works in AI/ML data center fabrics and why conventional ECMP is often not enough for large RoCEv2 training clusters."
+    },
+    {
+      "id": "/network/chap08/",
+      "title": "Chapter 8: IP Routing for AI/ML Fabrics",
+      "route": "/network/chap08/",
+      "group": "network",
+      "keywords": [
+        "bgp",
+        "tenant",
+        "routing",
+        "is-is",
+        "srv6",
+        "fabrics",
+        "asn",
+        "fabric",
+        "flexalgo",
+        "ebgp"
+      ],
+      "excerpt": "This chapter explains routing choices for AI/ML data center fabrics."
+    },
+    {
+      "id": "/network/clos-ebgp-lab/",
+      "title": "Clos Fabric Lab Series",
+      "route": "/network/clos-ebgp-lab/",
+      "group": "network",
+      "keywords": [
+        "bgp",
+        "leaf",
+        "leaf1",
+        "spine1",
+        "spine",
+        "spine2",
+        "ecmp",
+        "lab",
+        "bfd",
+        "loopbacks"
+      ],
+      "excerpt": "This README starts with the implemented Lab 1 and records the planned direction for the next labs. The sequence is meant to move from a pure routed underlay..."
+    },
+    {
+      "id": "concept:bgp",
+      "kind": "concept",
+      "title": "BGP",
+      "label": "BGP",
+      "group": "network",
+      "description": "Routing protocol used in underlays, eBGP fabrics, and data center route control.",
+      "keywords": [
+        "BGP",
+        "eBGP",
+        "iBGP",
+        "BGP underlay"
+      ]
+    },
+    {
+      "id": "concept:clos",
+      "kind": "concept",
+      "title": "Clos Fabric",
+      "label": "Clos Fabric",
+      "group": "network",
+      "description": "Leaf-spine fabric topology used to scale east-west data center traffic.",
+      "keywords": [
+        "Clos Fabric",
+        "Clos",
+        "leaf-spine",
+        "leaf spine",
+        "spine-leaf",
+        "CLOS"
+      ]
+    },
+    {
+      "id": "concept:congestion-control",
+      "kind": "concept",
+      "title": "Congestion Control",
+      "label": "Congestion Control",
+      "group": "network",
+      "description": "Mechanisms that prevent fabric overload, queue buildup, and packet loss.",
+      "keywords": [
+        "Congestion Control",
+        "congestion control",
+        "ECN",
+        "PFC",
+        "DCQCN",
+        "lossless Ethernet",
+        "tail latency"
+      ]
+    },
+    {
+      "id": "/network/articles/cloud-data-center-network-now-and-next.ko/",
+      "title": "Cloud Data Center Network의 지금과 앞으로",
+      "route": "/network/articles/cloud-data-center-network-now-and-next.ko/",
+      "group": "network",
+      "keywords": [
+        "network",
+        "ethernet",
+        "fabric",
+        "ai/ml",
+        "rdma",
+        "routing",
+        "frontend",
+        "traffic",
+        "adaptive",
+        "rack"
+      ],
+      "excerpt": "Cloud-native web-scale network는 많은 작은 TCP flow를 commodity Ethernet/Clos/ECMP로 처리하는 데 최적화되어 왔다. 그러나 AI/ML workload는 GPU 간 동기화, RDMA, collective..."
+    },
+    {
+      "id": "/network/chap03/",
+      "title": "Chapter 3: Network Design Considerations",
+      "route": "/network/chap03/",
+      "group": "network",
+      "keywords": [
+        "leaf",
+        "clos",
+        "fabric",
+        "rail",
+        "design",
+        "cabling",
+        "spine",
+        "server",
+        "congestion",
+        "designs"
+      ],
+      "excerpt": "This chapter explains the major physical and logical design choices for AI data center networks."
+    },
+    {
+      "id": "/network/chap02/",
+      "title": "Chapter 2: \"The Common-Man View\" of AI Data Center Fabrics",
+      "route": "/network/chap02/",
+      "group": "network",
+      "keywords": [
+        "congestion",
+        "flows",
+        "traffic",
+        "ethernet",
+        "training",
+        "balancing",
+        "flow",
+        "rocev2",
+        "pfc",
+        "centers"
+      ],
+      "excerpt": "This chapter explains why AI/ML data center fabrics are different from traditional data center networks ."
+    },
+    {
+      "id": "/network/chap11/",
+      "title": "Chapter 11: Monitoring and Telemetry",
+      "route": "/network/chap11/",
+      "group": "network",
+      "keywords": [
+        "ifa",
+        "telemetry",
+        "queue",
+        "snmp",
+        "monitoring",
+        "mirroring",
+        "pfc",
+        "collector",
+        "ecn",
+        "per-hop"
+      ],
+      "excerpt": "This chapter explains how monitoring and telemetry change in AI/ML data center fabrics."
+    },
+    {
+      "id": "/network/chap07/",
+      "title": "Chapter 7: RoCEv2 Transport and Congestion Management",
+      "route": "/network/chap07/",
+      "group": "network",
+      "keywords": [
+        "pfc",
+        "congestion",
+        "ecn",
+        "csig",
+        "rocev2",
+        "cnp",
+        "pause",
+        "sfc",
+        "sender",
+        "threshold"
+      ],
+      "excerpt": "This chapter explains how RoCEv2 traffic is transported across Ethernet AI fabrics and how congestion is detected, signaled, and mitigated."
+    },
+    {
+      "id": "/courses/deep-learning-for-network-engineers/",
+      "title": "Deep Learning for Network Engineers",
+      "route": "/courses/deep-learning-for-network-engineers/",
+      "group": "courses/deep-learning-for-network-engineers",
+      "keywords": [
+        "study",
+        "backend",
+        "networks",
+        "focus",
+        "training",
+        "deep",
+        "engineers",
+        "congestion",
+        "distributed",
+        "understand"
+      ],
+      "excerpt": "Deep learning systems notes for network engineers covering training fundamentals, parallelism, collectives, RDMA, RoCE, and NCCL behavior."
+    },
+    {
+      "id": "/courses/deep-learning-for-network-engineers/week01/",
+      "title": "Week 1: From Artificial Neuron to AI Training Fabric",
+      "route": "/courses/deep-learning-for-network-engineers/week01/",
+      "group": "courses/deep-learning-for-network-engineers",
+      "keywords": [
+        "gradient",
+        "weight",
+        "gpu",
+        "training",
+        "pass",
+        "neuron",
+        "synchronization",
+        "network",
+        "책에서",
+        "loss"
+      ],
+      "excerpt": "이번 주 목표는 기본적인 Deep Learning 학습 과정이 어떻게 network design 문제로 이어지는지 이해하는 것이다."
+    },
+    {
+      "id": "/courses/deep-learning-for-network-engineers/week03/",
+      "title": "Week 3: Parallelism Strategies in Deep Learning",
+      "route": "/courses/deep-learning-for-network-engineers/week03/",
+      "group": "courses/deep-learning-for-network-engineers",
+      "keywords": [
+        "parallelism",
+        "gpu",
+        "gradient",
+        "pipeline",
+        "expert",
+        "stage",
+        "tensor",
+        "training",
+        "micro-batch",
+        "network"
+      ],
+      "excerpt": "이번 주 목표는 대규모 deep learning training이 왜 parallelism을 필요로 하는지 , 그리고 각 parallelization strategy가 GPU memory, GPU utilization, backend network design에 어떤 영향을..."
+    },
+    {
+      "id": "/courses/deep-learning-for-network-engineers/week04/",
+      "title": "Week 4: RDMA and GPU Cluster Communication",
+      "route": "/courses/deep-learning-for-network-engineers/week04/",
+      "group": "courses/deep-learning-for-network-engineers",
+      "keywords": [
+        "rank",
+        "rdma",
+        "nccl",
+        "queue",
+        "host",
+        "memory",
+        "transport",
+        "gpu",
+        "path",
+        "key"
+      ],
+      "excerpt": "이번 주 목표는 Chapter 9와 Chapter 14를 연결해서, RDMA가 GPU memory 사이의 빠른 data movement를 어떻게 만들고, NCCL이 distributed training job 안에서 어떤 communication pattern을 만드는지 이해하는..."
+    }
+  ],
+  "edges": [
+    {
+      "source": "/courses/deep-learning-for-network-engineers/",
+      "target": "/courses/deep-learning-for-network-engineers/week01/",
+      "type": "link+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/",
+      "target": "/courses/deep-learning-for-network-engineers/week03/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": [
+        "training"
+      ]
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/",
+      "target": "/courses/deep-learning-for-network-engineers/week04/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/network/chap06/",
+      "target": "/network/glb-nnhn-bgp-underlay/",
+      "type": "link+semantic",
+      "weight": 1,
+      "terms": [
+        "glb",
+        "leaf",
+        "spine"
+      ]
+    },
+    {
+      "source": "/network/chap08/",
+      "target": "/network/glb-nnhn-bgp-underlay/",
+      "type": "link+semantic",
+      "weight": 1,
+      "terms": [
+        "bgp"
+      ]
+    },
+    {
+      "source": "/network/clos-ebgp-lab/",
+      "target": "/network/glb-nnhn-bgp-underlay/",
+      "type": "link+semantic",
+      "weight": 1,
+      "terms": [
+        "bgp",
+        "leaf",
+        "spine"
+      ]
+    },
+    {
+      "source": "/network/articles/cloud-data-center-network-now-and-next.ko/",
+      "target": "/network/chap02/",
+      "type": "semantic+section",
+      "weight": 0.952,
+      "terms": [
+        "traffic",
+        "ethernet"
+      ]
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/",
+      "target": "concept:congestion-control",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "congestion control",
+        "Congestion Control",
+        "DCQCN",
+        "ECN"
+      ]
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week01/",
+      "target": "concept:congestion-control",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "tail latency",
+        "ECN",
+        "PFC",
+        "congestion control"
+      ]
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week03/",
+      "target": "concept:congestion-control",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "congestion control",
+        "Congestion Control",
+        "DCQCN",
+        "ECN"
+      ]
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week04/",
+      "target": "concept:congestion-control",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "PFC",
+        "ECN",
+        "tail latency"
+      ]
+    },
+    {
+      "source": "/network/articles/cloud-data-center-network-now-and-next.ko/",
+      "target": "concept:clos",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "Clos",
+        "CLOS"
+      ]
+    },
+    {
+      "source": "/network/articles/cloud-data-center-network-now-and-next.ko/",
+      "target": "concept:congestion-control",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "congestion control",
+        "Congestion Control",
+        "ECN",
+        "PFC"
+      ]
+    },
+    {
+      "source": "/network/chap02/",
+      "target": "concept:congestion-control",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "PFC",
+        "ECN",
+        "DCQCN",
+        "congestion control"
+      ]
+    },
+    {
+      "source": "/network/chap03/",
+      "target": "concept:clos",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "Clos",
+        "CLOS",
+        "Clos Fabric",
+        "leaf-spine"
+      ]
+    },
+    {
+      "source": "/network/chap03/",
+      "target": "concept:congestion-control",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "PFC",
+        "congestion control",
+        "Congestion Control",
+        "ECN"
+      ]
+    },
+    {
+      "source": "/network/chap06/",
+      "target": "concept:bgp",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "BGP",
+        "BGP underlay",
+        "eBGP"
+      ]
+    },
+    {
+      "source": "/network/chap06/",
+      "target": "concept:clos",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "Clos",
+        "CLOS",
+        "leaf-spine",
+        "spine-leaf"
+      ]
+    },
+    {
+      "source": "/network/chap06/",
+      "target": "concept:congestion-control",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "PFC",
+        "ECN",
+        "DCQCN",
+        "congestion control"
+      ]
+    },
+    {
+      "source": "/network/chap07/",
+      "target": "concept:clos",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "Clos",
+        "CLOS",
+        "leaf-spine",
+        "spine-leaf"
+      ]
+    },
+    {
+      "source": "/network/chap07/",
+      "target": "concept:congestion-control",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "PFC",
+        "ECN",
+        "DCQCN",
+        "congestion control"
+      ]
+    },
+    {
+      "source": "/network/chap08/",
+      "target": "concept:bgp",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "BGP",
+        "eBGP",
+        "iBGP"
+      ]
+    },
+    {
+      "source": "/network/chap08/",
+      "target": "concept:clos",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "Clos",
+        "CLOS",
+        "leaf-spine"
+      ]
+    },
+    {
+      "source": "/network/chap08/",
+      "target": "concept:congestion-control",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "DCQCN",
+        "ECN",
+        "PFC",
+        "congestion control"
+      ]
+    },
+    {
+      "source": "/network/chap11/",
+      "target": "concept:congestion-control",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "ECN",
+        "PFC",
+        "tail latency",
+        "DCQCN"
+      ]
+    },
+    {
+      "source": "/network/clos-ebgp-lab/",
+      "target": "concept:bgp",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "BGP",
+        "eBGP"
+      ]
+    },
+    {
+      "source": "/network/clos-ebgp-lab/",
+      "target": "concept:clos",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "Clos",
+        "CLOS",
+        "Clos Fabric"
+      ]
+    },
+    {
+      "source": "/network/glb-nnhn-bgp-underlay/",
+      "target": "concept:bgp",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "BGP",
+        "eBGP",
+        "BGP underlay"
+      ]
+    },
+    {
+      "source": "/network/glb-nnhn-bgp-underlay/",
+      "target": "concept:clos",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "Clos",
+        "CLOS",
+        "leaf-spine"
+      ]
+    },
+    {
+      "source": "/network/glb-nnhn-bgp-underlay/",
+      "target": "concept:congestion-control",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "ECN",
+        "PFC",
+        "tail latency",
+        "DCQCN"
+      ]
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week01/",
+      "target": "/courses/deep-learning-for-network-engineers/week03/",
+      "type": "semantic+section",
+      "weight": 0.921,
+      "terms": [
+        "gpu",
+        "gradient",
+        "training",
+        "network"
+      ]
+    },
+    {
+      "source": "/network/chap11/",
+      "target": "concept:clos",
+      "type": "mentions",
+      "weight": 0.855,
+      "terms": [
+        "Clos",
+        "CLOS",
+        "leaf-spine"
+      ]
+    },
+    {
+      "source": "/network/articles/cloud-data-center-network-now-and-next.ko/",
+      "target": "/network/chap03/",
+      "type": "semantic+section",
+      "weight": 0.833,
+      "terms": [
+        "fabric"
+      ]
+    },
+    {
+      "source": "/network/chap02/",
+      "target": "concept:clos",
+      "type": "mentions",
+      "weight": 0.83,
+      "terms": [
+        "leaf-spine",
+        "spine-leaf"
+      ]
+    },
+    {
+      "source": "/network/articles/cloud-data-center-network-now-and-next.ko/",
+      "target": "/network/chap08/",
+      "type": "semantic+section",
+      "weight": 0.81,
+      "terms": [
+        "routing",
+        "fabric"
+      ]
+    },
+    {
+      "source": "/network/articles/cloud-data-center-network-now-and-next.ko/",
+      "target": "/network/chap06/",
+      "type": "semantic+section",
+      "weight": 0.805,
+      "terms": []
+    },
+    {
+      "source": "/network/chap03/",
+      "target": "concept:bgp",
+      "type": "mentions",
+      "weight": 0.805,
+      "terms": [
+        "BGP"
+      ]
+    },
+    {
+      "source": "/network/chap11/",
+      "target": "concept:bgp",
+      "type": "mentions",
+      "weight": 0.805,
+      "terms": [
+        "BGP"
+      ]
+    },
+    {
+      "source": "/network/articles/cloud-data-center-network-now-and-next.ko/",
+      "target": "/network/chap07/",
+      "type": "semantic+section",
+      "weight": 0.798,
+      "terms": []
+    },
+    {
+      "source": "/network/articles/cloud-data-center-network-now-and-next.ko/",
+      "target": "/network/chap11/",
+      "type": "semantic+section",
+      "weight": 0.784,
+      "terms": []
+    },
+    {
+      "source": "/network/articles/cloud-data-center-network-now-and-next.ko/",
+      "target": "/network/glb-nnhn-bgp-underlay/",
+      "type": "semantic+section",
+      "weight": 0.774,
+      "terms": []
+    },
+    {
+      "source": "/network/chap03/",
+      "target": "/network/chap08/",
+      "type": "semantic",
+      "weight": 0.759,
+      "terms": [
+        "fabric"
+      ]
+    },
+    {
+      "source": "/network/chap02/",
+      "target": "/network/chap03/",
+      "type": "semantic",
+      "weight": 0.758,
+      "terms": [
+        "congestion"
+      ]
+    },
+    {
+      "source": "/network/chap06/",
+      "target": "/network/chap07/",
+      "type": "semantic",
+      "weight": 0.745,
+      "terms": []
+    },
+    {
+      "source": "/network/chap02/",
+      "target": "/network/chap11/",
+      "type": "semantic",
+      "weight": 0.729,
+      "terms": [
+        "pfc"
+      ]
+    },
+    {
+      "source": "/network/chap02/",
+      "target": "/network/chap08/",
+      "type": "semantic",
+      "weight": 0.726,
+      "terms": []
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week01/",
+      "target": "/network/chap03/",
+      "type": "semantic",
+      "weight": 0.718,
+      "terms": []
+    },
+    {
+      "source": "/network/chap02/",
+      "target": "/network/chap06/",
+      "type": "semantic",
+      "weight": 0.717,
+      "terms": [
+        "flows",
+        "flow"
+      ]
+    },
+    {
+      "source": "/network/chap07/",
+      "target": "/network/chap08/",
+      "type": "semantic",
+      "weight": 0.701,
+      "terms": []
+    },
+    {
+      "source": "/network/chap02/",
+      "target": "/network/chap07/",
+      "type": "semantic",
+      "weight": 0.699,
+      "terms": [
+        "congestion",
+        "rocev2",
+        "pfc"
+      ]
+    },
+    {
+      "source": "/network/chap08/",
+      "target": "/network/chap11/",
+      "type": "semantic",
+      "weight": 0.698,
+      "terms": []
+    },
+    {
+      "source": "/network/chap06/",
+      "target": "/network/chap11/",
+      "type": "semantic",
+      "weight": 0.686,
+      "terms": []
+    },
+    {
+      "source": "/network/chap06/",
+      "target": "/network/chap08/",
+      "type": "semantic",
+      "weight": 0.674,
+      "terms": []
+    },
+    {
+      "source": "/network/chap03/",
+      "target": "/network/glb-nnhn-bgp-underlay/",
+      "type": "semantic",
+      "weight": 0.666,
+      "terms": [
+        "leaf",
+        "spine"
+      ]
+    },
+    {
+      "source": "/network/chap02/",
+      "target": "/network/glb-nnhn-bgp-underlay/",
+      "type": "semantic",
+      "weight": 0.659,
+      "terms": []
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week04/",
+      "target": "/network/articles/cloud-data-center-network-now-and-next.ko/",
+      "type": "semantic",
+      "weight": 0.658,
+      "terms": [
+        "rdma"
+      ]
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week01/",
+      "target": "/network/chap02/",
+      "type": "semantic",
+      "weight": 0.652,
+      "terms": [
+        "training"
+      ]
+    },
+    {
+      "source": "/network/chap11/",
+      "target": "/network/glb-nnhn-bgp-underlay/",
+      "type": "semantic",
+      "weight": 0.648,
+      "terms": []
+    },
+    {
+      "source": "/network/chap06/",
+      "target": "/network/clos-ebgp-lab/",
+      "type": "semantic",
+      "weight": 0.595,
+      "terms": [
+        "leaf",
+        "spine",
+        "ecmp"
+      ]
+    },
+    {
+      "source": "/network/chap08/",
+      "target": "/network/clos-ebgp-lab/",
+      "type": "semantic",
+      "weight": 0.591,
+      "terms": [
+        "bgp"
+      ]
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week01/",
+      "target": "/courses/deep-learning-for-network-engineers/week04/",
+      "type": "section",
+      "weight": 0.18,
+      "terms": []
+    },
+    {
+      "source": "/network/articles/cloud-data-center-network-now-and-next.ko/",
+      "target": "/network/clos-ebgp-lab/",
+      "type": "section",
+      "weight": 0.18,
+      "terms": []
+    }
+  ]
+}

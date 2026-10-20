@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="430" viewBox="0 0 960 430" role="img" aria-labelledby="title desc">
+  <title id="title">LoRA and QLoRA adaptation</title>
+  <desc id="desc">LoRA freezes the base weight and trains a low-rank update. QLoRA quantizes the frozen base weight and keeps the adapter trainable.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .box { fill: none; stroke: #111111; stroke-width: 1.4; rx: 6; }
+    .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; rx: 6; }
+    .accent { fill: none; stroke: #D9392E; stroke-width: 2.2; rx: 6; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.3; marker-end: url(#arrow); }
+    .hot { fill: none; stroke: #D9392E; stroke-width: 1.8; marker-end: url(#arrowRed); }
+    .muted { fill: none; stroke: #6F6A63; stroke-width: 1.1; stroke-dasharray: 4 4; marker-end: url(#arrowSoft); }
+    .text { fill: #050505; font-family: Arial, sans-serif; font-size: 16px; font-weight: 700; }
+    .small { fill: #6F6A63; font-family: Arial, sans-serif; font-size: 13px; }
+    .mono { fill: #050505; font-family: "Courier New", monospace; font-size: 14px; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#111111"/>
+    </marker>
+    <marker id="arrowRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#D9392E"/>
+    </marker>
+    <marker id="arrowSoft" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#6F6A63"/>
+    </marker>
+  </defs>
+  <rect class="bg" width="960" height="430"/>
+
+  <rect class="box" x="55" y="145" width="170" height="96"/>
+  <text class="text" x="140" y="181" text-anchor="middle">Frozen W0</text>
+  <text class="small" x="140" y="205" text-anchor="middle">base model weight</text>
+  <text class="mono" x="140" y="226" text-anchor="middle">d x d</text>
+
+  <rect class="accent" x="345" y="90" width="120" height="70"/>
+  <text class="text" x="405" y="119" text-anchor="middle">B</text>
+  <text class="small" x="405" y="141" text-anchor="middle">d x r</text>
+
+  <rect class="accent" x="345" y="225" width="120" height="70"/>
+  <text class="text" x="405" y="254" text-anchor="middle">A</text>
+  <text class="small" x="405" y="276" text-anchor="middle">r x d</text>
+
+  <rect class="soft" x="555" y="145" width="155" height="96"/>
+  <text class="text" x="632.5" y="181" text-anchor="middle">Low-rank update</text>
+  <text class="mono" x="632.5" y="205" text-anchor="middle">Delta W = BA</text>
+  <text class="small" x="632.5" y="226" text-anchor="middle">train adapter only</text>
+
+  <rect class="box" x="790" y="145" width="125" height="96"/>
+  <text class="text" x="852.5" y="181" text-anchor="middle">Adapted W</text>
+  <text class="mono" x="852.5" y="205" text-anchor="middle">W0 + BA</text>
+  <text class="small" x="852.5" y="226" text-anchor="middle">task behavior</text>
+
+  <path class="muted" d="M225 193 L345 125"/>
+  <path class="hot" d="M465 125 C520 128 535 158 555 180"/>
+  <path class="hot" d="M465 260 C520 255 535 226 555 205"/>
+  <path class="line" d="M710 193 L790 193"/>
+  <path class="line" d="M225 193 C470 370 690 340 790 218"/>
+
+  <text class="small" x="405" y="55" text-anchor="middle">LoRA: small trainable matrices, frozen base</text>
+
+  <rect class="soft" x="82" y="325" width="178" height="56"/>
+  <text class="text" x="171" y="349" text-anchor="middle">QLoRA base</text>
+  <text class="small" x="171" y="368" text-anchor="middle">quantized frozen W0</text>
+
+  <rect class="accent" x="350" y="325" width="178" height="56"/>
+  <text class="text" x="439" y="349" text-anchor="middle">Trainable adapter</text>
+  <text class="small" x="439" y="368" text-anchor="middle">BF16 or similar</text>
+
+  <rect class="box" x="618" y="325" width="178" height="56"/>
+  <text class="text" x="707" y="349" text-anchor="middle">Lower VRAM</text>
+  <text class="small" x="707" y="368" text-anchor="middle">large model fine-tuning</text>
+
+  <path class="line" d="M260 353 L350 353"/>
+  <path class="line" d="M528 353 L618 353"/>
+</svg>

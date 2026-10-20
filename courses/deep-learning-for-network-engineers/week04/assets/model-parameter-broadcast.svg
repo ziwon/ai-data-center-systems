@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="560" viewBox="0 0 1120 560" role="img" aria-labelledby="title desc">
+  <title id="title">Model parameter distribution by master rank 0</title>
+  <desc id="desc">Redrawn figure showing rank 0 broadcasting shared model parameters to local GPUs over NVLink and remote GPUs over RoCEv2 queue pairs.</desc>
+  <defs>
+    <style>
+      text { font-family: Arial, sans-serif; }
+      .bg { fill: #F3EFE7; }
+      .host { fill: none; stroke: #D8D1C7; stroke-width: 1.2; stroke-dasharray: 5 4; }
+      .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.2; }
+      .soft { fill: #F5F1EA; stroke: #D8D1C7; stroke-width: 1.1; }
+      .master { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+      .line { fill: none; stroke: #111111; stroke-width: 1.6; }
+      .nv { fill: none; stroke: #111111; stroke-width: 1.8; }
+      .rdma { fill: none; stroke: #D9392E; stroke-width: 2; }
+      .dash { fill: none; stroke: #6F6A63; stroke-width: 1.4; stroke-dasharray: 6 5; }
+      .label { font-size: 16px; font-weight: 700; fill: #050505; }
+      .small { font-size: 13px; fill: #6F6A63; }
+      .tiny { font-size: 12px; fill: #6F6A63; }
+      .param { font-size: 13px; font-family: monospace; fill: #050505; }
+      .red { font-size: 13px; font-weight: 700; fill: #D9392E; }
+      .arrow { fill: #111111; }
+      .arrow-red { fill: #D9392E; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1120" height="560"/>
+  <rect class="host" x="38" y="48" width="420" height="468" rx="8"/>
+  <rect class="host" x="612" y="48" width="468" height="468" rx="8"/>
+  <text class="label" x="118" y="78">Host A: 192.168.10.101</text>
+  <text class="label" x="742" y="78">Host B: 192.168.10.102</text>
+
+  <rect class="box" x="58" y="108" width="1020" height="76" rx="6"/>
+  <text class="label" x="480" y="136">Shared model structure</text>
+  <text class="small" x="398" y="158">Parameters are distributed by PyTorch/NCCL from rank 0</text>
+  <text class="param" x="122" y="158">[1,2][3,4][5,6]</text>
+  <text class="param" x="838" y="158">[1,2][3,4][5,6]</text>
+
+  <rect class="master" x="78" y="378" width="96" height="94" rx="6"/>
+  <text class="label" x="104" y="404">Rank 0</text>
+  <text class="tiny" x="100" y="424">GPU 0</text>
+  <text class="tiny" x="100" y="444">VRAM</text>
+  <text class="param" x="92" y="464">[1,2][3,4]</text>
+
+  <rect class="soft" x="82" y="232" width="74" height="82" rx="5"/>
+  <text class="label" x="104" y="256">R1</text>
+  <text class="tiny" x="101" y="276">GPU 1</text>
+  <text class="tiny" x="100" y="296">VRAM</text>
+  <rect class="soft" x="206" y="232" width="74" height="82" rx="5"/>
+  <text class="label" x="228" y="256">R2</text>
+  <text class="tiny" x="225" y="276">GPU 2</text>
+  <text class="tiny" x="224" y="296">VRAM</text>
+  <rect class="soft" x="330" y="232" width="74" height="82" rx="5"/>
+  <text class="label" x="352" y="256">R3</text>
+  <text class="tiny" x="349" y="276">GPU 3</text>
+  <text class="tiny" x="348" y="296">VRAM</text>
+
+  <path class="nv" d="M 126 378 C 126 340, 119 338, 119 314"/>
+  <path class="nv" d="M 126 378 C 170 340, 243 340, 243 314"/>
+  <path class="nv" d="M 126 378 C 238 330, 367 338, 367 314"/>
+  <polygon class="arrow" points="119,314 113,326 125,326"/>
+  <polygon class="arrow" points="243,314 237,326 249,326"/>
+  <polygon class="arrow" points="367,314 361,326 373,326"/>
+  <text class="small" x="154" y="350">DMA over NVLink</text>
+
+  <rect class="soft" x="646" y="232" width="74" height="82" rx="5"/>
+  <text class="label" x="668" y="256">R4</text>
+  <text class="tiny" x="665" y="276">GPU 0</text>
+  <text class="tiny" x="664" y="296">VRAM</text>
+  <rect class="soft" x="772" y="232" width="74" height="82" rx="5"/>
+  <text class="label" x="794" y="256">R5</text>
+  <text class="tiny" x="791" y="276">GPU 1</text>
+  <text class="tiny" x="790" y="296">VRAM</text>
+  <rect class="soft" x="898" y="232" width="74" height="82" rx="5"/>
+  <text class="label" x="920" y="256">R6</text>
+  <text class="tiny" x="917" y="276">GPU 2</text>
+  <text class="tiny" x="916" y="296">VRAM</text>
+  <rect class="soft" x="1024" y="232" width="74" height="82" rx="5"/>
+  <text class="label" x="1046" y="256">R7</text>
+  <text class="tiny" x="1043" y="276">GPU 3</text>
+  <text class="tiny" x="1042" y="296">VRAM</text>
+
+  <rect class="box" x="394" y="384" width="120" height="74" rx="7"/>
+  <text class="label" x="418" y="410">Queue</text>
+  <text class="label" x="430" y="430">pairs</text>
+  <text class="tiny" x="410" y="448">rank 0 to remote</text>
+
+  <rect class="box" x="552" y="344" width="194" height="112" rx="8"/>
+  <text class="label" x="588" y="392">Backend network</text>
+  <text class="small" x="600" y="416">Layer 3 fabric</text>
+
+  <path class="rdma" d="M 174 420 L 394 420"/>
+  <polygon class="arrow-red" points="394,420 382,414 382,426"/>
+  <path class="rdma" d="M 514 420 L 552 400"/>
+  <polygon class="arrow-red" points="552,400 539,398 545,410"/>
+  <path class="rdma" d="M 746 400 C 804 390, 683 348, 683 314"/>
+  <path class="rdma" d="M 746 400 C 844 390, 809 348, 809 314"/>
+  <path class="rdma" d="M 746 400 C 930 390, 935 348, 935 314"/>
+  <path class="rdma" d="M 746 400 C 1022 390, 1061 348, 1061 314"/>
+  <polygon class="arrow-red" points="683,314 677,326 689,326"/>
+  <polygon class="arrow-red" points="809,314 803,326 815,326"/>
+  <polygon class="arrow-red" points="935,314 929,326 941,326"/>
+  <polygon class="arrow-red" points="1061,314 1055,326 1067,326"/>
+  <text class="red" x="698" y="482">RoCEv2 RDMA path for remote ranks</text>
+</svg>

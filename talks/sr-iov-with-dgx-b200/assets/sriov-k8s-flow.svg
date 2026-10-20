@@ -1,0 +1,178 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1760 990" role="img" aria-labelledby="title desc">
+  <title id="title">How SR-IOV works in Kubernetes</title>
+  <desc id="desc">Flow from user YAML and Kubernetes control plane through scheduler, kubelet, Multus, SR-IOV CNI, IPAM, host PF and VF allocation, into an application Pod and external fabric.</desc>
+  <style>
+    .bg { fill: #fbfcff; }
+    .title { font: 800 46px Inter, Arial, sans-serif; fill: #09123b; }
+    .subtitle { font: 700 28px Inter, Arial, sans-serif; fill: #0b64d8; }
+    .head { font: 800 23px Inter, Arial, sans-serif; fill: #ffffff; }
+    .label { font: 700 17px Inter, Arial, sans-serif; fill: #121212; }
+    .small { font: 500 14px Inter, Arial, sans-serif; fill: #222222; }
+    .tiny { font: 500 12px Inter, Arial, sans-serif; fill: #333333; }
+    .mono { font: 600 13px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fill: #111111; }
+    .muted { fill: #5c667a; }
+    .blue { fill: #0b63d8; }
+    .green { fill: #0a8a45; }
+    .teal { fill: #19a69a; }
+    .purple { fill: #5f35c7; }
+    .orange { fill: #fff4d8; stroke: #c58a12; }
+    .box { fill: #ffffff; stroke: #155bd4; stroke-width: 2; }
+    .greenBox { fill: #f4fff7; stroke: #0b8d45; stroke-width: 2; }
+    .tealBox { fill: #f0fffd; stroke: #159b93; stroke-width: 2; }
+    .purpleBox { fill: #fbf7ff; stroke: #6730c3; stroke-width: 2; }
+    .node { fill: #f8fbff; stroke: #145bd4; stroke-width: 1.6; }
+    .dash { stroke-dasharray: 9 7; }
+    .arrow { fill: none; stroke: #0d52ca; stroke-width: 2.4; marker-end: url(#arrow); }
+    .arrow2 { fill: none; stroke: #222222; stroke-width: 2.1; marker-end: url(#arrowDark); }
+    .arrowG { fill: none; stroke: #0a8a45; stroke-width: 2.4; marker-end: url(#arrowGreen); }
+    .arrowP { fill: none; stroke: #6730c3; stroke-width: 2.4; marker-end: url(#arrowPurple); }
+    .flow { fill: #eef5ff; stroke: #1768d8; stroke-width: 1.7; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#0d52ca"/>
+    </marker>
+    <marker id="arrowDark" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#222222"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#0a8a45"/>
+    </marker>
+    <marker id="arrowPurple" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#6730c3"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1760" height="990"/>
+  <text class="title" x="880" y="54" text-anchor="middle">How SR-IOV Works in Kubernetes</text>
+  <text class="subtitle" x="880" y="94" text-anchor="middle">SR-IOV가 Kubernetes에서 동작하는 흐름</text>
+
+  <rect x="26" y="112" width="394" height="540" rx="12" class="box"/>
+  <path d="M38 112h370a12 12 0 0 1 12 12v37H26v-37a12 12 0 0 1 12-12z" class="blue"/>
+  <text class="head" x="68" y="146">Kubernetes Control Plane / Configuration</text>
+  <rect x="50" y="182" width="296" height="70" rx="8" class="node"/>
+  <text class="label" x="132" y="224">User / YAML</text>
+  <rect x="50" y="286" width="296" height="96" rx="8" class="node"/>
+  <text class="label" x="132" y="318">Pod spec</text>
+  <text class="mono" x="132" y="348">requests:</text>
+  <text class="mono" x="132" y="368">intel.com/sriov_netdevice: 1</text>
+  <rect x="50" y="420" width="296" height="76" rx="8" class="purpleBox"/>
+  <text class="label" x="112" y="456">NetworkAttachmentDefinition</text>
+  <text class="label" x="172" y="480">(NAD)</text>
+  <rect x="50" y="536" width="316" height="98" rx="8" class="greenBox"/>
+  <text class="label" x="118" y="576">SR-IOV Network Operator</text>
+  <text class="small" x="118" y="604">Creates PF/VFs on nodes</text>
+  <text class="small" x="118" y="624">and manages configuration</text>
+  <path class="arrow2" d="M198 252v32"/>
+  <path class="arrow2" d="M198 382v36"/>
+  <path class="arrow2" d="M198 496v38"/>
+
+  <rect x="454" y="112" width="756" height="540" rx="14" class="tealBox"/>
+  <path d="M466 112h732a14 14 0 0 1 14 14v43H454v-43a14 14 0 0 1 14-14z" class="teal"/>
+  <text class="head" x="780" y="146">Worker Node</text>
+  <rect x="502" y="184" width="184" height="66" rx="8" class="node"/>
+  <text class="label" x="570" y="224">Scheduler</text>
+  <rect x="936" y="184" width="182" height="66" rx="8" class="node"/>
+  <text class="label" x="1014" y="224">Kubelet</text>
+  <path class="arrow dash" d="M686 217h248"/>
+  <text class="small" x="748" y="242">places Pod on</text>
+  <text class="small" x="748" y="260">suitable node</text>
+
+  <rect x="752" y="304" width="230" height="70" rx="8" class="node"/>
+  <text class="label" x="858" y="334" text-anchor="middle">SR-IOV</text>
+  <text class="label" x="858" y="357" text-anchor="middle">Device Plugin</text>
+  <path class="arrow2" d="M982 340h40v-86"/>
+  <text class="small" x="990" y="388">discovers VFs and</text>
+  <text class="small" x="990" y="408">advertises resource</text>
+
+  <rect x="494" y="380" width="174" height="72" rx="8" class="purpleBox"/>
+  <text class="label" x="580" y="422" text-anchor="middle">Multus CNI</text>
+  <rect x="728" y="470" width="182" height="72" rx="8" class="tealBox"/>
+  <text class="label" x="819" y="513" text-anchor="middle">SR-IOV CNI</text>
+  <rect x="1030" y="470" width="150" height="72" rx="8" class="greenBox"/>
+  <text class="label" x="1105" y="500" text-anchor="middle">Whereabouts /</text>
+  <text class="label" x="1105" y="523" text-anchor="middle">IPAM</text>
+  <path class="arrow dash" d="M668 416h58"/>
+  <path class="arrow" d="M819 470v-92"/>
+  <path class="arrow2" d="M910 506h118"/>
+
+  <rect x="478" y="618" width="582" height="174" rx="10" class="orange"/>
+  <text class="label" x="500" y="646">Host NIC on Worker Node</text>
+  <rect x="512" y="654" width="524" height="54" rx="6" fill="#fff8e8" stroke="#b87e0d"/>
+  <text class="label" x="748" y="688" text-anchor="middle">PF (Physical Function)</text>
+  <rect x="526" y="738" width="86" height="50" rx="6" fill="#fff8e8" stroke="#b87e0d"/>
+  <text class="label" x="568" y="770" text-anchor="middle">VF1</text>
+  <rect x="666" y="738" width="86" height="50" rx="6" fill="#fff8e8" stroke="#b87e0d"/>
+  <text class="label" x="709" y="770" text-anchor="middle">VF2</text>
+  <rect x="812" y="730" width="92" height="58" rx="6" fill="#fff8e8" stroke="#0d52ca" stroke-width="2" stroke-dasharray="8 6"/>
+  <text class="label" x="858" y="767" text-anchor="middle">VF3</text>
+  <rect x="956" y="738" width="86" height="50" rx="6" fill="#fff8e8" stroke="#b87e0d"/>
+  <text class="label" x="999" y="770" text-anchor="middle">VF4</text>
+  <path class="arrow2" d="M774 708v26"/>
+  <path class="arrow2" d="M774 708l-200 28"/>
+  <path class="arrow2" d="M774 708l-65 28"/>
+  <path class="arrow2" d="M774 708l84 18"/>
+  <path class="arrow2" d="M774 708l225 28"/>
+  <text class="small" x="772" y="818" text-anchor="middle">VFs created from the PF</text>
+
+  <path class="arrow" d="M346 334h182v42"/>
+  <path class="arrowP" d="M346 458h146"/>
+  <path class="arrowG" d="M366 584h110"/>
+  <path class="arrow" d="M858 730v-184"/>
+
+  <rect x="1278" y="220" width="220" height="530" rx="14" class="greenBox"/>
+  <path d="M1290 220h196a14 14 0 0 1 14 14v38h-222v-38a14 14 0 0 1 14-14z" class="green"/>
+  <text class="head" x="1348" y="249">Application Pod</text>
+  <rect x="1292" y="282" width="196" height="116" rx="10" class="greenBox"/>
+  <text class="label" x="1390" y="322" text-anchor="middle">Application Pod</text>
+  <rect x="1320" y="348" width="138" height="42" rx="6" fill="#eafff2" stroke="#0b8d45"/>
+  <text class="small" x="1390" y="374" text-anchor="middle">Main Container</text>
+  <rect x="1292" y="430" width="196" height="90" rx="10" class="node"/>
+  <text class="label" x="1390" y="468" text-anchor="middle">eth0 (default CNI)</text>
+  <text class="small" x="1390" y="492" text-anchor="middle">10.244.1.10/24</text>
+  <rect x="1292" y="552" width="196" height="144" rx="10" class="greenBox"/>
+  <text class="label" x="1390" y="590" text-anchor="middle">net1 (SR-IOV VF)</text>
+  <text class="small" x="1390" y="616" text-anchor="middle">192.168.100.10/24</text>
+  <text class="small" x="1390" y="652" text-anchor="middle" fill="#0a8a45">direct NIC access,</text>
+  <text class="small" x="1390" y="672" text-anchor="middle" fill="#0a8a45">low latency, high throughput</text>
+  <path class="arrow" d="M904 760h404v-136"/>
+  <path class="arrow2" d="M1118 250v180c0 76 42 116 160 154"/>
+  <text class="small" x="1160" y="306">allocates</text>
+  <text class="small" x="1160" y="326">one VF</text>
+  <text class="small" x="1160" y="346">for the Pod</text>
+
+  <rect x="1565" y="226" width="190" height="526" rx="12" class="purpleBox"/>
+  <path d="M1577 226h166a12 12 0 0 1 12 12v38h-190v-38a12 12 0 0 1 12-12z" class="purple"/>
+  <text class="head" x="1604" y="255">External Network</text>
+  <rect x="1612" y="356" width="94" height="108" rx="12" fill="#f6f0ff" stroke="#6730c3" stroke-width="3"/>
+  <path d="M1634 392h48M1664 378l20 14-20 14M1684 430h-48M1654 416l-20 14 20 14" fill="none" stroke="#6730c3" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text class="label" x="1660" y="510" text-anchor="middle">External</text>
+  <text class="label" x="1660" y="535" text-anchor="middle">Network /</text>
+  <text class="label" x="1660" y="560" text-anchor="middle">Switch /</text>
+  <text class="label" x="1660" y="585" text-anchor="middle">Fabric</text>
+  <path class="arrowP" d="M1488 624h78"/>
+  <path class="arrowP" d="M858 790h806v-190"/>
+
+  <rect x="30" y="682" width="352" height="162" rx="12" fill="#ffffff" stroke="#1768d8" stroke-width="2" stroke-dasharray="10 7"/>
+  <text class="label" x="74" y="724" fill="#0b63d8">Conceptual Callouts</text>
+  <text class="tiny" x="62" y="754">• PF = parent NIC function</text>
+  <text class="tiny" x="62" y="780">• VF = lightweight virtual PCIe function</text>
+  <text class="tiny" x="62" y="806">• Bypasses Linux bridge / overlay for data path</text>
+  <text class="tiny" x="62" y="832">• Common for DPDK, RDMA, high-performance networking</text>
+
+  <rect x="30" y="872" width="1388" height="84" rx="10" class="flow"/>
+  <rect x="58" y="890" width="126" height="50" rx="8" class="blue"/>
+  <text class="head" x="121" y="924" text-anchor="middle">Flow (1→7)</text>
+  <g class="small">
+    <text x="236" y="906">1 Operator creates</text><text x="236" y="928">PF/VFs</text>
+    <text x="400" y="906">2 Device Plugin</text><text x="400" y="928">advertises resources</text>
+    <text x="604" y="906">3 Pod requests</text><text x="604" y="928">SR-IOV resource</text>
+    <text x="786" y="906">4 Scheduler places</text><text x="786" y="928">Pod on suitable node</text>
+    <text x="1014" y="906">5 Kubelet allocates</text><text x="1014" y="928">a VF</text>
+    <text x="1166" y="906">6 Multus calls</text><text x="1166" y="928">SR-IOV CNI + IPAM</text>
+    <text x="1336" y="906">7 VF attached as</text><text x="1336" y="928">secondary interface</text>
+  </g>
+  <rect x="1442" y="876" width="292" height="72" rx="10" fill="#ffffff" stroke="#888" stroke-width="1.5" stroke-dasharray="10 7"/>
+  <text class="tiny" x="1484" y="910">Data path bypasses Linux bridge / overlay</text>
+  <text class="tiny" x="1484" y="932">for higher performance.</text>
+</svg>

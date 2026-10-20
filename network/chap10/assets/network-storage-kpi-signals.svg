@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="620" viewBox="0 0 1120 620" role="img" aria-labelledby="title desc">
+  <title id="title">Network and storage KPI signal map</title>
+  <desc id="desc">A map from training or inference symptom to GPU, network, and storage counters used for root-cause analysis.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .panel { fill: none; stroke: #D8D1C7; stroke-width: 1.2; }
+    .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.4; }
+    .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; }
+    .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.5; }
+    .accent-line { fill: none; stroke: #D9392E; stroke-width: 2.2; }
+    .muted-line { fill: none; stroke: #D8D1C7; stroke-width: 1.2; stroke-dasharray: 7 6; }
+    .head { font-family: Inter, Arial, sans-serif; font-size: 23px; font-weight: 700; fill: #050505; }
+    .label { font-family: Inter, Arial, sans-serif; font-size: 16px; font-weight: 700; fill: #050505; }
+    .small { font-family: Inter, Arial, sans-serif; font-size: 12px; fill: #6F6A63; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#111111"/>
+    </marker>
+    <marker id="arrowAccent" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#D9392E"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1120" height="620"/>
+  <rect class="panel" x="42" y="40" width="1036" height="520" rx="8"/>
+
+  <g transform="translate(80 82)">
+    <rect class="accent" x="330" y="0" width="300" height="88" rx="6"/>
+    <text class="head" x="480" y="35" text-anchor="middle">KPI symptom</text>
+    <text class="small" x="480" y="60" text-anchor="middle">JCT up, p99 up, throughput down, GPU idle</text>
+
+    <rect class="box" x="0" y="176" width="260" height="150" rx="6"/>
+    <text class="label" x="130" y="210" text-anchor="middle">GPU / compute</text>
+    <text class="small" x="130" y="240" text-anchor="middle">utilization, clocks</text>
+    <text class="small" x="130" y="262" text-anchor="middle">kernel time, memory stalls</text>
+    <text class="small" x="130" y="284" text-anchor="middle">slow rank behavior</text>
+
+    <rect class="accent" x="350" y="176" width="260" height="150" rx="6"/>
+    <text class="label" x="480" y="210" text-anchor="middle">Network fabric</text>
+    <text class="small" x="480" y="240" text-anchor="middle">ECN, CNP, PFC</text>
+    <text class="small" x="480" y="262" text-anchor="middle">drops, queue occupancy</text>
+    <text class="small" x="480" y="284" text-anchor="middle">RDMA retransmission</text>
+
+    <rect class="box" x="700" y="176" width="260" height="150" rx="6"/>
+    <text class="label" x="830" y="210" text-anchor="middle">Storage path</text>
+    <text class="small" x="830" y="240" text-anchor="middle">read/write throughput</text>
+    <text class="small" x="830" y="262" text-anchor="middle">metadata latency</text>
+    <text class="small" x="830" y="284" text-anchor="middle">checkpoint write time</text>
+
+    <path class="line" d="M420 88 C338 123 225 140 130 176" marker-end="url(#arrow)"/>
+    <path class="accent-line" d="M480 88 V176" marker-end="url(#arrowAccent)"/>
+    <path class="line" d="M540 88 C622 123 735 140 830 176" marker-end="url(#arrow)"/>
+
+    <rect class="soft" x="78" y="420" width="804" height="82" rx="6"/>
+    <text class="label" x="480" y="454" text-anchor="middle">Correlate counters with application time</text>
+    <text class="small" x="480" y="479" text-anchor="middle">Step time, dataloader wait, collective duration, checkpoint pause, p99 request latency, and JCT.</text>
+
+    <path class="muted-line" d="M130 326 C173 371 237 397 322 420" marker-end="url(#arrow)"/>
+    <path class="accent-line" d="M480 326 V420" marker-end="url(#arrowAccent)"/>
+    <path class="muted-line" d="M830 326 C787 371 723 397 638 420" marker-end="url(#arrow)"/>
+  </g>
+</svg>

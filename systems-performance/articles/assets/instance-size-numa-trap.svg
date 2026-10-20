@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="560" viewBox="0 0 1120 560" role="img" aria-labelledby="title desc">
+  <title id="title">Instance size and NUMA boundary trap</title>
+  <desc id="desc">A progression showing how scaling from small instances to larger instances can accidentally move a workload across NUMA boundaries, while smaller replicas stay inside a local domain but pay per-instance overhead.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .panel { fill: #F5F1EA; stroke: #D8D1C7; stroke-width: 1.2; }
+    .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.4; }
+    .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; }
+    .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+    .fill { fill: #D8D1C7; stroke: #111111; stroke-width: 1; }
+    .redfill { fill: #D9392E; stroke: #111111; stroke-width: 1; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.7; }
+    .redline { fill: none; stroke: #D9392E; stroke-width: 2.2; }
+    .text { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #050505; font-size: 16px; }
+    .small { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #6F6A63; font-size: 13px; }
+    .label { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #050505; font-size: 14px; font-weight: 700; }
+    .red { fill: #D9392E; font-weight: 700; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#111111"/>
+    </marker>
+    <marker id="arrow-red" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#D9392E"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1120" height="560"/>
+
+  <rect class="panel" x="54" y="70" width="300" height="332"/>
+  <rect class="panel" x="410" y="70" width="300" height="332"/>
+  <rect class="panel" x="766" y="70" width="300" height="332"/>
+
+  <text class="label" x="82" y="108">Small instance</text>
+  <text class="small" x="82" y="132">Workload fits inside one local domain.</text>
+  <rect class="box" x="120" y="180" width="168" height="128"/>
+  <rect class="fill" x="142" y="204" width="44" height="34"/>
+  <rect class="fill" x="206" y="204" width="44" height="34"/>
+  <rect class="fill" x="142" y="254" width="44" height="34"/>
+  <rect class="fill" x="206" y="254" width="44" height="34"/>
+  <text class="small" x="126" y="350">Simple locality, but less room per VM.</text>
+
+  <text class="label" x="438" y="108">Bigger instance</text>
+  <text class="small" x="438" y="132">Still fits if the NUMA domain is large enough.</text>
+  <rect class="box" x="476" y="166" width="168" height="156"/>
+  <rect class="fill" x="498" y="190" width="36" height="30"/>
+  <rect class="fill" x="550" y="190" width="36" height="30"/>
+  <rect class="fill" x="602" y="190" width="36" height="30"/>
+  <rect class="fill" x="498" y="238" width="36" height="30"/>
+  <rect class="fill" x="550" y="238" width="36" height="30"/>
+  <rect class="fill" x="602" y="238" width="36" height="30"/>
+  <rect class="fill" x="498" y="286" width="36" height="30"/>
+  <rect class="fill" x="550" y="286" width="36" height="30"/>
+  <rect class="fill" x="602" y="286" width="36" height="30"/>
+  <text class="small" x="482" y="350">Capacity increases without crossing yet.</text>
+
+  <text class="label" x="794" y="108">Too large for one NUMA node</text>
+  <text class="small" x="794" y="132">A single process can span the boundary.</text>
+  <rect class="accent" x="812" y="166" width="96" height="156"/>
+  <rect class="box" x="920" y="166" width="96" height="156"/>
+  <text class="small" x="836" y="194">NUMA 0</text>
+  <text class="small" x="944" y="194">NUMA 1</text>
+  <rect class="redfill" x="842" y="220" width="36" height="30"/>
+  <rect class="redfill" x="842" y="268" width="36" height="30"/>
+  <rect class="redfill" x="950" y="220" width="36" height="30"/>
+  <rect class="redfill" x="950" y="268" width="36" height="30"/>
+  <path class="redline" d="M878 235 C902 220, 926 220, 950 235" marker-end="url(#arrow-red)"/>
+  <path class="redline" d="M878 283 C902 298, 926 298, 950 283" marker-end="url(#arrow-red)"/>
+  <text class="small" x="816" y="350"><tspan class="red">Risk:</tspan> same pod, remote memory traffic.</text>
+
+  <path class="line" d="M356 230 L408 230" marker-end="url(#arrow)"/>
+  <path class="line" d="M712 230 L764 230" marker-end="url(#arrow)"/>
+
+  <rect class="soft" x="168" y="432" width="784" height="86"/>
+  <text class="small" x="194" y="456">Smaller replicas avoid NUMA spillover, but every instance carries overhead:</text>
+  <text class="small" x="194" y="478">kubelet, CRI, kernel, monitoring agents, image cache, and scheduling surface.</text>
+  <text class="small" x="194" y="500">The practical choice is a sizing problem: measure goodput per dollar and p95/p99 variance.</text>
+
+  <text class="small" x="70" y="532">Reconstructed from the instance-scaling sequence in the presentation PDF; not a verbatim slide crop.</text>
+</svg>

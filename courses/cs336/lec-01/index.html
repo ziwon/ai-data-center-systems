@@ -1,0 +1,1132 @@
+<!DOCTYPE html><html lang="en" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-bguv2lll"> <head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Lecture 1: Overview and Tokenization | AI Data Center Systems</title><link rel="canonical" href="https://adcs.restack.tech/courses/cs336/lec-01/"/><link rel="sitemap" href="/sitemap-index.xml"/><script async src="https://www.googletagmanager.com/gtag/js?id=G-76LFZJVBTE"></script><script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-76LFZJVBTE');
+      </script><script async crossorigin="anonymous" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8128231647578658"></script><link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v6.4.8"/><meta name="generator" content="Starlight v0.40.0"/><meta property="og:title" content="Lecture 1: Overview and Tokenization"/><meta property="og:url" content="https://adcs.restack.tech/courses/cs336/lec-01/"/><meta property="og:locale" content="en"/><meta property="og:description" content="이 노트는 1시간 19분 22초 분량의 English caption과 공식 executable trace의 lecture 01.py 를 함께 대조해 작성했다. 자막은 강사의 구두 설명과 맥락을, executable trace는 수식·코드·assignment 항목을 확인하는..."/><meta property="og:site_name" content="AI Data Center Systems"/><meta name="description" content="이 노트는 1시간 19분 22초 분량의 English caption과 공식 executable trace의 lecture 01.py 를 함께 대조해 작성했다. 자막은 강사의 구두 설명과 맥락을, executable trace는 수식·코드·assignment 항목을 확인하는..."/><meta property="og:type" content="article"/><meta property="og:image" content="https://adcs.restack.tech/og/courses/cs336/lec-01.png?v=2"/><meta property="og:image:width" content="1200"/><meta property="og:image:height" content="630"/><meta name="twitter:image" content="https://adcs.restack.tech/og/courses/cs336/lec-01.png?v=2"/><meta name="twitter:card" content="summary_large_image"/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/_astro/print.DNXP8c50.css" media="print"><link rel="stylesheet" href="/_astro/common.DYbqSTpl.css"><script type="module" src="/_astro/page.CtJXHRyR.js"></script></head> <body class="astro-bguv2lll"> <a href="#_top" class="astro-7q3lir66">Skip to content</a> <script>
+  (() => {
+    try {
+      const savedMode = localStorage.getItem('adcs-navigation-mode');
+      document.documentElement.dataset.navigationMode = savedMode === 'compact' ? 'compact' : 'normal';
+    } catch {
+      document.documentElement.dataset.navigationMode = 'normal';
+    }
+  })();
+</script> <div class="page sl-flex astro-4toy2ex6"> <header class="header astro-4toy2ex6"><div class="header astro-3ef6ksr2"> <div class="title-wrapper sl-flex astro-3ef6ksr2"> <a href="/" class="site-title sl-flex astro-m46x6ez3">  <span class="astro-m46x6ez3" translate="no"> AI Data Center Systems </span> </a> <button class="navigation-mode-toggle print:hidden astro-3ef6ksr2" type="button" aria-label="Compact navigation" aria-pressed="false" title="Use compact navigation"> <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" class="astro-3ef6ksr2"> <rect x="3" y="4" width="18" height="16" rx="2" class="astro-3ef6ksr2"></rect> <path d="M9 4v16M6.5 10 4.5 12l2 2" class="astro-3ef6ksr2"></path> </svg> </button> </div> <div class="sl-flex print:hidden astro-3ef6ksr2"> <site-search class="astro-3ef6ksr2 astro-v37mnknz" data-translations="{&quot;placeholder&quot;:&quot;Search&quot;}"> <button data-open-modal disabled aria-label="Search" aria-keyshortcuts="Control+K" class="astro-v37mnknz"> <svg aria-hidden="true" class="astro-v37mnknz astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg> <span class="sl-hidden md:sl-block astro-v37mnknz" aria-hidden="true">Search</span> <kbd class="sl-hidden md:sl-flex astro-v37mnknz" style="display: none;"> <kbd class="astro-v37mnknz">Ctrl</kbd><kbd class="astro-v37mnknz">K</kbd> </kbd> </button> <dialog style="padding:0" aria-label="Search" class="astro-v37mnknz"> <div class="dialog-frame sl-flex astro-v37mnknz">  <button data-close-modal class="sl-flex md:sl-hidden astro-v37mnknz"> Cancel </button> <div class="search-container astro-v37mnknz"> <div id="starlight__search" class="astro-v37mnknz"></div> </div> </div> </dialog> </site-search>  <script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script> <script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.D1WXcfCt.js"></script>  </div> <div class="sl-hidden md:sl-flex print:hidden right-group astro-3ef6ksr2"> <div class="sl-flex social-icons astro-3ef6ksr2"> <a href="https://github.com/ziwon/ai-data-center-systems" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">GitHub</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script> <script type="module">const r="starlight-theme",o=e=>e==="auto"||e==="dark"||e==="light"?e:"auto",c=()=>o(typeof localStorage<"u"&&localStorage.getItem(r));function n(e){typeof localStorage<"u"&&localStorage.setItem(r,e==="light"||e==="dark"?e:"")}const l=()=>matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";function t(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e==="auto"?l():e,n(e)}matchMedia("(prefers-color-scheme: light)").addEventListener("change",()=>{c()==="auto"&&t("auto")});class s extends HTMLElement{constructor(){super(),t(c()),this.querySelector("select")?.addEventListener("change",a=>{a.currentTarget instanceof HTMLSelectElement&&t(o(a.currentTarget.value))})}}customElements.define("starlight-theme-select",s);</script> <script type="module">class s extends HTMLElement{constructor(){super();const e=this.querySelector("select");e&&(e.addEventListener("change",t=>{t.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=t.currentTarget.value)}),window.addEventListener("pageshow",t=>{if(!t.persisted)return;const n=e.querySelector("option[selected]")?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}}customElements.define("starlight-lang-select",s);</script> </div> </div></header> <nav class="sidebar print:hidden astro-4toy2ex6" aria-label="Main"> <starlight-menu-button class="print:hidden astro-jif73yzw"> <button aria-expanded="false" aria-label="Menu" aria-controls="starlight__sidebar" class="sl-flex md:sl-hidden astro-jif73yzw"> <svg aria-hidden="true" class="open-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg> <svg aria-hidden="true" class="close-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg> </button> </starlight-menu-button> <script type="module">class s extends HTMLElement{constructor(){super(),this.btn=this.querySelector("button"),this.btn.addEventListener("click",()=>this.toggleExpanded());const t=this.closest("nav");t&&t.addEventListener("keyup",e=>this.closeOnEscape(e))}setExpanded(t){this.setAttribute("aria-expanded",String(t)),document.body.toggleAttribute("data-mobile-menu-expanded",t)}toggleExpanded(){this.setExpanded(this.getAttribute("aria-expanded")!=="true")}closeOnEscape(t){t.code==="Escape"&&(this.setExpanded(!1),this.btn.focus())}}customElements.define("starlight-menu-button",s);</script>  <div id="starlight__sidebar" class="sidebar-pane astro-4toy2ex6"> <div class="navigation-controls astro-4toy2ex6"> <button class="navigation-drawer-toggle astro-4toy2ex6" type="button" aria-controls="starlight__sidebar-content" aria-expanded="false" title="Open navigation"> <svg class="navigation-menu-icon astro-4toy2ex6" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"> <path d="M4 6h16M4 12h16M4 18h16" class="astro-4toy2ex6"></path> </svg> <svg class="navigation-close-icon astro-4toy2ex6" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"> <path d="m6 6 12 12M18 6 6 18" class="astro-4toy2ex6"></path> </svg> <span class="navigation-drawer-label astro-4toy2ex6">Open navigation</span> </button> </div> <div id="starlight__sidebar-content" class="sidebar-content sl-flex astro-4toy2ex6"> <ul class="starlight-sidebar-topics astro-2fh6iaza"> <li class="astro-2fh6iaza"> <a aria-label="Network" title="Network" href="/network/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8.7 10a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-6.27-6.3a1 1 0 0 0-1.42 1.42ZM21 14a1 1 0 0 0-1 1v3.59L15.44 14A1 1 0 0 0 14 15.44L18.59 20H15a1 1 0 0 0 0 2h6a1 1 0 0 0 .38-.08 1 1 0 0 0 .54-.54A1 1 0 0 0 22 21v-6a1 1 0 0 0-1-1Zm.92-11.38a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-6a1 1 0 0 0 0 2h3.59L2.29 20.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V9a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z"/></svg> </div> <div class="astro-2fh6iaza"> Network  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="GPU &amp; Accelerator Systems" title="GPU &amp; Accelerator Systems" href="/gpu/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> </div> <div class="astro-2fh6iaza"> GPU &amp; Accelerator Systems  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Storage" title="Storage" href="/storage/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8 16.5a1 1 0 1 0 1 1 1 1 0 0 0-1-1M12 2C8 2 4 3.37 4 6v12c0 2.63 4 4 8 4s8-1.37 8-4V6c0-2.63-4-4-8-4m6 16c0 .71-2.28 2-6 2s-6-1.29-6-2v-3.27A13 13 0 0 0 12 16a13 13 0 0 0 6-1.27Zm0-6c0 .71-2.28 2-6 2s-6-1.29-6-2V8.73A13 13 0 0 0 12 10a13 13 0 0 0 6-1.27Zm-6-4C8.28 8 6 6.71 6 6s2.28-2 6-2 6 1.29 6 2-2.28 2-6 2m-4 2.5a1 1 0 1 0 1 1 1 1 0 0 0-1-1"/></svg> </div> <div class="astro-2fh6iaza"> Storage  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Training" title="Training" href="/training/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1 1v8a1 1 0 0 0 2 0v-8a1 1 0 0 0-1-1m5-10a1 1 0 0 0-1 1v18a1 1 0 0 0 2 0V3a1 1 0 0 0-1-1m10 14a1 1 0 0 0-1 1v4a1 1 0 0 0 2 0v-4a1 1 0 0 0-1-1m-5-8a1 1 0 0 0-1 1v12a1 1 0 0 0 2 0V9a1 1 0 0 0-1-1"/></svg> </div> <div class="astro-2fh6iaza"> Training  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Inference" title="Inference" data-topic-icon="brain" href="/inference/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 22H5a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3h1a4 4 0 0 1 7.3-2.18c.448.64.692 1.4.7 2.18h3a1 1 0 0 1 1 1v3a4 4 0 0 1 2.18 7.3A3.86 3.86 0 0 1 18 18v3a1 1 0 0 1-1 1ZM5 8a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11v-3.18a1 1 0 0 1 1.33-.95 1.77 1.77 0 0 0 1.74-.23 2 2 0 0 0 .93-1.37 2 2 0 0 0-.48-1.59 1.89 1.89 0 0 0-2.17-.55 1 1 0 0 1-1.33-.95V8h-3.2a1 1 0 0 1-1-1.33 1.77 1.77 0 0 0-.23-1.74 1.939 1.939 0 0 0-3-.43A2 2 0 0 0 8 6c.002.23.046.456.13.67A1 1 0 0 1 7.18 8H5Z"/></svg> </div> <div class="astro-2fh6iaza"> Inference  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="MLOps" title="MLOps" data-topic-icon="cycle" href="/mlops/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8.7 10a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-6.27-6.3a1 1 0 0 0-1.42 1.42ZM21 14a1 1 0 0 0-1 1v3.59L15.44 14A1 1 0 0 0 14 15.44L18.59 20H15a1 1 0 0 0 0 2h6a1 1 0 0 0 .38-.08 1 1 0 0 0 .54-.54A1 1 0 0 0 22 21v-6a1 1 0 0 0-1-1Zm.92-11.38a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-6a1 1 0 0 0 0 2h3.59L2.29 20.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V9a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z"/></svg> </div> <div class="astro-2fh6iaza"> MLOps  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Systems Performance" title="Systems Performance" href="/systems-performance/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path fill-rule="evenodd" d="M1.44 8.855v-.001l3.527-3.516c.34-.344.802-.541 1.285-.548h6.649l.947-.947c3.07-3.07 6.207-3.072 7.62-2.868a1.821 1.821 0 0 1 1.557 1.557c.204 1.413.203 4.55-2.868 7.62l-.946.946v6.649a1.845 1.845 0 0 1-.549 1.286l-3.516 3.528a1.844 1.844 0 0 1-3.11-.944l-.858-4.275-4.52-4.52-2.31-.463-1.964-.394A1.847 1.847 0 0 1 .98 10.693a1.843 1.843 0 0 1 .46-1.838Zm5.379 2.017-3.873-.776L6.32 6.733h4.638l-4.14 4.14Zm8.403-5.655c2.459-2.46 4.856-2.463 5.89-2.33.134 1.035.13 3.432-2.329 5.891l-6.71 6.71-3.561-3.56 6.71-6.711Zm-1.318 15.837-.776-3.873 4.14-4.14v4.639l-3.364 3.374Z" clip-rule="evenodd"/><path d="M9.318 18.345a.972.972 0 0 0-1.86-.561c-.482 1.435-1.687 2.204-2.934 2.619a8.22 8.22 0 0 1-1.23.302c.062-.365.157-.79.303-1.229.415-1.247 1.184-2.452 2.62-2.935a.971.971 0 1 0-.62-1.842c-.12.04-.236.084-.35.13-2.02.828-3.012 2.588-3.493 4.033a10.383 10.383 0 0 0-.51 2.845l-.001.016v.063c0 .536.434.972.97.972H2.24a7.21 7.21 0 0 0 .878-.065c.527-.063 1.248-.19 2.02-.447 1.445-.48 3.205-1.472 4.033-3.494a5.828 5.828 0 0 0 .147-.407Z"/></svg> </div> <div class="astro-2fh6iaza"> Systems Performance  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Courses" title="Courses" href="/courses/" class="starlight-sidebar-topics-current astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.17 2.06A13.1 13.1 0 0 0 19 1.87a12.94 12.94 0 0 0-7 2.05 12.94 12.94 0 0 0-7-2 13.1 13.1 0 0 0-2.17.19 1 1 0 0 0-.83 1v12a1 1 0 0 0 1.17 1 10.9 10.9 0 0 1 8.25 1.91l.12.07h.11a.91.91 0 0 0 .7 0h.11l.12-.07A10.899 10.899 0 0 1 20.83 16 1 1 0 0 0 22 15V3a1 1 0 0 0-.83-.94ZM11 15.35a12.87 12.87 0 0 0-6-1.48H4v-10c.333-.02.667-.02 1 0a10.86 10.86 0 0 1 6 1.8v9.68Zm9-1.44h-1a12.87 12.87 0 0 0-6 1.48V5.67a10.86 10.86 0 0 1 6-1.8c.333-.02.667-.02 1 0v10.04Zm1.17 4.15a13.098 13.098 0 0 0-2.17-.19 12.94 12.94 0 0 0-7 2.05 12.94 12.94 0 0 0-7-2.05c-.727.003-1.453.066-2.17.19A1 1 0 0 0 2 19.21a1 1 0 0 0 1.17.79 10.9 10.9 0 0 1 8.25 1.91 1 1 0 0 0 1.16 0A10.9 10.9 0 0 1 20.83 20a1 1 0 0 0 1.17-.79 1 1 0 0 0-.83-1.15Z"/></svg> </div> <div class="astro-2fh6iaza"> Courses  </div> </a> </li> </ul> <sl-sidebar-state-persist data-hash="147ldbs" class="astro-kku4brbg"> <script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script>  <ul class="top-level astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">Courses</span>  </a> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">cme295</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="0"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/cme295/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">CME295 Lecture Notes</span>  </a> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">lec-01</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="1"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/cme295/lec-01/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 1: Transformer</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">lec-02</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="2"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/cme295/lec-02/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 2: Transformer-Based Models &amp; Tricks</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">lec-03</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="3"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/cme295/lec-03/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 3: Large Language Models, Decoding, Prompting, and Inference</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">lec-04</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="4"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/cme295/lec-04/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 4: LLM Training, Fine-Tuning, and Efficient Adaptation</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">lec-05</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="5"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/cme295/lec-05/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 5: LLM Tuning and Human Preferences</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">lec-06</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="6"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/cme295/lec-06/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 6: LLM Reasoning and GRPO</span>  </a> </li> </ul> </details> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">cs336</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="7"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/cs336/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Stanford CS336: Language Modeling from Scratch</span>  </a> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">lec-01</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="8"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/cs336/lec-01/" aria-current="page" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 1: Overview and Tokenization</span>  </a> </li> </ul> </details> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">deep-learning-for-network-engineers</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="9"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/deep-learning-for-network-engineers/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Deep Learning for Network Engineers</span>  </a> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">week01</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="10"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/deep-learning-for-network-engineers/week01/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 1: From Artificial Neuron to AI Training Fabric</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">week02</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="11"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/deep-learning-for-network-engineers/week02/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 2: Large Language Model, LLM</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">week03</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="12"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/deep-learning-for-network-engineers/week03/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 3: Parallelism Strategies in Deep Learning</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">week04</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="13"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/deep-learning-for-network-engineers/week04/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 4: RDMA and GPU Cluster Communication</span>  </a> </li> </ul> </details> </li> </ul> </details> </li> </ul>  <script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script> </sl-sidebar-state-persist> <div class="md:sl-hidden"> <div class="mobile-preferences sl-flex astro-wu23bvmt"> <div class="social-icons astro-wu23bvmt"> <a href="https://github.com/ziwon/ai-data-center-systems" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">GitHub</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script>   </div> </div> </div> </div> </nav> <div class="main-frame astro-4toy2ex6">  <script type="module">const a=document.getElementById("starlight__sidebar"),n=a?.querySelector("sl-sidebar-state-persist"),o="sl-sidebar-state",i=()=>{let t=[];const e=n?.dataset.hash||"";try{const s=sessionStorage.getItem(o),r=JSON.parse(s||"{}");Array.isArray(r.open)&&r.hash===e&&(t=r.open)}catch{}return{hash:e,open:t,scroll:a?.scrollTop||0}},c=t=>{try{sessionStorage.setItem(o,JSON.stringify(t))}catch{}},d=()=>c(i()),l=(t,e)=>{const s=i();s.open[e]=t,c(s)};n?.addEventListener("click",t=>{if(!(t.target instanceof Element))return;const e=t.target.closest("summary")?.closest("details");if(!e)return;const s=e.querySelector("sl-sidebar-restore"),r=parseInt(s?.dataset.index||"");isNaN(r)||l(!e.open,r)});addEventListener("visibilitychange",()=>{document.visibilityState==="hidden"&&d()});addEventListener("pageHide",d);</script> <div class="lg:sl-flex astro-67yu43on"> <aside class="right-sidebar-container print:hidden astro-67yu43on"> <div class="right-sidebar astro-67yu43on"> <div class="lg:sl-hidden astro-rl4sue7z"><mobile-starlight-toc data-min-h="2" data-max-h="2" class="astro-doynk5tl"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-doynk5tl"><details id="starlight__mobile-toc" class="astro-doynk5tl"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-doynk5tl"><span class="toggle sl-flex astro-doynk5tl">On this page<svg aria-hidden="true" class="caret astro-doynk5tl astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-doynk5tl"></span></summary><div class="dropdown astro-doynk5tl"><ul class="isMobile astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#table-of-contents" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Table of Contents</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#goal" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Goal</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#lecture-overview" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Lecture Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#source-verification" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Source Verification</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#why-build-language-models-from-scratch" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Why Build Language Models From Scratch</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#what-transfers-across-scale" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">What Transfers Across Scale</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#efficiency-as-the-central-frame" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Efficiency as the Central Frame</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#language-model-evolution-and-the-open-ecosystem" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Language Model Evolution and the Open Ecosystem</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#course-structure" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Course Structure</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#part-i-basics" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Part I: Basics</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#part-ii-systems" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Part II: Systems</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#part-iii-scaling-laws" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Part III: Scaling Laws</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#part-iv-evaluation-and-data" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Part IV: Evaluation and Data</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#part-v-alignment" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Part V: Alignment</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#a-unified-efficiency-lens" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">A Unified Efficiency Lens</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#tokenization-as-an-interface" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Tokenization as an Interface</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#tokenizer-design-trade-offs" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Tokenizer Design Trade-Offs</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#byte-pair-encoding" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Byte Pair Encoding</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#bpe-encoding-and-decoding" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">BPE Encoding and Decoding</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#implementation-considerations" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Implementation Considerations</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#beyond-tokenization" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Beyond Tokenization</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#practical-tips-and-notes" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Practical Tips and Notes</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#lecture-summary" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Lecture Summary</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#key-terms" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Key Terms</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#questions" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Questions</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#answers" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Answers</span> </a>  </li> </ul></div></details></nav></mobile-starlight-toc><script type="module" src="/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.hwBsy0Mo.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-rl4sue7z"><div class="sl-container astro-rl4sue7z"><kb-graph-card> <button class="kb-graph-card" type="button" data-open aria-haspopup="dialog"> <span class="kb-graph-copy"> <span class="kb-graph-title">Knowledge graph</span> <span class="kb-graph-subtitle" data-count>Loading related docs</span> </span> <span class="kb-graph-thumb" aria-hidden="true" data-map></span> <span class="kb-graph-expand" aria-hidden="true">Expand</span> </button> <dialog class="kb-graph-dialog" aria-label="Knowledge graph" data-dialog> <div class="kb-graph-panel"> <div class="kb-graph-panel-header"> <div> <p>Knowledge graph</p> <h2 data-heading>Related documents</h2> </div> <div class="kb-graph-tabs" role="tablist" aria-label="Knowledge graph views"> <button type="button" role="tab" aria-selected="true" data-tab="page">This page</button> <button type="button" role="tab" aria-selected="false" data-tab="global">Full graph</button> </div> <button type="button" data-close aria-label="Close knowledge graph">×</button> </div> <div class="kb-graph-stage" data-stage data-view="page"> <div data-page-stage></div> <div data-global-stage hidden></div> </div> </div> </dialog> </kb-graph-card> <script type="module" src="/_astro/KnowledgeGraphCard.astro_astro_type_script_index_0_lang.C475L69c.js"></script><starlight-toc data-min-h="2" data-max-h="2"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">On this page</h2><ul class="astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#table-of-contents" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Table of Contents</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#goal" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Goal</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#lecture-overview" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Lecture Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#source-verification" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Source Verification</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#why-build-language-models-from-scratch" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Why Build Language Models From Scratch</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#what-transfers-across-scale" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">What Transfers Across Scale</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#efficiency-as-the-central-frame" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Efficiency as the Central Frame</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#language-model-evolution-and-the-open-ecosystem" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Language Model Evolution and the Open Ecosystem</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#course-structure" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Course Structure</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#part-i-basics" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Part I: Basics</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#part-ii-systems" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Part II: Systems</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#part-iii-scaling-laws" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Part III: Scaling Laws</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#part-iv-evaluation-and-data" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Part IV: Evaluation and Data</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#part-v-alignment" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Part V: Alignment</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#a-unified-efficiency-lens" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">A Unified Efficiency Lens</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#tokenization-as-an-interface" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Tokenization as an Interface</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#tokenizer-design-trade-offs" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Tokenizer Design Trade-Offs</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#byte-pair-encoding" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Byte Pair Encoding</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#bpe-encoding-and-decoding" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">BPE Encoding and Decoding</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#implementation-considerations" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Implementation Considerations</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#beyond-tokenization" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Beyond Tokenization</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#practical-tips-and-notes" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Practical Tips and Notes</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#lecture-summary" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Lecture Summary</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#key-terms" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Key Terms</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#questions" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Questions</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#answers" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Answers</span> </a>  </li> </ul></nav></starlight-toc><script type="module" src="/_astro/TableOfContents.astro_astro_type_script_index_0_lang.FuRcXuRY.js"></script></div></div> </div> </aside> <div class="main-pane astro-67yu43on">  <main data-pagefind-body class="astro-bguv2lll" lang="en" dir="ltr">    <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <h1 id="_top" class="astro-j6tvhyss">Lecture 1: Overview and Tokenization</h1> </div> </div> <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <starlight-image-zoom> <template class="astro-vjux6bgf"> <dialog class="starlight-image-zoom-dialog astro-vjux6bgf"> <button aria-label="Unzoom image" class="starlight-image-zoom-control astro-vjux6bgf"> <svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" class="astro-vjux6bgf"> <use href="#starlight-image-zoom-icon-unzoom" class="astro-vjux6bgf"></use> </svg> </button> <figure class="astro-vjux6bgf"></figure> </dialog> </template> <svg xmlns="http://www.w3.org/2000/svg" style="display:none" class="astro-vjux6bgf"> <symbol id="starlight-image-zoom-icon-zoom" viewBox="0 0 24 24" class="astro-vjux6bgf"> <path d="M9.79 12.79 4 18.59V17a1 1 0 0 0-2 0v4a1 1 0 0 0 .08.38 1 1 0 0 0 .54.54A1 1 0 0 0 3 22h4a1 1 0 0 0 0-2H5.41l5.8-5.79a1 1 0 0 0-1.42-1.42ZM21.92 2.62a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-4a1 1 0 0 0 0 2h1.59l-5.8 5.79a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V7a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z" class="astro-vjux6bgf"></path> </symbol> <symbol id="starlight-image-zoom-icon-unzoom" viewBox="0 0 24 24" class="astro-vjux6bgf"> <path d="M21.71 2.29a1 1 0 0 0-1.42 0l-5.79 5.8V6.5a1 1 0 0 0-2 0v4a1 1 0 0 0 .08.38 1 1 0 0 0 .54.54 1 1 0 0 0 .38.08h4a1 1 0 0 0 0-2h-1.59l5.8-5.79a1 1 0 0 0 0-1.42ZM10.88 12.58a1 1 0 0 0-.38-.08h-4a1 1 0 0 0 0 2h1.59l-5.8 5.79a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l5.79-5.8v1.59a1 1 0 0 0 2 0v-4a1 1 0 0 0-.08-.38 1 1 0 0 0-.54-.54Z" class="astro-vjux6bgf"></path> </symbol> </svg> </starlight-image-zoom>   <script type="module" src="/_astro/ImageZoom.astro_astro_type_script_index_0_lang.CZmBqK-T.js"></script> <div class="sl-markdown-content"> <p>Source: <a href="https://www.youtube.com/watch?v=JuoVZkPBiKk">Stanford CS336 Lecture 1 — Overview, Tokenization</a></p>
+<p>Course material: <a href="https://cs336.stanford.edu/lectures/?trace=lecture_01">Executable lecture</a></p>
+<p>이 노트는 1시간 19분 22초 분량의 English caption과 공식 executable trace의 <code dir="auto">lecture_01.py</code>를 함께 대조해 작성했다. 자막은 강사의 구두 설명과 맥락을, executable trace는 수식·코드·assignment 항목을 확인하는 기준으로 사용했다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="table-of-contents">Table of Contents</h2><a class="sl-anchor-link" href="#table-of-contents"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Table of Contents”</span></a></div>
+<ul>
+<li><a href="#goal">Goal</a></li>
+<li><a href="#lecture-overview">Lecture Overview</a></li>
+<li><a href="#source-verification">Source Verification</a></li>
+<li><a href="#why-build-language-models-from-scratch">Why Build Language Models From Scratch</a></li>
+<li><a href="#what-transfers-across-scale">What Transfers Across Scale</a></li>
+<li><a href="#efficiency-as-the-central-frame">Efficiency as the Central Frame</a></li>
+<li><a href="#language-model-evolution-and-the-open-ecosystem">Language Model Evolution and the Open Ecosystem</a></li>
+<li><a href="#course-structure">Course Structure</a></li>
+<li><a href="#part-i-basics">Part I: Basics</a></li>
+<li><a href="#part-ii-systems">Part II: Systems</a></li>
+<li><a href="#part-iii-scaling-laws">Part III: Scaling Laws</a></li>
+<li><a href="#part-iv-evaluation-and-data">Part IV: Evaluation and Data</a></li>
+<li><a href="#part-v-alignment">Part V: Alignment</a></li>
+<li><a href="#a-unified-efficiency-lens">A Unified Efficiency Lens</a></li>
+<li><a href="#tokenization-as-an-interface">Tokenization as an Interface</a></li>
+<li><a href="#tokenizer-design-trade-offs">Tokenizer Design Trade-Offs</a></li>
+<li><a href="#byte-pair-encoding">Byte Pair Encoding</a></li>
+<li><a href="#bpe-encoding-and-decoding">BPE Encoding and Decoding</a></li>
+<li><a href="#implementation-considerations">Implementation Considerations</a></li>
+<li><a href="#beyond-tokenization">Beyond Tokenization</a></li>
+<li><a href="#practical-tips-and-notes">Practical Tips and Notes</a></li>
+<li><a href="#lecture-summary">Lecture Summary</a></li>
+<li><a href="#key-terms">Key Terms</a></li>
+<li><a href="#questions">Questions</a></li>
+<li><a href="#answers">Answers</a></li>
+</ul>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="goal">Goal</h2><a class="sl-anchor-link" href="#goal"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Goal”</span></a></div>
+<p>이번 강의의 목표는 language model을 단순히 호출하거나 fine-tuning하는 사용자가 아니라, 제한된 data와 compute 안에서 전체 시스템을 직접 설계할 수 있는 builder의 관점을 갖는 것이다.</p>
+<p>핵심 메시지는 다음과 같다.</p>
+<blockquote>
+<p>좋은 language model을 만드는 문제는 architecture 하나를 고르는 문제가 아니다. Tokenization, model, optimization, hardware, scaling, data, evaluation, alignment를 하나의 효율성 문제로 연결해야 한다.</p>
+</blockquote>
+<p>Lecture 1은 두 가지 역할을 한다.</p>
+<ol>
+<li>CS336 전체가 다룰 language modeling stack과 다섯 assignment의 관계를 설명한다.</li>
+<li>Raw Unicode text와 model이 처리하는 token ID 사이의 interface를 정의하고, byte-level BPE를 처음부터 구현하는 원리를 설명한다.</li>
+</ol>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="lecture-overview">Lecture Overview</h2><a class="sl-anchor-link" href="#lecture-overview"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Lecture Overview”</span></a></div>
+<p>강의는 약 1시간 19분이며 다음 순서로 진행된다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Time</th><th>Topic</th><th>Main question</th></tr></thead><tbody><tr><td><code dir="auto">00:00</code></td><td>Course philosophy</td><td>이미 강력한 API와 coding agent가 있는데 왜 from scratch로 만드는가?</td></tr><tr><td><code dir="auto">05:54</code></td><td>Small scale and frontier scale</td><td>작은 model에서 얻은 지식 중 무엇이 대규모로 전이되는가?</td></tr><tr><td><code dir="auto">09:15</code></td><td>Efficiency and scaling</td><td>규모가 커질수록 algorithmic efficiency가 왜 더 중요해지는가?</td></tr><tr><td><code dir="auto">11:36</code></td><td>Language model history</td><td>Neural LM, Transformer, scaling, open model 생태계는 어떻게 이어졌는가?</td></tr><tr><td><code dir="auto">19:29</code></td><td>Executable lecture and logistics</td><td>강의와 assignment는 어떤 방식으로 진행되는가?</td></tr><tr><td><code dir="auto">27:17</code></td><td>Five-part course map</td><td>Basics, systems, scaling, data, alignment는 어떻게 연결되는가?</td></tr><tr><td><code dir="auto">36:02</code></td><td>Systems</td><td>FLOPs, memory, kernels, distributed training, inference를 어떻게 계산하는가?</td></tr><tr><td><code dir="auto">45:12</code></td><td>Scaling laws</td><td>비싼 단 한 번의 run을 작은 실험으로 어떻게 예측하는가?</td></tr><tr><td><code dir="auto">53:29</code></td><td>Evaluation and data</td><td>무엇을 측정하고 어떤 data로 model의 능력을 만드는가?</td></tr><tr><td><code dir="auto">1:00:20</code></td><td>Alignment</td><td>생성 결과를 평가하는 약한 supervision으로 어떻게 model을 개선하는가?</td></tr><tr><td><code dir="auto">1:05:07</code></td><td>Tokenization</td><td>Unicode string을 어떻게 효율적인 token sequence로 바꾸는가?</td></tr></tbody></table>
+<p>Lecture 1의 범위는 넓지만 전체를 관통하는 질문은 하나다.</p>
+<div class="expressive-code"><link rel="stylesheet" href="/_astro/ec.v4551.css"><script type="module" src="/_astro/ec.0vx5m.js"></script><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">주어진 data와 compute budget에서</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">평가 기준상 가장 좋은 model을 어떻게 만들 것인가?</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="주어진 data와 compute budget에서평가 기준상 가장 좋은 model을 어떻게 만들 것인가?"><div></div></button></div></figure></div>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="source-verification">Source Verification</h2><a class="sl-anchor-link" href="#source-verification"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Source Verification”</span></a></div>
+<p>영상 자막과 executable lecture는 같은 강의 흐름을 가지지만 역할이 다르다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Source</th><th>Checked content</th><th>Used for</th></tr></thead><tbody><tr><td>YouTube caption</td><td><code dir="auto">00:04</code>부터 <code dir="auto">1:19:15</code>까지의 강의 발화</td><td>설명의 논리, 강조점, 강사의 caveat</td></tr><tr><td>Executable trace</td><td><code dir="auto">lecture_01.py</code> 763 lines, 617 execution steps</td><td>함수 구조, code example, 수치, assignment 요구사항</td></tr></tbody></table>
+<p>공식 trace의 top-level 실행 순서는 다음과 같다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">welcome</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> why_this_course_exists</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> current_lm_landscape</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> what_is_this_program</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> course_logistics</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> course_syllabus</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> tokenization</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> Next time: resource accounting</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="welcome  -> why_this_course_exists  -> current_lm_landscape  -> what_is_this_program  -> course_logistics  -> course_syllabus  -> tokenization  -> Next time: resource accounting"><div></div></button></div></figure></div>
+<p>Trace에서 확인한 concrete example은 다음과 같다.</p>
+<ul>
+<li>Test string: <code dir="auto">"Hello, 🌍! 你好!"</code></li>
+<li>Tokenizer example: <code dir="auto">tiktoken.get_encoding("o200k_base")</code></li>
+<li>Character conversion: <code dir="auto">ord("a") == 97</code>, <code dir="auto">ord("🌍") == 127757</code></li>
+<li>UTF-8 conversion: <code dir="auto">"a"</code>는 1 byte, <code dir="auto">"🌍"</code>는 4 bytes</li>
+<li>Word tokenizer example: <code dir="auto">"I'll say supercalifragilisticexpialidocious!"</code></li>
+<li>BPE training corpus: <code dir="auto">"the cat in the hat"</code></li>
+<li>BPE inference text: <code dir="auto">"the quick brown fox"</code></li>
+<li>Next lecture: resource accounting</li>
+</ul>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="why-build-language-models-from-scratch">Why Build Language Models From Scratch</h2><a class="sl-anchor-link" href="#why-build-language-models-from-scratch"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Why Build Language Models From Scratch”</span></a></div>
+<p>현대 AI workflow는 점점 높은 abstraction으로 이동했다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">직접 model 구현과 학습</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> pretrained model fine-tuning</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> prompting</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> 대화형 assistant</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> agent에 장기 작업 위임</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="직접 model 구현과 학습  -> pretrained model fine-tuning  -> prompting  -> 대화형 assistant  -> agent에 장기 작업 위임"><div></div></button></div></figure></div>
+<p>높은 abstraction은 생산성을 높이지만, abstraction은 완전하지 않다. Model이 원하는 행동을 하지 못했을 때 내부 stack을 이해하지 못하면 선택할 수 있는 해결책도 제한된다. Prompt를 바꾸는 것만으로는 tokenizer, data mixture, architecture, optimizer, kernel, parallelism 같은 design space를 탐색할 수 없다.</p>
+<p>CS336의 <code dir="auto">from scratch</code>는 모든 dependency를 재구현한다는 뜻이 아니다. 한 quarter 안에서 학습 가치가 높은 경계를 선택해 tokenizer, Transformer, optimizer, training loop, GPU kernel, distributed training component를 직접 만든다는 뜻이다.</p>
+<p>강의가 강조하는 학습 방식은 다음과 같다.</p>
+<ul>
+<li>설명을 듣는 것보다 실제 component를 구현한다.</li>
+<li>Unit test로 correctness를 먼저 확인한다.</li>
+<li>작은 환경에서 profile과 benchmark를 반복한다.</li>
+<li>제한된 compute에서 model quality를 최대화한다.</li>
+<li>내부가 보이지 않는 abstraction이 실패했을 때 아래 layer로 내려간다.</li>
+</ul>
+<p>이는 research question의 범위를 넓힌다. 이미 정해진 API의 입력과 출력만 바꾸는 것이 아니라, 전체 stack에서 어떤 가정을 바꿀지 선택할 수 있기 때문이다.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="what-transfers-across-scale">What Transfers Across Scale</h2><a class="sl-anchor-link" href="#what-transfers-across-scale"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “What Transfers Across Scale”</span></a></div>
+<p>Frontier model은 매우 비싸고, 학습 recipe와 data mixture도 완전히 공개되지 않는다. 따라서 수업에서 작은 model을 학습한다고 해서 frontier-scale 현상을 그대로 재현할 수는 없다.</p>
+<p>강의는 작은 scale에서 배우는 지식을 세 종류로 구분한다.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    A[Small-scale&#x3C;br/>experiments] --> B[Mechanics&#x3C;br/>how it works]
+    A --> C[Mindset&#x3C;br/>how to build]
+    A --> D[Intuitions&#x3C;br/>what works]
+    B --> E[Transfers well&#x3C;br/>parallelism and kernels]
+    C --> F[Transfers well&#x3C;br/>profile and benchmark]
+    D --> G[Scale-sensitive&#x3C;br/>requires experiments]
+
+    classDef primary fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef secondary fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef note fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef accent fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    class A primary
+    class B,C,D secondary
+    class E,F note
+    class G accent</pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Knowledge</th><th>Example</th><th>Transferability</th></tr></thead><tbody><tr><td>Mechanics</td><td>Transformer, model parallelism, kernel fusion이 어떻게 동작하는가</td><td>비교적 높다</td></tr><tr><td>Mindset</td><td>모든 component를 profile하고 budget 대비 효율을 측정한다</td><td>비교적 높다</td></tr><tr><td>Intuitions</td><td>특정 activation, data mixture, architecture 변경이 품질을 높인다</td><td>scale과 setting에 민감하다</td></tr></tbody></table>
+<p>작은 model과 큰 model에서는 compute가 쓰이는 위치가 달라질 수 있다. 강의 예시에서는 규모가 커지면서 Transformer FLOPs 중 MLP가 차지하는 비중이 크게 증가한다. 작은 model의 attention 최적화가 큰 model에서도 같은 효과를 낸다고 단정할 수 없는 이유다.</p>
+<p>Model capability도 scale에 따라 비선형적으로 보일 수 있다. 작은 scale에서는 관찰되지 않던 in-context learning이나 task performance가 충분한 scale에서 뚜렷해질 수 있다. 따라서 작은 실험은 mechanics와 개발 습관을 배우는 데 강하지만, modeling intuition을 검증하는 최종 증거는 아니다.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="efficiency-as-the-central-frame">Efficiency as the Central Frame</h2><a class="sl-anchor-link" href="#efficiency-as-the-central-frame"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Efficiency as the Central Frame”</span></a></div>
+<p>강의는 bitter lesson을 “scale만 중요하고 algorithm은 중요하지 않다”로 해석하지 않는다. 중요한 것은 더 많은 resource를 효과적으로 사용할 수 있는, 즉 scale하는 algorithm이다.</p>
+<p>강의의 직관을 단순화하면 다음과 같다.</p>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>model quality</mtext><mo>≈</mo><mtext>algorithmic efficiency</mtext><mo>×</mo><mtext>available resources</mtext></mrow><annotation encoding="application/x-tex">\text{model quality} \approx
+\text{algorithmic efficiency} \times
+\text{available resources}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord text"><span class="mord">model quality</span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord text"><span class="mord">algorithmic efficiency</span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord text"><span class="mord">available resources</span></span></span></span></span></span>
+<p>이는 물리 법칙이 아니라 강의의 문제 설정을 설명하는 개념적 식이다. Resource가 커질수록 작은 효율 개선의 절대 효과도 커진다. 작은 run이 두 배 느리면 조금 더 기다릴 수 있지만, 대규모 run의 몇 퍼센트 차이는 막대한 compute와 비용 차이가 된다.</p>
+<p>따라서 CS336의 기본 optimization objective는 다음과 같다.</p>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><munder><mrow><mi>max</mi><mo>⁡</mo></mrow><mtext>design choices</mtext></munder><mspace width="1em"></mspace><mtext>evaluation quality</mtext><mspace width="1em"></mspace><mtext>subject to fixed data and compute budgets</mtext></mrow><annotation encoding="application/x-tex">\max_{\text{design choices}}
+\quad \text{evaluation quality}
+\quad
+\text{subject to fixed data and compute budgets}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.5827em;vertical-align:-0.8882em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.4306em;"><span style="top:-2.3479em;margin-left:0em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">design choices</span></span></span></span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span><span class="mop">max</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.8882em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:1em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord text"><span class="mord">evaluation quality</span></span><span class="mspace" style="margin-right:1em;"></span><span class="mord text"><span class="mord">subject to fixed data and compute budgets</span></span></span></span></span></span>
+<p>여기서 design choice는 architecture만 뜻하지 않는다.</p>
+<ul>
+<li>어떤 unit으로 text를 tokenization할 것인가</li>
+<li>FLOPs와 memory를 어디에 배분할 것인가</li>
+<li>Model width, depth, head, expert 수를 어떻게 정할 것인가</li>
+<li>어떤 optimizer와 learning-rate schedule을 사용할 것인가</li>
+<li>어떤 data를 남기고 제거할 것인가</li>
+<li>Training과 inference를 어떤 hardware topology에 배치할 것인가</li>
+<li>어떤 metric으로 성공을 판단할 것인가</li>
+</ul>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="language-model-evolution-and-the-open-ecosystem">Language Model Evolution and the Open Ecosystem</h2><a class="sl-anchor-link" href="#language-model-evolution-and-the-open-ecosystem"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Language Model Evolution and the Open Ecosystem”</span></a></div>
+<p>Language model은 오랫동안 존재했다. 초기에는 English entropy 추정, speech recognition, machine translation의 fluency component 등에 n-gram model이 사용되었다.</p>
+<p>현대 neural language model로 이어지는 흐름에는 다음 요소들이 있다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Development</th><th>Contribution</th></tr></thead><tbody><tr><td>Neural language model</td><td>Discrete count 대신 learned representation과 neural network 사용</td></tr><tr><td>LSTM and sequence-to-sequence</td><td>긴 sequence와 conditional generation을 neural architecture로 처리</td></tr><tr><td>Attention</td><td>Source 전체를 하나의 vector로 압축하는 병목 완화</td></tr><tr><td>Transformer</td><td>Attention 중심 구조와 높은 parallelism 제공</td></tr><tr><td>Adam and training techniques</td><td>대규모 neural model optimization을 실용화</td></tr><tr><td>Model parallelism</td><td>단일 accelerator에 들어가지 않는 model 학습</td></tr><tr><td>Mixture of Experts</td><td>Token마다 일부 expert만 사용해 compute-efficient capacity 확장</td></tr><tr><td>ELMo and BERT</td><td>대규모 text pre-training 후 downstream fine-tuning</td></tr><tr><td>GPT series and scaling laws</td><td>규모 확대와 in-context learning 중심의 paradigm 강화</td></tr><tr><td>Chat and agent models</td><td>Prompt-response를 넘어 conversation과 장기 tool-using task 수행</td></tr></tbody></table>
+<p>최근 model이 수행하는 작업은 크게 달라졌지만, 기반은 여전히 GPU, kernel, gradient-based optimization, Transformer와 attention이다. 달라진 것은 요구 조건이다. 더 긴 context와 agent trace 때문에 inference efficiency와 orchestration이 중요해졌다.</p>
+<p>Open ecosystem은 이 강의가 가능한 중요한 이유다.</p>
+<ul>
+<li>Open-weight model은 실제 architecture와 behavior를 관찰하게 한다.</li>
+<li>Code, data, training report까지 공개하는 project는 재현 가능성을 높인다.</li>
+<li>완전한 recipe가 공개되지 않더라도 여러 paper와 implementation을 비교해 frontier stack을 추론할 수 있다.</li>
+<li>Closed frontier model과 작은 classroom model 사이의 간극을 줄여준다.</li>
+</ul>
+<p>그러나 open weight만으로는 충분하지 않다. Training data mixture, filtering rule, optimizer detail이 없으면 model이 어떻게 만들어졌는지 완전히 재현할 수 없다.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="course-structure">Course Structure</h2><a class="sl-anchor-link" href="#course-structure"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Course Structure”</span></a></div>
+<p>CS336은 다섯 assignment를 따라 language model development stack을 순서대로 쌓는다.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    A[Basics&#x3C;br/>build an LM] --> B[Systems&#x3C;br/>make it fast]
+    B --> C[Scaling&#x3C;br/>predict larger runs]
+    C --> D[Data&#x3C;br/>define capabilities]
+    D --> E[Alignment&#x3C;br/>prefer better outputs]
+    D --> F[Evaluation&#x3C;br/>measure quality]
+    F -. feedback .-> A
+    F -. feedback .-> D
+    F -. feedback .-> E
+
+    classDef primary fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef secondary fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef note fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef accent fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    class A primary
+    class B,C,D secondary
+    class F note
+    class E accent</pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Assignment</th><th>Theme</th><th>Deliverable</th></tr></thead><tbody><tr><td><a href="https://github.com/stanford-cs336/assignment1-basics">1</a></td><td>Basics</td><td>BPE, Transformer, cross-entropy, AdamW, training loop 구현과 LM 학습</td></tr><tr><td><a href="https://github.com/stanford-cs336/assignment2-systems">2</a></td><td>Systems</td><td>Fused RMSNorm Triton kernel, DDP, optimizer-state sharding 구현과 profiling</td></tr><tr><td><a href="https://github.com/stanford-cs336/assignment3-scaling">3</a></td><td>Scaling</td><td>Training API의 작은 run으로 scaling law를 fit하고 target loss 예측</td></tr><tr><td><a href="https://github.com/stanford-cs336/assignment4-data">4</a></td><td>Data</td><td>Common Crawl HTML 변환, quality/harm classifier, MinHash deduplication</td></tr><tr><td><a href="https://github.com/stanford-cs336/assignment5-alignment">5</a></td><td>Alignment</td><td>DPO와 GRPO 구현</td></tr></tbody></table>
+<p>Assignment는 scaffolding code를 거의 제공하지 않는 대신 unit test를 제공한다. 권장 workflow는 laptop에서 correctness를 확인하고, GPU 환경에서는 training run이나 performance benchmark처럼 accelerator가 필요한 부분만 실행하는 것이다.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="part-i-basics">Part I: Basics</h2><a class="sl-anchor-link" href="#part-i-basics"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Part I: Basics”</span></a></div>
+<p>첫 번째 단계의 목표는 최소한의 language model training stack을 완성하는 것이다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Raw text</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> Tokenizer</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> Token IDs</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> Transformer</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> Next-token loss</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> Optimizer</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> Trainer</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> Checkpoint and evaluation</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Raw text  -> Tokenizer  -> Token IDs  -> Transformer  -> Next-token loss  -> Optimizer  -> Trainer  -> Checkpoint and evaluation"><div></div></button></div></figure></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="tokenization">Tokenization</h3><a class="sl-anchor-link" href="#tokenization"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Tokenization”</span></a></div>
+<p>Tokenizer는 raw byte sequence를 model이 처리할 integer sequence로 바꾼다. Token은 model이 계산을 배분하는 기본 단위이므로 tokenization은 단순한 preprocessing이 아니다.</p>
+<p>자주 등장하는 byte sequence를 하나의 token으로 묶으면 sequence가 짧아진다. 반대로 드물고 정보량이 높은 부분은 여러 token으로 남길 수 있다. 강의는 이를 adaptive computation 관점으로 설명한다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="architecture">Architecture</h3><a class="sl-anchor-link" href="#architecture"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Architecture”</span></a></div>
+<p>Transformer라는 큰 틀 안에도 많은 design choice가 있다.</p>
+<ul>
+<li>Activation function</li>
+<li>Positional encoding</li>
+<li>Normalization 위치와 방식</li>
+<li>Full, sparse, local attention</li>
+<li>State-space 또는 linear-attention hybrid</li>
+<li>Dense MLP와 Mixture of Experts</li>
+<li>Layer 수, hidden dimension, head 수, expert 수</li>
+</ul>
+<p>Attention은 sequence length <code dir="auto">n</code>에 대해 대략 <code dir="auto">O(n^2)</code>의 interaction을 만들기 때문에 long context에서 architecture 선택이 compute와 memory를 크게 바꾼다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="optimization">Optimization</h3><a class="sl-anchor-link" href="#optimization"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Optimization”</span></a></div>
+<p>Model을 정의한 뒤에도 training stability와 quality를 좌우하는 선택이 남는다.</p>
+<ul>
+<li>Next-token 또는 multi-token prediction objective</li>
+<li>AdamW, SOAP, Muon 같은 optimizer</li>
+<li>Xavier initialization 또는 muP 같은 parameterization</li>
+<li>Cosine 또는 WSD learning-rate schedule</li>
+<li>Regularization</li>
+<li>Critical batch size</li>
+<li>MoE load balancing과 aux-free objective</li>
+</ul>
+<p>이 항목들을 단순한 hyperparameter 목록으로 보면 안 된다. 대규모 run에서는 잘못된 initialization이나 learning rate 하나가 training divergence로 이어질 수 있다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="three-way-trade-off">Three-Way Trade-Off</h3><a class="sl-anchor-link" href="#three-way-trade-off"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Three-Way Trade-Off”</span></a></div>
+<p>첫 번째 assignment의 설계는 세 목표 사이의 균형 문제다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Goal</th><th>Question</th></tr></thead><tbody><tr><td>Expressiveness</td><td>Data의 복잡성을 표현할 충분한 capacity가 있는가?</td></tr><tr><td>Stability</td><td>Parameter와 gradient가 폭발하거나 사라지지 않는가?</td></tr><tr><td>Efficiency</td><td>Hardware에서 실제로 빠르게 실행되는가?</td></tr></tbody></table>
+<p>Architecture를 작게 투영하면 더 빨라질 수 있지만 quality가 떨어질 수 있다. 더 표현력 있는 구조가 불안정하거나 memory traffic을 늘릴 수도 있다. 좋은 recipe는 세 목표를 함께 만족시켜야 한다.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="part-ii-systems">Part II: Systems</h2><a class="sl-anchor-link" href="#part-ii-systems"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Part II: Systems”</span></a></div>
+<p>Systems unit의 목표는 보유한 hardware에서 가능한 한 많은 useful work를 얻는 것이다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="resource-accounting">Resource Accounting</h3><a class="sl-anchor-link" href="#resource-accounting"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Resource Accounting”</span></a></div>
+<p>첫 단계는 FLOPs와 memory byte가 어디에 쓰이는지 계산하는 것이다. 강의는 <code dir="auto">N</code>개의 parameter를 가진 model을 <code dir="auto">D</code>개의 token으로 학습할 때의 거친 계산량을 다음처럼 소개한다.</p>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>training FLOPs</mtext><mo>≈</mo><mn>6</mn><mi>N</mi><mi>D</mi></mrow><annotation encoding="application/x-tex">\text{training FLOPs} \approx 6ND
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8778em;vertical-align:-0.1944em;"></span><span class="mord text"><span class="mord">training FLOPs</span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord">6</span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span></span></span></span></span>
+<p>상수 <code dir="auto">6</code>은 forward와 backward 과정의 주요 matrix multiplication을 단순화한 근사다. 중요한 것은 식 자체를 외우는 것이 아니라 어떤 operation이 비용을 만드는지 직접 유도하는 것이다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="compute-and-memory">Compute and Memory</h3><a class="sl-anchor-link" href="#compute-and-memory"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Compute and Memory”</span></a></div>
+<p>GPU에서 compute unit과 HBM은 분리되어 있다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">HBM에서 parameter/activation 읽기</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> compute unit으로 이동</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> 연산</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> 결과를 HBM에 쓰기</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="HBM에서 parameter/activation 읽기  -> compute unit으로 이동  -> 연산  -> 결과를 HBM에 쓰기"><div></div></button></div></figure></div>
+<p>Peak FLOP/s가 높더라도 data를 충분히 빠르게 공급하지 못하면 compute unit은 기다린다. Roofline analysis는 operation의 arithmetic intensity를 이용해 compute-bound인지 memory-bound인지 판단하는 도구다.</p>
+<p>Trace의 hardware 예시는 B200의 BF16 peak를 <code dir="auto">2.25 PFLOP/s</code>, memory bandwidth를 <code dir="auto">8 TB/s</code>로 둔다. 이 수치는 peak compute와 peak bandwidth를 비교해 operation별 예상 bottleneck을 계산하기 위한 출발점이다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="kernels-and-data-movement">Kernels and Data Movement</h3><a class="sl-anchor-link" href="#kernels-and-data-movement"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Kernels and Data Movement”</span></a></div>
+<p>PyTorch operation도 내부적으로 GPU kernel을 launch한다. Custom kernel의 핵심 목적은 종종 연산 수 감소보다 data movement 감소다.</p>
+<p>Operator fusion은 중간 결과를 HBM에 썼다가 다시 읽는 대신, 한 번 읽은 data에 여러 operation을 적용한 후 결과를 한 번만 쓴다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Unfused:</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">read -> op A -> write -> read -> op B -> write</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Fused:</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">read -> op A -> op B -> write</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Unfused:read -> op A -> write -> read -> op B -> writeFused:read -> op A -> op B -> write"><div></div></button></div></figure></div>
+<p>Tiling도 작은 working set을 빠른 on-chip memory에 유지해 재사용한다는 같은 원리를 확장한다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="distributed-training">Distributed Training</h3><a class="sl-anchor-link" href="#distributed-training"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Distributed Training”</span></a></div>
+<p>GPU 사이의 data movement는 한 GPU 내부의 HBM 접근보다 더 비싸다. Distributed training에서는 다음 state를 여러 GPU에 배치해야 한다.</p>
+<ul>
+<li>Model parameters</li>
+<li>Activations</li>
+<li>Gradients</li>
+<li>Optimizer states</li>
+</ul>
+<p>분할 기준에 따라 data, tensor/model, pipeline, sequence, expert parallelism이 만들어진다. <code dir="auto">gather</code>, <code dir="auto">reduce</code>, <code dir="auto">all-reduce</code> 같은 collective가 필요한 state를 필요한 GPU로 이동시키며, topology와 communication volume이 performance를 결정한다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="inference">Inference</h3><a class="sl-anchor-link" href="#inference"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Inference”</span></a></div>
+<p>Inference는 chat serving에만 필요한 것이 아니다. RL rollout, test-time compute, synthetic data generation, evaluation도 inference workload다.</p>
+<p>Autoregressive inference는 두 phase로 나뉜다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Phase</th><th>Operation</th><th>Typical characteristic</th></tr></thead><tbody><tr><td>Prefill</td><td>Prompt token 전체를 처리하고 KV cache 구축</td><td>Training과 비슷한 큰 matrix operation</td></tr><tr><td>Decode</td><td>한 번에 다음 token 하나씩 생성</td><td>KV cache를 반복해서 읽는 memory-bound workload</td></tr></tbody></table>
+<p>Inference optimization에는 quantization, pruning, distillation, speculative decoding, inference-specific kernel, request batching과 scheduling이 있다. Training batch는 미리 정할 수 있지만 serving request는 서로 다른 시점과 길이로 도착하므로 orchestration 문제가 추가된다.</p>
+<p>Assignment 2에서는 systems 개념을 다음 구현으로 확인한다.</p>
+<ol>
+<li>Triton으로 fused RMSNorm kernel을 작성한다.</li>
+<li>Distributed data parallel training을 구현한다.</li>
+<li>Optimizer state를 shard한다.</li>
+<li>구현의 correctness, latency와 throughput을 benchmark하고 profile한다.</li>
+</ol>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="part-iii-scaling-laws">Part III: Scaling Laws</h2><a class="sl-anchor-link" href="#part-iii-scaling-laws"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Part III: Scaling Laws”</span></a></div>
+<p>큰 model은 hyperparameter를 잘못 골랐다고 여러 번 다시 학습할 수 없다. 목표 scale에서 한 번의 run만 가능하다면, 작은 experiment를 통해 큰 run의 결과를 미리 예측해야 한다.</p>
+<p>강의의 핵심 개념은 개별 model이 아니라 <code dir="auto">scaling recipe</code>다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">FLOP budget</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> model size</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> training tokens</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> batch size</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> learning rate</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> architecture hyperparameters</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> expected loss</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="FLOP budget  -> model size  -> training tokens  -> batch size  -> learning rate  -> architecture hyperparameters  -> expected loss"><div></div></button></div></figure></div>
+<p>Scaling recipe는 compute budget을 training configuration으로 변환하는 함수다. 여러 작은 budget에서 experiment를 실행하고 loss curve를 fit한 뒤 target budget으로 extrapolate한다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="predictability-before-optimality">Predictability Before Optimality</h3><a class="sl-anchor-link" href="#predictability-before-optimality"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Predictability Before Optimality”</span></a></div>
+<p>작은 scale에서 최적인 hyperparameter가 큰 scale에서 불규칙하게 변하면 target run의 값을 예측할 수 없다. 따라서 scaling recipe에는 hyperparameter transfer가 필요하다.</p>
+<ul>
+<li>Learning rate가 scale에 따라 일정하거나 예측 가능한 규칙으로 변한다.</li>
+<li>Batch size와 model shape이 budget에 따라 일관되게 변한다.</li>
+<li>Parameterization이 scale 변화에도 activation과 gradient를 안정적으로 유지한다.</li>
+</ul>
+<p>최고의 작은 model 하나를 찾는 것보다 scale에 따라 안정적으로 extrapolate되는 family를 만드는 것이 더 중요할 수 있다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="compute-optimal-allocation">Compute-Optimal Allocation</h3><a class="sl-anchor-link" href="#compute-optimal-allocation"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Compute-Optimal Allocation”</span></a></div>
+<p>고정된 FLOP budget에서는 더 큰 model을 적은 token으로 학습할지, 더 작은 model을 더 많은 token으로 학습할지 결정해야 한다. 강의는 고전적인 compute-optimal 결과의 거친 출발점으로 parameter당 약 20 token을 소개한다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">70B parameters -> 약 1.4T training tokens</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="70B parameters -> 약 1.4T training tokens"><div></div></button></div></figure></div>
+<p>이는 보편 법칙이 아니다. Data와 architecture에 따라 달라지고, inference cost까지 고려하면 작은 model을 compute-optimal 지점보다 훨씬 많은 token으로 학습하는 편이 유리할 수 있다.</p>
+<p>Scaling law는 자동으로 나타나는 자연법칙이 아니다. 일관된 recipe, 안정적인 training, 적절한 metric과 충분한 작은-scale 실험을 통해 예측 가능한 관계를 만들어야 한다.</p>
+<p>Assignment 3은 실제 large-scale run 대신 <code dir="auto">hyperparameters -> loss</code> training API를 제공한다. 제한된 FLOP budget으로 여러 configuration을 질의하고, 얻은 data point에 scaling law를 fit한 뒤 더 큰 target budget의 hyperparameter와 loss를 제출한다. 평가 목표는 주어진 budget에서 loss와 prediction error를 줄이는 것이다.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="part-iv-evaluation-and-data">Part IV: Evaluation and Data</h2><a class="sl-anchor-link" href="#part-iv-evaluation-and-data"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Part IV: Evaluation and Data”</span></a></div>
+<p>Data는 model이 무엇을 잘하게 될지를 정한다. 따라서 data를 수집하기 전에 무엇을 측정할지 정의해야 한다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="internal-and-external-evaluation">Internal and External Evaluation</h3><a class="sl-anchor-link" href="#internal-and-external-evaluation"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Internal and External Evaluation”</span></a></div>
+<p>강의는 evaluation을 두 용도로 구분한다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Evaluation</th><th>Purpose</th><th>Desired property</th></tr></thead><tbody><tr><td>Internal</td><td>Model development와 scaling decision</td><td>Scale에 따라 smooth하고 차이를 민감하게 보여야 함</td></tr><tr><td>External</td><td>사용자, 고객, reviewer에게 capability 설명</td><td>실제 사용 환경과의 ecological validity가 중요</td></tr></tbody></table>
+<p>Perplexity는 internal development에서 여전히 유용하다. 하지만 사용자가 원하는 task success를 전부 설명하지는 못한다. External evaluation은 실제 coding, reasoning, conversation 같은 use case를 반영해야 한다.</p>
+<p>General-purpose model은 하나의 평균 점수만으로 평가하기 어렵다. 다양한 evaluation을 유지하고, aggregate score 뒤에서 어떤 capability가 개선되거나 악화되었는지 확인해야 한다.</p>
+<p>Evaluation data가 공개되어 있으면 training corpus와 섞이는 contamination 위험도 있다. 가능하면 인터넷에 공개되지 않은 held-out data를 두는 이유다.</p>
+<p>Trace는 external capability evaluation의 예로 <code dir="auto">GPQA</code>, <code dir="auto">Humanity's Last Exam</code>, <code dir="auto">SWE-Bench</code>, <code dir="auto">Terminal-Bench</code>를 든다. 특정 benchmark 하나가 general-purpose quality를 대표한다기보다 서로 다른 reasoning과 agent capability를 보는 evaluation suite의 예다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="data-collection-and-processing">Data Collection and Processing</h3><a class="sl-anchor-link" href="#data-collection-and-processing"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Data Collection and Processing”</span></a></div>
+<p>대규모 corpus는 완성된 text dataset 형태로 주어지지 않는다. Web page는 HTML이고, 논문은 PDF이며, code는 directory 구조와 metadata를 가진다.</p>
+<p>Training data pipeline에는 다음 단계가 필요하다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Source acquisition</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> transformation to text</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> quality filtering</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> deduplication</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> source mixing</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> synthetic augmentation</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> tokenization</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Source acquisition  -> transformation to text  -> quality filtering  -> deduplication  -> source mixing  -> synthetic augmentation  -> tokenization"><div></div></button></div></figure></div>
+<p>각 단계에는 기술적 문제와 함께 legal·licensing 판단이 들어간다. 공개 GitHub repository라고 해서 모든 code를 자유롭게 training에 사용할 수 있다고 단정할 수 없다.</p>
+<p>Data는 training stage에 따라 역할도 달라진다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Stage</th><th>Data role</th></tr></thead><tbody><tr><td>Pre-training</td><td>넓은 domain의 기본 language와 world knowledge 습득</td></tr><tr><td>Mid-training</td><td>고품질 data, long-context document, code repository 등 특정 capability 강화</td></tr><tr><td>Post-training</td><td>Conversation, instruction, reasoning trace, tool-use trajectory 학습</td></tr></tbody></table>
+<p>Filtering은 나쁜 data가 model을 직접 망가뜨리는 문제만이 아니다. 고정 compute budget에서 중복되거나 낮은 품질의 token을 학습하면 좋은 token에 쓸 update를 잃는다. Data quality도 compute efficiency다.</p>
+<p>Trace는 deduplication 방법의 예로 Bloom filter와 MinHash를 들고, Assignment 4에서는 MinHash를 직접 사용한다. Assignment pipeline은 Common Crawl HTML에서 main text를 추출하고, quality 및 harmful-content classifier를 학습하고, document를 deduplicate하는 순서다. Leaderboard는 고정 token budget에서 perplexity를 최소화한다.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="part-v-alignment">Part V: Alignment</h2><a class="sl-anchor-link" href="#part-v-alignment"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Part V: Alignment”</span></a></div>
+<p>Pre-training은 다음 token을 알려주는 full supervision을 사용한다. 그러나 좋은 response 전체를 매번 작성하는 것보다 생성된 response를 비교하거나 검증하는 것이 쉬운 경우가 많다.</p>
+<p>Alignment의 기본 loop는 다음과 같다.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    A[Prompt] --> B[Generate&#x3C;br/>responses]
+    B --> C[Score&#x3C;br/>human or verifier]
+    C --> D[Prefer&#x3C;br/>better response]
+    D --> E[Update&#x3C;br/>the model]
+    E -. next iteration .-> B
+
+    classDef primary fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef secondary fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef note fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef accent fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    class A primary
+    class B,C secondary
+    class D note
+    class E accent</pre>
+<p>Score는 human preference, programmatic verifier, LM judge 등에서 올 수 있다. Update 방식에는 PPO, GRPO 같은 RL algorithm과 preference pair를 supervised-style objective로 학습하는 DPO가 있다.</p>
+<p>RL은 optimization만 어려운 것이 아니다. 대규모 reasoning RL은 inference server가 rollout을 생성하고 training server가 update하는 분산 pipeline이다. Code execution environment까지 포함하면 worker orchestration이 복잡해진다.</p>
+<p>Rollout producer가 느리거나 오래된 policy로 생성한 sample이 쌓이면 off-policy 문제가 생긴다. 반대로 항상 최신 policy만 기다리면 hardware throughput이 낮아질 수 있다. Alignment system은 on-policyness와 throughput 사이를 조절해야 한다.</p>
+<p>Assignment 5의 concrete target은 DPO와 GRPO 구현이다. Trace는 PPO를 RLHF의 대표 algorithm, DPO를 preference data에 대한 더 단순한 방식, GRPO를 value function 없이 group-relative signal을 사용하는 방식으로 소개한다.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="a-unified-efficiency-lens">A Unified Efficiency Lens</h2><a class="sl-anchor-link" href="#a-unified-efficiency-lens"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “A Unified Efficiency Lens”</span></a></div>
+<p>강의의 다섯 부분은 서로 다른 주제가 아니라 같은 budget optimization 문제의 다른 측면이다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Area</th><th>Efficiency interpretation</th></tr></thead><tbody><tr><td>Tokenization</td><td>같은 text를 더 짧고 유용한 computational unit으로 표현</td></tr><tr><td>Architecture</td><td>필요한 capacity를 더 적은 FLOPs와 memory로 제공</td></tr><tr><td>Systems</td><td>Hardware peak 성능을 실제 useful throughput으로 전환</td></tr><tr><td>Scaling laws</td><td>작은 run으로 큰 run의 configuration과 결과를 예측</td></tr><tr><td>Data filtering</td><td>낮은 품질과 중복 token에 compute를 낭비하지 않음</td></tr><tr><td>Evaluation</td><td>Optimization해야 할 capability를 측정 가능한 target으로 정의</td></tr><tr><td>Alignment</td><td>완전한 정답 작성보다 저렴한 critique와 verification 활용</td></tr></tbody></table>
+<p>Resource는 compute core만이 아니다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Resources =</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">data</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">+ compute</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">+ memory capacity</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">+ memory bandwidth</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">+ interconnect bandwidth</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">+ engineering time</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Resources =  data  + compute  + memory capacity  + memory bandwidth  + interconnect bandwidth  + engineering time"><div></div></button></div></figure></div>
+<p>좋은 system은 한 resource의 utilization만 높이지 않는다. 고정된 전체 resource에서 evaluation quality를 높인다.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="tokenization-as-an-interface">Tokenization as an Interface</h2><a class="sl-anchor-link" href="#tokenization-as-an-interface"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Tokenization as an Interface”</span></a></div>
+<p>Raw text는 Unicode string이고, language model은 integer token sequence에 대한 probability distribution을 학습한다.</p>
+<p>Autoregressive language model은 token sequence <code dir="auto">x_1, ..., x_T</code>의 확률을 다음처럼 분해한다.</p>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>p</mi><mo stretchy="false">(</mo><msub><mi>x</mi><mn>1</mn></msub><mo separator="true">,</mo><mo>…</mo><mo separator="true">,</mo><msub><mi>x</mi><mi>T</mi></msub><mo stretchy="false">)</mo><mo>=</mo><munderover><mo>∏</mo><mrow><mi>t</mi><mo>=</mo><mn>1</mn></mrow><mi>T</mi></munderover><mi>p</mi><mo stretchy="false">(</mo><msub><mi>x</mi><mi>t</mi></msub><mo>∣</mo><msub><mi>x</mi><mrow><mo>&#x3C;</mo><mi>t</mi></mrow></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">p(x_1, \ldots, x_T)
+=
+\prod_{t=1}^{T} p(x_t \mid x_{&#x3C;t})
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">p</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner">…</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.1389em;">T</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:3.0954em;vertical-align:-1.2671em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.8283em;"><span style="top:-1.8829em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mrel mtight">=</span><span class="mord mtight">1</span></span></span></span><span style="top:-3.05em;"><span class="pstrut" style="height:3.05em;"></span><span><span class="mop op-symbol large-op">∏</span></span></span><span style="top:-4.3em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.1389em;">T</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.2671em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">p</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∣</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mrel mtight">&#x3C;</span><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1774em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></span>
+<p>Tokenizer는 이 두 세계 사이의 양방향 interface다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">encode: Unicode string -> token IDs</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">decode: token IDs -> Unicode string</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="encode: Unicode string -> token IDsdecode: token IDs -> Unicode string"><div></div></button></div></figure></div>
+<p>Executable lecture는 interface를 다음처럼 정의한다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="python"><code><div class="ec-line"><div class="code"><span style="--0:#C792EA;--1:#8844AE">class</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#FFCB8B;--1:#111111">Tokenizer</span><span style="--0:#D6DEEB;--1:#403F53">(</span><span style="--0:#82AAFF;--1:#3B61B0">ABC</span><span style="--0:#D6DEEB;--1:#403F53">):</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#C792EA;--1:#8844AE">def</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">encode</span><span style="--0:#D9F5DD;--1:#111111">(</span><span style="--0:#7FDBCA;--1:#096E72">self</span><span style="--0:#D6DEEB;--1:#403F53">, </span><span style="--0:#7FDBCA;--1:#096E72">string</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#C5E478;--1:#3B61B0">str</span><span style="--0:#D9F5DD;--1:#111111">)</span><span style="--0:#D6DEEB;--1:#403F53"> -> list[</span><span style="--0:#C5E478;--1:#3B61B0">int</span><span style="--0:#D6DEEB;--1:#403F53">]:</span></div></div><div class="ec-line"><div class="code"><span class="indent">        </span><span style="--0:#C792EA;--1:#8844AE">raise</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C5E478;--1:#3B61B0">NotImplementedError</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#C792EA;--1:#8844AE">def</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">decode</span><span style="--0:#D9F5DD;--1:#111111">(</span><span style="--0:#7FDBCA;--1:#096E72">self</span><span style="--0:#D6DEEB;--1:#403F53">, </span><span style="--0:#7FDBCA;--1:#096E72">indices</span><span style="--0:#D6DEEB;--1:#403F53">: list[</span><span style="--0:#C5E478;--1:#3B61B0">int</span><span style="--0:#D6DEEB;--1:#403F53">]</span><span style="--0:#D9F5DD;--1:#111111">)</span><span style="--0:#D6DEEB;--1:#403F53"> -> </span><span style="--0:#C5E478;--1:#3B61B0">str</span><span style="--0:#D6DEEB;--1:#403F53">:</span></div></div><div class="ec-line"><div class="code"><span class="indent">        </span><span style="--0:#C792EA;--1:#8844AE">raise</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C5E478;--1:#3B61B0">NotImplementedError</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="class Tokenizer(ABC):    def encode(self, string: str) -> list[int]:        raise NotImplementedError    def decode(self, indices: list[int]) -> str:        raise NotImplementedError"><div></div></button></div></figure></div>
+<p>가장 중요한 correctness 조건은 round trip이다.</p>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>decode</mtext><mo stretchy="false">(</mo><mtext>encode</mtext><mo stretchy="false">(</mo><mi>s</mi><mo stretchy="false">)</mo><mo stretchy="false">)</mo><mo>=</mo><mi>s</mi></mrow><annotation encoding="application/x-tex">\text{decode}(\text{encode}(s)) = s
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord">decode</span></span><span class="mopen">(</span><span class="mord text"><span class="mord">encode</span></span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mclose">))</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">s</span></span></span></span></span>
+<p>적어도 tokenizer가 지원한다고 정의한 모든 string에서 이 성질이 유지되어야 한다. Encode 후 원문을 복원하지 못한다면 model이 생성한 token을 정확한 text로 되돌릴 수 없다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="compression-ratio">Compression Ratio</h3><a class="sl-anchor-link" href="#compression-ratio"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Compression Ratio”</span></a></div>
+<p>강의는 tokenizer efficiency의 기본 metric으로 bytes per token을 사용한다.</p>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>compression ratio</mtext><mo>=</mo><mfrac><mtext>number of UTF-8 bytes</mtext><mtext>number of tokens</mtext></mfrac></mrow><annotation encoding="application/x-tex">\text{compression ratio}
+=
+\frac{\text{number of UTF-8 bytes}}
+{\text{number of tokens}}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8623em;vertical-align:-0.1944em;"></span><span class="mord text"><span class="mord">compression ratio</span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.0574em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3714em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord">number of tokens</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord">number of UTF-8 bytes</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span>
+<p>값이 클수록 같은 text가 더 적은 token으로 표현된다. Sequence가 짧아지면 attention과 activation 비용이 줄어든다.</p>
+<p>그러나 vocabulary size를 무한히 늘려 compression ratio만 높일 수는 없다. 큰 vocabulary는 embedding과 output projection을 키우고, rare token의 학습 sample을 희소하게 만든다.</p>
+<p>Trace에서는 <code dir="auto">"Hello, 🌍! 你好!"</code>를 <code dir="auto">o200k_base</code>로 encode하고 다시 decode해 round trip을 확인한다. 실제 tokenizer를 관찰하면 앞 공백이 word와 같은 token에 포함될 수 있고, 문장 처음의 <code dir="auto">"hello"</code>와 중간의 <code dir="auto">" hello"</code>가 다른 ID가 되며, 숫자도 몇 digit씩 묶여 tokenization될 수 있다.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="tokenizer-design-trade-offs">Tokenizer Design Trade-Offs</h2><a class="sl-anchor-link" href="#tokenizer-design-trade-offs"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Tokenizer Design Trade-Offs”</span></a></div>
+<p>강의는 BPE에 도달하기 전 세 가지 단순한 tokenizer를 비교한다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Design</th><th>Vocabulary</th><th>Strength</th><th>Main problem</th></tr></thead><tbody><tr><td>Unicode character</td><td>약 15만 code point 가능</td><td>Character 단위 round trip이 직관적</td><td>Rare character가 많고 vocabulary 활용이 비효율적</td></tr><tr><td>UTF-8 byte</td><td>고정된 256 byte</td><td>모든 Unicode string 표현 가능, unknown token 없음</td><td>Sequence가 길고 compression ratio가 약 1</td></tr><tr><td>Word/chunk</td><td>Corpus의 distinct word</td><td>Token이 의미 단위와 잘 맞고 sequence가 짧음</td><td>Vocabulary가 사실상 무한하고 unseen word가 발생</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h3"><h3 id="character-level-tokenization">Character-Level Tokenization</h3><a class="sl-anchor-link" href="#character-level-tokenization"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Character-Level Tokenization”</span></a></div>
+<p>Unicode character는 이미 integer code point를 가진다. 각 character를 token으로 사용하면 구현은 쉽지만 드문 character가 vocabulary slot을 차지한다. Character마다 UTF-8 byte 길이도 다르므로 실제 storage와 computation 관계가 단순하지 않다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="byte-level-tokenization">Byte-Level Tokenization</h3><a class="sl-anchor-link" href="#byte-level-tokenization"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Byte-Level Tokenization”</span></a></div>
+<p>String을 UTF-8 bytes로 바꾸면 모든 값은 <code dir="auto">0</code>부터 <code dir="auto">255</code> 사이에 있다. Fixed vocabulary와 complete coverage라는 장점이 있지만, 한 글자나 단어가 여러 byte token으로 늘어나 sequence가 길어진다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="word-level-tokenization">Word-Level Tokenization</h3><a class="sl-anchor-link" href="#word-level-tokenization"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Word-Level Tokenization”</span></a></div>
+<p>Whitespace나 regular expression으로 text를 chunking하면 human-readable word가 token이 된다. Compression은 좋지만 test 시 처음 보는 word가 나오면 <code dir="auto">&#x3C;unk></code>로 바꿔야 한다. <code dir="auto">&#x3C;unk></code>는 서로 다른 unseen string을 같은 token으로 collapse하고 probability 계산도 왜곡할 수 있다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="desired-compromise">Desired Compromise</h3><a class="sl-anchor-link" href="#desired-compromise"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Desired Compromise”</span></a></div>
+<p>원하는 tokenizer는 다음 성질을 함께 가져야 한다.</p>
+<ul>
+<li>모든 input을 표현할 수 있다.</li>
+<li>자주 등장하는 sequence는 적은 token으로 압축한다.</li>
+<li>드문 sequence는 작은 단위로 분해해 unknown token을 피한다.</li>
+<li>Vocabulary size를 통제할 수 있다.</li>
+<li>Encode와 decode가 정확히 round trip한다.</li>
+</ul>
+<p>Byte-level BPE는 byte의 complete coverage와 learned chunk의 compression을 결합한다.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="byte-pair-encoding">Byte Pair Encoding</h2><a class="sl-anchor-link" href="#byte-pair-encoding"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Byte Pair Encoding”</span></a></div>
+<p>BPE는 원래 data compression을 위해 만들어졌고, 이후 subword segmentation과 language model tokenization에 사용되었다.</p>
+<p>공식 trace가 제시하는 역사적 순서는 1994년 Philip Gage의 compression algorithm, neural machine translation을 위한 subword 적용, GPT-2의 language-model tokenizer 채택이다.</p>
+<p>핵심 아이디어는 corpus에서 가장 자주 인접하는 token pair를 반복해서 합치는 것이다.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    A[Raw corpus] --> B[UTF-8 bytes&#x3C;br/>initial 256 tokens]
+    B --> C[Count adjacent&#x3C;br/>token pairs]
+    C --> D[Select most&#x3C;br/>frequent pair]
+    D --> E[Create new&#x3C;br/>merged token]
+    E --> F[Replace all&#x3C;br/>pair occurrences]
+    F -. repeat until&#x3C;br/>target vocab .-> C
+    F --> G[Merge table&#x3C;br/>and vocabulary]
+
+    classDef primary fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef secondary fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef note fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef accent fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    class A primary
+    class B,C,D,F secondary
+    class E accent
+    class G note</pre>
+<div class="sl-heading-wrapper level-h3"><h3 id="training-algorithm">Training Algorithm</h3><a class="sl-anchor-link" href="#training-algorithm"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Training Algorithm”</span></a></div>
+<p>초기 vocabulary는 모든 byte value다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">V = {0, 1, ..., 255}</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="V = {0, 1, ..., 255}"><div></div></button></div></figure></div>
+<p>Corpus를 byte token sequence로 바꾼 뒤 다음 과정을 반복한다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">while |V| &#x3C; target_vocab_size:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">pair_counts = count_adjacent_pairs(corpus)</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">best_pair = most_frequent(pair_counts)</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">new_id = |V|</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">V[new_id] = concatenate(V[best_pair.left], V[best_pair.right])</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">corpus = replace_all(corpus, best_pair, new_id)</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">merges.append(best_pair -> new_id)</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="while |V| < target_vocab_size:    pair_counts = count_adjacent_pairs(corpus)    best_pair = most_frequent(pair_counts)    new_id = |V|    V[new_id] = concatenate(V[best_pair.left], V[best_pair.right])    corpus = replace_all(corpus, best_pair, new_id)    merges.append(best_pair -> new_id)"><div></div></button></div></figure></div>
+<p>강의의 toy corpus는 <code dir="auto">"the cat in the hat"</code>이다. Byte pair <code dir="auto">(116, 104)</code>는 ASCII의 <code dir="auto">t</code>, <code dir="auto">h</code>에 해당하며 여러 번 등장한다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">(116, 104) -> token 256 -> "th"</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">(256, 101) -> token 257 -> "the"</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="(116, 104) -> token 256 -> &#x22;th&#x22;(256, 101) -> token 257 -> &#x22;the&#x22;"><div></div></button></div></figure></div>
+<p>같은 pair가 corpus에서 여러 번 나타나면 한 번의 merge로 모든 non-overlapping occurrence가 치환된다. 아래 예에서는 <code dir="auto">th</code>와 <code dir="auto">the</code>가 각각 두 번씩 합쳐지므로, merge마다 vocabulary entry는 하나만 늘지만 corpus sequence는 두 token씩 짧아진다.</p>
+<p><starlight-image-zoom-zoomable><img src="/courses/cs336/lec-01/assets/bpe-merge-example.svg" alt="BPE가 the cat in the hat에서 반복 pair를 병합하는 과정"><button aria-label="Zoom image: BPE가 the cat in the hat에서 반복 pair를 병합하는 과정" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<p>Merge가 진행될수록 corpus token sequence는 짧아지고 vocabulary는 커진다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">sequence length ↓</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">vocabulary size ↑</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="sequence length ↓vocabulary size ↑"><div></div></button></div></figure></div>
+<p>자주 등장하는 sequence는 하나의 token으로 빠르게 합쳐진다. 드문 sequence는 원래 byte token 또는 더 작은 subword token으로 남는다.</p>
+<p>Trace의 <code dir="auto">merge()</code>는 input을 왼쪽에서 오른쪽으로 scan하며 선택한 pair의 서로 겹치지 않는 모든 occurrence를 새 ID로 치환한다. <code dir="auto">train_bpe()</code>는 merge마다 <code dir="auto">256 + i</code>를 새 ID로 배정하고, 새 vocabulary entry에는 두 token의 byte string을 이어 붙인 값을 저장한다.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="bpe-encoding-and-decoding">BPE Encoding and Decoding</h2><a class="sl-anchor-link" href="#bpe-encoding-and-decoding"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “BPE Encoding and Decoding”</span></a></div>
+<p>Tokenizer training은 vocabulary와 ordered merge rule을 만든다. 새 text를 encode할 때는 training에서 배운 merge를 input에 적용한다.</p>
+<p>개념적 encode 과정은 다음과 같다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">1. Unicode string을 UTF-8 bytes로 변환한다.</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">2. 각 byte를 초기 token으로 둔다.</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">3. 현재 sequence에 적용 가능한 learned merge를 찾는다.</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">4. Training 때 정해진 우선순위에 따라 pair를 합친다.</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">5. 더 적용할 merge가 없을 때 token ID sequence를 반환한다.</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="1. Unicode string을 UTF-8 bytes로 변환한다.2. 각 byte를 초기 token으로 둔다.3. 현재 sequence에 적용 가능한 learned merge를 찾는다.4. Training 때 정해진 우선순위에 따라 pair를 합친다.5. 더 적용할 merge가 없을 때 token ID sequence를 반환한다."><div></div></button></div></figure></div>
+<p>Trace의 reference implementation은 Python dictionary의 insertion order를 이용해 학습된 merge를 순서대로 전부 적용한다. 이는 correctness를 설명하기 위한 구현이며, Assignment 1에서는 input에 실제로 영향을 주는 merge만 처리하도록 개선해야 한다.</p>
+<p>Decode는 각 token ID가 나타내는 byte sequence를 이어 붙이고 UTF-8 string으로 복원한다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">token IDs</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> vocabulary lookup</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> concatenate bytes</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> UTF-8 decode</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> original string</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="token IDs  -> vocabulary lookup  -> concatenate bytes  -> UTF-8 decode  -> original string"><div></div></button></div></figure></div>
+<p>Base vocabulary에 모든 byte가 있으므로 unseen word도 표현할 수 있다. 새로운 word를 하나의 unknown token으로 바꾸는 대신 학습된 subword와 byte 조각으로 분해한다.</p>
+<p>중요한 점은 merge table이 단순한 set이 아니라 priority를 가진다는 것이다. 같은 input에 여러 merge가 가능할 때 training order와 일치하는 rule을 적용해야 deterministic한 encoding을 얻는다.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="implementation-considerations">Implementation Considerations</h2><a class="sl-anchor-link" href="#implementation-considerations"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Implementation Considerations”</span></a></div>
+<p>강의에서 보여준 짧은 BPE implementation은 개념적으로 완전하지만 매우 느리다. 실제 tokenizer를 만들려면 algorithmic complexity와 data pipeline을 함께 고려해야 한다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="pair-counting">Pair Counting</h3><a class="sl-anchor-link" href="#pair-counting"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Pair Counting”</span></a></div>
+<p>매 iteration마다 corpus 전체를 처음부터 scan해 모든 pair를 다시 세면 vocabulary가 커질수록 비용이 매우 커진다. Merge가 영향을 준 주변 pair만 count를 갱신할 수 있는 index나 incremental data structure가 필요하다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="applying-merges">Applying Merges</h3><a class="sl-anchor-link" href="#applying-merges"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Applying Merges”</span></a></div>
+<p>Encode할 때 모든 merge rule을 차례로 검사하면 merge 수가 <code dir="auto">vocab_size - 256</code>에 가까우므로 느리다. 현재 sequence에 존재하는 후보 pair만 추적하고 가장 높은 priority의 merge를 선택해야 한다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="pre-tokenization">Pre-Tokenization</h3><a class="sl-anchor-link" href="#pre-tokenization"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Pre-Tokenization”</span></a></div>
+<p>실제 구현은 거대한 document 전체를 하나의 sequence로 두지 않는다. Regular expression 등으로 text를 chunking하고 각 chunk 안에서 BPE를 적용한다.</p>
+<p>Pre-tokenization은 다음에 영향을 준다.</p>
+<ul>
+<li>어떤 pair가 merge boundary를 넘을 수 있는가</li>
+<li>Whitespace가 앞 token과 결합되는가</li>
+<li>숫자와 punctuation을 어떻게 분리하는가</li>
+<li>Pair counting과 encode를 얼마나 parallelize할 수 있는가</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="special-tokens">Special Tokens</h3><a class="sl-anchor-link" href="#special-tokens"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Special Tokens”</span></a></div>
+<p>Document boundary, end-of-text, padding 같은 special token은 ordinary text와 충돌하지 않아야 한다. Training corpus에서 special token literal을 어떻게 처리할지, encode API가 허용된 special token을 어떻게 받는지 명확히 정해야 한다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="runtime-choice">Runtime Choice</h3><a class="sl-anchor-link" href="#runtime-choice"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Runtime Choice”</span></a></div>
+<p>Correct Python implementation으로 먼저 test한 뒤 profile해야 한다. Pair counting과 merge application이 병목이라면 더 나은 data structure, multiprocessing, Rust나 C/C++ implementation을 검토할 수 있다.</p>
+<p>Language를 바꾸기 전에 algorithm이 불필요하게 corpus 전체를 반복 scan하는지 확인하는 것이 우선이다.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="beyond-tokenization">Beyond Tokenization</h2><a class="sl-anchor-link" href="#beyond-tokenization"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Beyond Tokenization”</span></a></div>
+<p>강의는 언젠가 명시적인 tokenizer가 사라질 가능성을 언급한다. 그러나 byte를 Transformer에 그대로 넣는 것만으로 문제가 해결되지는 않는다.</p>
+<p>Tokenizer를 대체하는 architecture도 두 가지 역할을 수행해야 한다.</p>
+<ol>
+<li>Low-level input을 modeling에 유용한 abstraction으로 올린다.</li>
+<li>Input 위치마다 같은 compute를 쓰지 않고 가변적인 chunk와 adaptive computation을 제공한다.</li>
+</ol>
+<p>이 요구는 text뿐 아니라 video와 DNA sequence에도 적용된다. Raw unit 하나의 signal이 약할 때, model은 여러 unit을 더 높은 수준의 representation으로 묶어야 한다.</p>
+<p>즉 미래의 model이 BPE merge table을 사용하지 않더라도 다음 문제는 남는다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">어떤 raw unit을 하나의 computational unit으로 볼 것인가?</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">각 구간에 얼마만큼의 compute를 배분할 것인가?</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="어떤 raw unit을 하나의 computational unit으로 볼 것인가?각 구간에 얼마만큼의 compute를 배분할 것인가?"><div></div></button></div></figure></div>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="practical-tips-and-notes">Practical Tips and Notes</h2><a class="sl-anchor-link" href="#practical-tips-and-notes"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Practical Tips and Notes”</span></a></div>
+<p>이 절은 강의 내용을 바탕으로 실제 tokenizer와 language model pipeline을 구현할 때 확인할 운영 항목을 별도로 정리한다. 강의 원문의 주장이라기보다 구현과 검증을 위한 실무 메모다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="correctness를-performance보다-먼저-고정하기">Correctness를 Performance보다 먼저 고정하기</h3><a class="sl-anchor-link" href="#correctness를-performance보다-먼저-고정하기"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Correctness를 Performance보다 먼저 고정하기”</span></a></div>
+<p>Tokenizer는 training data와 serving input 모두의 schema다. 작은 오류도 checkpoint 전체와 호환되지 않을 수 있다.</p>
+<p>다음 property test를 먼저 만든다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">decode(encode(text)) == text</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">encode(text) is deterministic</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">all emitted IDs are in vocabulary</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">special-token handling follows the declared policy</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="decode(encode(text)) == textencode(text) is deterministicall emitted IDs are in vocabularyspecial-token handling follows the declared policy"><div></div></button></div></figure></div>
+<p>빈 string, whitespace, 여러 언어, emoji, combining character, invalid-looking byte pattern, 긴 반복 문자열을 test corpus에 포함한다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="compression-ratio를-domain별로-측정하기">Compression Ratio를 Domain별로 측정하기</h3><a class="sl-anchor-link" href="#compression-ratio를-domain별로-측정하기"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Compression Ratio를 Domain별로 측정하기”</span></a></div>
+<p>전체 평균 bytes/token 하나만 보면 multilingual이나 code workload의 문제를 놓칠 수 있다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Slice</th><th>Measure</th></tr></thead><tbody><tr><td>Korean, English, CJK</td><td>bytes/token, tokens/character</td></tr><tr><td>Source code</td><td>tokens/line, indentation과 identifier fragmentation</td></tr><tr><td>Numbers</td><td>긴 정수, 소수, 날짜의 token pattern</td></tr><tr><td>Whitespace-heavy text</td><td>앞 공백과 token 결합 방식</td></tr><tr><td>Domain terminology</td><td>자주 쓰는 전문 용어의 fragmentation</td></tr></tbody></table>
+<p>같은 character 수라도 tokenizer에 따라 token 수가 다르므로 context window와 inference 비용 비교는 tokenized length 기준으로 해야 한다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="vocabulary-size의-양쪽-비용-보기">Vocabulary Size의 양쪽 비용 보기</h3><a class="sl-anchor-link" href="#vocabulary-size의-양쪽-비용-보기"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Vocabulary Size의 양쪽 비용 보기”</span></a></div>
+<p>큰 vocabulary는 sequence를 줄일 수 있지만 embedding과 output projection parameter를 늘린다. Rare token의 update도 희소해진다.</p>
+<p>작은 vocabulary는 model의 input/output layer를 줄이지만 sequence length, attention cost, activation memory를 늘린다. Vocabulary search는 이 두 비용을 함께 측정해야 한다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="tokenizer-throughput을-end-to-end로-측정하기">Tokenizer Throughput을 End-to-End로 측정하기</h3><a class="sl-anchor-link" href="#tokenizer-throughput을-end-to-end로-측정하기"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Tokenizer Throughput을 End-to-End로 측정하기”</span></a></div>
+<p>Training tokenizer의 merge loop만 빠르게 만드는 것으로 충분하지 않다.</p>
+<ul>
+<li>Corpus read와 decompression</li>
+<li>Pre-tokenization</li>
+<li>BPE encode</li>
+<li>Token ID serialization</li>
+<li>Data loader read</li>
+</ul>
+<p>전체 pipeline에서 GPU가 token을 기다리는지 확인한다. Offline preprocessing이 빠르더라도 serving-time encode latency가 높을 수 있으므로 두 workload를 따로 benchmark한다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="small-scale-result를-frontier-intuition으로-과대해석하지-않기">Small-Scale Result를 Frontier Intuition으로 과대해석하지 않기</h3><a class="sl-anchor-link" href="#small-scale-result를-frontier-intuition으로-과대해석하지-않기"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Small-Scale Result를 Frontier Intuition으로 과대해석하지 않기”</span></a></div>
+<p>작은 model에서 빨라진 kernel이나 안정화된 optimizer setting은 mechanics에 대한 좋은 증거다. 그러나 quality improvement가 큰 model에서도 유지된다는 증거는 아니다.</p>
+<p>결과를 다음처럼 구분해 기록한다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Correctness claim</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Performance claim at measured scale</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Quality claim at measured scale</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Unverified extrapolation to target scale</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Correctness claimPerformance claim at measured scaleQuality claim at measured scaleUnverified extrapolation to target scale"><div></div></button></div></figure></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="quick-reference">Quick Reference</h3><a class="sl-anchor-link" href="#quick-reference"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Quick Reference”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Symptom</th><th>First Check</th></tr></thead><tbody><tr><td>Encode 후 원문이 달라진다</td><td>UTF-8 byte concatenation, special token, normalization 여부</td></tr><tr><td>Tokenizer training이 지나치게 느리다</td><td>매 merge마다 corpus 전체를 다시 세는지 확인</td></tr><tr><td>Encode latency가 vocabulary와 함께 급증한다</td><td>모든 merge rule을 순회하는지 확인</td></tr><tr><td>특정 언어의 context가 빨리 소진된다</td><td>언어별 bytes/token과 tokens/character 비교</td></tr><tr><td>Embedding parameter가 너무 크다</td><td>Vocabulary size와 tied embedding 여부 확인</td></tr><tr><td>GPU가 data를 기다린다</td><td>Tokenization, serialization, data-loader throughput 측정</td></tr><tr><td>작은 실험의 scaling curve가 흔들린다</td><td>Recipe consistency, training stability, metric noise 확인</td></tr><tr><td>Decode throughput이 낮다</td><td>KV-cache traffic, batch scheduling, memory bandwidth 확인</td></tr></tbody></table>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="lecture-summary">Lecture Summary</h2><a class="sl-anchor-link" href="#lecture-summary"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Lecture Summary”</span></a></div>
+<p>Lecture 1은 CS336의 목적을 language model 전체 stack에 대한 이해로 정의한다. Prompting과 high-level API는 유용하지만 abstraction이 실패했을 때 design space를 제한한다. Fundamental research를 하려면 tokenizer, architecture, optimization, systems, data와 evaluation까지 내려갈 수 있어야 한다.</p>
+<p>작은 classroom model은 frontier model을 그대로 재현하지 못한다. 그럼에도 mechanics와 engineering mindset는 scale을 넘어 전이된다. 반면 특정 architecture나 data choice가 quality를 높인다는 intuition은 scale-sensitive하므로 실제 experiment가 필요하다.</p>
+<p>강의 전체를 묶는 원리는 efficiency다. Basics에서는 expressive model, stable training, fast execution의 균형을 잡는다. Systems에서는 FLOPs와 memory traffic을 계산하고 kernel fusion과 distributed sharding으로 hardware를 활용한다. Scaling law는 작은 experiment로 큰 run을 예측하는 recipe를 만든다. Evaluation은 목표 capability를 정의하고, data pipeline은 그 capability를 학습할 corpus를 만든다. Alignment는 생성 결과를 비교하고 검증하는 약한 supervision을 이용한다.</p>
+<p>후반부는 tokenization을 raw Unicode string과 token ID 사이의 round-trip interface로 정의한다. Character tokenizer는 vocabulary가 비효율적이고, byte tokenizer는 sequence가 길며, word tokenizer는 unseen input을 처리하기 어렵다. Byte-level BPE는 모든 byte를 기본 vocabulary로 두고 자주 등장하는 adjacent pair를 반복해서 합쳐 complete coverage와 compression을 절충한다.</p>
+<p>BPE의 개념은 단순하지만 효율적인 구현은 별개의 systems problem이다. Pair count를 incremental하게 갱신하고, 현재 input에 관련된 merge만 적용하며, pre-tokenization과 special token semantics를 명확히 해야 한다. 궁극적으로 tokenizer가 바뀌거나 사라지더라도 raw input을 유용한 abstraction으로 묶고 compute를 적응적으로 배분하는 문제는 남는다.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="key-terms">Key Terms</h2><a class="sl-anchor-link" href="#key-terms"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Key Terms”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Term</th><th>Meaning　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　</th></tr></thead><tbody><tr><td>Prefill</td><td>Prompt token 전체를 병렬적으로 처리하고 KV cache를 구성하는 LLM inference phase　　　　　　　　　</td></tr><tr><td>Decode</td><td>이전 token과 KV cache를 이용해 다음 token을 순차적으로 생성하는 autoregressive inference phase　</td></tr><tr><td>Scaling recipe</td><td>Compute budget을 model 크기와 training hyperparameter로 변환하는 규칙　　　　　　　　　　　　　　</td></tr><tr><td>Scaling law</td><td>Model 크기, training data, compute와 loss 사이의 관계를 나타내는 경험적 법칙　　　　　　　　　　</td></tr><tr><td>Hyperparameter transfer</td><td>작은 model에서 정한 hyperparameter가 큰 model에서도 유지되거나 예측 가능하게 변하는 성질　　　　</td></tr><tr><td>Compute-optimal scaling</td><td>고정 compute budget에서 model 크기와 training token 수를 배분하는 방법　　　　　　　　　　　　　</td></tr><tr><td>Internal evaluation</td><td>Model 개발과 scaling comparison을 위해 사용하는 evaluation　　　　　　　　　　　　　　　　　　　</td></tr><tr><td>External evaluation</td><td>실제 사용 환경에서 model capability와 task success를 측정하는 evaluation　　　　　　　　　　　　</td></tr><tr><td>Perplexity</td><td>Language model이 token sequence에 부여한 확률을 바탕으로 예측 불확실성을 나타내는 metric　　　　</td></tr><tr><td>Data contamination</td><td>Evaluation sample이 training data에 포함되어 model 성능이 과대평가되는 문제　　　　　　　　　　　</td></tr><tr><td>Weak supervision</td><td>완전한 target 대신 preference, critique 또는 verifier signal로 model을 학습하는 방식　　　　　　</td></tr><tr><td>On-policy</td><td>현재 policy가 생성한 sample을 사용해 policy를 update하는 reinforcement learning setting　　　　　</td></tr><tr><td>DPO</td><td>선호되는 response와 거부된 response의 pair로 language model을 직접 최적화하는 방법　　　　　　　</td></tr><tr><td>GRPO</td><td>같은 prompt에서 생성한 response group의 상대 reward를 이용하는 reinforcement learning 방법　　　</td></tr><tr><td>Tokenizer</td><td>Text와 language model이 처리하는 token ID sequence 사이를 변환하는 component　　　　　　　　　　</td></tr><tr><td>Token</td><td>Language model이 입력과 출력에서 처리하는 text 단위　　　　　　　　　　　　　　　　　　　　　　　</td></tr><tr><td>Vocabulary</td><td>Token과 token ID 사이의 전체 mapping　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　</td></tr><tr><td>Pre-tokenization</td><td>BPE를 적용하기 전에 text를 word, whitespace, punctuation 등의 chunk로 나누는 단계　　　　　　　　</td></tr><tr><td>BPE</td><td>자주 등장하는 adjacent token pair를 반복해서 합쳐 subword vocabulary를 학습하는 algorithm　　　　</td></tr><tr><td>Merge rule</td><td>BPE가 두 token을 하나의 새로운 token으로 합치도록 학습한 규칙　　　　　　　　　　　　　　　　　　</td></tr><tr><td>Special token</td><td>End-of-text, padding, document boundary처럼 language model pipeline에서 특별한 의미를 갖는 token</td></tr><tr><td>Adaptive computation</td><td>Input의 내용이나 위치에 따라 서로 다른 양의 model compute를 배분하는 방식　　　　　　　　　　　　</td></tr></tbody></table>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="questions">Questions</h2><a class="sl-anchor-link" href="#questions"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Questions”</span></a></div>
+<ol>
+<li>이미 pretrained model과 강력한 API가 있는데 language model을 from scratch로 구현하는 이유는 무엇인가?</li>
+<li>작은 model 실험에서 mechanics와 mindset가 modeling intuition보다 잘 전이되는 이유는 무엇인가?</li>
+<li>Bitter lesson을 “algorithm은 중요하지 않다”로 해석하면 왜 잘못인가?</li>
+<li>고정된 budget에서 language model 개발을 efficiency 문제로 본다는 것은 무엇을 의미하는가?</li>
+<li>Assignment 1의 expressiveness, stability, efficiency는 어떤 trade-off를 만드는가?</li>
+<li>GPU의 peak FLOP/s만으로 실제 kernel performance를 설명할 수 없는 이유는 무엇인가?</li>
+<li>Operator fusion은 어떤 data movement를 제거하는가?</li>
+<li>Distributed training에서 shard해야 하는 주요 state 네 가지는 무엇인가?</li>
+<li>Prefill과 decode는 computation pattern이 어떻게 다른가?</li>
+<li>Scaling recipe는 단일 model configuration과 어떻게 다른가?</li>
+<li>Scaling에서 predictability가 optimality만큼 중요한 이유는 무엇인가?</li>
+<li>Internal evaluation과 external evaluation은 목적이 어떻게 다른가?</li>
+<li>Data filtering을 compute efficiency로 볼 수 있는 이유는 무엇인가?</li>
+<li>Alignment에서 weak supervision이 유용한 이유는 무엇인가?</li>
+<li>대규모 RL pipeline에서 on-policyness와 throughput은 왜 충돌할 수 있는가?</li>
+<li>Tokenizer가 만족해야 하는 round-trip property는 무엇인가?</li>
+<li>Bytes per token이 높아지면 어떤 이점이 있는가?</li>
+<li>Character-, byte-, word-level tokenizer의 핵심 한계는 각각 무엇인가?</li>
+<li>Byte-level BPE가 unknown token 없이 모든 string을 표현할 수 있는 이유는 무엇인가?</li>
+<li>BPE training에서 한 번의 merge iteration은 어떤 단계로 이루어지는가?</li>
+<li>BPE training이 진행될수록 sequence length와 vocabulary size는 어떻게 변하는가?</li>
+<li>개념적으로 올바른 BPE implementation이 실제 corpus에서 느린 이유는 무엇인가?</li>
+<li>Pre-tokenization이 merge 결과와 performance에 영향을 주는 이유는 무엇인가?</li>
+<li>명시적인 tokenizer가 사라져도 abstraction과 adaptive computation 문제가 남는 이유는 무엇인가?</li>
+</ol>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="answers">Answers</h2><a class="sl-anchor-link" href="#answers"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Answers”</span></a></div>
+<ol>
+<li>High-level abstraction이 실패하면 prompt나 API input만으로는 tokenizer, architecture, data, optimizer, kernel 같은 design space를 바꿀 수 없다. Component를 직접 구현하면 내부 mechanics를 이해하고 fundamental research의 선택 범위를 넓힐 수 있다.</li>
+<li>Parallelism이나 kernel이 동작하는 원리는 구조적으로 설명하고 작은 환경에서도 검증할 수 있다. 반면 특정 modeling choice가 quality를 높이는지는 data, model size와 training budget에 민감하므로 작은 scale의 결과가 그대로 전이되지 않을 수 있다.</li>
+<li>Scale은 비효율적인 algorithm을 자동으로 구해주지 않는다. 큰 resource를 활용할 수 있는 scalable algorithm과 몇 퍼센트의 efficiency improvement가 대규모에서는 더 큰 절대 효과를 만든다.</li>
+<li>Architecture 하나가 아니라 tokenization, optimization, hardware utilization, scaling, data quality와 evaluation을 함께 조정해 주어진 resource에서 가장 높은 evaluation quality를 얻는다는 뜻이다.</li>
+<li>더 표현력 있는 model은 training이 불안정하거나 느릴 수 있고, 더 빠르고 작은 구조는 quality가 낮을 수 있다. 세 목표를 동시에 만족하는 configuration을 찾아야 한다.</li>
+<li>Compute unit이 사용할 data를 HBM에서 충분히 빠르게 이동하지 못하면 GPU는 memory-bound가 된다. 따라서 FLOP/s와 함께 memory bandwidth와 arithmetic intensity를 봐야 한다.</li>
+<li>첫 operation의 결과를 HBM에 쓰고 두 번째 operation을 위해 다시 읽는 왕복을 제거한다. Data를 한 번 읽어 여러 operation을 수행한 뒤 한 번만 쓴다.</li>
+<li>Model parameters, activations, gradients, optimizer states다.</li>
+<li>Prefill은 prompt token을 병렬적으로 처리해 KV cache를 만들며 큰 matrix operation 비중이 높다. Decode는 token을 하나씩 생성하며 model state와 KV cache를 반복해서 읽어 memory-bound가 되기 쉽다.</li>
+<li>단일 configuration은 특정 scale의 값이다. Scaling recipe는 임의의 FLOP budget을 model size, token 수, batch size, learning rate 등 일관된 configuration으로 mapping한다.</li>
+<li>Target-scale run을 여러 번 반복할 수 없기 때문이다. 작은 scale에서 hyperparameter 변화가 불규칙하면 큰 scale의 값과 loss를 신뢰성 있게 extrapolate할 수 없다.</li>
+<li>Internal evaluation은 model 개발 중 차이를 비교하고 scaling trend를 보는 데 쓰인다. External evaluation은 실제 사용 환경에서 의미 있는 capability를 사용자나 reviewer에게 설명하는 데 쓰인다.</li>
+<li>고정 compute budget에서 중복되거나 낮은 품질의 token에 gradient update를 쓰면 좋은 data를 학습할 기회를 잃기 때문이다.</li>
+<li>이상적인 response를 직접 작성하기 어려워도 여러 response 중 더 좋은 것을 고르거나 정답을 검증하는 것은 쉬울 수 있기 때문이다.</li>
+<li>최신 policy의 rollout만 기다리면 accelerator가 idle할 수 있다. 처리량을 높이려고 오래된 rollout을 사용하면 update된 policy와 sample을 만든 policy가 달라져 off-policy 문제가 커진다.</li>
+<li>지원하는 string <code dir="auto">s</code>에 대해 <code dir="auto">decode(encode(s)) = s</code>가 성립해야 한다.</li>
+<li>같은 text를 더 적은 token으로 표현하므로 sequence length, attention cost와 activation memory를 줄일 수 있다.</li>
+<li>Character-level은 큰 sparse vocabulary, byte-level은 긴 sequence, word-level은 unbounded vocabulary와 unseen word 문제가 있다.</li>
+<li>초기 vocabulary가 UTF-8의 모든 byte value를 포함하기 때문이다. Learned merge가 없어도 어떤 Unicode string이든 byte sequence로 분해할 수 있다.</li>
+<li>Adjacent pair frequency를 세고, 가장 빈도가 높은 pair를 선택하고, 새 token ID를 만든 뒤 corpus의 해당 pair를 새 token으로 치환한다.</li>
+<li>Merge할수록 여러 token이 하나로 합쳐져 sequence는 짧아지고, merge마다 새 token을 추가하므로 vocabulary는 커진다.</li>
+<li>매 iteration마다 corpus 전체의 pair를 다시 세고, encode할 때 모든 merge를 순회하면 corpus 크기와 vocabulary size에 따라 반복 작업이 크게 증가하기 때문이다.</li>
+<li>Chunk boundary를 넘는 merge를 막고 pair frequency를 바꾸며, 작은 chunk 단위의 병렬 처리를 가능하게 하기 때문이다.</li>
+<li>Raw byte나 low-level unit은 modeling signal이 약하고 sequence가 길다. 어떤 unit을 묶어 higher-level representation으로 만들고 위치별로 compute를 얼마나 배분할지는 architecture가 계속 해결해야 한다.</li>
+</ol> </div> <footer class="sl-flex astro-3yyafb3n"> <div class="meta sl-flex astro-3yyafb3n"> <a href="https://github.com/ziwon/ai-data-center-systems/edit/main/courses/cs336/lec-01/README.md" class="sl-flex print:hidden astro-eez2twj6"><svg aria-hidden="true" class="astro-eez2twj6 astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.2em;"><path d="M22 7.24a1 1 0 0 0-.29-.71l-4.24-4.24a1 1 0 0 0-1.1-.22 1 1 0 0 0-.32.22l-2.83 2.83L2.29 16.05a1 1 0 0 0-.29.71V21a1 1 0 0 0 1 1h4.24a1 1 0 0 0 .76-.29l10.87-10.93L21.71 8c.1-.1.17-.2.22-.33a1 1 0 0 0 0-.24v-.14l.07-.05ZM6.83 20H4v-2.83l9.93-9.93 2.83 2.83L6.83 20ZM18.17 8.66l-2.83-2.83 1.42-1.41 2.82 2.82-1.41 1.42Z"/></svg>Edit page</a> <p>Last updated: <time datetime="2026-09-06T15:43:17.000Z">Sep 6, 2026</time></p> </div> <div class="pagination-links print:hidden astro-u2l5gyhi" dir="ltr"> <a href="/courses/cs336/" rel="prev" class="astro-u2l5gyhi"> <svg aria-hidden="true" class="astro-u2l5gyhi astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17 11H9.41l3.3-3.29a1.004 1.004 0 1 0-1.42-1.42l-5 5a1 1 0 0 0-.21.33 1 1 0 0 0 0 .76 1 1 0 0 0 .21.33l5 5a1.002 1.002 0 0 0 1.639-.325 1 1 0 0 0-.219-1.095L9.41 13H17a1 1 0 0 0 0-2Z"/></svg> <span class="astro-u2l5gyhi"> Previous <br class="astro-u2l5gyhi"> <span class="link-title astro-u2l5gyhi">Stanford CS336: Language Modeling from Scratch</span> </span> </a> <a href="/courses/deep-learning-for-network-engineers/" rel="next" class="astro-u2l5gyhi"> <svg aria-hidden="true" class="astro-u2l5gyhi astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17.92 11.62a1.001 1.001 0 0 0-.21-.33l-5-5a1.003 1.003 0 1 0-1.42 1.42l3.3 3.29H7a1 1 0 0 0 0 2h7.59l-3.3 3.29a1.002 1.002 0 0 0 .325 1.639 1 1 0 0 0 1.095-.219l5-5a1 1 0 0 0 .21-.33 1 1 0 0 0 0-.76Z"/></svg> <span class="astro-u2l5gyhi"> Next <br class="astro-u2l5gyhi"> <span class="link-title astro-u2l5gyhi">Deep Learning for Network Engineers</span> </span> </a> </div>  </footer> </div> </div>  </main> </div> </div> </div> <ask-docs-widget> <button class="ask-fab" type="button" data-open aria-label="Ask this docs"> <span class="ask-fab-icon" aria-hidden="true">?</span>
+Ask this docs
+</button> <div class="ask-panel" data-panel hidden> <div class="ask-resize-handle" data-resize aria-hidden="true"></div> <div class="ask-panel-inner"> <header class="ask-header"> <div> <p class="ask-eyebrow">AI Data Center Systems</p> <h2 class="ask-title">Ask this docs</h2> </div> <div class="ask-header-controls"> <button class="ask-mode-btn" data-mode-btn="right" title="오른쪽 패널" aria-label="오른쪽 패널"> <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="6" height="16" rx="1.5" opacity="0.35"></rect><rect x="8" y="0" width="8" height="16" rx="1.5"></rect></svg> </button> <button class="ask-mode-btn" data-mode-btn="bottom" title="하단 패널" aria-label="하단 패널"> <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="16" height="6" rx="1.5" opacity="0.35"></rect><rect x="0" y="8" width="16" height="8" rx="1.5"></rect></svg> </button> <button class="ask-mode-btn" data-mode-btn="expand" title="전체 확장" aria-label="전체 확장"> <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 5.5V1h4.5M10.5 1H15v4.5M15 10.5V15h-4.5M5.5 15H1v-4.5"></path></svg> </button> <button class="ask-close-btn" type="button" aria-label="닫기" data-close> <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13"></path></svg> </button> </div> </header> <div class="ask-body"> <label class="ask-field"> <span class="ask-field-row"> <span>Question</span> <span class="ask-char" data-char>0 / 800</span> </span> <textarea name="question" rows="3" maxlength="800" placeholder="이 문서에서 핵심 운영 체크포인트는 무엇인가요?" data-question></textarea> <span class="ask-hint">시간당 최대 20회 · 질문당 최대 800자</span> </label> <div class="ask-actions"> <button class="ask-submit" type="button" data-submit> <svg class="ask-spinner" viewBox="0 0 24 24" fill="none" aria-hidden="true" hidden> <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2.5" stroke-dasharray="56" stroke-dashoffset="14" stroke-linecap="round"></circle> </svg> <span data-submit-label>Ask</span> </button> <p class="ask-status" data-status></p> </div> <section class="ask-answer" data-answer hidden></section> <section class="ask-sources" data-sources hidden> <h3>Sources</h3> <ul class="ask-source-chips" data-source-list></ul> </section> </div> </div> </div> <div class="ask-backdrop" data-backdrop hidden></div> </ask-docs-widget> <script type="module" src="/_astro/AskDocs.astro_astro_type_script_index_0_lang.BbnAb04M.js"></script> </div> <script type="module">const r=document.documentElement,c=document.querySelector("#starlight__sidebar"),s=document.querySelector(".navigation-mode-toggle"),a=document.querySelector(".navigation-drawer-toggle"),u=window.matchMedia("(min-width: 50rem)");function d(){return r.dataset.navigationMode==="compact"}function o(){return r.dataset.navigationDrawer==="open"}function l(){const e=d(),t=e&&o();s?.setAttribute("aria-pressed",String(e)),s?.setAttribute("title",e?"Use normal navigation":"Use compact navigation"),a?.setAttribute("aria-expanded",String(t)),a?.setAttribute("title",t?"Close navigation":"Open navigation");const n=a?.querySelector(".navigation-drawer-label");n&&(n.textContent=t?"Close navigation":"Open navigation")}function i(e,t=!1){const n=!!(e&&d()&&u.matches);r.dataset.navigationDrawer=n?"open":"closed",l(),n?requestAnimationFrame(()=>{const g=c?.querySelector('a[aria-current="page"]'),m=c?.querySelector(".starlight-sidebar-topics-current");(g??m)?.focus()}):t&&a?.focus()}function p(e){r.dataset.navigationMode=e,i(!1);try{localStorage.setItem("adcs-navigation-mode",e)}catch{}l()}s?.addEventListener("click",()=>{p(d()?"normal":"compact")});a?.addEventListener("click",()=>{i(!o(),o())});document.addEventListener("keydown",e=>{e.key==="Escape"&&o()&&i(!1,!0)});document.addEventListener("pointerdown",e=>{!o()||!(e.target instanceof Node)||c?.contains(e.target)||i(!1)});u.addEventListener("change",()=>i(!1));r.dataset.navigationDrawer="closed";l();</script> </body></html>

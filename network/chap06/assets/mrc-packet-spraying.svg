@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="560" viewBox="0 0 1120 560" role="img" aria-labelledby="title desc">
+  <title id="title">MRC packet spraying compared with traditional single-path forwarding</title>
+  <desc id="desc">A diagram comparing traditional per-flow forwarding, where one transfer follows one path, with MRC packet spraying, where one reliable transfer is split across many paths and placed directly into destination memory.</desc>
+  <rect width="1120" height="560" fill="#f8fafc"/>
+
+  <defs>
+    <marker id="arrowBlue" markerWidth="5" markerHeight="5" refX="4.5" refY="2.5" orient="auto">
+      <path d="M0,0 L5,2.5 L0,5 Z" fill="#2563eb"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="5" markerHeight="5" refX="4.5" refY="2.5" orient="auto">
+      <path d="M0,0 L5,2.5 L0,5 Z" fill="#16a34a"/>
+    </marker>
+    <marker id="arrowOrange" markerWidth="5" markerHeight="5" refX="4.5" refY="2.5" orient="auto">
+      <path d="M0,0 L5,2.5 L0,5 Z" fill="#f97316"/>
+    </marker>
+    <marker id="arrowRed" markerWidth="5" markerHeight="5" refX="4.5" refY="2.5" orient="auto">
+      <path d="M0,0 L5,2.5 L0,5 Z" fill="#dc2626"/>
+    </marker>
+  </defs>
+
+  <g font-family="Inter, Arial, sans-serif">
+    <text x="560" y="48" text-anchor="middle" font-size="28" font-weight="700" fill="#0f172a">Packet Load Balancing: Single Path vs MRC</text>
+    <text x="560" y="77" text-anchor="middle" font-size="15" fill="#475569">MRC treats packet spraying, memory placement, reliability, and path health as one transport-level design.</text>
+  </g>
+
+  <line x1="560" y1="105" x2="560" y2="510" stroke="#cbd5e1" stroke-width="2"/>
+
+  <g font-family="Inter, Arial, sans-serif">
+    <text x="280" y="125" text-anchor="middle" font-size="22" font-weight="700" fill="#0f172a">Traditional ECMP / SLB</text>
+    <text x="280" y="151" text-anchor="middle" font-size="14" fill="#475569">One flow or transfer usually follows one selected path.</text>
+
+    <rect x="50" y="230" width="120" height="70" rx="8" fill="#eff6ff" stroke="#2563eb"/>
+    <text x="110" y="258" text-anchor="middle" font-size="15" font-weight="700" fill="#1e3a8a">Source NIC</text>
+    <text x="110" y="280" text-anchor="middle" font-size="13" fill="#1e40af">one transfer</text>
+
+    <rect x="230" y="214" width="96" height="48" rx="7" fill="#ffffff" stroke="#64748b"/>
+    <text x="278" y="244" text-anchor="middle" font-size="13" fill="#334155">Spine A</text>
+    <rect x="230" y="286" width="96" height="48" rx="7" fill="#ffffff" stroke="#64748b"/>
+    <text x="278" y="316" text-anchor="middle" font-size="13" fill="#334155">Spine B</text>
+    <rect x="230" y="358" width="96" height="48" rx="7" fill="#ffffff" stroke="#64748b"/>
+    <text x="278" y="388" text-anchor="middle" font-size="13" fill="#334155">Spine C</text>
+
+    <rect x="390" y="230" width="120" height="70" rx="8" fill="#ecfdf5" stroke="#16a34a"/>
+    <text x="450" y="258" text-anchor="middle" font-size="15" font-weight="700" fill="#14532d">Dest NIC</text>
+    <text x="450" y="280" text-anchor="middle" font-size="13" fill="#166534">in-order flow</text>
+
+    <path d="M170 265 C205 250 215 238 230 238" stroke="#2563eb" stroke-width="2" fill="none" marker-end="url(#arrowBlue)"/>
+    <path d="M326 238 C352 242 365 252 390 265" stroke="#2563eb" stroke-width="2" fill="none" marker-end="url(#arrowBlue)"/>
+    <path d="M170 265 C205 295 210 310 230 310" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5 5" fill="none"/>
+    <path d="M170 265 C205 345 210 382 230 382" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5 5" fill="none"/>
+
+    <rect x="180" y="438" width="200" height="52" rx="8" fill="#fff7ed" stroke="#f97316"/>
+    <text x="280" y="461" text-anchor="middle" font-size="14" font-weight="700" fill="#9a3412">Risk</text>
+    <text x="280" y="480" text-anchor="middle" font-size="13" fill="#9a3412">one elephant transfer can hot-spot</text>
+  </g>
+
+  <g font-family="Inter, Arial, sans-serif">
+    <text x="840" y="125" text-anchor="middle" font-size="22" font-weight="700" fill="#0f172a">MRC Packet Spraying</text>
+    <text x="840" y="151" text-anchor="middle" font-size="14" fill="#475569">One reliable transfer is split across many paths and planes.</text>
+
+    <rect x="610" y="230" width="120" height="70" rx="8" fill="#eff6ff" stroke="#2563eb"/>
+    <text x="670" y="256" text-anchor="middle" font-size="15" font-weight="700" fill="#1e3a8a">Source NIC</text>
+    <text x="670" y="278" text-anchor="middle" font-size="13" fill="#1e40af">MRC transfer</text>
+
+    <rect x="800" y="188" width="96" height="38" rx="7" fill="#ffffff" stroke="#64748b"/>
+    <text x="848" y="213" text-anchor="middle" font-size="12" fill="#334155">Plane 0</text>
+    <rect x="800" y="244" width="96" height="38" rx="7" fill="#ffffff" stroke="#64748b"/>
+    <text x="848" y="269" text-anchor="middle" font-size="12" fill="#334155">Plane 1</text>
+    <rect x="800" y="300" width="96" height="38" rx="7" fill="#ffffff" stroke="#64748b"/>
+    <text x="848" y="325" text-anchor="middle" font-size="12" fill="#334155">Plane 2</text>
+    <rect x="800" y="356" width="96" height="38" rx="7" fill="#ffffff" stroke="#64748b"/>
+    <text x="848" y="381" text-anchor="middle" font-size="12" fill="#334155">Plane 3</text>
+
+    <rect x="968" y="220" width="110" height="120" rx="8" fill="#ecfdf5" stroke="#16a34a"/>
+    <text x="1023" y="245" text-anchor="middle" font-size="15" font-weight="700" fill="#14532d">Dest NIC</text>
+    <rect x="990" y="262" width="66" height="14" fill="#bbf7d0" stroke="#16a34a"/>
+    <rect x="990" y="280" width="66" height="14" fill="#bbf7d0" stroke="#16a34a"/>
+    <rect x="990" y="298" width="66" height="14" fill="#bbf7d0" stroke="#16a34a"/>
+    <text x="1023" y="330" text-anchor="middle" font-size="12" fill="#166534">memory offsets</text>
+
+    <text x="750" y="198" text-anchor="middle" font-size="12" font-weight="700" fill="#2563eb">P1</text>
+    <text x="750" y="250" text-anchor="middle" font-size="12" font-weight="700" fill="#16a34a">P2</text>
+    <text x="750" y="304" text-anchor="middle" font-size="12" font-weight="700" fill="#f97316">P3</text>
+    <text x="750" y="360" text-anchor="middle" font-size="12" font-weight="700" fill="#7c3aed">P4</text>
+
+    <path d="M730 255 C760 220 775 207 800 207" stroke="#2563eb" stroke-width="2.5" fill="none" marker-end="url(#arrowBlue)"/>
+    <path d="M730 263 C760 263 775 263 800 263" stroke="#16a34a" stroke-width="2.5" fill="none" marker-end="url(#arrowGreen)"/>
+    <path d="M730 273 C760 300 775 319 800 319" stroke="#f97316" stroke-width="2.5" fill="none" marker-end="url(#arrowOrange)"/>
+    <path d="M730 282 C760 345 775 375 800 375" stroke="#7c3aed" stroke-width="2.5" fill="none"/>
+
+    <path d="M896 207 C925 212 944 232 968 250" stroke="#2563eb" stroke-width="2.5" fill="none" marker-end="url(#arrowBlue)"/>
+    <path d="M896 263 C927 263 943 270 968 276" stroke="#16a34a" stroke-width="2.5" fill="none" marker-end="url(#arrowGreen)"/>
+    <path d="M896 319 C926 313 945 304 968 294" stroke="#f97316" stroke-width="2.5" fill="none" marker-end="url(#arrowOrange)"/>
+    <path d="M896 375 C930 355 945 330 968 312" stroke="#7c3aed" stroke-width="2.5" fill="none"/>
+
+    <path d="M895 244 C925 220 935 205 950 182" stroke="#dc2626" stroke-width="2" stroke-dasharray="6 5" fill="none" marker-end="url(#arrowRed)"/>
+    <text x="965" y="180" font-size="12" fill="#991b1b">retire bad path</text>
+    <text x="965" y="197" font-size="12" fill="#991b1b">probe recovery</text>
+
+    <rect x="720" y="438" width="240" height="52" rx="8" fill="#ecfdf5" stroke="#16a34a"/>
+    <text x="840" y="461" text-anchor="middle" font-size="14" font-weight="700" fill="#14532d">Benefit</text>
+    <text x="840" y="480" text-anchor="middle" font-size="13" fill="#166534">one transfer can use many paths safely</text>
+  </g>
+</svg>
