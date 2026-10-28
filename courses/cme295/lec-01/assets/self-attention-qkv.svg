@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="420" viewBox="0 0 920 420" role="img" aria-labelledby="title desc">
+  <title id="title">Self-attention QKV computation flow</title>
+  <desc id="desc">Input token embeddings are projected into query, key, and value matrices. Query and key produce attention scores, softmax normalizes them, and the weights mix values.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .box { fill: none; stroke: #111111; stroke-width: 1.4; rx: 6; }
+    .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; rx: 6; }
+    .accent { fill: none; stroke: #D9392E; stroke-width: 2.2; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.4; marker-end: url(#arrow); }
+    .thin { fill: none; stroke: #6F6A63; stroke-width: 1.1; marker-end: url(#arrowSoft); }
+    .text { fill: #050505; font-family: Arial, sans-serif; font-size: 16px; font-weight: 700; }
+    .small { fill: #6F6A63; font-family: Arial, sans-serif; font-size: 13px; }
+    .mono { fill: #050505; font-family: "Courier New", monospace; font-size: 14px; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#111111"/>
+    </marker>
+    <marker id="arrowSoft" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#6F6A63"/>
+    </marker>
+  </defs>
+  <rect class="bg" x="0" y="0" width="920" height="420"/>
+
+  <rect class="box" x="40" y="155" width="150" height="90"/>
+  <text class="text" x="115" y="190" text-anchor="middle">Input X</text>
+  <text class="small" x="115" y="215" text-anchor="middle">token embeddings</text>
+  <text class="mono" x="115" y="237" text-anchor="middle">n x d_model</text>
+
+  <rect class="soft" x="255" y="55" width="140" height="62"/>
+  <text class="text" x="325" y="83" text-anchor="middle">Q = XWQ</text>
+  <text class="small" x="325" y="104" text-anchor="middle">what to ask</text>
+
+  <rect class="soft" x="255" y="168" width="140" height="62"/>
+  <text class="text" x="325" y="196" text-anchor="middle">K = XWK</text>
+  <text class="small" x="325" y="217" text-anchor="middle">how to match</text>
+
+  <rect class="soft" x="255" y="281" width="140" height="62"/>
+  <text class="text" x="325" y="309" text-anchor="middle">V = XWV</text>
+  <text class="small" x="325" y="330" text-anchor="middle">what to carry</text>
+
+  <path class="thin" d="M190 185 C220 115 225 86 255 86"/>
+  <path class="thin" d="M190 200 L255 200"/>
+  <path class="thin" d="M190 215 C220 285 225 312 255 312"/>
+
+  <rect class="box" x="475" y="122" width="155" height="94"/>
+  <text class="text" x="552.5" y="156" text-anchor="middle">QK<tspan baseline-shift="super" font-size="11">T</tspan></text>
+  <text class="small" x="552.5" y="181" text-anchor="middle">similarity scores</text>
+  <text class="mono" x="552.5" y="203" text-anchor="middle">n x n</text>
+
+  <path class="line" d="M395 86 C440 86 435 142 475 150"/>
+  <path class="line" d="M395 199 C430 199 438 175 475 172"/>
+
+  <rect class="box" x="690" y="122" width="150" height="94"/>
+  <text class="text" x="765" y="154" text-anchor="middle">softmax</text>
+  <text class="small" x="765" y="179" text-anchor="middle">attention weights</text>
+  <text class="mono" x="765" y="201" text-anchor="middle">rows sum to 1</text>
+
+  <path class="line" d="M630 169 L690 169"/>
+
+  <rect class="box" x="690" y="281" width="150" height="62"/>
+  <text class="text" x="765" y="309" text-anchor="middle">Output</text>
+  <text class="small" x="765" y="331" text-anchor="middle">weighted values</text>
+
+  <path class="accent" d="M765 216 L765 281"/>
+  <path class="line" d="M395 312 L690 312"/>
+  <text class="small" x="610" y="299" text-anchor="middle">multiply by V</text>
+
+  <text class="mono" x="765" y="250" text-anchor="middle">softmax(QK^T / sqrt(d_k)) V</text>
+</svg>

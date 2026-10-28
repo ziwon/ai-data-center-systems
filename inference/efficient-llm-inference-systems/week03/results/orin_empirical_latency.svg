@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="620" viewBox="0 0 980 620">
+  <rect width="980" height="620" fill="#f8fafc"/>
+  <rect x="70" y="78" width="760" height="388" fill="#ffffff" stroke="#cbd5e1"/>
+
+  <text x="70" y="34" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="700" fill="#0f172a">Jetson Orin 64GB Empirical Latency</text>
+  <text x="70" y="58" font-family="Inter, Arial, sans-serif" font-size="13" fill="#475569">Qwen2.5-7B BF16 text proxy at 1K prompt / 16 decode tokens, with Qwen3-VL-2B VRS verifier reference.</text>
+
+  <!-- horizontal grid and left-axis seconds -->
+  <line x1="70" y1="466" x2="830" y2="466" stroke="#0f172a" stroke-width="1.4"/>
+  <line x1="70" y1="78" x2="70" y2="466" stroke="#0f172a" stroke-width="1.4"/>
+  <line x1="830" y1="78" x2="830" y2="466" stroke="#64748b" stroke-width="1.2"/>
+
+  <g font-family="Inter, Arial, sans-serif" font-size="12" fill="#334155">
+    <line x1="70" y1="466.0" x2="830" y2="466.0" stroke="#e2e8f0"/>
+    <text x="58" y="470.0" text-anchor="end">0s</text>
+    <line x1="70" y1="327.4" x2="830" y2="327.4" stroke="#e2e8f0"/>
+    <text x="58" y="331.4" text-anchor="end">5s</text>
+    <line x1="70" y1="188.9" x2="830" y2="188.9" stroke="#e2e8f0"/>
+    <text x="58" y="192.9" text-anchor="end">10s</text>
+    <line x1="70" y1="78.0" x2="830" y2="78.0" stroke="#e2e8f0"/>
+    <text x="58" y="82.0" text-anchor="end">14s</text>
+    <text x="32" y="276" transform="rotate(-90 32 276)" text-anchor="middle" font-size="13" fill="#111827">Latency</text>
+  </g>
+
+  <!-- right-axis KV MiB -->
+  <g font-family="Inter, Arial, sans-serif" font-size="12" fill="#475569">
+    <text x="842" y="470.0">0 MiB</text>
+    <text x="842" y="276.0">500 MiB</text>
+    <text x="842" y="82.0">1000 MiB</text>
+    <text x="902" y="276" transform="rotate(90 902 276)" text-anchor="middle" font-size="13" fill="#111827">KV after decode</text>
+  </g>
+
+  <!-- 2B VLM verifier reference line: 8.07s -->
+  <line x1="70" y1="242.4" x2="830" y2="242.4" stroke="#dc2626" stroke-width="1.7" stroke-dasharray="7 6"/>
+  <rect x="600" y="218" width="218" height="20" rx="3" fill="#fff1f2"/>
+  <text x="609" y="232" font-family="Inter, Arial, sans-serif" font-size="12" fill="#991b1b">2B VLM verifier reference: 8.07s</text>
+
+  <!-- grouped latency bars for 7B sweep -->
+  <g font-family="Inter, Arial, sans-serif" font-size="12" fill="#0f172a">
+    <!-- batch 1: prefill 1.21s, decode 1.51s -->
+    <rect x="122" y="432.5" width="30" height="33.5" fill="#f97316"/>
+    <rect x="158" y="424.2" width="30" height="41.8" fill="#0891b2"/>
+    <text x="155" y="491" text-anchor="middle">1</text>
+
+    <!-- batch 2: prefill 1.70s, decode 1.54s -->
+    <rect x="264" y="418.9" width="30" height="47.1" fill="#f97316"/>
+    <rect x="300" y="423.3" width="30" height="42.7" fill="#0891b2"/>
+    <text x="297" y="491" text-anchor="middle">2</text>
+
+    <!-- batch 4: prefill 3.32s, decode 1.60s -->
+    <rect x="406" y="374.0" width="30" height="92.0" fill="#f97316"/>
+    <rect x="442" y="421.6" width="30" height="44.4" fill="#0891b2"/>
+    <text x="439" y="491" text-anchor="middle">4</text>
+
+    <!-- batch 8: prefill 6.64s, decode 1.73s -->
+    <rect x="548" y="282.0" width="30" height="184.0" fill="#f97316"/>
+    <rect x="584" y="418.1" width="30" height="47.9" fill="#0891b2"/>
+    <text x="581" y="491" text-anchor="middle">8</text>
+
+    <!-- batch 16: prefill 13.38s, decode 1.99s -->
+    <rect x="690" y="95.2" width="30" height="370.8" fill="#f97316"/>
+    <rect x="726" y="410.8" width="30" height="55.2" fill="#0891b2"/>
+    <text x="723" y="491" text-anchor="middle">16</text>
+
+    <text x="439" y="524" text-anchor="middle" font-size="13" fill="#111827">Batch size</text>
+  </g>
+
+  <!-- KV after decode line: 56.7, 113.3, 226.6, 453.3, 906.5 MiB -->
+  <polyline points="155,444.0 297,422.0 439,378.1 581,290.1 723,114.3" fill="none" stroke="#7c3aed" stroke-width="3"/>
+  <g fill="#7c3aed" stroke="#ffffff" stroke-width="2">
+    <circle cx="155" cy="444.0" r="5"/>
+    <circle cx="297" cy="422.0" r="5"/>
+    <circle cx="439" cy="378.1" r="5"/>
+    <circle cx="581" cy="290.1" r="5"/>
+    <circle cx="723" cy="114.3" r="5"/>
+  </g>
+
+  <!-- numeric annotations -->
+  <g font-family="Inter, Arial, sans-serif" font-size="11" fill="#334155">
+    <text x="137" y="426" text-anchor="middle">1.21</text>
+    <text x="173" y="418" text-anchor="middle">1.51</text>
+    <text x="279" y="412" text-anchor="middle">1.70</text>
+    <text x="421" y="368" text-anchor="middle">3.32</text>
+    <text x="563" y="276" text-anchor="middle">6.64</text>
+    <text x="705" y="88" text-anchor="middle">13.38</text>
+    <text x="735" y="106" fill="#5b21b6">906 MiB</text>
+  </g>
+
+  <!-- legend -->
+  <g transform="translate(70 550)" font-family="Inter, Arial, sans-serif" font-size="13" fill="#334155">
+    <rect x="0" y="-11" width="16" height="16" fill="#f97316"/>
+    <text x="24" y="2">7B prefill time</text>
+    <rect x="152" y="-11" width="16" height="16" fill="#0891b2"/>
+    <text x="176" y="2">7B decode time</text>
+    <line x1="310" y1="-3" x2="350" y2="-3" stroke="#7c3aed" stroke-width="3"/>
+    <circle cx="330" cy="-3" r="4" fill="#7c3aed"/>
+    <text x="360" y="2">7B KV after decode</text>
+    <line x1="522" y1="-3" x2="562" y2="-3" stroke="#dc2626" stroke-width="1.7" stroke-dasharray="7 6"/>
+    <text x="572" y="2">2B VLM verifier latency</text>
+  </g>
+
+  <text x="70" y="592" font-family="Inter, Arial, sans-serif" font-size="12" fill="#64748b">Takeaway: KV remains small at batch 16, but prefill latency grows to 13.38s; practical camera concurrency is latency-bound before it is KV-capacity-bound.</text>
+</svg>

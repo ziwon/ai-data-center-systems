@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="620" viewBox="0 0 1120 620" role="img" aria-labelledby="title desc">
+  <title id="title">NVIDIA Magnum IO optimization stack</title>
+  <desc id="desc">A diagram organizing Magnum IO into storage IO, network IO, in-network compute, and IO management.</desc>
+  <defs>
+    <style>
+      text { font-family: Arial, sans-serif; }
+      .bg { fill: #F3EFE7; }
+      .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.4; }
+      .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; }
+      .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+      .line { fill: none; stroke: #111111; stroke-width: 1.8; }
+      .dash { fill: none; stroke: #6F6A63; stroke-width: 1.2; stroke-dasharray: 6 5; }
+      .label { fill: #050505; font-size: 17px; font-weight: 700; }
+      .small { fill: #6F6A63; font-size: 13px; }
+      .red { fill: #D9392E; font-size: 13px; font-weight: 700; }
+      .arrow { fill: #111111; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1120" height="620"/>
+
+  <rect class="box" x="72" y="62" width="986" height="490" rx="8"/>
+  <text class="label" x="92" y="98">Magnum IO goal</text>
+  <text class="small" x="92" y="122">Move data with fewer host copies, lower latency, and higher end-to-end GPU goodput.</text>
+
+  <rect class="soft" x="104" y="172" width="220" height="210" rx="8"/>
+  <text class="label" x="144" y="210">Storage I/O</text>
+  <text class="small" x="138" y="246">GPUDirect Storage</text>
+  <text class="small" x="138" y="274">BlueField SNAP</text>
+  <text class="small" x="138" y="302">NVMe / NVMe-oF</text>
+
+  <rect class="accent" x="386" y="172" width="220" height="210" rx="8"/>
+  <text class="label" x="424" y="210">Network I/O</text>
+  <text class="small" x="420" y="246">GPUDirect RDMA</text>
+  <text class="small" x="420" y="274">NCCL, UCX</text>
+  <text class="small" x="420" y="302">NVSHMEM, HPC-X</text>
+
+  <rect class="accent" x="668" y="172" width="220" height="210" rx="8"/>
+  <text class="label" x="704" y="210">In-network compute</text>
+  <text class="small" x="704" y="246">InfiniBand SHARP</text>
+  <text class="small" x="704" y="274">NVLink SHARP</text>
+  <text class="small" x="704" y="302">BlueField control</text>
+
+  <rect class="soft" x="254" y="430" width="220" height="100" rx="8"/>
+  <text class="label" x="304" y="466">I/O management</text>
+  <text class="small" x="304" y="494">UFM, NetQ, telemetry</text>
+
+  <rect class="box" x="596" y="430" width="260" height="100" rx="8"/>
+  <text class="label" x="650" y="466">Application stack</text>
+  <text class="small" x="638" y="494">PyTorch, Dynamo, vLLM</text>
+
+  <line class="line" x1="324" y1="277" x2="386" y2="277"/>
+  <polygon class="arrow" points="386,277 374,271 374,283"/>
+  <line class="line" x1="606" y1="277" x2="668" y2="277"/>
+  <polygon class="arrow" points="668,277 656,271 656,283"/>
+  <path class="dash" d="M 496 382 C 510 414, 560 444, 596 466"/>
+  <polygon class="arrow" points="596,466 584,462 590,452"/>
+  <path class="dash" d="M 778 382 C 766 408, 746 422, 730 430"/>
+  <polygon class="arrow" points="730,430 740,420 744,432"/>
+
+  <text class="red" x="92" y="578">Chapter 4 focus: network path, NCCL collectives, SHARP offload, and NIXL inference transfers.</text>
+</svg>

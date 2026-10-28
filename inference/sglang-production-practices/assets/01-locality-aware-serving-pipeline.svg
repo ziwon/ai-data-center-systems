@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1360" height="760" viewBox="0 0 1360 760" role="img" aria-labelledby="title desc">
+  <title id="title">SGLang locality-aware production serving pipeline</title>
+  <desc id="desc">Requests pass through the Model Gateway to colocated or disaggregated prefill and decode workers. RadixAttention GPU caches extend through HiCache host and shared storage while telemetry observes routing and execution.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#111111"/>
+    </marker>
+    <marker id="arrow-accent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#D9392E"/>
+    </marker>
+  </defs>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .guide { stroke: #D8D1C7; stroke-width: 1; }
+    .section { fill: #6F6A63; font: 600 13px Inter, Arial, sans-serif; letter-spacing: 1.6px; }
+    .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.6; rx: 8; }
+    .box-soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.6; rx: 8; }
+    .box-accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2.4; rx: 8; }
+    .label { fill: #050505; font: 600 17px Inter, Arial, sans-serif; text-anchor: middle; }
+    .sub { fill: #6F6A63; font: 13px Inter, Arial, sans-serif; text-anchor: middle; }
+    .edge-label { fill: #6F6A63; font: 12px Inter, Arial, sans-serif; text-anchor: middle; }
+    .edge { fill: none; stroke: #111111; stroke-width: 1.8; marker-end: url(#arrow); }
+    .edge-bi { fill: none; stroke: #111111; stroke-width: 1.6; marker-start: url(#arrow); marker-end: url(#arrow); }
+    .edge-accent { fill: none; stroke: #D9392E; stroke-width: 2.6; marker-end: url(#arrow-accent); }
+    .signal { fill: none; stroke: #6F6A63; stroke-width: 1.4; stroke-dasharray: 6 6; marker-end: url(#arrow); }
+    .accent-bar { fill: #D9392E; }
+  </style>
+
+  <rect class="bg" width="1360" height="760"/>
+  <line class="guide" x1="194" y1="36" x2="194" y2="724"/>
+  <line class="guide" x1="484" y1="36" x2="484" y2="724"/>
+  <line class="guide" x1="1002" y1="36" x2="1002" y2="724"/>
+
+  <text class="section" x="40" y="55">REQUESTS</text>
+  <text class="section" x="220" y="55">ROUTING</text>
+  <text class="section" x="510" y="55">EXECUTION AND LOCAL KV</text>
+  <text class="section" x="1028" y="55">EXTENDED KV AND SIGNALS</text>
+
+  <rect class="box" x="40" y="244" width="124" height="78"/>
+  <text class="label" x="102" y="278">Clients</text>
+  <text class="sub" x="102" y="301">generate / stream</text>
+
+  <rect class="box-accent" x="220" y="225" width="224" height="116"/>
+  <rect class="accent-bar" x="220" y="225" width="8" height="116" rx="4"/>
+  <text class="label" x="332" y="270">SGLang</text>
+  <text class="label" x="332" y="293">Model Gateway</text>
+  <text class="sub" x="332" y="318">locality + admission</text>
+
+  <rect class="box" x="510" y="88" width="220" height="82"/>
+  <text class="label" x="620" y="123">Colocated workers</text>
+  <text class="sub" x="620" y="147">prefill and decode</text>
+
+  <rect class="box" x="510" y="244" width="220" height="82"/>
+  <text class="label" x="620" y="279">Prefill pool</text>
+  <text class="sub" x="620" y="303">prompt KV generation</text>
+
+  <rect class="box" x="790" y="244" width="180" height="82"/>
+  <text class="label" x="880" y="279">Decode pool</text>
+  <text class="sub" x="880" y="303">token generation</text>
+
+  <rect class="box-soft" x="790" y="88" width="180" height="82"/>
+  <text class="label" x="880" y="123">GPU KV</text>
+  <text class="sub" x="880" y="147">RadixAttention</text>
+
+  <rect class="box-soft" x="510" y="424" width="220" height="82"/>
+  <text class="label" x="620" y="459">GPU KV</text>
+  <text class="sub" x="620" y="483">RadixAttention</text>
+
+  <rect class="box-soft" x="790" y="424" width="180" height="82"/>
+  <text class="label" x="880" y="459">GPU KV</text>
+  <text class="sub" x="880" y="483">RadixAttention</text>
+
+  <rect class="box-soft" x="1040" y="88" width="260" height="82"/>
+  <text class="label" x="1170" y="123">Host KV</text>
+  <text class="sub" x="1170" y="147">HiCache L2</text>
+
+  <rect class="box-soft" x="510" y="584" width="220" height="82"/>
+  <text class="label" x="620" y="619">Host KV</text>
+  <text class="sub" x="620" y="643">HiCache L2</text>
+
+  <rect class="box-soft" x="790" y="584" width="180" height="82"/>
+  <text class="label" x="880" y="619">Host KV</text>
+  <text class="sub" x="880" y="643">HiCache L2</text>
+
+  <rect class="box-accent" x="1040" y="584" width="260" height="82"/>
+  <text class="label" x="1170" y="619">Shared KV storage</text>
+  <text class="sub" x="1170" y="643">HiCache L3</text>
+
+  <rect class="box" x="1040" y="264" width="260" height="96"/>
+  <text class="label" x="1170" y="302">Prometheus</text>
+  <text class="label" x="1170" y="325">+ OpenTelemetry</text>
+  <text class="sub" x="1170" y="348">routing · queues · cache · SLOs</text>
+
+  <path class="edge" d="M164 283 H220"/>
+  <path class="edge" d="M444 253 H472 V129 H510"/>
+  <text class="edge-label" x="467" y="190" transform="rotate(-90 467 190)">cache-aware route</text>
+  <path class="edge" d="M444 283 H510"/>
+  <text class="edge-label" x="477" y="273">PD route</text>
+  <path class="edge" d="M444 313 H470 V365 H760 V285 H790"/>
+
+  <path class="edge" d="M730 129 H790"/>
+  <path class="edge" d="M620 326 V424"/>
+  <path class="edge" d="M880 326 V424"/>
+  <path class="edge-accent" d="M730 285 H790"/>
+  <text class="edge-label" x="760" y="271">KV transfer</text>
+  <text class="edge-label" x="760" y="343">NVLink / RDMA</text>
+
+  <path class="edge-bi" d="M970 129 H1040"/>
+  <path class="edge-bi" d="M620 506 V584"/>
+  <path class="edge-bi" d="M880 506 V584"/>
+  <path class="edge-bi" d="M730 625 H790"/>
+  <path class="edge-bi" d="M970 625 H1040"/>
+  <path class="edge-bi" d="M1300 129 H1320 V625 H1300"/>
+
+  <path class="signal" d="M444 333 H478 V700 H1170 V360"/>
+  <path class="signal" d="M730 108 H1008 V284 H1040"/>
+  <path class="signal" d="M970 305 H1040"/>
+</svg>

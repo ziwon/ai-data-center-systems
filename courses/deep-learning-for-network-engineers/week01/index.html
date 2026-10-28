@@ -1,0 +1,734 @@
+<!DOCTYPE html><html lang="en" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-bguv2lll"> <head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Week 1: From Artificial Neuron to AI Training Fabric | AI Data Center Systems</title><link rel="canonical" href="https://adcs.restack.tech/courses/deep-learning-for-network-engineers/week01/"/><link rel="sitemap" href="/sitemap-index.xml"/><script async src="https://www.googletagmanager.com/gtag/js?id=G-76LFZJVBTE"></script><script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-76LFZJVBTE');
+      </script><script async crossorigin="anonymous" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8128231647578658"></script><link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v6.4.8"/><meta name="generator" content="Starlight v0.40.0"/><meta property="og:title" content="Week 1: From Artificial Neuron to AI Training Fabric"/><meta property="og:url" content="https://adcs.restack.tech/courses/deep-learning-for-network-engineers/week01/"/><meta property="og:locale" content="en"/><meta property="og:description" content="이번 주 목표는 기본적인 Deep Learning 학습 과정이 어떻게 network design 문제로 이어지는지 이해하는 것이다."/><meta property="og:site_name" content="AI Data Center Systems"/><meta name="description" content="이번 주 목표는 기본적인 Deep Learning 학습 과정이 어떻게 network design 문제로 이어지는지 이해하는 것이다."/><meta property="og:type" content="article"/><meta property="og:image" content="https://adcs.restack.tech/og/courses/deep-learning-for-network-engineers/week01.png?v=2"/><meta property="og:image:width" content="1200"/><meta property="og:image:height" content="630"/><meta name="twitter:image" content="https://adcs.restack.tech/og/courses/deep-learning-for-network-engineers/week01.png?v=2"/><meta name="twitter:card" content="summary_large_image"/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/_astro/print.DNXP8c50.css" media="print"><link rel="stylesheet" href="/_astro/common.DYbqSTpl.css"><script type="module" src="/_astro/page.CtJXHRyR.js"></script></head> <body class="astro-bguv2lll"> <a href="#_top" class="astro-7q3lir66">Skip to content</a> <script>
+  (() => {
+    try {
+      const savedMode = localStorage.getItem('adcs-navigation-mode');
+      document.documentElement.dataset.navigationMode = savedMode === 'compact' ? 'compact' : 'normal';
+    } catch {
+      document.documentElement.dataset.navigationMode = 'normal';
+    }
+  })();
+</script> <div class="page sl-flex astro-4toy2ex6"> <header class="header astro-4toy2ex6"><div class="header astro-3ef6ksr2"> <div class="title-wrapper sl-flex astro-3ef6ksr2"> <a href="/" class="site-title sl-flex astro-m46x6ez3">  <span class="astro-m46x6ez3" translate="no"> AI Data Center Systems </span> </a> <button class="navigation-mode-toggle print:hidden astro-3ef6ksr2" type="button" aria-label="Compact navigation" aria-pressed="false" title="Use compact navigation"> <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" class="astro-3ef6ksr2"> <rect x="3" y="4" width="18" height="16" rx="2" class="astro-3ef6ksr2"></rect> <path d="M9 4v16M6.5 10 4.5 12l2 2" class="astro-3ef6ksr2"></path> </svg> </button> </div> <div class="sl-flex print:hidden astro-3ef6ksr2"> <site-search class="astro-3ef6ksr2 astro-v37mnknz" data-translations="{&quot;placeholder&quot;:&quot;Search&quot;}"> <button data-open-modal disabled aria-label="Search" aria-keyshortcuts="Control+K" class="astro-v37mnknz"> <svg aria-hidden="true" class="astro-v37mnknz astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg> <span class="sl-hidden md:sl-block astro-v37mnknz" aria-hidden="true">Search</span> <kbd class="sl-hidden md:sl-flex astro-v37mnknz" style="display: none;"> <kbd class="astro-v37mnknz">Ctrl</kbd><kbd class="astro-v37mnknz">K</kbd> </kbd> </button> <dialog style="padding:0" aria-label="Search" class="astro-v37mnknz"> <div class="dialog-frame sl-flex astro-v37mnknz">  <button data-close-modal class="sl-flex md:sl-hidden astro-v37mnknz"> Cancel </button> <div class="search-container astro-v37mnknz"> <div id="starlight__search" class="astro-v37mnknz"></div> </div> </div> </dialog> </site-search>  <script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script> <script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.D1WXcfCt.js"></script>  </div> <div class="sl-hidden md:sl-flex print:hidden right-group astro-3ef6ksr2"> <div class="sl-flex social-icons astro-3ef6ksr2"> <a href="https://github.com/ziwon/ai-data-center-systems" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">GitHub</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script> <script type="module">const r="starlight-theme",o=e=>e==="auto"||e==="dark"||e==="light"?e:"auto",c=()=>o(typeof localStorage<"u"&&localStorage.getItem(r));function n(e){typeof localStorage<"u"&&localStorage.setItem(r,e==="light"||e==="dark"?e:"")}const l=()=>matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";function t(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e==="auto"?l():e,n(e)}matchMedia("(prefers-color-scheme: light)").addEventListener("change",()=>{c()==="auto"&&t("auto")});class s extends HTMLElement{constructor(){super(),t(c()),this.querySelector("select")?.addEventListener("change",a=>{a.currentTarget instanceof HTMLSelectElement&&t(o(a.currentTarget.value))})}}customElements.define("starlight-theme-select",s);</script> <script type="module">class s extends HTMLElement{constructor(){super();const e=this.querySelector("select");e&&(e.addEventListener("change",t=>{t.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=t.currentTarget.value)}),window.addEventListener("pageshow",t=>{if(!t.persisted)return;const n=e.querySelector("option[selected]")?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}}customElements.define("starlight-lang-select",s);</script> </div> </div></header> <nav class="sidebar print:hidden astro-4toy2ex6" aria-label="Main"> <starlight-menu-button class="print:hidden astro-jif73yzw"> <button aria-expanded="false" aria-label="Menu" aria-controls="starlight__sidebar" class="sl-flex md:sl-hidden astro-jif73yzw"> <svg aria-hidden="true" class="open-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg> <svg aria-hidden="true" class="close-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg> </button> </starlight-menu-button> <script type="module">class s extends HTMLElement{constructor(){super(),this.btn=this.querySelector("button"),this.btn.addEventListener("click",()=>this.toggleExpanded());const t=this.closest("nav");t&&t.addEventListener("keyup",e=>this.closeOnEscape(e))}setExpanded(t){this.setAttribute("aria-expanded",String(t)),document.body.toggleAttribute("data-mobile-menu-expanded",t)}toggleExpanded(){this.setExpanded(this.getAttribute("aria-expanded")!=="true")}closeOnEscape(t){t.code==="Escape"&&(this.setExpanded(!1),this.btn.focus())}}customElements.define("starlight-menu-button",s);</script>  <div id="starlight__sidebar" class="sidebar-pane astro-4toy2ex6"> <div class="navigation-controls astro-4toy2ex6"> <button class="navigation-drawer-toggle astro-4toy2ex6" type="button" aria-controls="starlight__sidebar-content" aria-expanded="false" title="Open navigation"> <svg class="navigation-menu-icon astro-4toy2ex6" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"> <path d="M4 6h16M4 12h16M4 18h16" class="astro-4toy2ex6"></path> </svg> <svg class="navigation-close-icon astro-4toy2ex6" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"> <path d="m6 6 12 12M18 6 6 18" class="astro-4toy2ex6"></path> </svg> <span class="navigation-drawer-label astro-4toy2ex6">Open navigation</span> </button> </div> <div id="starlight__sidebar-content" class="sidebar-content sl-flex astro-4toy2ex6"> <ul class="starlight-sidebar-topics astro-2fh6iaza"> <li class="astro-2fh6iaza"> <a aria-label="Network" title="Network" href="/network/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8.7 10a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-6.27-6.3a1 1 0 0 0-1.42 1.42ZM21 14a1 1 0 0 0-1 1v3.59L15.44 14A1 1 0 0 0 14 15.44L18.59 20H15a1 1 0 0 0 0 2h6a1 1 0 0 0 .38-.08 1 1 0 0 0 .54-.54A1 1 0 0 0 22 21v-6a1 1 0 0 0-1-1Zm.92-11.38a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-6a1 1 0 0 0 0 2h3.59L2.29 20.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V9a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z"/></svg> </div> <div class="astro-2fh6iaza"> Network  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="GPU &amp; Accelerator Systems" title="GPU &amp; Accelerator Systems" href="/gpu/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> </div> <div class="astro-2fh6iaza"> GPU &amp; Accelerator Systems  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Storage" title="Storage" href="/storage/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8 16.5a1 1 0 1 0 1 1 1 1 0 0 0-1-1M12 2C8 2 4 3.37 4 6v12c0 2.63 4 4 8 4s8-1.37 8-4V6c0-2.63-4-4-8-4m6 16c0 .71-2.28 2-6 2s-6-1.29-6-2v-3.27A13 13 0 0 0 12 16a13 13 0 0 0 6-1.27Zm0-6c0 .71-2.28 2-6 2s-6-1.29-6-2V8.73A13 13 0 0 0 12 10a13 13 0 0 0 6-1.27Zm-6-4C8.28 8 6 6.71 6 6s2.28-2 6-2 6 1.29 6 2-2.28 2-6 2m-4 2.5a1 1 0 1 0 1 1 1 1 0 0 0-1-1"/></svg> </div> <div class="astro-2fh6iaza"> Storage  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Training" title="Training" href="/training/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1 1v8a1 1 0 0 0 2 0v-8a1 1 0 0 0-1-1m5-10a1 1 0 0 0-1 1v18a1 1 0 0 0 2 0V3a1 1 0 0 0-1-1m10 14a1 1 0 0 0-1 1v4a1 1 0 0 0 2 0v-4a1 1 0 0 0-1-1m-5-8a1 1 0 0 0-1 1v12a1 1 0 0 0 2 0V9a1 1 0 0 0-1-1"/></svg> </div> <div class="astro-2fh6iaza"> Training  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Inference" title="Inference" data-topic-icon="brain" href="/inference/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 22H5a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3h1a4 4 0 0 1 7.3-2.18c.448.64.692 1.4.7 2.18h3a1 1 0 0 1 1 1v3a4 4 0 0 1 2.18 7.3A3.86 3.86 0 0 1 18 18v3a1 1 0 0 1-1 1ZM5 8a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11v-3.18a1 1 0 0 1 1.33-.95 1.77 1.77 0 0 0 1.74-.23 2 2 0 0 0 .93-1.37 2 2 0 0 0-.48-1.59 1.89 1.89 0 0 0-2.17-.55 1 1 0 0 1-1.33-.95V8h-3.2a1 1 0 0 1-1-1.33 1.77 1.77 0 0 0-.23-1.74 1.939 1.939 0 0 0-3-.43A2 2 0 0 0 8 6c.002.23.046.456.13.67A1 1 0 0 1 7.18 8H5Z"/></svg> </div> <div class="astro-2fh6iaza"> Inference  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="MLOps" title="MLOps" data-topic-icon="cycle" href="/mlops/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8.7 10a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-6.27-6.3a1 1 0 0 0-1.42 1.42ZM21 14a1 1 0 0 0-1 1v3.59L15.44 14A1 1 0 0 0 14 15.44L18.59 20H15a1 1 0 0 0 0 2h6a1 1 0 0 0 .38-.08 1 1 0 0 0 .54-.54A1 1 0 0 0 22 21v-6a1 1 0 0 0-1-1Zm.92-11.38a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-6a1 1 0 0 0 0 2h3.59L2.29 20.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V9a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z"/></svg> </div> <div class="astro-2fh6iaza"> MLOps  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Systems Performance" title="Systems Performance" href="/systems-performance/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path fill-rule="evenodd" d="M1.44 8.855v-.001l3.527-3.516c.34-.344.802-.541 1.285-.548h6.649l.947-.947c3.07-3.07 6.207-3.072 7.62-2.868a1.821 1.821 0 0 1 1.557 1.557c.204 1.413.203 4.55-2.868 7.62l-.946.946v6.649a1.845 1.845 0 0 1-.549 1.286l-3.516 3.528a1.844 1.844 0 0 1-3.11-.944l-.858-4.275-4.52-4.52-2.31-.463-1.964-.394A1.847 1.847 0 0 1 .98 10.693a1.843 1.843 0 0 1 .46-1.838Zm5.379 2.017-3.873-.776L6.32 6.733h4.638l-4.14 4.14Zm8.403-5.655c2.459-2.46 4.856-2.463 5.89-2.33.134 1.035.13 3.432-2.329 5.891l-6.71 6.71-3.561-3.56 6.71-6.711Zm-1.318 15.837-.776-3.873 4.14-4.14v4.639l-3.364 3.374Z" clip-rule="evenodd"/><path d="M9.318 18.345a.972.972 0 0 0-1.86-.561c-.482 1.435-1.687 2.204-2.934 2.619a8.22 8.22 0 0 1-1.23.302c.062-.365.157-.79.303-1.229.415-1.247 1.184-2.452 2.62-2.935a.971.971 0 1 0-.62-1.842c-.12.04-.236.084-.35.13-2.02.828-3.012 2.588-3.493 4.033a10.383 10.383 0 0 0-.51 2.845l-.001.016v.063c0 .536.434.972.97.972H2.24a7.21 7.21 0 0 0 .878-.065c.527-.063 1.248-.19 2.02-.447 1.445-.48 3.205-1.472 4.033-3.494a5.828 5.828 0 0 0 .147-.407Z"/></svg> </div> <div class="astro-2fh6iaza"> Systems Performance  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Courses" title="Courses" href="/courses/" class="starlight-sidebar-topics-current astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.17 2.06A13.1 13.1 0 0 0 19 1.87a12.94 12.94 0 0 0-7 2.05 12.94 12.94 0 0 0-7-2 13.1 13.1 0 0 0-2.17.19 1 1 0 0 0-.83 1v12a1 1 0 0 0 1.17 1 10.9 10.9 0 0 1 8.25 1.91l.12.07h.11a.91.91 0 0 0 .7 0h.11l.12-.07A10.899 10.899 0 0 1 20.83 16 1 1 0 0 0 22 15V3a1 1 0 0 0-.83-.94ZM11 15.35a12.87 12.87 0 0 0-6-1.48H4v-10c.333-.02.667-.02 1 0a10.86 10.86 0 0 1 6 1.8v9.68Zm9-1.44h-1a12.87 12.87 0 0 0-6 1.48V5.67a10.86 10.86 0 0 1 6-1.8c.333-.02.667-.02 1 0v10.04Zm1.17 4.15a13.098 13.098 0 0 0-2.17-.19 12.94 12.94 0 0 0-7 2.05 12.94 12.94 0 0 0-7-2.05c-.727.003-1.453.066-2.17.19A1 1 0 0 0 2 19.21a1 1 0 0 0 1.17.79 10.9 10.9 0 0 1 8.25 1.91 1 1 0 0 0 1.16 0A10.9 10.9 0 0 1 20.83 20a1 1 0 0 0 1.17-.79 1 1 0 0 0-.83-1.15Z"/></svg> </div> <div class="astro-2fh6iaza"> Courses  </div> </a> </li> </ul> <sl-sidebar-state-persist data-hash="147ldbs" class="astro-kku4brbg"> <script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script>  <ul class="top-level astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">Courses</span>  </a> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">cme295</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="0"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/cme295/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">CME295 Lecture Notes</span>  </a> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">lec-01</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="1"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/cme295/lec-01/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 1: Transformer</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">lec-02</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="2"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/cme295/lec-02/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 2: Transformer-Based Models &amp; Tricks</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">lec-03</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="3"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/cme295/lec-03/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 3: Large Language Models, Decoding, Prompting, and Inference</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">lec-04</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="4"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/cme295/lec-04/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 4: LLM Training, Fine-Tuning, and Efficient Adaptation</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">lec-05</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="5"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/cme295/lec-05/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 5: LLM Tuning and Human Preferences</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">lec-06</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="6"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/cme295/lec-06/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 6: LLM Reasoning and GRPO</span>  </a> </li> </ul> </details> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">cs336</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="7"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/cs336/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Stanford CS336: Language Modeling from Scratch</span>  </a> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">lec-01</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="8"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/cs336/lec-01/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 1: Overview and Tokenization</span>  </a> </li> </ul> </details> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">deep-learning-for-network-engineers</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="9"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/deep-learning-for-network-engineers/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Deep Learning for Network Engineers</span>  </a> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">week01</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="10"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/deep-learning-for-network-engineers/week01/" aria-current="page" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 1: From Artificial Neuron to AI Training Fabric</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">week02</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="11"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/deep-learning-for-network-engineers/week02/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 2: Large Language Model, LLM</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">week03</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="12"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/deep-learning-for-network-engineers/week03/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 3: Parallelism Strategies in Deep Learning</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">week04</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="13"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/deep-learning-for-network-engineers/week04/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 4: RDMA and GPU Cluster Communication</span>  </a> </li> </ul> </details> </li> </ul> </details> </li> </ul>  <script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script> </sl-sidebar-state-persist> <div class="md:sl-hidden"> <div class="mobile-preferences sl-flex astro-wu23bvmt"> <div class="social-icons astro-wu23bvmt"> <a href="https://github.com/ziwon/ai-data-center-systems" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">GitHub</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script>   </div> </div> </div> </div> </nav> <div class="main-frame astro-4toy2ex6">  <script type="module">const a=document.getElementById("starlight__sidebar"),n=a?.querySelector("sl-sidebar-state-persist"),o="sl-sidebar-state",i=()=>{let t=[];const e=n?.dataset.hash||"";try{const s=sessionStorage.getItem(o),r=JSON.parse(s||"{}");Array.isArray(r.open)&&r.hash===e&&(t=r.open)}catch{}return{hash:e,open:t,scroll:a?.scrollTop||0}},c=t=>{try{sessionStorage.setItem(o,JSON.stringify(t))}catch{}},d=()=>c(i()),l=(t,e)=>{const s=i();s.open[e]=t,c(s)};n?.addEventListener("click",t=>{if(!(t.target instanceof Element))return;const e=t.target.closest("summary")?.closest("details");if(!e)return;const s=e.querySelector("sl-sidebar-restore"),r=parseInt(s?.dataset.index||"");isNaN(r)||l(!e.open,r)});addEventListener("visibilitychange",()=>{document.visibilityState==="hidden"&&d()});addEventListener("pageHide",d);</script> <div class="lg:sl-flex astro-67yu43on"> <aside class="right-sidebar-container print:hidden astro-67yu43on"> <div class="right-sidebar astro-67yu43on"> <div class="lg:sl-hidden astro-rl4sue7z"><mobile-starlight-toc data-min-h="2" data-max-h="2" class="astro-doynk5tl"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-doynk5tl"><details id="starlight__mobile-toc" class="astro-doynk5tl"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-doynk5tl"><span class="toggle sl-flex astro-doynk5tl">On this page<svg aria-hidden="true" class="caret astro-doynk5tl astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-doynk5tl"></span></summary><div class="dropdown astro-doynk5tl"><ul class="isMobile astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#table-of-contents" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Table of Contents</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#goal" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Goal</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#why-network-engineers-should-learn-the-training-loop" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Why Network Engineers Should Learn the Training Loop</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#chapter-1-artificial-neuron" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Chapter 1: Artificial Neuron</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#chapter-2-backpropagation-algorithm" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Chapter 2: Backpropagation Algorithm</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#chapter-3-multi-class-classification" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Chapter 3: Multi-Class Classification</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#training-loop-as-compute-and-communication-phases" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Training Loop as Compute and Communication Phases</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#gradient-synchronization-and-backend-network-burst" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Gradient Synchronization and Backend Network Burst</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#ai-training-traffic-vs-general-data-center-traffic" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">AI Training Traffic vs General Data Center Traffic</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#ai-training-fabric-design-implications" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">AI Training Fabric Design Implications</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#chapter-summary" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Chapter Summary</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#key-terms" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Key Terms</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#questions" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Questions</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#answers" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Answers</span> </a>  </li> </ul></div></details></nav></mobile-starlight-toc><script type="module" src="/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.hwBsy0Mo.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-rl4sue7z"><div class="sl-container astro-rl4sue7z"><kb-graph-card> <button class="kb-graph-card" type="button" data-open aria-haspopup="dialog"> <span class="kb-graph-copy"> <span class="kb-graph-title">Knowledge graph</span> <span class="kb-graph-subtitle" data-count>Loading related docs</span> </span> <span class="kb-graph-thumb" aria-hidden="true" data-map></span> <span class="kb-graph-expand" aria-hidden="true">Expand</span> </button> <dialog class="kb-graph-dialog" aria-label="Knowledge graph" data-dialog> <div class="kb-graph-panel"> <div class="kb-graph-panel-header"> <div> <p>Knowledge graph</p> <h2 data-heading>Related documents</h2> </div> <div class="kb-graph-tabs" role="tablist" aria-label="Knowledge graph views"> <button type="button" role="tab" aria-selected="true" data-tab="page">This page</button> <button type="button" role="tab" aria-selected="false" data-tab="global">Full graph</button> </div> <button type="button" data-close aria-label="Close knowledge graph">×</button> </div> <div class="kb-graph-stage" data-stage data-view="page"> <div data-page-stage></div> <div data-global-stage hidden></div> </div> </div> </dialog> </kb-graph-card> <script type="module" src="/_astro/KnowledgeGraphCard.astro_astro_type_script_index_0_lang.C475L69c.js"></script><starlight-toc data-min-h="2" data-max-h="2"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">On this page</h2><ul class="astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#table-of-contents" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Table of Contents</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#goal" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Goal</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#why-network-engineers-should-learn-the-training-loop" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Why Network Engineers Should Learn the Training Loop</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#chapter-1-artificial-neuron" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Chapter 1: Artificial Neuron</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#chapter-2-backpropagation-algorithm" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Chapter 2: Backpropagation Algorithm</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#chapter-3-multi-class-classification" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Chapter 3: Multi-Class Classification</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#training-loop-as-compute-and-communication-phases" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Training Loop as Compute and Communication Phases</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#gradient-synchronization-and-backend-network-burst" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Gradient Synchronization and Backend Network Burst</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#ai-training-traffic-vs-general-data-center-traffic" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">AI Training Traffic vs General Data Center Traffic</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#ai-training-fabric-design-implications" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">AI Training Fabric Design Implications</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#chapter-summary" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Chapter Summary</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#key-terms" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Key Terms</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#questions" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Questions</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#answers" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Answers</span> </a>  </li> </ul></nav></starlight-toc><script type="module" src="/_astro/TableOfContents.astro_astro_type_script_index_0_lang.FuRcXuRY.js"></script></div></div> </div> </aside> <div class="main-pane astro-67yu43on">  <main data-pagefind-body class="astro-bguv2lll" lang="en" dir="ltr">    <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <h1 id="_top" class="astro-j6tvhyss">Week 1: From Artificial Neuron to AI Training Fabric</h1> </div> </div> <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <starlight-image-zoom> <template class="astro-vjux6bgf"> <dialog class="starlight-image-zoom-dialog astro-vjux6bgf"> <button aria-label="Unzoom image" class="starlight-image-zoom-control astro-vjux6bgf"> <svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" class="astro-vjux6bgf"> <use href="#starlight-image-zoom-icon-unzoom" class="astro-vjux6bgf"></use> </svg> </button> <figure class="astro-vjux6bgf"></figure> </dialog> </template> <svg xmlns="http://www.w3.org/2000/svg" style="display:none" class="astro-vjux6bgf"> <symbol id="starlight-image-zoom-icon-zoom" viewBox="0 0 24 24" class="astro-vjux6bgf"> <path d="M9.79 12.79 4 18.59V17a1 1 0 0 0-2 0v4a1 1 0 0 0 .08.38 1 1 0 0 0 .54.54A1 1 0 0 0 3 22h4a1 1 0 0 0 0-2H5.41l5.8-5.79a1 1 0 0 0-1.42-1.42ZM21.92 2.62a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-4a1 1 0 0 0 0 2h1.59l-5.8 5.79a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V7a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z" class="astro-vjux6bgf"></path> </symbol> <symbol id="starlight-image-zoom-icon-unzoom" viewBox="0 0 24 24" class="astro-vjux6bgf"> <path d="M21.71 2.29a1 1 0 0 0-1.42 0l-5.79 5.8V6.5a1 1 0 0 0-2 0v4a1 1 0 0 0 .08.38 1 1 0 0 0 .54.54 1 1 0 0 0 .38.08h4a1 1 0 0 0 0-2h-1.59l5.8-5.79a1 1 0 0 0 0-1.42ZM10.88 12.58a1 1 0 0 0-.38-.08h-4a1 1 0 0 0 0 2h1.59l-5.8 5.79a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l5.79-5.8v1.59a1 1 0 0 0 2 0v-4a1 1 0 0 0-.08-.38 1 1 0 0 0-.54-.54Z" class="astro-vjux6bgf"></path> </symbol> </svg> </starlight-image-zoom>   <script type="module" src="/_astro/ImageZoom.astro_astro_type_script_index_0_lang.CZmBqK-T.js"></script> <div class="sl-markdown-content"> <div class="sl-heading-wrapper level-h2"><h2 id="table-of-contents">Table of Contents</h2><a class="sl-anchor-link" href="#table-of-contents"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Table of Contents”</span></a></div>
+<ul>
+<li><a href="#goal">Goal</a></li>
+<li><a href="#why-network-engineers-should-learn-the-training-loop">Why Network Engineers Should Learn the Training Loop</a></li>
+<li><a href="#chapter-1-artificial-neuron">Chapter 1: Artificial Neuron</a></li>
+<li><a href="#chapter-2-backpropagation-algorithm">Chapter 2: Backpropagation Algorithm</a></li>
+<li><a href="#chapter-3-multi-class-classification">Chapter 3: Multi-Class Classification</a></li>
+<li><a href="#training-loop-as-compute-and-communication-phases">Training Loop as Compute and Communication Phases</a></li>
+<li><a href="#gradient-synchronization-and-backend-network-burst">Gradient Synchronization and Backend Network Burst</a></li>
+<li><a href="#ai-training-traffic-vs-general-data-center-traffic">AI Training Traffic vs General Data Center Traffic</a></li>
+<li><a href="#ai-training-fabric-design-implications">AI Training Fabric Design Implications</a></li>
+<li><a href="#chapter-summary">Chapter Summary</a></li>
+<li><a href="#key-terms">Key Terms</a></li>
+<li><a href="#questions">Questions</a></li>
+<li><a href="#answers">Answers</a></li>
+<li><a href="#references">References</a></li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="goal">Goal</h2><a class="sl-anchor-link" href="#goal"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Goal”</span></a></div>
+<p>이번 주 목표는 <strong>기본적인 Deep Learning 학습 과정이 어떻게 network design 문제로 이어지는지</strong> 이해하는 것이다.</p>
+<p>핵심 아이디어는 다음과 같다.</p>
+<blockquote>
+<p>Deep Learning은 처음에는 GPU compute 문제처럼 보이지만, distributed training으로 확장되는 순간 backend network synchronization 문제가 된다.</p>
+</blockquote>
+<p>목표는 model researcher가 되는 것이 아니다.
+목표는 AI training workload가 왜 high bandwidth, low latency, congestion control, lossless behavior를 갖춘 전용 backend fabric을 요구하는지 이해하는 것이다.</p>
+<p>책에서도 Deep Learning과 data center networking 사이를 연결하는 bridge 역할을 목표로 하며, 특히 Deep Learning workload가 backend network design에 어떤 영향을 주는지에 집중한다고 설명한다. 또한 이 책은 configuration guide가 아니며, frontend, management, storage network는 주요 범위 밖에 있다고 명시한다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="why-network-engineers-should-learn-the-training-loop">Why Network Engineers Should Learn the Training Loop</h2><a class="sl-anchor-link" href="#why-network-engineers-should-learn-the-training-loop"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Why Network Engineers Should Learn the Training Loop”</span></a></div>
+<p>현대 Deep Learning model은 단일 GPU 또는 CPU memory 용량을 초과할 수 있다. 이 경우 학습은 여러 GPU 또는 여러 server에 분산되어야 한다. 같은 node 안의 GPU 통신은 NVLink를 사용할 수 있고, node 간 통신은 InfiniBand 또는 Ethernet 기반 fabric 같은 backend network에 의존한다. 책에서는 GPU synchronization이 network에 높은 throughput, ultra-low latency, zero packet loss라는 엄격한 요구사항을 만든다고 강조한다.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TB
+    classDef model fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef decision fill:#173f32,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef compute fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef network fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef requirement fill:#5a3520,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    A[Deep Learning Model]:::model --> B[Large Model Parameters]:::model
+    B --> C{Fits in One GPU?}:::decision
+
+    C -- Yes --> D[Single-GPU Training]:::compute
+    C -- No --> E[Distributed Training]:::network
+
+    E --> F[Multi-GPU / Multi-Node]:::network
+    F --> G[Gradient Synchronization]:::network
+    G --> H[Backend Network Traffic]:::network
+    H --> I[AI Training Fabric Requirements]:::requirement
+
+    I --> I1[High Bandwidth]:::requirement
+    I --> I2[Low Tail Latency]:::requirement
+    I --> I3[Lossless Behavior]:::requirement
+    I --> I4[Congestion Control]:::requirement
+    I --> I5[Observability]:::requirement</pre>
+<p>유용한 mental model은 다음과 같다.</p>
+<blockquote>
+<p>Forward/Backward는 GPU가 계산하는 구간이다.
+Gradient Synchronization은 GPU들이 서로를 기다리는 구간이다.</p>
+</blockquote>
+<div class="sl-heading-wrapper level-h2"><h2 id="chapter-1-artificial-neuron">Chapter 1: Artificial Neuron</h2><a class="sl-anchor-link" href="#chapter-1-artificial-neuron"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Chapter 1: Artificial Neuron”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="11-what-is-an-artificial-neuron">1.1 What is an Artificial Neuron?</h3><a class="sl-anchor-link" href="#11-what-is-an-artificial-neuron"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “1.1 What is an Artificial Neuron?”</span></a></div>
+<p>Artificial neuron은 neural network의 가장 작은 계산 단위다. 입력값을 받고, weight parameter를 곱한 뒤, bias term을 더하고, activation function을 적용해 output을 만든다. 책에서는 이 과정을 matrix multiplication 이후 non-linear activation function을 적용하는 흐름으로 설명한다.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    classDef input fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef param fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef compute fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef output fill:#5a3520,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    X[Input Values]:::input --> WS[Weighted Sum]:::compute
+    W[Weights]:::param --> WS
+    B[Bias]:::param --> WS
+    WS --> Z[Pre-Activation Value z]:::compute
+    Z --> AF[Activation Function]:::compute
+    AF --> Y[Neuron Output]:::output</pre>
+<div class="sl-heading-wrapper level-h3"><h3 id="12-weight-and-bias">1.2 Weight and Bias</h3><a class="sl-anchor-link" href="#12-weight-and-bias"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “1.2 Weight and Bias”</span></a></div>
+<p>Weight와 bias는 단순한 수학 변수가 아니다.
+학습되는 model parameter다.</p>
+<p>Infrastructure 관점에서는 다음처럼 볼 수 있다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Deep Learning Concept</th><th>Infrastructure Meaning</th></tr></thead><tbody><tr><td>Weight</td><td>GPU memory에 저장되는 model parameter</td></tr><tr><td>Bias</td><td>추가로 학습되는 parameter</td></tr><tr><td>Activation</td><td>Forward pass 중 생성되는 intermediate tensor</td></tr><tr><td>Gradient</td><td>Weight update의 방향과 크기</td></tr><tr><td>Precision</td><td>Memory와 bandwidth에 영향을 주는 FP32/FP16/BF16/FP8 선택</td></tr></tbody></table>
+<p>책에서는 모든 connection이 관련 weight parameter를 갖고, 예시에서는 보통 32-bit 값으로 표현된다고 설명한다. 또한 weighted sum 결과와 neuron output도 처리 과정에서 저장되어야 한다고 설명한다. model과 input data가 GPU memory를 초과하면 parallelization strategy가 필요해진다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="13-why-weight-and-bias-become-gpu-memory-footprint">1.3 Why Weight and Bias Become GPU Memory Footprint</h3><a class="sl-anchor-link" href="#13-why-weight-and-bias-become-gpu-memory-footprint"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “1.3 Why Weight and Bias Become GPU Memory Footprint”</span></a></div>
+<p>올바른 연결은 다음과 같다.</p>
+<div class="expressive-code"><link rel="stylesheet" href="/_astro/ec.v4551.css"><script type="module" src="/_astro/ec.0vx5m.js"></script><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Artificial neuron</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ weights and bias</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ model parameters</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ GPU memory footprint</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ distributed training when memory is insufficient</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Artificial neuron→ weights and bias→ model parameters→ GPU memory footprint→ distributed training when memory is insufficient"><div></div></button></div></figure></div>
+<p>Neuron 하나는 작다.
+하지만 수십억 개 parameter를 가진 model은 weights, activations, gradients, optimizer states, mini-batch tensors를 GPU memory에 유지해야 한다.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TB
+    classDef neuron fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef param fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef memory fill:#5a3520,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef decision fill:#173f32,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef compute fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef risk fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    A[Artificial Neuron]:::neuron --> B[Weights + Bias]:::param
+    B --> C[Model Parameters]:::param
+    C --> D[GPU VRAM Usage]:::memory
+
+    D --> E[Parameters]:::memory
+    D --> F[Activations]:::memory
+    D --> G[Gradients]:::memory
+    D --> H[Optimizer States]:::memory
+    D --> I[Mini-batch Input]:::memory
+
+    D --> J{Fits in GPU Memory?}:::decision
+    J -- Yes --> K[Single GPU Training]:::compute
+    J -- No --> L[Parallelization Required]:::risk</pre>
+<div class="sl-heading-wrapper level-h3"><h3 id="14-network-impact-of-chapter-1">1.4 Network Impact of Chapter 1</h3><a class="sl-anchor-link" href="#14-network-impact-of-chapter-1"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “1.4 Network Impact of Chapter 1”</span></a></div>
+<p>Chapter 1은 단순해 보이지만, 이미 첫 번째 network design trigger를 보여준다.</p>
+<blockquote>
+<p>Model과 input data가 하나의 GPU에 들어가지 않으면 workload를 여러 GPU로 나눠야 한다.</p>
+</blockquote>
+<p>책에서는 neural network model과 input data의 memory requirement가 GPU memory를 초과하면 parallelization이 필요하다고 설명한다. 한 server 안에서는 NVLink를 통해 synchronization이 일어날 수 있고, 여러 GPU server에 걸쳐서는 backend network를 통해 synchronization이 일어난다. 이 backend network는 lossless, high-speed packet forwarding을 제공해야 한다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="chapter-2-backpropagation-algorithm">Chapter 2: Backpropagation Algorithm</h2><a class="sl-anchor-link" href="#chapter-2-backpropagation-algorithm"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Chapter 2: Backpropagation Algorithm”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="21-training-loop-overview">2.1 Training Loop Overview</h3><a class="sl-anchor-link" href="#21-training-loop-overview"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “2.1 Training Loop Overview”</span></a></div>
+<p>Chapter 2는 작은 feed-forward neural network를 사용해 training loop를 설명한다. Forward pass는 model output을 만들고, error function은 output이 expected value와 얼마나 다른지 측정하며, backward pass는 weight를 어떻게 조정해야 하는지 계산한다.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TD
+    classDef input fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef forward fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef loss fill:#5a3520,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef backward fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef update fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    A[Mini-batch Input]:::input --> B[Forward Pass]:::forward
+    B --> C[Model Prediction]:::forward
+    C --> D[Loss / Error Calculation]:::loss
+    D --> E[Backward Pass]:::backward
+    E --> F[Gradient Calculation]:::backward
+    F --> G[Weight Adjustment]:::update
+    G --> H[Weight Update]:::update
+    H --> I[Next Iteration]:::input</pre>
+<div class="sl-heading-wrapper level-h3"><h3 id="22-forward-pass">2.2 Forward Pass</h3><a class="sl-anchor-link" href="#22-forward-pass"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “2.2 Forward Pass”</span></a></div>
+<p>Forward Pass는 다음을 의미한다.</p>
+<blockquote>
+<p>Model이 input data를 처리하고 prediction을 생성하는 과정이다.</p>
+</blockquote>
+<p>책에서는 forward pass의 마지막 단계에서 error function을 적용해 model output과 expected value를 비교한다고 설명한다. Chapter 2에서는 Mean Squared Error를 사용하며, 이는 prediction이 expected value에서 얼마나 떨어져 있는지 측정한다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Input</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ Weighted Sum</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ Activation</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ Model Output</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ Loss Calculation</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Input→ Weighted Sum→ Activation→ Model Output→ Loss Calculation"><div></div></button></div></figure></div>
+<p>Infrastructure 관점에서는 다음과 같다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Phase</th><th>Main Work</th><th>Main Bottleneck</th></tr></thead><tbody><tr><td>Forward Pass</td><td>Tensor computation</td><td>GPU compute / HBM</td></tr><tr><td>Loss Calculation</td><td>Prediction과 label 비교</td><td>GPU compute</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h3"><h3 id="23-backward-pass">2.3 Backward Pass</h3><a class="sl-anchor-link" href="#23-backward-pass"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “2.3 Backward Pass”</span></a></div>
+<p>Backward Pass는 다음을 의미한다.</p>
+<blockquote>
+<p>Model이 loss를 뒤로 전파하면서 각 weight의 gradient를 계산하는 과정이다.</p>
+</blockquote>
+<p>책에서는 backpropagation이 activation output, weighted sum, input value를 직접 수정할 수 없다고 설명한다. 대신 weight adjustment를 계산하고, 이를 사용해 model weight를 업데이트한다.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart RL
+    classDef loss fill:#5a3520,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef gradient fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef update fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    A[Loss]:::loss --> B[Output Layer Gradient]:::gradient
+    B --> C[Hidden Layer Gradient]:::gradient
+    C --> D[Weight Gradients]:::gradient
+    D --> E[Weight Adjustment]:::update
+    E --> F[Updated Weights]:::update</pre>
+<div class="sl-heading-wrapper level-h3"><h3 id="24-gradient">2.4 Gradient</h3><a class="sl-anchor-link" href="#24-gradient"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “2.4 Gradient”</span></a></div>
+<p>Gradient는 model에게 다음을 알려준다.</p>
+<blockquote>
+<p>Loss를 줄이려면 weight를 어느 방향으로, 얼마나 바꿔야 하는가?</p>
+</blockquote>
+<p>Chapter 2에서는 backward pass 중 algorithm이 각 weight의 gradient를 계산한다고 설명한다. Gradient descent를 통해 gradient의 반대 방향으로 이동하면, 여러 iteration에 걸쳐 loss를 줄일 수 있다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Gradient = direction + magnitude of weight adjustment</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Gradient = direction + magnitude of weight adjustment"><div></div></button></div></figure></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="25-learning-rate">2.5 Learning Rate</h3><a class="sl-anchor-link" href="#25-learning-rate"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “2.5 Learning Rate”</span></a></div>
+<p>Learning rate는 각 update step의 크기를 제어한다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Gradient = where to go</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Learning Rate = how far to move</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Gradient = where to goLearning Rate = how far to move"><div></div></button></div></figure></div>
+<p>작은 learning rate는 training을 안정적으로 만들 수 있지만 느리다.
+큰 learning rate는 training을 빠르게 할 수 있지만 overshoot가 발생해 불안정해질 수 있다.</p>
+<p>Infrastructure team 입장에서는 중요하다. 불안정한 training은 비싼 GPU cluster 시간을 낭비할 수 있기 때문이다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="chapter-3-multi-class-classification">Chapter 3: Multi-Class Classification</h2><a class="sl-anchor-link" href="#chapter-3-multi-class-classification"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Chapter 3: Multi-Class Classification”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="31-mnist-dataset">3.1 MNIST Dataset</h3><a class="sl-anchor-link" href="#31-mnist-dataset"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3.1 MNIST Dataset”</span></a></div>
+<p>Multi-class classification은 MNIST handwritten digit classification 예제로 이해할 수 있다. 이 dataset은 grayscale handwritten digit image로 구성되어 있으며, 가능한 digit이 10개이므로 output layer는 class마다 하나씩 총 10개의 neuron을 사용한다. Label은 training 전에 one-hot encoding된다.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    classDef input fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef transform fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef layer fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef output fill:#5a3520,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    A[28 x 28 Image]:::input --> B[Flatten]:::transform
+    B --> C[784 Input Values]:::input
+    C --> D[Hidden Layer]:::layer
+    D --> E[Output Layer: 10 Neurons]:::layer
+    E --> F[Digit Class Probabilities]:::output</pre>
+<p><starlight-image-zoom-zoomable><img src="/courses/deep-learning-for-network-engineers/week01/assets/mnist-forward-parameter-flow.svg" alt="MNIST forward pass parameter flow"><button aria-label="Zoom image: MNIST forward pass parameter flow" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<p>MNIST 예제는 단순히 image를 10개 class로 분류하는 흐름만 보여주는 것이 아니라, parameter 수가 어떻게 memory footprint로 이어지는지도 보여준다. 28 x 28 image는 784개 input feature가 되고, hidden layer가 128개 neuron이면 hidden layer weight만 <code dir="auto">784 x 128 = 100,352</code>개가 된다. Output layer는 <code dir="auto">128 x 10 = 1,280</code>개 weight를 추가한다.</p>
+<p>FP32를 사용하면 weight 하나가 4 byte이므로, 이 작은 예제에서도 weight parameter만 <code dir="auto">101,632 x 4 = 406,528 bytes</code>가 필요하다. 실제 training에서는 여기에 activation, gradient, optimizer state, mini-batch tensor가 더해진다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="32-softmax">3.2 SoftMax</h3><a class="sl-anchor-link" href="#32-softmax"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3.2 SoftMax”</span></a></div>
+<p>Output layer는 logit이라고 부르는 raw score를 만든다.
+SoftMax는 이 logit을 class probability로 변환한다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Logits</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ SoftMax</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ Probability distribution across classes</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Logits→ SoftMax→ Probability distribution across classes"><div></div></button></div></figure></div>
+<p>책에서는 각 output neuron이 weighted sum을 계산해 logit을 만들고, SoftMax가 각 logit에 exponential을 적용한 뒤 모든 exponential의 합으로 나누어 probability로 변환한다고 설명한다.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    classDef logits fill:#173f32,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef softmax fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef probability fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    A[Output Layer Logits]:::logits --> B[SoftMax]:::softmax
+    B --> C[Class 0 Probability]:::probability
+    B --> D[Class 1 Probability]:::probability
+    B --> E[...]:::probability
+    B --> F[Class 9 Probability]:::probability</pre>
+<div class="sl-heading-wrapper level-h3"><h3 id="33-cross-entropy-loss">3.3 Cross-Entropy Loss</h3><a class="sl-anchor-link" href="#33-cross-entropy-loss"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3.3 Cross-Entropy Loss”</span></a></div>
+<p>Cross-Entropy Loss는 다음 질문에 답한다.</p>
+<blockquote>
+<p>Model이 정답 class에 얼마나 높은 probability를 부여했는가?</p>
+</blockquote>
+<p>정답 class의 probability가 높으면 loss는 낮다.
+정답 class의 probability가 낮으면 loss는 높다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Correct class probability high → low loss</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Correct class probability low  → high loss</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Correct class probability high → low lossCorrect class probability low  → high loss"><div></div></button></div></figure></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="34-backward-pass-in-multi-class-classification">3.4 Backward Pass in Multi-Class Classification</h3><a class="sl-anchor-link" href="#34-backward-pass-in-multi-class-classification"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3.4 Backward Pass in Multi-Class Classification”</span></a></div>
+<p>SoftMax + Cross-Entropy 조합에서 output layer gradient는 다음처럼 이해할 수 있다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">gradient = predicted probability - ground truth</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="gradient = predicted probability - ground truth"><div></div></button></div></figure></div>
+<p>책에서는 output layer neuron의 gradient가 SoftMax가 만든 probability에서 one-hot encoded ground truth 값을 빼서 계산된다고 설명한다. SoftMax와 cross-entropy loss가 잘 결합되기 때문에 이런 단순한 gradient 표현이 가능하다.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TD
+    classDef probability fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef label fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef gradient fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef update fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    A[SoftMax Probabilities]:::probability --> C[Output Gradient]:::gradient
+    B[One-Hot Ground Truth]:::label --> C
+    C --> D[Hidden Layer Gradients]:::gradient
+    D --> E[Weight Gradients]:::gradient
+    E --> F[Weight Adjustment]:::update
+    F --> G[Weight Update]:::update</pre>
+<div class="sl-heading-wrapper level-h2"><h2 id="training-loop-as-compute-and-communication-phases">Training Loop as Compute and Communication Phases</h2><a class="sl-anchor-link" href="#training-loop-as-compute-and-communication-phases"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Training Loop as Compute and Communication Phases”</span></a></div>
+<p>Chapter 1-3에서 얻을 수 있는 가장 중요한 infrastructure insight는 training loop에 성격이 매우 다른 두 phase가 있다는 점이다.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+sequenceDiagram
+    participant GPU as GPU Compute
+    participant NET as Backend Network
+    participant PEER as Peer GPUs
+
+    GPU->>GPU: Forward Pass
+    GPU->>GPU: Loss Calculation
+    GPU->>GPU: Backward Pass
+    GPU->>GPU: Local Gradient Calculation
+    GPU->>NET: Gradient Synchronization Burst
+    NET->>PEER: AllReduce / Gradient Exchange
+    PEER-->>NET: Gradient Data
+    NET-->>GPU: Averaged Gradient
+    GPU->>GPU: Weight Update
+    GPU->>GPU: Next Mini-batch</pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Training Phase</th><th>Main Work</th><th>Network Impact</th></tr></thead><tbody><tr><td>Mini-batch Load</td><td>Training data load</td><td>Storage/PCIe dependent</td></tr><tr><td>Forward Pass</td><td>Prediction computation</td><td>Low</td></tr><tr><td>Loss Calculation</td><td>Prediction과 label 비교</td><td>Low</td></tr><tr><td>Backward Pass</td><td>Gradient computation</td><td>Low to medium</td></tr><tr><td>Gradient Synchronization</td><td>GPU 간 gradient 교환</td><td>Very high</td></tr><tr><td>Weight Update</td><td>Parameter update</td><td>Low</td></tr></tbody></table>
+<p>책에서는 compute-intensive한 forward/backward pass 동안 대부분의 연산이 GPU 내부에서 local하게 수행되므로 network utilization이 낮다고 설명한다. 반면 gradient synchronization 중에는 GPU NIC가 line rate로 전송할 수 있고, 종종 link utilization이 100%에 가까워진다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="gradient-synchronization-and-backend-network-burst">Gradient Synchronization and Backend Network Burst</h2><a class="sl-anchor-link" href="#gradient-synchronization-and-backend-network-burst"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Gradient Synchronization and Backend Network Burst”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="1-why-synchronization-is-needed">1. Why Synchronization is Needed</h3><a class="sl-anchor-link" href="#1-why-synchronization-is-needed"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “1. Why Synchronization is Needed”</span></a></div>
+<p>Data Parallel Training에서는 다음과 같이 동작한다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">GPU-A processes mini-batch A</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">GPU-B processes mini-batch B</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">GPU-C processes mini-batch C</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">GPU-D processes mini-batch D</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="GPU-A processes mini-batch AGPU-B processes mini-batch BGPU-C processes mini-batch CGPU-D processes mini-batch D"><div></div></button></div></figure></div>
+<p>각 GPU는 local gradient를 계산한다.</p>
+<p>각 GPU가 자기 gradient만 사용해 weight를 업데이트하면 model replica들이 서로 달라진다.</p>
+<p>따라서 다음 과정이 필요하다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Local Gradients</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ Synchronize</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ Average</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ Same Weight Update</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ Same Model State</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Local Gradients→ Synchronize→ Average→ Same Weight Update→ Same Model State"><div></div></button></div></figure></div>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TB
+    classDef gpu fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef data fill:#173f32,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef gradient fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef sync fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef update fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    subgraph GPU_A[GPU-A]
+        A1[Model Replica]:::gpu
+        A2[Mini-batch A]:::data
+        A3[Local Gradient A]:::gradient
+        A1 --> A2 --> A3
+    end
+
+    subgraph GPU_B[GPU-B]
+        B1[Model Replica]:::gpu
+        B2[Mini-batch B]:::data
+        B3[Local Gradient B]:::gradient
+        B1 --> B2 --> B3
+    end
+
+    subgraph GPU_C[GPU-C]
+        C1[Model Replica]:::gpu
+        C2[Mini-batch C]:::data
+        C3[Local Gradient C]:::gradient
+        C1 --> C2 --> C3
+    end
+
+    A3 --> S[Gradient Synchronization / AllReduce]:::sync
+    B3 --> S
+    C3 --> S
+
+    S --> AVG[Averaged Gradient]:::sync
+    AVG --> U1[Same Weight Update on GPU-A]:::update
+    AVG --> U2[Same Weight Update on GPU-B]:::update
+    AVG --> U3[Same Weight Update on GPU-C]:::update</pre>
+<p>책에서는 data parallelization에서 dataset이 micro-batch로 나뉘고, 각 GPU가 같은 model과 parameter를 사용해 자신의 micro-batch를 처리한다고 설명한다. 실제 weight adjustment 값을 계산하기 전에 gradient는 synchronize되어야 한다. 각 GPU는 받은 gradient와 자기 gradient를 더한 뒤 GPU 수로 나누고, 평균 gradient를 weight adjustment에 사용한다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="2-why-this-creates-network-burst">2. Why This Creates Network Burst</h3><a class="sl-anchor-link" href="#2-why-this-creates-network-burst"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “2. Why This Creates Network Burst”</span></a></div>
+<p>Gradient synchronization은 local gradient computation 이후에 발생한다.
+즉, 많은 GPU가 training step의 거의 같은 시점에 통신을 시작한다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Compute phase</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ quiet network</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Synchronization phase</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ many GPUs send gradient data at once</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ backend network burst</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Compute phase→ quiet networkSynchronization phase→ many GPUs send gradient data at once→ backend network burst"><div></div></button></div></figure></div>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    classDef compute fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef quiet fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef sync fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef risk fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef impact fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    A[Forward / Backward Compute]:::compute --> B[Low Network Utilization]:::quiet
+    B --> C[Gradient Synchronization]:::sync
+    C --> D[High NIC Utilization]:::sync
+    D --> E[Potential Congestion]:::risk
+    E --> F[Tail Latency]:::risk
+    F --> G[GPU Idle Time]:::impact
+    G --> H[Lower GPU Utilization]:::impact</pre>
+<p><starlight-image-zoom-zoomable><img src="/courses/deep-learning-for-network-engineers/week01/assets/gradient-sync-network-burst.svg" alt="Gradient synchronization network burst"><button aria-label="Zoom image: Gradient synchronization network burst" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<p>책의 Figure 3-7도 이 pattern을 보여준다. Gradient synchronization이 link utilization을 capacity에 가깝게 밀어 올리는 반면, backward/forward compute phase에서는 network utilization이 낮게 나타난다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="ai-training-traffic-vs-general-data-center-traffic">AI Training Traffic vs General Data Center Traffic</h2><a class="sl-anchor-link" href="#ai-training-traffic-vs-general-data-center-traffic"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “AI Training Traffic vs General Data Center Traffic”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Item</th><th>General Data Center Traffic</th><th>AI Training Traffic</th></tr></thead><tbody><tr><td>Pattern</td><td>독립적인 request가 많음</td><td>Training step에 동기화된 GPU communication</td></tr><tr><td>Main Direction</td><td>North-South + 일부 East-West</td><td>Heavy East-West</td></tr><tr><td>Traffic Shape</td><td>비교적 분산됨</td><td>Compute phase + sync burst</td></tr><tr><td>Bottleneck Metric</td><td>Average latency, RPS, throughput</td><td>Collective completion time, tail latency</td></tr><tr><td>Packet Loss Impact</td><td>Retransmission으로 회복 가능한 경우가 많음</td><td>Training synchronization 지연 또는 실패 가능</td></tr><tr><td>Main Objective</td><td>Request를 안정적으로 serving</td><td>GPU가 기다리지 않게 유지</td></tr><tr><td>Key Metrics</td><td>p95 latency, error rate</td><td>GPU utilization, AllReduce time, NIC utilization, ECN/PFC</td></tr></tbody></table>
+<p>핵심 문장은 다음과 같다.</p>
+<blockquote>
+<p>General data center network는 request를 serving한다.
+AI Training Fabric은 GPU를 synchronize한다.</p>
+</blockquote>
+<div class="sl-heading-wrapper level-h2"><h2 id="ai-training-fabric-design-implications">AI Training Fabric Design Implications</h2><a class="sl-anchor-link" href="#ai-training-fabric-design-implications"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “AI Training Fabric Design Implications”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="1-bandwidth">1. Bandwidth</h3><a class="sl-anchor-link" href="#1-bandwidth"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “1. Bandwidth”</span></a></div>
+<p>Gradient synchronization은 GPU NIC를 line rate에 가깝게 밀어 올릴 수 있다.
+따라서 GPU-to-NIC mapping, NIC speed, rail capacity, oversubscription ratio가 중요하다.</p>
+<p>Checklist:</p>
+<ul>
+<li>GPU당 충분한 NIC bandwidth가 있는가?</li>
+<li>GPU-to-NIC mapping이 명확한가?</li>
+<li>East-West bandwidth가 non-blocking인가, oversubscribed인가?</li>
+<li>Fabric이 synchronization burst를 흡수할 수 있는가?</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="2-latency-and-tail-latency">2. Latency and Tail Latency</h3><a class="sl-anchor-link" href="#2-latency-and-tail-latency"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “2. Latency and Tail Latency”</span></a></div>
+<p>Average latency만으로는 충분하지 않다.
+Distributed training은 참여한 GPU 중 가장 느린 GPU를 기다린다.</p>
+<p>Checklist:</p>
+<ul>
+<li>Sync 중 p99/p999 latency는 어떤가?</li>
+<li>GPU group 사이에 slow path가 있는가?</li>
+<li>Job placement가 hop count 불균형을 만드는가?</li>
+<li>Collective completion time을 측정하고 있는가?</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="3-lossless-behavior">3. Lossless Behavior</h3><a class="sl-anchor-link" href="#3-lossless-behavior"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3. Lossless Behavior”</span></a></div>
+<p>책에서는 server 간 inter-GPU communication이 lossless해야 하며 line-rate performance를 유지할 수 있어야 한다고 반복해서 강조한다. 특히 training이 며칠 또는 몇 주 동안 지속될 때 더 중요하다. 또한 gradient exchange 중 packet 하나만 drop되어도 divergence나 job failure가 발생할 수 있고, restart가 필요할 수 있다고 설명한다.</p>
+<p>Checklist:</p>
+<ul>
+<li>Fabric은 InfiniBand인가, RoCEv2인가?</li>
+<li>RoCEv2라면 PFC, ECN, DCQCN policy가 정의되어 있는가?</li>
+<li>Packet drop을 monitoring하고 있는가?</li>
+<li>Checkpoint를 정기적으로 저장하고 있는가?</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="4-congestion-control">4. Congestion Control</h3><a class="sl-anchor-link" href="#4-congestion-control"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “4. Congestion Control”</span></a></div>
+<p>Synchronized burst는 incast, queue buildup, ECN marking, PFC pause, tail latency를 만들 수 있다.</p>
+<p>Checklist:</p>
+<ul>
+<li>Gradient synchronization이 어디에서 incast를 만들 수 있는가?</li>
+<li>Switch buffer가 적절히 sizing되고 monitoring되는가?</li>
+<li>ECN threshold가 tuning되어 있는가?</li>
+<li>PFC pause가 fabric 전체로 propagation될 수 있는가?</li>
+<li>Topology가 hash polarization을 줄이는가?</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="5-observability">5. Observability</h3><a class="sl-anchor-link" href="#5-observability"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “5. Observability”</span></a></div>
+<p>AI Training Fabric은 standard interface counter만으로 운영하기 어렵다.
+GPU telemetry와 network telemetry를 함께 correlation해야 한다.</p>
+<p>Checklist:</p>
+<ul>
+<li>GPU utilization</li>
+<li>NCCL AllReduce duration</li>
+<li>NIC throughput</li>
+<li>RDMA errors</li>
+<li>ECN marking count</li>
+<li>PFC pause frames</li>
+<li>Switch queue depth</li>
+<li>Training step time</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="chapter-summary">Chapter Summary</h2><a class="sl-anchor-link" href="#chapter-summary"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Chapter Summary”</span></a></div>
+<p>Chapter 1-3은 AI Training Fabric을 이해하기 위한 기반을 만든다.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TD
+    classDef chapter fill:#5a3520,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef param fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef compute fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef network fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef risk fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef requirement fill:#5a3520,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    A[Chapter 1: Artificial Neuron]:::chapter --> B[Weights and Biases]:::param
+    B --> C[GPU Memory Footprint]:::param
+
+    C --> D[Chapter 2: Backpropagation]:::chapter
+    D --> E[Forward Pass]:::compute
+    D --> F[Loss Calculation]:::compute
+    D --> G[Backward Pass]:::compute
+    G --> H[Gradient Calculation]:::compute
+
+    H --> I[Chapter 3: Multi-Class Classification]:::chapter
+    I --> J[Mini-batch Training]:::compute
+    J --> K[Data Parallelism]:::network
+    K --> L[Gradient Synchronization]:::network
+
+    L --> M[Backend Network Burst]:::network
+    M --> N[GPU Idle Time Risk]:::risk
+    N --> O[AI Training Fabric Requirements]:::requirement</pre>
+<p>핵심 정리는 다음과 같다.</p>
+<blockquote>
+<p>Neural network는 weight를 update하면서 학습한다.
+Distributed training은 gradient synchronization을 통해 이 update를 일관되게 유지한다.
+Gradient synchronization이 Deep Learning을 backend network 문제로 만드는 지점이다.</p>
+</blockquote>
+<div class="sl-heading-wrapper level-h2"><h2 id="key-terms">Key Terms</h2><a class="sl-anchor-link" href="#key-terms"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Key Terms”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Term</th><th>Meaning</th></tr></thead><tbody><tr><td>Artificial Neuron</td><td>Neural network의 기본 계산 단위</td></tr><tr><td>Weight</td><td>Input connection에 연결된 trainable parameter</td></tr><tr><td>Bias</td><td>Weighted sum을 이동시키는 trainable offset</td></tr><tr><td>Activation Function</td><td>Weighted sum에 적용되는 non-linear function</td></tr><tr><td>Forward Pass</td><td>Prediction과 loss를 계산하는 과정</td></tr><tr><td>Backward Pass</td><td>Gradient와 weight update 방향을 계산하는 과정</td></tr><tr><td>Gradient</td><td>Loss를 줄이기 위한 방향과 크기</td></tr><tr><td>Learning Rate</td><td>Gradient를 적용할 때 사용하는 step size</td></tr><tr><td>Mini-batch</td><td>Iteration마다 처리하는 training data의 작은 subset</td></tr><tr><td>Data Parallelism</td><td>여러 GPU에 같은 model을 두고 서로 다른 data를 처리하는 전략</td></tr><tr><td>Gradient Synchronization</td><td>GPU 간 gradient를 교환하고 평균내는 과정</td></tr><tr><td>AllReduce</td><td>Gradient를 aggregate하는 collective operation</td></tr><tr><td>RDMA</td><td>CPU data copy 없이 server 간 direct memory access를 수행하는 방식</td></tr><tr><td>AI Training Fabric</td><td>GPU-to-GPU training communication을 위한 backend network</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h2"><h2 id="questions">Questions</h2><a class="sl-anchor-link" href="#questions"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Questions”</span></a></div>
+<ol>
+<li>Weight와 bias는 왜 GPU memory footprint에 포함되는가?</li>
+<li>Forward Pass와 Backward Pass의 차이는 무엇인가?</li>
+<li>Gradient는 왜 계산하는가?</li>
+<li>Data Parallel Training은 왜 gradient synchronization이 필요한가?</li>
+<li>Gradient synchronization은 왜 backend network burst를 만드는가?</li>
+<li>AI training traffic은 일반 data center traffic과 왜 다른가?</li>
+<li>Average bandwidth보다 tail latency와 collective completion time이 더 중요한 이유는 무엇인가?</li>
+</ol>
+<div class="sl-heading-wrapper level-h2"><h2 id="answers">Answers</h2><a class="sl-anchor-link" href="#answers"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Answers”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="1-weight와-bias는-왜-gpu-memory-footprint에-포함되는가">1. Weight와 bias는 왜 GPU memory footprint에 포함되는가?</h3><a class="sl-anchor-link" href="#1-weight와-bias는-왜-gpu-memory-footprint에-포함되는가"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “1. Weight와 bias는 왜 GPU memory footprint에 포함되는가?”</span></a></div>
+<p>Weight와 bias는 trainable model parameter다.
+Neuron이 layer 사이에서 연결될수록 weight와 bias의 수는 빠르게 증가한다. 이 parameter들은 forward pass, backward pass, weight update 동안 GPU memory에 저장되어야 한다. 따라서 weight와 bias는 model의 GPU memory footprint의 기본이 된다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="2-forward-pass와-backward-pass의-차이는-무엇인가">2. Forward Pass와 Backward Pass의 차이는 무엇인가?</h3><a class="sl-anchor-link" href="#2-forward-pass와-backward-pass의-차이는-무엇인가"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “2. Forward Pass와 Backward Pass의 차이는 무엇인가?”</span></a></div>
+<p>Forward Pass는 model prediction과 loss를 계산한다.</p>
+<p>Backward Pass는 loss를 사용해 gradient를 계산하고, 각 weight를 어떻게 조정해야 하는지 결정한다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Forward Pass  = prediction + loss</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Backward Pass = gradient + weight update direction</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Forward Pass  = prediction + lossBackward Pass = gradient + weight update direction"><div></div></button></div></figure></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="3-gradient는-왜-계산하는가">3. Gradient는 왜 계산하는가?</h3><a class="sl-anchor-link" href="#3-gradient는-왜-계산하는가"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3. Gradient는 왜 계산하는가?”</span></a></div>
+<p>Gradient는 각 weight가 loss에 얼마나 기여했는지, 그리고 loss를 줄이기 위해 weight를 어느 방향으로 바꿔야 하는지 알려준다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="4-data-parallel-training은-왜-gradient-synchronization이-필요한가">4. Data Parallel Training은 왜 gradient synchronization이 필요한가?</h3><a class="sl-anchor-link" href="#4-data-parallel-training은-왜-gradient-synchronization이-필요한가"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “4. Data Parallel Training은 왜 gradient synchronization이 필요한가?”</span></a></div>
+<p>각 GPU는 서로 다른 mini-batch를 처리하고 자신의 local gradient를 계산한다.
+각 GPU가 자기 gradient만 사용해 model을 update하면 model replica들이 서로 달라진다.
+Gradient synchronization은 GPU 간 gradient를 평균내서 모든 replica가 같은 update를 적용하게 만든다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="5-gradient-synchronization은-왜-backend-network-burst를-만드는가">5. Gradient synchronization은 왜 backend network burst를 만드는가?</h3><a class="sl-anchor-link" href="#5-gradient-synchronization은-왜-backend-network-burst를-만드는가"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “5. Gradient synchronization은 왜 backend network burst를 만드는가?”</span></a></div>
+<p>Forward Pass와 Backward Pass 동안 대부분의 작업은 GPU 내부에서 local하게 수행된다.
+Gradient Synchronization 단계에서는 많은 GPU가 training step의 거의 같은 시점에 gradient data를 교환한다. 이 때문에 backend network에 짧고 높은 bandwidth burst가 발생한다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="6-ai-training-traffic은-일반-data-center-traffic과-왜-다른가">6. AI training traffic은 일반 data center traffic과 왜 다른가?</h3><a class="sl-anchor-link" href="#6-ai-training-traffic은-일반-data-center-traffic과-왜-다른가"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “6. AI training traffic은 일반 data center traffic과 왜 다른가?”</span></a></div>
+<p>일반 data center traffic은 보통 독립적인 request가 많이 모인 형태다.
+AI training traffic은 training step에 의해 동기화된다. GPU는 local하게 계산하다가 synchronization 단계에서 함께 통신한다. 그래서 AI training traffic은 bursty하고, East-West traffic 비중이 높으며, tail latency에 민감하다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="7-average-bandwidth보다-tail-latency와-collective-completion-time이-더-중요한-이유는-무엇인가">7. Average bandwidth보다 tail latency와 collective completion time이 더 중요한 이유는 무엇인가?</h3><a class="sl-anchor-link" href="#7-average-bandwidth보다-tail-latency와-collective-completion-time이-더-중요한-이유는-무엇인가"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “7. Average bandwidth보다 tail latency와 collective completion time이 더 중요한 이유는 무엇인가?”</span></a></div>
+<p>Distributed training은 참여한 모든 GPU가 synchronization을 끝낼 때까지 다음 단계로 진행할 수 없다.
+Average bandwidth가 충분해 보여도, 하나의 slow path나 지연된 GPU가 나머지 GPU를 모두 기다리게 만들 수 있다. 따라서 collective completion time과 tail latency는 GPU idle time과 training cost에 직접 영향을 준다.</p> </div> <footer class="sl-flex astro-3yyafb3n"> <div class="meta sl-flex astro-3yyafb3n"> <a href="https://github.com/ziwon/ai-data-center-systems/edit/main/courses/deep-learning-for-network-engineers/week01/README.md" class="sl-flex print:hidden astro-eez2twj6"><svg aria-hidden="true" class="astro-eez2twj6 astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.2em;"><path d="M22 7.24a1 1 0 0 0-.29-.71l-4.24-4.24a1 1 0 0 0-1.1-.22 1 1 0 0 0-.32.22l-2.83 2.83L2.29 16.05a1 1 0 0 0-.29.71V21a1 1 0 0 0 1 1h4.24a1 1 0 0 0 .76-.29l10.87-10.93L21.71 8c.1-.1.17-.2.22-.33a1 1 0 0 0 0-.24v-.14l.07-.05ZM6.83 20H4v-2.83l9.93-9.93 2.83 2.83L6.83 20ZM18.17 8.66l-2.83-2.83 1.42-1.41 2.82 2.82-1.41 1.42Z"/></svg>Edit page</a> <p>Last updated: <time datetime="2026-07-22T12:47:10.000Z">Jul 22, 2026</time></p> </div> <div class="pagination-links print:hidden astro-u2l5gyhi" dir="ltr"> <a href="/courses/deep-learning-for-network-engineers/" rel="prev" class="astro-u2l5gyhi"> <svg aria-hidden="true" class="astro-u2l5gyhi astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17 11H9.41l3.3-3.29a1.004 1.004 0 1 0-1.42-1.42l-5 5a1 1 0 0 0-.21.33 1 1 0 0 0 0 .76 1 1 0 0 0 .21.33l5 5a1.002 1.002 0 0 0 1.639-.325 1 1 0 0 0-.219-1.095L9.41 13H17a1 1 0 0 0 0-2Z"/></svg> <span class="astro-u2l5gyhi"> Previous <br class="astro-u2l5gyhi"> <span class="link-title astro-u2l5gyhi">Deep Learning for Network Engineers</span> </span> </a> <a href="/courses/deep-learning-for-network-engineers/week02/" rel="next" class="astro-u2l5gyhi"> <svg aria-hidden="true" class="astro-u2l5gyhi astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17.92 11.62a1.001 1.001 0 0 0-.21-.33l-5-5a1.003 1.003 0 1 0-1.42 1.42l3.3 3.29H7a1 1 0 0 0 0 2h7.59l-3.3 3.29a1.002 1.002 0 0 0 .325 1.639 1 1 0 0 0 1.095-.219l5-5a1 1 0 0 0 .21-.33 1 1 0 0 0 0-.76Z"/></svg> <span class="astro-u2l5gyhi"> Next <br class="astro-u2l5gyhi"> <span class="link-title astro-u2l5gyhi">Week 2: Large Language Model, LLM</span> </span> </a> </div>  </footer> </div> </div>  </main> </div> </div> </div> <ask-docs-widget> <button class="ask-fab" type="button" data-open aria-label="Ask this docs"> <span class="ask-fab-icon" aria-hidden="true">?</span>
+Ask this docs
+</button> <div class="ask-panel" data-panel hidden> <div class="ask-resize-handle" data-resize aria-hidden="true"></div> <div class="ask-panel-inner"> <header class="ask-header"> <div> <p class="ask-eyebrow">AI Data Center Systems</p> <h2 class="ask-title">Ask this docs</h2> </div> <div class="ask-header-controls"> <button class="ask-mode-btn" data-mode-btn="right" title="오른쪽 패널" aria-label="오른쪽 패널"> <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="6" height="16" rx="1.5" opacity="0.35"></rect><rect x="8" y="0" width="8" height="16" rx="1.5"></rect></svg> </button> <button class="ask-mode-btn" data-mode-btn="bottom" title="하단 패널" aria-label="하단 패널"> <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="16" height="6" rx="1.5" opacity="0.35"></rect><rect x="0" y="8" width="16" height="8" rx="1.5"></rect></svg> </button> <button class="ask-mode-btn" data-mode-btn="expand" title="전체 확장" aria-label="전체 확장"> <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 5.5V1h4.5M10.5 1H15v4.5M15 10.5V15h-4.5M5.5 15H1v-4.5"></path></svg> </button> <button class="ask-close-btn" type="button" aria-label="닫기" data-close> <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13"></path></svg> </button> </div> </header> <div class="ask-body"> <label class="ask-field"> <span class="ask-field-row"> <span>Question</span> <span class="ask-char" data-char>0 / 800</span> </span> <textarea name="question" rows="3" maxlength="800" placeholder="이 문서에서 핵심 운영 체크포인트는 무엇인가요?" data-question></textarea> <span class="ask-hint">시간당 최대 20회 · 질문당 최대 800자</span> </label> <div class="ask-actions"> <button class="ask-submit" type="button" data-submit> <svg class="ask-spinner" viewBox="0 0 24 24" fill="none" aria-hidden="true" hidden> <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2.5" stroke-dasharray="56" stroke-dashoffset="14" stroke-linecap="round"></circle> </svg> <span data-submit-label>Ask</span> </button> <p class="ask-status" data-status></p> </div> <section class="ask-answer" data-answer hidden></section> <section class="ask-sources" data-sources hidden> <h3>Sources</h3> <ul class="ask-source-chips" data-source-list></ul> </section> </div> </div> </div> <div class="ask-backdrop" data-backdrop hidden></div> </ask-docs-widget> <script type="module" src="/_astro/AskDocs.astro_astro_type_script_index_0_lang.BbnAb04M.js"></script> </div> <script type="module">const r=document.documentElement,c=document.querySelector("#starlight__sidebar"),s=document.querySelector(".navigation-mode-toggle"),a=document.querySelector(".navigation-drawer-toggle"),u=window.matchMedia("(min-width: 50rem)");function d(){return r.dataset.navigationMode==="compact"}function o(){return r.dataset.navigationDrawer==="open"}function l(){const e=d(),t=e&&o();s?.setAttribute("aria-pressed",String(e)),s?.setAttribute("title",e?"Use normal navigation":"Use compact navigation"),a?.setAttribute("aria-expanded",String(t)),a?.setAttribute("title",t?"Close navigation":"Open navigation");const n=a?.querySelector(".navigation-drawer-label");n&&(n.textContent=t?"Close navigation":"Open navigation")}function i(e,t=!1){const n=!!(e&&d()&&u.matches);r.dataset.navigationDrawer=n?"open":"closed",l(),n?requestAnimationFrame(()=>{const g=c?.querySelector('a[aria-current="page"]'),m=c?.querySelector(".starlight-sidebar-topics-current");(g??m)?.focus()}):t&&a?.focus()}function p(e){r.dataset.navigationMode=e,i(!1);try{localStorage.setItem("adcs-navigation-mode",e)}catch{}l()}s?.addEventListener("click",()=>{p(d()?"normal":"compact")});a?.addEventListener("click",()=>{i(!o(),o())});document.addEventListener("keydown",e=>{e.key==="Escape"&&o()&&i(!1,!0)});document.addEventListener("pointerdown",e=>{!o()||!(e.target instanceof Node)||c?.contains(e.target)||i(!1)});u.addEventListener("change",()=>i(!1));r.dataset.navigationDrawer="closed";l();</script> </body></html>

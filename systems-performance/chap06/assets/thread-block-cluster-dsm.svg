@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="680" viewBox="0 0 1200 680" role="img" aria-labelledby="title desc">
+  <title id="title">Thread block cluster and distributed shared memory</title>
+  <desc id="desc">A thread block cluster spans blocks on multiple streaming multiprocessors whose local shared memories form a distributed shared memory address space.</desc>
+  <style>
+    .bg { fill: #F3EFE7; }
+    .box { fill: #F5F1EA; stroke: #111111; stroke-width: 2; }
+    .key-box { fill: none; stroke: #D9392E; stroke-width: 3; }
+    .line { fill: none; stroke: #111111; stroke-width: 2; marker-end: url(#arrow); }
+    .both { fill: none; stroke: #111111; stroke-width: 2; marker-start: url(#arrow); marker-end: url(#arrow); }
+    .label { fill: #050505; font: 600 22px Inter, Arial, sans-serif; text-anchor: middle; }
+    .small { fill: #6F6A63; font: 16px Inter, Arial, sans-serif; text-anchor: middle; }
+    .key { fill: #D9392E; font: 700 15px Inter, Arial, sans-serif; letter-spacing: 1px; text-anchor: middle; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#111111"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1200" height="680" rx="12"/>
+
+  <rect class="box" x="420" y="35" width="360" height="90" rx="4"/>
+  <text class="label" x="600" y="75">Thread block cluster</text>
+  <text class="small" x="600" y="102">co-scheduled cluster scope</text>
+
+  <path class="line" d="M600 125 V160 H180 V205"/>
+  <path class="line" d="M600 125 V205"/>
+  <path class="line" d="M600 125 V160 H1020 V205"/>
+
+  <g>
+    <rect class="box" x="55" y="205" width="250" height="100" rx="4"/>
+    <text class="label" x="180" y="250">SM / block 0</text>
+    <text class="small" x="180" y="278">cluster member</text>
+
+    <rect class="box" x="475" y="205" width="250" height="100" rx="4"/>
+    <text class="label" x="600" y="250">SM / block 1</text>
+    <text class="small" x="600" y="278">cluster member</text>
+
+    <rect class="box" x="895" y="205" width="250" height="100" rx="4"/>
+    <text class="label" x="1020" y="250">SM / block 2</text>
+    <text class="small" x="1020" y="278">cluster member</text>
+  </g>
+
+  <path class="line" d="M180 305 V375"/>
+  <path class="line" d="M600 305 V375"/>
+  <path class="line" d="M1020 305 V375"/>
+
+  <g>
+    <rect class="box" x="55" y="375" width="250" height="100" rx="4"/>
+    <text class="label" x="180" y="418">Shared memory 0</text>
+    <text class="small" x="180" y="447">block-local allocation</text>
+
+    <rect class="box" x="475" y="375" width="250" height="100" rx="4"/>
+    <text class="label" x="600" y="418">Shared memory 1</text>
+    <text class="small" x="600" y="447">block-local allocation</text>
+
+    <rect class="box" x="895" y="375" width="250" height="100" rx="4"/>
+    <text class="label" x="1020" y="418">Shared memory 2</text>
+    <text class="small" x="1020" y="447">block-local allocation</text>
+  </g>
+
+  <path class="both" d="M180 475 V520 H420"/>
+  <path class="both" d="M600 475 V520"/>
+  <path class="both" d="M1020 475 V520 H780"/>
+
+  <rect class="key-box" x="420" y="520" width="360" height="115" rx="4"/>
+  <text class="key" x="600" y="552">CLUSTER-SCOPE DATA EXCHANGE</text>
+  <text class="label" x="600" y="590">Distributed shared memory</text>
+  <text class="small" x="600" y="617">addressable across cluster members</text>
+</svg>

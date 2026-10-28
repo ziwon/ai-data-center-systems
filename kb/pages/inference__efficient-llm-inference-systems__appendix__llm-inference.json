@@ -1,0 +1,823 @@
+{
+  "version": 1,
+  "current": {
+    "id": "/inference/efficient-llm-inference-systems/appendix/llm-inference/",
+    "title": "LLM Inference",
+    "route": "/inference/efficient-llm-inference-systems/appendix/llm-inference/",
+    "group": "inference",
+    "keywords": [
+      "convert",
+      "token",
+      "logits",
+      "inference",
+      "llm",
+      "decoding",
+      "detokenize",
+      "streamed",
+      "single-head",
+      "transformer"
+    ],
+    "excerpt": "It also connects the high-level pipeline to the Transformer block, single-head self-attention, decoding strategies, prefill/decode behavior with KV cache,..."
+  },
+  "nodes": [
+    {
+      "id": "/inference/efficient-llm-inference-systems/appendix/llm-inference/",
+      "title": "LLM Inference",
+      "route": "/inference/efficient-llm-inference-systems/appendix/llm-inference/",
+      "group": "inference",
+      "keywords": [
+        "convert",
+        "token",
+        "logits",
+        "inference",
+        "llm",
+        "decoding",
+        "detokenize",
+        "streamed",
+        "single-head",
+        "transformer"
+      ],
+      "excerpt": "It also connects the high-level pipeline to the Transformer block, single-head self-attention, decoding strategies, prefill/decode behavior with KV cache,..."
+    },
+    {
+      "id": "/inference/",
+      "title": "Inference",
+      "route": "/inference/",
+      "group": "inference",
+      "keywords": [
+        "하드웨어",
+        "메모리",
+        "최적화",
+        "다룹니다",
+        "참고자료",
+        "살펴봅니다",
+        "주차별",
+        "세대별",
+        "아키텍처",
+        "추론의"
+      ],
+      "excerpt": "LLM inference notes covering KV cache, quantization, speculative decoding, FlashAttention, SGLang production serving, and model serving profiles."
+    },
+    {
+      "id": "/inference/efficient-llm-inference-systems/",
+      "title": "Efficient LLM Inference Systems",
+      "route": "/inference/efficient-llm-inference-systems/",
+      "group": "inference",
+      "keywords": [
+        "양자화",
+        "메모리",
+        "다룹니다",
+        "특성을",
+        "speculative",
+        "llm",
+        "decoding",
+        "부록을",
+        "안내하며",
+        "efficient"
+      ],
+      "excerpt": "LLM inference systems notes covering KV cache, batching, quantization, GPU profiling, model serving, and practical performance trade-offs."
+    },
+    {
+      "id": "/inference/efficient-llm-inference-systems/appendix/",
+      "title": "Appendix",
+      "route": "/inference/efficient-llm-inference-systems/appendix/",
+      "group": "inference",
+      "keywords": [
+        "appendix",
+        "weeks",
+        "reusable",
+        "background",
+        "appear",
+        "topics",
+        "across",
+        "multiple",
+        "llm",
+        "inference"
+      ],
+      "excerpt": "Reusable background notes for LLM inference topics that appear across multiple weeks."
+    },
+    {
+      "id": "/inference/efficient-llm-inference-systems/week03/",
+      "title": "Week 3 — Transformer Inference and the KV Cache",
+      "route": "/inference/efficient-llm-inference-systems/week03/",
+      "group": "inference",
+      "keywords": [
+        "gqa",
+        "kib",
+        "mib",
+        "week",
+        "mha",
+        "cache",
+        "gib",
+        "orin",
+        "batch",
+        "bf16"
+      ],
+      "excerpt": "If the Transformer attention flow is not fresh, review the Transformer appendix first. For the full input-to-output generation path, see the LLM inference..."
+    },
+    {
+      "id": "concept:attention",
+      "kind": "concept",
+      "title": "Attention",
+      "label": "Attention",
+      "group": "model-architecture",
+      "description": "Transformer attention mechanism and its MHA, MQA, GQA, RoPE, and FlashAttention variants.",
+      "keywords": [
+        "Attention",
+        "attention",
+        "self-attention",
+        "MHA",
+        "MQA",
+        "GQA",
+        "RoPE",
+        "FlashAttention"
+      ]
+    },
+    {
+      "id": "concept:kv-cache",
+      "kind": "concept",
+      "title": "KV Cache",
+      "label": "KV Cache",
+      "group": "inference",
+      "description": "Transformer key-value cache used to avoid recomputing attention state during decoding.",
+      "keywords": [
+        "KV Cache",
+        "KV cache",
+        "key-value cache",
+        "KV-cache",
+        "k/v cache"
+      ]
+    },
+    {
+      "id": "/inference/efficient-llm-inference-systems/appendix/transformer/",
+      "title": "Transformer",
+      "route": "/inference/efficient-llm-inference-systems/appendix/transformer/",
+      "group": "inference",
+      "keywords": [
+        "토큰을",
+        "다음과",
+        "attention",
+        "embedding",
+        "hel",
+        "score",
+        "softmax",
+        "transformer",
+        "mask",
+        "pre-ln"
+      ],
+      "excerpt": "LLM은 문장을 한 번에 완성하지 않는다. 입력 문맥을 기반으로 다음 토큰 하나의 확률 분포를 계산하고, 그중 하나를 선택한 뒤, 선택된 토큰을 다시 문맥에 붙여 반복 생성한다."
+    },
+    {
+      "id": "/courses/cme295/lec-03/",
+      "title": "Lecture 3: Large Language Models, Decoding, Prompting, and Inference",
+      "route": "/courses/cme295/lec-03/",
+      "group": "courses/cme295",
+      "keywords": [
+        "token",
+        "decoding",
+        "model",
+        "probability",
+        "context",
+        "expert",
+        "decoder-only",
+        "sampling",
+        "llm",
+        "temperature"
+      ],
+      "excerpt": "이번 강의의 목표는 현대 LLM을 decoder-only Transformer 기반의 next-token prediction system 으로 이해하고, 그 위에서 실제 응답이 어떻게 생성되고 최적화되는지 파악하는 것이다."
+    },
+    {
+      "id": "/courses/cme295/lec-02/",
+      "title": "Lecture 2: Transformer-Based Models & Tricks",
+      "route": "/courses/cme295/lec-02/",
+      "group": "courses/cme295",
+      "keywords": [
+        "token",
+        "bert",
+        "position",
+        "attention",
+        "embedding",
+        "positional",
+        "nsp",
+        "encoder",
+        "transformer",
+        "cls"
+      ],
+      "excerpt": "이번 강의의 목표는 원래 Transformer 구조가 오늘날 LLM과 BERT 계열 모델로 어떻게 변형되었는지 이해하는 것이다."
+    },
+    {
+      "id": "/inference/efficient-llm-inference-systems/week01/",
+      "title": "Efficient LLM Inference Systems",
+      "route": "/inference/efficient-llm-inference-systems/week01/",
+      "group": "inference",
+      "keywords": [
+        "prompt",
+        "batch",
+        "tpot",
+        "length",
+        "logits",
+        "increases",
+        "128",
+        "size",
+        "throughput",
+        "ttft"
+      ],
+      "excerpt": "This chapter measures how prompt length and batch size affect latency and throughput in decoder-only LLM inference."
+    },
+    {
+      "id": "/courses/cme295/",
+      "title": "CME295 Lecture Notes",
+      "route": "/courses/cme295/",
+      "group": "courses/cme295",
+      "keywords": [
+        "lecture",
+        "reasoning",
+        "다이어그램",
+        "preference",
+        "grpo",
+        "sft",
+        "llm",
+        "transformer",
+        "human",
+        "pre-training"
+      ],
+      "excerpt": "CME295 lecture notes on transformers, language models, and practical AI systems concepts with engineering-focused annotations."
+    },
+    {
+      "id": "/courses/cme295/lec-01/",
+      "title": "Lecture 1: Transformer",
+      "route": "/courses/cme295/lec-01/",
+      "group": "courses/cme295",
+      "keywords": [
+        "token",
+        "rnn",
+        "embedding",
+        "decoder",
+        "self-attention",
+        "text",
+        "one-hot",
+        "representation",
+        "sentence",
+        "label"
+      ],
+      "excerpt": "이번 강의의 목표는 Transformer를 갑자기 등장한 LLM 구조로 보는 것이 아니라, NLP 문제와 기존 sequence model의 한계에서 자연스럽게 등장한 architecture로 이해하는 것이다."
+    },
+    {
+      "id": "/courses/cs336/lec-01/",
+      "title": "Lecture 1: Overview and Tokenization",
+      "route": "/courses/cs336/lec-01/",
+      "group": "courses/cs336",
+      "keywords": [
+        "token",
+        "model",
+        "merge",
+        "bpe",
+        "vocabulary",
+        "tokenizer",
+        "corpus",
+        "evaluation",
+        "training",
+        "byte"
+      ],
+      "excerpt": "이 노트는 1시간 19분 22초 분량의 English caption과 공식 executable trace의 lecture 01.py 를 함께 대조해 작성했다. 자막은 강사의 구두 설명과 맥락을, executable trace는 수식·코드·assignment 항목을 확인하는..."
+    }
+  ],
+  "edges": [
+    {
+      "source": "/courses/cme295/",
+      "target": "/courses/cme295/lec-01/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/courses/cme295/",
+      "target": "/courses/cme295/lec-02/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": [
+        "transformer"
+      ]
+    },
+    {
+      "source": "/courses/cme295/",
+      "target": "/courses/cme295/lec-03/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": [
+        "llm"
+      ]
+    },
+    {
+      "source": "/inference/",
+      "target": "/inference/efficient-llm-inference-systems/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": [
+        "메모리",
+        "다룹니다"
+      ]
+    },
+    {
+      "source": "/inference/",
+      "target": "/inference/efficient-llm-inference-systems/appendix/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/inference/",
+      "target": "/inference/efficient-llm-inference-systems/appendix/llm-inference/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/inference/",
+      "target": "/inference/efficient-llm-inference-systems/appendix/transformer/",
+      "type": "link+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/inference/",
+      "target": "/inference/efficient-llm-inference-systems/week01/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/inference/",
+      "target": "/inference/efficient-llm-inference-systems/week03/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/",
+      "target": "/inference/efficient-llm-inference-systems/appendix/llm-inference/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": [
+        "llm",
+        "decoding"
+      ]
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/",
+      "target": "/inference/efficient-llm-inference-systems/appendix/transformer/",
+      "type": "link+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/",
+      "target": "/inference/efficient-llm-inference-systems/week01/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/",
+      "target": "/inference/efficient-llm-inference-systems/week03/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/appendix/",
+      "target": "/inference/efficient-llm-inference-systems/appendix/llm-inference/",
+      "type": "link+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/appendix/",
+      "target": "/inference/efficient-llm-inference-systems/appendix/transformer/",
+      "type": "link+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/appendix/llm-inference/",
+      "target": "/inference/efficient-llm-inference-systems/week03/",
+      "type": "link+semantic",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/appendix/transformer/",
+      "target": "/inference/efficient-llm-inference-systems/week03/",
+      "type": "link+semantic",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/courses/cme295/lec-01/",
+      "target": "/courses/cme295/lec-02/",
+      "type": "semantic+section",
+      "weight": 0.985,
+      "terms": [
+        "token",
+        "embedding"
+      ]
+    },
+    {
+      "source": "/courses/cme295/lec-01/",
+      "target": "/courses/cme295/lec-03/",
+      "type": "semantic+section",
+      "weight": 0.966,
+      "terms": [
+        "token"
+      ]
+    },
+    {
+      "source": "/courses/cme295/",
+      "target": "concept:attention",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "attention",
+        "Attention",
+        "FlashAttention",
+        "MHA"
+      ]
+    },
+    {
+      "source": "/courses/cme295/",
+      "target": "concept:kv-cache",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "KV cache",
+        "KV Cache"
+      ]
+    },
+    {
+      "source": "/courses/cme295/lec-01/",
+      "target": "concept:attention",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "attention",
+        "Attention",
+        "self-attention"
+      ]
+    },
+    {
+      "source": "/courses/cme295/lec-02/",
+      "target": "/courses/cme295/lec-03/",
+      "type": "semantic+section",
+      "weight": 0.93,
+      "terms": [
+        "token"
+      ]
+    },
+    {
+      "source": "/courses/cme295/lec-02/",
+      "target": "concept:attention",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "attention",
+        "Attention",
+        "RoPE",
+        "self-attention"
+      ]
+    },
+    {
+      "source": "/courses/cme295/lec-02/",
+      "target": "concept:kv-cache",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "KV cache",
+        "KV Cache"
+      ]
+    },
+    {
+      "source": "/courses/cme295/lec-03/",
+      "target": "concept:attention",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "attention",
+        "Attention",
+        "GQA",
+        "MQA"
+      ]
+    },
+    {
+      "source": "/courses/cme295/lec-03/",
+      "target": "concept:kv-cache",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "KV cache",
+        "KV Cache"
+      ]
+    },
+    {
+      "source": "/courses/cs336/lec-01/",
+      "target": "concept:attention",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "attention",
+        "Attention"
+      ]
+    },
+    {
+      "source": "/courses/cs336/lec-01/",
+      "target": "concept:kv-cache",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "KV cache",
+        "KV Cache",
+        "KV-cache"
+      ]
+    },
+    {
+      "source": "/inference/",
+      "target": "concept:attention",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "attention",
+        "Attention",
+        "FlashAttention"
+      ]
+    },
+    {
+      "source": "/inference/",
+      "target": "concept:kv-cache",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "KV cache",
+        "KV Cache"
+      ]
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/appendix/transformer/",
+      "target": "concept:attention",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "attention",
+        "Attention",
+        "self-attention",
+        "RoPE"
+      ]
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/appendix/transformer/",
+      "target": "concept:kv-cache",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "KV cache",
+        "KV Cache"
+      ]
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/week01/",
+      "target": "concept:kv-cache",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "KV cache",
+        "KV Cache",
+        "KV-cache"
+      ]
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/week03/",
+      "target": "concept:attention",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "GQA",
+        "attention",
+        "Attention",
+        "MHA"
+      ]
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/week03/",
+      "target": "concept:kv-cache",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "KV cache",
+        "KV Cache",
+        "KV-cache"
+      ]
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/",
+      "target": "concept:attention",
+      "type": "mentions",
+      "weight": 0.905,
+      "terms": [
+        "attention",
+        "Attention",
+        "GQA",
+        "MHA"
+      ]
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/",
+      "target": "/inference/efficient-llm-inference-systems/appendix/",
+      "type": "semantic+section",
+      "weight": 0.894,
+      "terms": [
+        "llm"
+      ]
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/",
+      "target": "concept:kv-cache",
+      "type": "mentions",
+      "weight": 0.88,
+      "terms": [
+        "KV cache",
+        "KV Cache"
+      ]
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/appendix/llm-inference/",
+      "target": "concept:attention",
+      "type": "mentions",
+      "weight": 0.855,
+      "terms": [
+        "attention",
+        "Attention",
+        "self-attention"
+      ]
+    },
+    {
+      "source": "/courses/cme295/lec-01/",
+      "target": "concept:kv-cache",
+      "type": "mentions",
+      "weight": 0.83,
+      "terms": [
+        "KV cache",
+        "KV Cache"
+      ]
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/appendix/llm-inference/",
+      "target": "concept:kv-cache",
+      "type": "mentions",
+      "weight": 0.83,
+      "terms": [
+        "KV cache",
+        "KV Cache"
+      ]
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/week01/",
+      "target": "concept:attention",
+      "type": "mentions",
+      "weight": 0.805,
+      "terms": [
+        "GQA"
+      ]
+    },
+    {
+      "source": "/courses/cme295/lec-01/",
+      "target": "/courses/cs336/lec-01/",
+      "type": "semantic",
+      "weight": 0.696,
+      "terms": [
+        "token"
+      ]
+    },
+    {
+      "source": "/courses/cme295/lec-01/",
+      "target": "/inference/efficient-llm-inference-systems/week03/",
+      "type": "semantic",
+      "weight": 0.692,
+      "terms": []
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/appendix/",
+      "target": "/inference/efficient-llm-inference-systems/week01/",
+      "type": "semantic+section",
+      "weight": 0.684,
+      "terms": []
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/appendix/llm-inference/",
+      "target": "/inference/efficient-llm-inference-systems/appendix/transformer/",
+      "type": "semantic",
+      "weight": 0.683,
+      "terms": [
+        "transformer"
+      ]
+    },
+    {
+      "source": "/courses/cme295/lec-01/",
+      "target": "/inference/efficient-llm-inference-systems/appendix/transformer/",
+      "type": "semantic",
+      "weight": 0.679,
+      "terms": [
+        "embedding"
+      ]
+    },
+    {
+      "source": "/courses/cme295/lec-03/",
+      "target": "/inference/efficient-llm-inference-systems/appendix/transformer/",
+      "type": "semantic",
+      "weight": 0.667,
+      "terms": []
+    },
+    {
+      "source": "/courses/cme295/",
+      "target": "/courses/cs336/lec-01/",
+      "type": "semantic",
+      "weight": 0.666,
+      "terms": []
+    },
+    {
+      "source": "/courses/cme295/lec-03/",
+      "target": "/inference/efficient-llm-inference-systems/week01/",
+      "type": "semantic",
+      "weight": 0.662,
+      "terms": []
+    },
+    {
+      "source": "/courses/cme295/lec-02/",
+      "target": "/inference/efficient-llm-inference-systems/week03/",
+      "type": "semantic",
+      "weight": 0.66,
+      "terms": []
+    },
+    {
+      "source": "/courses/cme295/lec-02/",
+      "target": "/inference/efficient-llm-inference-systems/appendix/transformer/",
+      "type": "semantic",
+      "weight": 0.654,
+      "terms": [
+        "attention",
+        "embedding",
+        "transformer"
+      ]
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/appendix/transformer/",
+      "target": "/inference/efficient-llm-inference-systems/week01/",
+      "type": "semantic",
+      "weight": 0.631,
+      "terms": []
+    },
+    {
+      "source": "/courses/cme295/lec-03/",
+      "target": "/inference/efficient-llm-inference-systems/appendix/llm-inference/",
+      "type": "semantic",
+      "weight": 0.621,
+      "terms": [
+        "token",
+        "decoding",
+        "llm"
+      ]
+    },
+    {
+      "source": "/courses/cme295/lec-02/",
+      "target": "/inference/efficient-llm-inference-systems/appendix/llm-inference/",
+      "type": "semantic",
+      "weight": 0.614,
+      "terms": [
+        "token",
+        "transformer"
+      ]
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/appendix/llm-inference/",
+      "target": "/inference/efficient-llm-inference-systems/week01/",
+      "type": "semantic",
+      "weight": 0.594,
+      "terms": [
+        "logits"
+      ]
+    },
+    {
+      "source": "/courses/cme295/",
+      "target": "/inference/efficient-llm-inference-systems/appendix/",
+      "type": "semantic",
+      "weight": 0.558,
+      "terms": [
+        "llm"
+      ]
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/appendix/",
+      "target": "/inference/efficient-llm-inference-systems/week03/",
+      "type": "section",
+      "weight": 0.18,
+      "terms": []
+    }
+  ]
+}

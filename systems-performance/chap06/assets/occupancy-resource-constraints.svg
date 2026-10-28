@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="650" viewBox="0 0 1200 650" role="img" aria-labelledby="title desc">
+  <title id="title">GPU occupancy resource constraints</title>
+  <desc id="desc">Threads, registers, shared memory, and architectural limits determine resident blocks, active warps, and theoretical occupancy.</desc>
+  <style>
+    .bg { fill: #F3EFE7; }
+    .box { fill: none; stroke: #111111; stroke-width: 2; }
+    .soft { fill: #F5F1EA; stroke: #D8D1C7; stroke-width: 2; }
+    .critical { fill: none; stroke: #D9392E; stroke-width: 3; }
+    .line { fill: none; stroke: #111111; stroke-width: 2; marker-end: url(#arrow); }
+    .dash { fill: none; stroke: #6F6A63; stroke-width: 1.5; stroke-dasharray: 6 6; }
+    .label { fill: #050505; font: 600 22px Inter, Arial, sans-serif; }
+    .small { fill: #6F6A63; font: 16px Inter, Arial, sans-serif; }
+    .formula { fill: #050505; font: 600 19px ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .key { fill: #D9392E; font: 700 15px Inter, Arial, sans-serif; letter-spacing: 1.2px; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#111111"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1200" height="650" rx="12"/>
+
+  <g>
+    <rect class="box" x="40" y="45" width="270" height="100" rx="4"/>
+    <text class="label" x="65" y="83">Thread budget</text>
+    <text class="small" x="65" y="113">threads/SM ÷ threads/block</text>
+
+    <rect class="box" x="40" y="175" width="270" height="100" rx="4"/>
+    <text class="label" x="65" y="213">Register budget</text>
+    <text class="small" x="65" y="243">registers/SM ÷ registers/block</text>
+
+    <rect class="box" x="40" y="305" width="270" height="100" rx="4"/>
+    <text class="label" x="65" y="343">Shared-memory budget</text>
+    <text class="small" x="65" y="373">shared memory/SM ÷ per block</text>
+
+    <rect class="box" x="40" y="435" width="270" height="100" rx="4"/>
+    <text class="label" x="65" y="473">Architectural limit</text>
+    <text class="small" x="65" y="503">maximum active blocks/SM</text>
+  </g>
+
+  <path class="line" d="M310 95 H365 V205 H405"/>
+  <path class="line" d="M310 225 H405"/>
+  <path class="line" d="M310 355 H365 V265 H405"/>
+  <path class="line" d="M310 485 H365 V285 H405"/>
+
+  <g>
+    <rect class="critical" x="405" y="155" width="370" height="190" rx="4"/>
+    <text class="key" x="435" y="190">BINDING CONSTRAINT</text>
+    <text class="label" x="435" y="229">Resident blocks per SM</text>
+    <line class="dash" x1="435" y1="250" x2="745" y2="250"/>
+    <text class="formula" x="435" y="286">min(thread, register,</text>
+    <text class="formula" x="435" y="316">shared memory, block limit)</text>
+  </g>
+
+  <path class="line" d="M775 250 H845"/>
+
+  <g>
+    <rect class="soft" x="845" y="165" width="300" height="100" rx="4"/>
+    <text class="label" x="875" y="204">Active warps per SM</text>
+    <text class="small" x="875" y="234">resident blocks × warps/block</text>
+
+    <path class="line" d="M995 265 V345"/>
+
+    <rect class="box" x="845" y="345" width="300" height="110" rx="4"/>
+    <text class="label" x="875" y="386">Theoretical occupancy</text>
+    <text class="small" x="875" y="416">active warps ÷ maximum warps</text>
+  </g>
+
+  <path class="dash" d="M995 455 V520 H775"/>
+  <text class="small" x="815" y="552">Validate with achieved occupancy, stall reasons,</text>
+  <text class="small" x="815" y="578">kernel time, and end-to-end goodput.</text>
+</svg>

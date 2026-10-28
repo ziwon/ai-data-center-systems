@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="600" viewBox="0 0 1120 600" role="img" aria-labelledby="title desc">
+  <title id="title">Checkpoint burst contention on shared storage</title>
+  <desc id="desc">A timeline shows steady training reads competing with a checkpoint write burst, increasing batch wait and lowering GPU goodput.</desc>
+  <defs>
+    <style>
+      text { font-family: Arial, sans-serif; }
+      .bg { fill: #F3EFE7; }
+      .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.4; }
+      .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; }
+      .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+      .line { fill: none; stroke: #111111; stroke-width: 1.8; }
+      .dash { fill: none; stroke: #6F6A63; stroke-width: 1.2; stroke-dasharray: 7 5; }
+      .label { fill: #050505; font-size: 17px; font-weight: 700; }
+      .small { fill: #6F6A63; font-size: 13px; }
+      .red { fill: #D9392E; font-size: 13px; font-weight: 700; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1120" height="600"/>
+  <text class="small" x="184" y="62">time →</text>
+
+  <text class="label" x="48" y="126">Training reads</text>
+  <line class="line" x1="184" y1="120" x2="1040" y2="120"/>
+  <rect class="soft" x="184" y="92" width="146" height="56" rx="6"/>
+  <rect class="soft" x="338" y="92" width="146" height="56" rx="6"/>
+  <rect class="soft" x="492" y="92" width="146" height="56" rx="6"/>
+  <rect class="soft" x="646" y="92" width="146" height="56" rx="6"/>
+  <rect class="soft" x="800" y="92" width="146" height="56" rx="6"/>
+  <text class="small" x="227" y="126">batch read</text>
+  <text class="small" x="381" y="126">batch read</text>
+  <text class="small" x="535" y="126">batch read</text>
+  <text class="small" x="689" y="126">batch read</text>
+  <text class="small" x="843" y="126">batch read</text>
+
+  <text class="label" x="48" y="250">Checkpoint write</text>
+  <line class="line" x1="184" y1="244" x2="1040" y2="244"/>
+  <rect class="accent" x="448" y="210" width="390" height="68" rx="6"/>
+  <text class="small" x="534" y="239">rank shards + optimizer state</text>
+  <text class="small" x="572" y="259">write / fsync burst</text>
+
+  <text class="label" x="48" y="384">Shared capacity</text>
+  <rect class="box" x="184" y="340" width="856" height="76" rx="8"/>
+  <rect class="soft" x="204" y="362" width="224" height="32" rx="4"/>
+  <text class="small" x="254" y="383">read headroom</text>
+  <rect class="accent" x="448" y="362" width="390" height="32" rx="4"/>
+  <text class="small" x="553" y="383">write burst consumes queue</text>
+  <rect class="soft" x="858" y="362" width="162" height="32" rx="4"/>
+  <text class="small" x="889" y="383">recovery</text>
+
+  <path class="dash" d="M 448 74 L 448 472"/>
+  <path class="dash" d="M 838 74 L 838 472"/>
+  <text class="red" x="536" y="470">p95 batch wait rises; GPU goodput falls</text>
+
+  <rect class="box" x="184" y="510" width="380" height="54" rx="6"/>
+  <text class="small" x="214" y="542">Mitigate: async / sharded checkpoint + QoS</text>
+  <rect class="box" x="660" y="510" width="380" height="54" rx="6"/>
+  <text class="small" x="702" y="542">Isolate dataset reads and checkpoint writes</text>
+</svg>

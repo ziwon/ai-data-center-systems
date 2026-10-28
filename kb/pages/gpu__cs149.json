@@ -1,0 +1,864 @@
+{
+  "version": 1,
+  "current": {
+    "id": "/gpu/cs149/",
+    "title": "Stanford CS149 / Parallel Computing",
+    "route": "/gpu/cs149/",
+    "group": "gpu",
+    "keywords": [
+      "cs149",
+      "multi-core",
+      "data-parallel",
+      "dnn",
+      "stanford",
+      "computing",
+      "parallel-computing",
+      "programming",
+      "simd",
+      "systems"
+    ],
+    "excerpt": "Stanford CS149 is the systems foundation course for this GPU track. It connects GPU programming with the broader parallel-computing model: multi-core CPUs,..."
+  },
+  "nodes": [
+    {
+      "id": "/gpu/cs149/",
+      "title": "Stanford CS149 / Parallel Computing",
+      "route": "/gpu/cs149/",
+      "group": "gpu",
+      "keywords": [
+        "cs149",
+        "multi-core",
+        "data-parallel",
+        "dnn",
+        "stanford",
+        "computing",
+        "parallel-computing",
+        "programming",
+        "simd",
+        "systems"
+      ],
+      "excerpt": "Stanford CS149 is the systems foundation course for this GPU track. It connects GPU programming with the broader parallel-computing model: multi-core CPUs,..."
+    },
+    {
+      "id": "/gpu/",
+      "title": "GPU Systems",
+      "route": "/gpu/",
+      "group": "gpu",
+      "keywords": [
+        "플랫폼",
+        "참고자료",
+        "cuda",
+        "메모리",
+        "모델과",
+        "gpu",
+        "아티클",
+        "컴퓨팅",
+        "아키텍처",
+        "익힙니다"
+      ],
+      "excerpt": "GPU 아키텍처와 CUDA 프로그래밍부터 Kubernetes GPU 플랫폼 운영까지 다루는 문서 모음입니다. 강좌는 실행 원리를 익히는 데, 참고자료는 세부 동작을 확인하는 데, 실습과 기술 아티클은 성능 분석과 운영 판단에 활용할 수 있습니다."
+    },
+    {
+      "id": "/gpu/cs149/lec01/",
+      "title": "Lecture 1: Why Parallelism? Why Efficiency?",
+      "route": "/gpu/cs149/lec01/",
+      "group": "gpu",
+      "keywords": [
+        "processor",
+        "locality",
+        "speedup",
+        "instruction",
+        "work",
+        "parallelism",
+        "memory",
+        "efficiency",
+        "parallel",
+        "cache"
+      ],
+      "excerpt": "이번 강의의 목표는 왜 현대 시스템에서 parallelism이 선택 사항이 아니라 기본 조건이 되었는지, 그리고 단순히 \"병렬로 돌렸다\"는 사실만으로는 충분하지 않은 이유를 이해하는 것이다."
+    },
+    {
+      "id": "/gpu/cs149/lec02/",
+      "title": "Lecture 2: A Modern Multi-Core Processor",
+      "route": "/gpu/cs149/lec02/",
+      "group": "gpu",
+      "keywords": [
+        "simd",
+        "instruction",
+        "execution",
+        "thread",
+        "processor",
+        "multi-threading",
+        "lane",
+        "stream",
+        "cache",
+        "warp"
+      ],
+      "excerpt": "이번 강의의 목표는 modern processor가 hardware 수준에서 parallelism을 어떤 방식으로 제공하는지 이해하는 것이다. 1강에서는 program을 instruction stream으로 보고 speedup과 efficiency를 구분했다. 2강에서는 이..."
+    },
+    {
+      "id": "/gpu/cs149/lec03/",
+      "title": "Lecture 3: Multi-Core Architecture, Part II and ISPC",
+      "route": "/gpu/cs149/lec03/",
+      "group": "gpu",
+      "keywords": [
+        "ispc",
+        "instance",
+        "gang",
+        "simd",
+        "thread",
+        "program",
+        "foreach",
+        "instruction",
+        "abstraction",
+        "lane"
+      ],
+      "excerpt": "이번 강의의 목표는 두 가지다. 첫째, modern throughput processor에서 latency와 bandwidth가 서로 다른 제약임을 이해한다. 둘째, parallel programming model의 semantics와 그것을 실제 hardware에..."
+    },
+    {
+      "id": "/gpu/cs149/lec04/",
+      "title": "Lecture 4: Parallel Programming Basics",
+      "route": "/gpu/cs149/lec04/",
+      "group": "gpu",
+      "keywords": [
+        "task",
+        "thread",
+        "assignment",
+        "barrier",
+        "worker",
+        "dependency",
+        "phase",
+        "work",
+        "cell",
+        "iteration"
+      ],
+      "excerpt": "이번 강의의 목표는 sequential program을 parallel program으로 바꾸는 사고 과정을 체계화하는 것이다. 핵심은 thread나 API를 먼저 고르는 것이 아니라, computation의 dependency를 찾아 independent work를 드러낸 뒤..."
+    },
+    {
+      "id": "/gpu/cs149/lec05/",
+      "title": "Lecture 5: Performance Optimization I — Work Distribution and Scheduling",
+      "route": "/gpu/cs149/lec05/",
+      "group": "gpu",
+      "keywords": [
+        "work",
+        "task",
+        "worker",
+        "continuation",
+        "spawn",
+        "queue",
+        "assignment",
+        "cilk",
+        "steal",
+        "stealing"
+      ],
+      "excerpt": "이번 강의의 목표는 parallel work를 단순히 많이 만드는 데서 한 걸음 더 나아가, 그 work를 available execution resources에 효율적으로 나누고 실행 순서를 정하는 방법을 이해하는 것이다. 핵심 질문은 다음 세 가지다."
+    },
+    {
+      "id": "/gpu/cs149/lec06/",
+      "title": "Lecture 6: Performance Optimization II — Locality, Communication, and Contention",
+      "route": "/gpu/cs149/lec06/",
+      "group": "gpu",
+      "keywords": [
+        "슬라이드",
+        "communication",
+        "intensity",
+        "cache",
+        "message",
+        "work",
+        "blocking",
+        "memory",
+        "ghost",
+        "assignment"
+      ],
+      "excerpt": "본문의 캡처는 69쪽 PDF를 표지부터 1-based로 센 공식 Lecture 6 슬라이드 p. 6, 8, 11, 18, 21, 23, 24, 26, 29, 31, 34, 35, 43, 44, 50, 57이다. Build/animation 중복과..."
+    },
+    {
+      "id": "/gpu/cs149/lec07/",
+      "title": "Lecture 7: GPU Architecture and CUDA Programming",
+      "route": "/gpu/cs149/lec07/",
+      "group": "gpu",
+      "keywords": [
+        "thread",
+        "block",
+        "warp",
+        "cuda",
+        "graphics",
+        "barrier",
+        "kernel",
+        "launch",
+        "shader",
+        "memory"
+      ],
+      "excerpt": "이 강의의 목표는 CUDA syntax를 암기하는 것이 아니라, CUDA가 노출하는 execution과 memory abstraction이 실제 GPU hardware의 구조 및 scheduling 제약과 어떻게 연결되는지 이해하는 것이다. CUDA는 GPU를 “아주 많은..."
+    },
+    {
+      "id": "/gpu/cs149/lec08/",
+      "title": "Lecture 8: Data-Parallel Thinking",
+      "route": "/gpu/cs149/lec08/",
+      "group": "gpu",
+      "keywords": [
+        "scan",
+        "sort",
+        "segmented",
+        "work",
+        "scatter",
+        "element",
+        "particle",
+        "cell",
+        "segment",
+        "prefix"
+      ],
+      "excerpt": "이번 강의의 목표는 parallel program을 worker가 무엇을 하는가 라는 관점에서만 보지 않고, 큰 data collection에 적용되는 소수의 sequence operations 조합으로 algorithm을 다시 표현하는 법을 익히는 것이다. map ,..."
+    },
+    {
+      "id": "/gpu/cs149/lec09/",
+      "title": "Lecture 9: Distributed Data-Parallel Computing Using Spark",
+      "route": "/gpu/cs149/lec09/",
+      "group": "gpu",
+      "keywords": [
+        "rdd",
+        "partition",
+        "lineage",
+        "spark",
+        "슬라이드",
+        "node",
+        "shuffle",
+        "reducer",
+        "mapper",
+        "narrow"
+      ],
+      "excerpt": "이번 강의의 목표는 한 machine 안의 parallelism을 넘어, 서로 다른 operating system과 private memory를 가진 수천 개 node에서 data-parallel computation을 실행하는 방법을 이해하는 것이다. Cluster에서는 계산을..."
+    },
+    {
+      "id": "concept:parallelism",
+      "kind": "concept",
+      "title": "Parallelism",
+      "label": "Parallelism",
+      "group": "distributed-training",
+      "description": "Data, tensor, pipeline, and expert parallel strategies for training or serving models.",
+      "keywords": [
+        "Parallelism",
+        "data parallel",
+        "tensor parallel",
+        "pipeline parallel",
+        "expert parallel",
+        "3D parallelism"
+      ]
+    },
+    {
+      "id": "/courses/cme295/lec-04/",
+      "title": "Lecture 4: LLM Training, Fine-Tuning, and Efficient Adaptation",
+      "route": "/courses/cme295/lec-04/",
+      "group": "courses/cme295",
+      "keywords": [
+        "pre-training",
+        "model",
+        "training",
+        "sft",
+        "lora",
+        "parallelism",
+        "optimizer",
+        "fine-tuning",
+        "precision",
+        "states"
+      ],
+      "excerpt": "이번 강의의 목표는 LLM이 어떻게 학습되는지, 그리고 왜 pre-training 이후 fine-tuning과 alignment 단계가 필요한지 이해하는 것이다."
+    },
+    {
+      "id": "/courses/cs336/lec-01/",
+      "title": "Lecture 1: Overview and Tokenization",
+      "route": "/courses/cs336/lec-01/",
+      "group": "courses/cs336",
+      "keywords": [
+        "token",
+        "model",
+        "merge",
+        "bpe",
+        "vocabulary",
+        "tokenizer",
+        "corpus",
+        "evaluation",
+        "training",
+        "byte"
+      ],
+      "excerpt": "이 노트는 1시간 19분 22초 분량의 English caption과 공식 executable trace의 lecture 01.py 를 함께 대조해 작성했다. 자막은 강사의 구두 설명과 맥락을, executable trace는 수식·코드·assignment 항목을 확인하는..."
+    },
+    {
+      "id": "/courses/deep-learning-for-network-engineers/week02/",
+      "title": "Week 2: Large Language Model, LLM",
+      "route": "/courses/deep-learning-for-network-engineers/week02/",
+      "group": "courses/deep-learning-for-network-engineers",
+      "keywords": [
+        "token",
+        "vector",
+        "embedding",
+        "attention",
+        "decoder",
+        "word",
+        "ffnn",
+        "layer",
+        "parameter",
+        "책에서"
+      ],
+      "excerpt": "이번 주 목표는 LLM이 텍스트를 어떻게 GPU가 처리할 수 있는 숫자 연산으로 바꾸는지 이해하는 것이다."
+    },
+    {
+      "id": "/courses/deep-learning-for-network-engineers/week03/",
+      "title": "Week 3: Parallelism Strategies in Deep Learning",
+      "route": "/courses/deep-learning-for-network-engineers/week03/",
+      "group": "courses/deep-learning-for-network-engineers",
+      "keywords": [
+        "parallelism",
+        "gpu",
+        "gradient",
+        "pipeline",
+        "expert",
+        "stage",
+        "tensor",
+        "training",
+        "micro-batch",
+        "communication"
+      ],
+      "excerpt": "이번 주 목표는 대규모 deep learning training이 왜 parallelism을 필요로 하는지 , 그리고 각 parallelization strategy가 GPU memory, GPU utilization, backend network design에 어떤 영향을..."
+    }
+  ],
+  "edges": [
+    {
+      "source": "/gpu/",
+      "target": "/gpu/cs149/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/gpu/",
+      "target": "/gpu/cs149/lec01/",
+      "type": "link+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/gpu/",
+      "target": "/gpu/cs149/lec02/",
+      "type": "link+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/gpu/",
+      "target": "/gpu/cs149/lec03/",
+      "type": "link+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/gpu/",
+      "target": "/gpu/cs149/lec04/",
+      "type": "link+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/gpu/",
+      "target": "/gpu/cs149/lec05/",
+      "type": "link+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/gpu/",
+      "target": "/gpu/cs149/lec06/",
+      "type": "link+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/gpu/",
+      "target": "/gpu/cs149/lec07/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": [
+        "cuda"
+      ]
+    },
+    {
+      "source": "/gpu/",
+      "target": "/gpu/cs149/lec08/",
+      "type": "link+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/gpu/",
+      "target": "/gpu/cs149/lec09/",
+      "type": "link+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/gpu/cs149/",
+      "target": "/gpu/cs149/lec01/",
+      "type": "link",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/gpu/cs149/",
+      "target": "/gpu/cs149/lec02/",
+      "type": "link+semantic",
+      "weight": 1,
+      "terms": [
+        "simd"
+      ]
+    },
+    {
+      "source": "/gpu/cs149/",
+      "target": "/gpu/cs149/lec03/",
+      "type": "link",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/gpu/cs149/",
+      "target": "/gpu/cs149/lec04/",
+      "type": "link",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/gpu/cs149/",
+      "target": "/gpu/cs149/lec05/",
+      "type": "link",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/gpu/cs149/",
+      "target": "/gpu/cs149/lec06/",
+      "type": "link",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/gpu/cs149/",
+      "target": "/gpu/cs149/lec07/",
+      "type": "link+semantic",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/gpu/cs149/",
+      "target": "/gpu/cs149/lec08/",
+      "type": "link",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/gpu/cs149/",
+      "target": "/gpu/cs149/lec09/",
+      "type": "link",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/courses/cme295/lec-04/",
+      "target": "concept:parallelism",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "Parallelism",
+        "data parallel",
+        "tensor parallel"
+      ]
+    },
+    {
+      "source": "/courses/cs336/lec-01/",
+      "target": "concept:parallelism",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "Parallelism",
+        "data parallel"
+      ]
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week02/",
+      "target": "concept:parallelism",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "Parallelism"
+      ]
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week03/",
+      "target": "concept:parallelism",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "Parallelism",
+        "data parallel",
+        "tensor parallel",
+        "pipeline parallel"
+      ]
+    },
+    {
+      "source": "/gpu/cs149/lec01/",
+      "target": "concept:parallelism",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "Parallelism"
+      ]
+    },
+    {
+      "source": "/gpu/cs149/lec02/",
+      "target": "concept:parallelism",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "Parallelism"
+      ]
+    },
+    {
+      "source": "/gpu/cs149/lec03/",
+      "target": "concept:parallelism",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "Parallelism",
+        "tensor parallel"
+      ]
+    },
+    {
+      "source": "/gpu/cs149/lec04/",
+      "target": "concept:parallelism",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "Parallelism"
+      ]
+    },
+    {
+      "source": "/gpu/cs149/lec05/",
+      "target": "concept:parallelism",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "Parallelism",
+        "data parallel"
+      ]
+    },
+    {
+      "source": "/gpu/cs149/lec08/",
+      "target": "concept:parallelism",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "Parallelism"
+      ]
+    },
+    {
+      "source": "/gpu/cs149/lec09/",
+      "target": "concept:parallelism",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "Parallelism"
+      ]
+    },
+    {
+      "source": "/gpu/cs149/lec06/",
+      "target": "concept:parallelism",
+      "type": "mentions",
+      "weight": 0.905,
+      "terms": [
+        "Parallelism",
+        "data parallel"
+      ]
+    },
+    {
+      "source": "/gpu/cs149/",
+      "target": "concept:parallelism",
+      "type": "mentions",
+      "weight": 0.88,
+      "terms": [
+        "Parallelism"
+      ]
+    },
+    {
+      "source": "/gpu/cs149/lec07/",
+      "target": "concept:parallelism",
+      "type": "mentions",
+      "weight": 0.88,
+      "terms": [
+        "Parallelism"
+      ]
+    },
+    {
+      "source": "/gpu/cs149/lec02/",
+      "target": "/gpu/cs149/lec03/",
+      "type": "semantic",
+      "weight": 0.811,
+      "terms": [
+        "simd",
+        "thread",
+        "instruction",
+        "lane"
+      ]
+    },
+    {
+      "source": "/gpu/cs149/lec08/",
+      "target": "/gpu/cs149/lec09/",
+      "type": "semantic",
+      "weight": 0.768,
+      "terms": []
+    },
+    {
+      "source": "/gpu/cs149/lec01/",
+      "target": "/gpu/cs149/lec02/",
+      "type": "semantic",
+      "weight": 0.761,
+      "terms": [
+        "instruction",
+        "processor",
+        "cache"
+      ]
+    },
+    {
+      "source": "/gpu/cs149/lec04/",
+      "target": "/gpu/cs149/lec08/",
+      "type": "semantic",
+      "weight": 0.757,
+      "terms": [
+        "work",
+        "cell"
+      ]
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week03/",
+      "target": "/gpu/cs149/lec01/",
+      "type": "semantic",
+      "weight": 0.752,
+      "terms": [
+        "parallelism"
+      ]
+    },
+    {
+      "source": "/gpu/cs149/lec03/",
+      "target": "/gpu/cs149/lec04/",
+      "type": "semantic",
+      "weight": 0.737,
+      "terms": [
+        "thread"
+      ]
+    },
+    {
+      "source": "/gpu/cs149/lec02/",
+      "target": "/gpu/cs149/lec04/",
+      "type": "semantic",
+      "weight": 0.722,
+      "terms": [
+        "thread"
+      ]
+    },
+    {
+      "source": "/gpu/cs149/lec01/",
+      "target": "/gpu/cs149/lec04/",
+      "type": "semantic",
+      "weight": 0.721,
+      "terms": [
+        "work"
+      ]
+    },
+    {
+      "source": "/gpu/cs149/lec02/",
+      "target": "/gpu/cs149/lec08/",
+      "type": "semantic",
+      "weight": 0.721,
+      "terms": []
+    },
+    {
+      "source": "/gpu/cs149/lec03/",
+      "target": "/gpu/cs149/lec07/",
+      "type": "semantic",
+      "weight": 0.721,
+      "terms": [
+        "thread"
+      ]
+    },
+    {
+      "source": "/gpu/cs149/lec04/",
+      "target": "/gpu/cs149/lec09/",
+      "type": "semantic",
+      "weight": 0.717,
+      "terms": []
+    },
+    {
+      "source": "/gpu/cs149/lec04/",
+      "target": "/gpu/cs149/lec05/",
+      "type": "semantic",
+      "weight": 0.715,
+      "terms": [
+        "work",
+        "task",
+        "worker",
+        "assignment"
+      ]
+    },
+    {
+      "source": "/gpu/cs149/lec01/",
+      "target": "/gpu/cs149/lec08/",
+      "type": "semantic",
+      "weight": 0.71,
+      "terms": [
+        "work"
+      ]
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week03/",
+      "target": "/gpu/cs149/lec02/",
+      "type": "semantic",
+      "weight": 0.709,
+      "terms": []
+    },
+    {
+      "source": "/gpu/cs149/lec05/",
+      "target": "/gpu/cs149/lec08/",
+      "type": "semantic",
+      "weight": 0.7,
+      "terms": [
+        "work"
+      ]
+    },
+    {
+      "source": "/gpu/cs149/lec02/",
+      "target": "/gpu/cs149/lec09/",
+      "type": "semantic",
+      "weight": 0.699,
+      "terms": []
+    },
+    {
+      "source": "/gpu/cs149/lec03/",
+      "target": "/gpu/cs149/lec08/",
+      "type": "semantic",
+      "weight": 0.699,
+      "terms": []
+    },
+    {
+      "source": "/gpu/cs149/lec01/",
+      "target": "/gpu/cs149/lec05/",
+      "type": "semantic",
+      "weight": 0.694,
+      "terms": [
+        "work"
+      ]
+    },
+    {
+      "source": "/gpu/cs149/lec03/",
+      "target": "/gpu/cs149/lec09/",
+      "type": "semantic",
+      "weight": 0.693,
+      "terms": []
+    },
+    {
+      "source": "/gpu/cs149/lec07/",
+      "target": "/gpu/cs149/lec09/",
+      "type": "semantic",
+      "weight": 0.685,
+      "terms": []
+    },
+    {
+      "source": "/gpu/cs149/lec01/",
+      "target": "/gpu/cs149/lec03/",
+      "type": "semantic",
+      "weight": 0.683,
+      "terms": [
+        "instruction"
+      ]
+    },
+    {
+      "source": "/gpu/cs149/lec02/",
+      "target": "/gpu/cs149/lec05/",
+      "type": "semantic",
+      "weight": 0.682,
+      "terms": []
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week03/",
+      "target": "/gpu/cs149/lec08/",
+      "type": "semantic",
+      "weight": 0.68,
+      "terms": []
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week03/",
+      "target": "/gpu/cs149/lec09/",
+      "type": "semantic",
+      "weight": 0.678,
+      "terms": []
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week03/",
+      "target": "/gpu/cs149/lec04/",
+      "type": "semantic",
+      "weight": 0.675,
+      "terms": []
+    },
+    {
+      "source": "/courses/cs336/lec-01/",
+      "target": "/gpu/cs149/lec05/",
+      "type": "semantic",
+      "weight": 0.665,
+      "terms": []
+    },
+    {
+      "source": "/gpu/cs149/lec06/",
+      "target": "/gpu/cs149/lec08/",
+      "type": "semantic",
+      "weight": 0.66,
+      "terms": [
+        "work"
+      ]
+    },
+    {
+      "source": "/courses/cme295/lec-04/",
+      "target": "/gpu/cs149/lec01/",
+      "type": "semantic",
+      "weight": 0.659,
+      "terms": [
+        "parallelism"
+      ]
+    },
+    {
+      "source": "/gpu/cs149/lec06/",
+      "target": "/gpu/cs149/lec07/",
+      "type": "semantic",
+      "weight": 0.659,
+      "terms": [
+        "memory"
+      ]
+    },
+    {
+      "source": "/courses/cs336/lec-01/",
+      "target": "/gpu/cs149/lec06/",
+      "type": "semantic",
+      "weight": 0.651,
+      "terms": []
+    },
+    {
+      "source": "/courses/cs336/lec-01/",
+      "target": "/gpu/cs149/lec08/",
+      "type": "semantic",
+      "weight": 0.65,
+      "terms": []
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week02/",
+      "target": "/courses/deep-learning-for-network-engineers/week03/",
+      "type": "section",
+      "weight": 0.297,
+      "terms": []
+    }
+  ]
+}

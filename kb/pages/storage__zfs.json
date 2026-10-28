@@ -1,0 +1,487 @@
+{
+  "version": 1,
+  "current": {
+    "id": "/storage/zfs/",
+    "title": "AI 학습 워크로드를 위한 ZFS 튜닝 가이드",
+    "route": "/storage/zfs/",
+    "group": "storage",
+    "keywords": [
+      "zfs",
+      "hdd",
+      "vdev",
+      "nvme",
+      "special",
+      "juicefs",
+      "nas",
+      "metadata",
+      "스토리지",
+      "tip"
+    ],
+    "excerpt": "이 분류가 중요한 이유는, AI 학습 워크로드에서는 단순히 “200TB 저장 가능”보다 다음 요소가 더 중요하기 때문이다."
+  },
+  "nodes": [
+    {
+      "id": "/storage/zfs/",
+      "title": "AI 학습 워크로드를 위한 ZFS 튜닝 가이드",
+      "route": "/storage/zfs/",
+      "group": "storage",
+      "keywords": [
+        "zfs",
+        "hdd",
+        "vdev",
+        "nvme",
+        "special",
+        "juicefs",
+        "nas",
+        "metadata",
+        "스토리지",
+        "tip"
+      ],
+      "excerpt": "이 분류가 중요한 이유는, AI 학습 워크로드에서는 단순히 “200TB 저장 가능”보다 다음 요소가 더 중요하기 때문이다."
+    },
+    {
+      "id": "/storage/",
+      "title": "Storage",
+      "route": "/storage/",
+      "group": "storage",
+      "keywords": [
+        "storage"
+      ],
+      "excerpt": "AI workload storage notes covering checkpoint data paths, ZFS, MLPerf Storage, storage benchmarking, and data pipeline performance."
+    },
+    {
+      "id": "concept:checkpointing",
+      "kind": "concept",
+      "title": "Checkpointing",
+      "label": "Checkpointing",
+      "group": "storage",
+      "description": "Model state persistence and recovery path for training systems.",
+      "keywords": [
+        "Checkpointing",
+        "checkpoint",
+        "checkpointing",
+        "model checkpoint"
+      ]
+    },
+    {
+      "id": "/network/chap09/",
+      "title": "Chapter 9: Storage Network Design and Technologies for AI Data Centers",
+      "route": "/network/chap09/",
+      "group": "network",
+      "keywords": [
+        "storage",
+        "file",
+        "nvme-o-tcp",
+        "fabric",
+        "nvme-o-rdma",
+        "infiniband",
+        "a/b",
+        "network",
+        "checkpoint",
+        "training"
+      ],
+      "excerpt": "This chapter explains why storage networking is a separate design topic in AI data centers."
+    },
+    {
+      "id": "/systems-performance/chap05/",
+      "title": "Chapter 5: GPU-Based Storage I/O Optimizations",
+      "route": "/systems-performance/chap05/",
+      "group": "systems-performance",
+      "keywords": [
+        "gds",
+        "storage",
+        "cpu",
+        "gpu",
+        "filesystem",
+        "read",
+        "path",
+        "dataset",
+        "checkpoint",
+        "preprocessing"
+      ],
+      "excerpt": "이번 장의 목표는 storage를 단순한 dataset 보관소가 아니라 GPU goodput을 결정하는 실행 경로의 일부 로 이해하는 것이다."
+    },
+    {
+      "id": "/inference/efficient-llm-inference-systems/appendix/hardware-architectures/domain-specific-architectures-for-ai-inference.ko/",
+      "title": "Domain-Specific Architectures for AI Inference",
+      "route": "/inference/efficient-llm-inference-systems/appendix/hardware-architectures/domain-specific-architectures-for-ai-inference.ko/",
+      "group": "inference",
+      "keywords": [
+        "dsa",
+        "cache",
+        "week",
+        "compute",
+        "hardware",
+        "tensor",
+        "inference",
+        "decode",
+        "sram",
+        "scratchpad"
+      ],
+      "excerpt": "저자는 이 질문에 답하기 위해 Transformer inference의 병목을 먼저 분석하고, 거기서 하드웨어 설계 원칙을 끌어낸다. 결론은 다음과 같다."
+    },
+    {
+      "id": "/systems-performance/chap02/",
+      "title": "Chapter 2: AI System Hardware Overview",
+      "route": "/systems-performance/chap02/",
+      "group": "systems-performance",
+      "keywords": [
+        "gpu",
+        "rack",
+        "blackwell",
+        "nvl72",
+        "grace",
+        "memory",
+        "cpu",
+        "nvlink",
+        "hbm",
+        "power"
+      ],
+      "excerpt": "이번 장의 목표는 AI 시스템 하드웨어를 단순한 스펙표가 아니라 성능 병목 구조 로 이해하는 것이다."
+    },
+    {
+      "id": "/network/chap03/",
+      "title": "Chapter 3: Network Design Considerations",
+      "route": "/network/chap03/",
+      "group": "network",
+      "keywords": [
+        "leaf",
+        "clos",
+        "fabric",
+        "rail",
+        "design",
+        "cabling",
+        "spine",
+        "server",
+        "congestion",
+        "designs"
+      ],
+      "excerpt": "This chapter explains the major physical and logical design choices for AI data center networks."
+    },
+    {
+      "id": "/storage/mlperf-storage/",
+      "title": "MLPerf Storage Benchmark",
+      "route": "/storage/mlperf-storage/",
+      "group": "storage",
+      "keywords": [
+        "storage",
+        "object",
+        "vectordb",
+        "인덱스",
+        "benchmark",
+        "i/o",
+        "cache",
+        "체크포인트",
+        "s3-compatible",
+        "checkpointing"
+      ],
+      "excerpt": "MLCommons Storage는 ML 워크로드를 지원하는 스토리지 시스템의 성능을 측정하기 위한 MLPerf Storage Benchmark Suite입니다. 단순 파일시스템 벤치마크가 아니라 학습 데이터 로딩, 체크포인트 저장/복구, LLM KV cache offload,..."
+    },
+    {
+      "id": "/courses/deep-learning-for-network-engineers/week03/",
+      "title": "Week 3: Parallelism Strategies in Deep Learning",
+      "route": "/courses/deep-learning-for-network-engineers/week03/",
+      "group": "courses/deep-learning-for-network-engineers",
+      "keywords": [
+        "parallelism",
+        "gpu",
+        "gradient",
+        "pipeline",
+        "expert",
+        "stage",
+        "tensor",
+        "training",
+        "micro-batch",
+        "communication"
+      ],
+      "excerpt": "이번 주 목표는 대규모 deep learning training이 왜 parallelism을 필요로 하는지 , 그리고 각 parallelization strategy가 GPU memory, GPU utilization, backend network design에 어떤 영향을..."
+    },
+    {
+      "id": "/gpu/articles/gpu-infrastructure-operations-and-platform-design.ko/",
+      "title": "GPU 인프라 운영과 플랫폼 설계: 하드웨어 장애 분석부터 멀티테넌시까지",
+      "route": "/gpu/articles/gpu-infrastructure-operations-and-platform-design.ko/",
+      "group": "gpu",
+      "keywords": [
+        "gpu",
+        "메모리",
+        "호스트",
+        "작업을",
+        "드라이버",
+        "iommu",
+        "재시작",
+        "서비스",
+        "workload",
+        "않는다"
+      ],
+      "excerpt": "GPU 노드를 재부팅한 뒤 학습이 다시 진행되고 step time도 기준선으로 돌아왔다고 하자. 당장의 장애는 수습했다. 하지만 작업을 다시 돌리는 것만으로 사건 처리가 끝나지는 않는다. 같은 구성을 쓰는 다른 노드에도 문제가 있는지, 재발 조건을 알고 있는지, 다음 패치에서도..."
+    },
+    {
+      "id": "/gpu/cs149/lec09/",
+      "title": "Lecture 9: Distributed Data-Parallel Computing Using Spark",
+      "route": "/gpu/cs149/lec09/",
+      "group": "gpu",
+      "keywords": [
+        "rdd",
+        "partition",
+        "lineage",
+        "spark",
+        "슬라이드",
+        "node",
+        "shuffle",
+        "reducer",
+        "mapper",
+        "narrow"
+      ],
+      "excerpt": "이번 강의의 목표는 한 machine 안의 parallelism을 넘어, 서로 다른 operating system과 private memory를 가진 수천 개 node에서 data-parallel computation을 실행하는 방법을 이해하는 것이다. Cluster에서는 계산을..."
+    },
+    {
+      "id": "/inference/models/kimi-k3/",
+      "title": "Kimi K3 기술 해부: 2.8T MoE, KDA, Attention Residuals, 그리고 64-GPU 서빙",
+      "route": "/inference/models/kimi-k3/",
+      "group": "inference",
+      "keywords": [
+        "kimi",
+        "kda",
+        "레이어",
+        "mla",
+        "sglang",
+        "보고서",
+        "expert",
+        "attnres",
+        "moonshot",
+        "attention"
+      ],
+      "excerpt": "공개 전에는 Kimi K2의 수치를 대입한 비공식 아키텍처 초안이 유통되었다. 이 초안은 KDA, Gated MLA, Block AttnRes, LatentMoE와 vision pathway의 연결 구조를 한 장에 보여준다는 점에서 여전히 유용하다. 다만 hidden..."
+    }
+  ],
+  "edges": [
+    {
+      "source": "/storage/",
+      "target": "/storage/mlperf-storage/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": [
+        "storage"
+      ]
+    },
+    {
+      "source": "/storage/",
+      "target": "/storage/zfs/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week03/",
+      "target": "concept:checkpointing",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "checkpoint",
+        "checkpointing",
+        "Checkpointing"
+      ]
+    },
+    {
+      "source": "/gpu/articles/gpu-infrastructure-operations-and-platform-design.ko/",
+      "target": "concept:checkpointing",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "checkpoint"
+      ]
+    },
+    {
+      "source": "/gpu/cs149/lec09/",
+      "target": "concept:checkpointing",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "checkpoint",
+        "model checkpoint"
+      ]
+    },
+    {
+      "source": "/inference/models/kimi-k3/",
+      "target": "concept:checkpointing",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "checkpoint"
+      ]
+    },
+    {
+      "source": "/network/chap09/",
+      "target": "concept:checkpointing",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "checkpoint",
+        "checkpointing",
+        "Checkpointing"
+      ]
+    },
+    {
+      "source": "/storage/mlperf-storage/",
+      "target": "concept:checkpointing",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "checkpointing",
+        "Checkpointing",
+        "checkpoint"
+      ]
+    },
+    {
+      "source": "/storage/zfs/",
+      "target": "concept:checkpointing",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "checkpoint"
+      ]
+    },
+    {
+      "source": "/systems-performance/chap02/",
+      "target": "concept:checkpointing",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "checkpoint"
+      ]
+    },
+    {
+      "source": "/systems-performance/chap05/",
+      "target": "concept:checkpointing",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "checkpoint",
+        "model checkpoint",
+        "checkpointing",
+        "Checkpointing"
+      ]
+    },
+    {
+      "source": "/network/chap03/",
+      "target": "concept:checkpointing",
+      "type": "mentions",
+      "weight": 0.88,
+      "terms": [
+        "checkpoint",
+        "checkpointing",
+        "Checkpointing"
+      ]
+    },
+    {
+      "source": "/network/chap03/",
+      "target": "/network/chap09/",
+      "type": "semantic",
+      "weight": 0.788,
+      "terms": [
+        "fabric"
+      ]
+    },
+    {
+      "source": "/systems-performance/chap02/",
+      "target": "/systems-performance/chap05/",
+      "type": "semantic",
+      "weight": 0.716,
+      "terms": [
+        "cpu",
+        "gpu"
+      ]
+    },
+    {
+      "source": "/network/chap09/",
+      "target": "/systems-performance/chap05/",
+      "type": "semantic",
+      "weight": 0.711,
+      "terms": [
+        "storage",
+        "checkpoint"
+      ]
+    },
+    {
+      "source": "/network/chap03/",
+      "target": "/systems-performance/chap05/",
+      "type": "semantic",
+      "weight": 0.702,
+      "terms": []
+    },
+    {
+      "source": "/network/chap09/",
+      "target": "/storage/zfs/",
+      "type": "semantic",
+      "weight": 0.695,
+      "terms": []
+    },
+    {
+      "source": "/storage/zfs/",
+      "target": "/systems-performance/chap05/",
+      "type": "semantic",
+      "weight": 0.687,
+      "terms": []
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week03/",
+      "target": "/gpu/cs149/lec09/",
+      "type": "semantic",
+      "weight": 0.678,
+      "terms": []
+    },
+    {
+      "source": "/network/chap03/",
+      "target": "/systems-performance/chap02/",
+      "type": "semantic",
+      "weight": 0.678,
+      "terms": []
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/appendix/hardware-architectures/domain-specific-architectures-for-ai-inference.ko/",
+      "target": "/storage/zfs/",
+      "type": "semantic",
+      "weight": 0.651,
+      "terms": []
+    },
+    {
+      "source": "/storage/zfs/",
+      "target": "/systems-performance/chap02/",
+      "type": "semantic",
+      "weight": 0.65,
+      "terms": []
+    },
+    {
+      "source": "/network/chap03/",
+      "target": "/storage/zfs/",
+      "type": "semantic",
+      "weight": 0.647,
+      "terms": []
+    },
+    {
+      "source": "/network/chap09/",
+      "target": "/storage/",
+      "type": "semantic",
+      "weight": 0.632,
+      "terms": [
+        "storage"
+      ]
+    },
+    {
+      "source": "/storage/",
+      "target": "/systems-performance/chap05/",
+      "type": "semantic",
+      "weight": 0.616,
+      "terms": [
+        "storage"
+      ]
+    },
+    {
+      "source": "/storage/mlperf-storage/",
+      "target": "/storage/zfs/",
+      "type": "section",
+      "weight": 0.297,
+      "terms": []
+    }
+  ]
+}

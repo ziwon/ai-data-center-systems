@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="600" viewBox="0 0 1120 600" role="img" aria-labelledby="title desc">
+  <title id="title">SFC and CSIG congestion signaling</title>
+  <desc id="desc">Comparison of Source Flow Control sending a direct flow-level signal from a congested switch toward the source and CSIG carrying in-band bottleneck metadata that is reflected by the destination.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.4; }
+    .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; }
+    .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+    .divider { stroke: #D8D1C7; stroke-width: 1.5; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.5; }
+    .accent-line { fill: none; stroke: #D9392E; stroke-width: 2; }
+    .muted-line { fill: none; stroke: #D8D1C7; stroke-width: 1.3; stroke-dasharray: 7 6; }
+    .label { font-family: Inter, Arial, sans-serif; font-size: 16px; font-weight: 700; fill: #050505; }
+    .small { font-family: Inter, Arial, sans-serif; font-size: 12px; fill: #6F6A63; }
+    .head { font-family: Inter, Arial, sans-serif; font-size: 22px; font-weight: 700; fill: #050505; }
+    .red { fill: #D9392E; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#111111"/>
+    </marker>
+    <marker id="arrowAccent" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#D9392E"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1120" height="600"/>
+  <line class="divider" x1="560" y1="58" x2="560" y2="528"/>
+
+  <g transform="translate(62 86)">
+    <text class="head" x="218" y="0" text-anchor="middle">SFC: direct source signal</text>
+    <text class="small" x="218" y="27" text-anchor="middle">Congested switch sends flow-level feedback toward the source.</text>
+
+    <rect class="box" x="0" y="150" width="118" height="72" rx="6"/>
+    <text class="label" x="59" y="181" text-anchor="middle">Source</text>
+    <text class="small" x="59" y="202" text-anchor="middle">NIC / QP</text>
+
+    <rect class="box" x="170" y="150" width="118" height="72" rx="6"/>
+    <text class="label" x="229" y="181" text-anchor="middle">Leaf</text>
+    <text class="small" x="229" y="202" text-anchor="middle">ingress</text>
+
+    <rect class="accent" x="340" y="130" width="130" height="112" rx="6"/>
+    <text class="label" x="405" y="165" text-anchor="middle">Congested</text>
+    <text class="label" x="405" y="187" text-anchor="middle">switch</text>
+    <text class="small" x="405" y="212" text-anchor="middle">SFC threshold</text>
+
+    <path class="line" d="M118 186 H170" marker-end="url(#arrow)"/>
+    <path class="line" d="M288 186 H340" marker-end="url(#arrow)"/>
+
+    <path class="accent-line" d="M405 130 C360 76 179 72 63 141" marker-end="url(#arrowAccent)"/>
+    <text class="label red" x="238" y="76" text-anchor="middle">reverse headers, trim payload</text>
+
+    <rect class="soft" x="54" y="318" width="360" height="86" rx="6"/>
+    <text class="label" x="234" y="350" text-anchor="middle">Design intent</text>
+    <text class="small" x="234" y="374" text-anchor="middle">faster than waiting for ECN-marked data to</text>
+    <text class="small" x="234" y="394" text-anchor="middle">reach the receiver, narrower than PFC pause</text>
+  </g>
+
+  <g transform="translate(626 86)">
+    <text class="head" x="218" y="0" text-anchor="middle">CSIG: in-band path metadata</text>
+    <text class="small" x="218" y="27" text-anchor="middle">Packets carry compact bottleneck data that the receiver reflects.</text>
+
+    <rect class="box" x="0" y="150" width="100" height="72" rx="6"/>
+    <text class="label" x="50" y="181" text-anchor="middle">Source</text>
+    <text class="small" x="50" y="202" text-anchor="middle">adds tag</text>
+
+    <rect class="box" x="142" y="150" width="100" height="72" rx="6"/>
+    <text class="label" x="192" y="181" text-anchor="middle">Leaf</text>
+    <text class="small" x="192" y="202" text-anchor="middle">updates</text>
+
+    <rect class="accent" x="284" y="150" width="100" height="72" rx="6"/>
+    <text class="label" x="334" y="181" text-anchor="middle">Spine</text>
+    <text class="small" x="334" y="202" text-anchor="middle">bottleneck</text>
+
+    <rect class="box" x="426" y="150" width="100" height="72" rx="6"/>
+    <text class="label" x="476" y="181" text-anchor="middle">Dest</text>
+    <text class="small" x="476" y="202" text-anchor="middle">reflects</text>
+
+    <path class="line" d="M100 186 H142" marker-end="url(#arrow)"/>
+    <path class="accent-line" d="M242 186 H284" marker-end="url(#arrowAccent)"/>
+    <path class="line" d="M384 186 H426" marker-end="url(#arrow)"/>
+    <path class="muted-line" d="M476 150 C425 72 160 72 54 141" marker-end="url(#arrow)"/>
+    <text class="small" x="260" y="73" text-anchor="middle">metadata reflected to sender</text>
+
+    <g transform="translate(24 310)">
+      <rect class="soft" x="0" y="0" width="478" height="96" rx="6"/>
+      <rect class="box" x="24" y="32" width="92" height="32" rx="4"/>
+      <text class="small" x="70" y="53" text-anchor="middle">Ethernet</text>
+      <rect class="box" x="120" y="32" width="72" height="32" rx="4"/>
+      <text class="small" x="156" y="53" text-anchor="middle">VLAN</text>
+      <rect class="accent" x="196" y="32" width="82" height="32" rx="4"/>
+      <text class="small red" x="237" y="53" text-anchor="middle">CSIG</text>
+      <rect class="box" x="282" y="32" width="72" height="32" rx="4"/>
+      <text class="small" x="318" y="53" text-anchor="middle">IP</text>
+      <rect class="box" x="358" y="32" width="92" height="32" rx="4"/>
+      <text class="small" x="404" y="53" text-anchor="middle">RoCEv2</text>
+    </g>
+  </g>
+</svg>

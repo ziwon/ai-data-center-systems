@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 470" role="img" aria-labelledby="title desc">
+  <title id="title">Shared memory tiling map</title>
+  <desc id="desc">A memory-bound kernel increases data reuse by cooperatively loading global memory tiles into shared memory, synchronizing, computing partial dot products, synchronizing again, and storing a C tile.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .panel { fill: none; stroke: #111111; stroke-width: 1.5; }
+    .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.5; }
+    .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.4; }
+    .accent-box { fill: #F3EFE7; stroke: #D9392E; stroke-width: 2; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.8; marker-end: url(#arrow); }
+    .soft-line { fill: none; stroke: #6F6A63; stroke-width: 1.5; stroke-dasharray: 6 5; marker-end: url(#soft-arrow); }
+    .accent-line { fill: none; stroke: #D9392E; stroke-width: 2.2; marker-end: url(#accent-arrow); }
+    .label { fill: #050505; font-family: Inter, Arial, sans-serif; font-size: 18px; font-weight: 700; }
+    .mid { fill: #050505; font-family: Inter, Arial, sans-serif; font-size: 15px; font-weight: 600; }
+    .small { fill: #6F6A63; font-family: Inter, Arial, sans-serif; font-size: 13px; }
+    .mono { fill: #050505; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .accent { fill: #D9392E; font-family: Inter, Arial, sans-serif; font-size: 14px; font-weight: 700; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#111111"/>
+    </marker>
+    <marker id="soft-arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#6F6A63"/>
+    </marker>
+    <marker id="accent-arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#D9392E"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1100" height="470"/>
+
+  <rect class="panel" x="34" y="42" width="212" height="332" rx="6"/>
+  <text class="label" x="62" y="78">Performance limit</text>
+  <rect class="accent-box" x="62" y="116" width="150" height="54" rx="6"/>
+  <text class="accent" x="84" y="139">low ops/byte</text>
+  <text class="small" x="84" y="157">memory-bound</text>
+  <rect class="box" x="62" y="212" width="150" height="54" rx="6"/>
+  <text class="mid" x="88" y="235">increase</text>
+  <text class="small" x="88" y="253">data reuse</text>
+  <path class="accent-line" d="M 137 170 L 137 212"/>
+
+  <rect class="panel" x="306" y="42" width="236" height="332" rx="6"/>
+  <text class="label" x="334" y="78">Global memory</text>
+  <text class="small" x="334" y="100">Large, high-latency input</text>
+  <g transform="translate(346 132)">
+    <rect class="soft" x="0" y="0" width="54" height="54"/>
+    <rect class="soft" x="54" y="0" width="54" height="54"/>
+    <rect class="soft" x="0" y="54" width="54" height="54"/>
+    <rect class="accent-box" x="54" y="54" width="54" height="54"/>
+    <text class="mid" x="16" y="32">A</text>
+    <text class="accent" x="70" y="86">tile</text>
+  </g>
+  <g transform="translate(346 260)">
+    <rect class="soft" x="0" y="0" width="54" height="54"/>
+    <rect class="accent-box" x="54" y="0" width="54" height="54"/>
+    <rect class="soft" x="0" y="54" width="54" height="54"/>
+    <rect class="soft" x="54" y="54" width="54" height="54"/>
+    <text class="mid" x="16" y="32">B</text>
+    <text class="accent" x="70" y="32">tile</text>
+  </g>
+
+  <rect class="box" x="596" y="96" width="156" height="58" rx="6"/>
+  <text class="mid" x="626" y="120">cooperative</text>
+  <text class="small" x="626" y="139">tile loads by block</text>
+
+  <rect class="panel" x="578" y="198" width="196" height="134" rx="6"/>
+  <text class="label" x="608" y="232">Shared memory</text>
+  <text class="small" x="608" y="254">A_s tile + B_s tile</text>
+  <rect class="accent-box" x="614" y="278" width="48" height="32" rx="4"/>
+  <rect class="accent-box" x="690" y="278" width="48" height="32" rx="4"/>
+  <text class="mono" x="624" y="299">A_s</text>
+  <text class="mono" x="700" y="299">B_s</text>
+
+  <rect class="accent-box" x="824" y="92" width="120" height="46" rx="6"/>
+  <text class="accent" x="848" y="120">barrier 1</text>
+  <rect class="box" x="816" y="186" width="136" height="58" rx="6"/>
+  <text class="mid" x="842" y="210">partial dot</text>
+  <text class="small" x="842" y="229">reuse tile values</text>
+  <rect class="accent-box" x="824" y="292" width="120" height="46" rx="6"/>
+  <text class="accent" x="848" y="320">barrier 2</text>
+
+  <rect class="panel" x="984" y="150" width="82" height="168" rx="6"/>
+  <text class="mid" x="1004" y="184">sum</text>
+  <text class="small" x="1000" y="205">register</text>
+  <rect class="accent-box" x="1000" y="248" width="48" height="42" rx="5"/>
+  <text class="accent" x="1013" y="274">C</text>
+
+  <path class="line" d="M 212 239 C 252 200 282 146 306 146"/>
+  <path class="line" d="M 454 186 C 506 154 548 125 596 125"/>
+  <path class="line" d="M 454 282 C 510 238 544 210 578 210"/>
+  <path class="line" d="M 752 125 C 782 125 798 116 824 116"/>
+  <path class="line" d="M 884 138 L 884 186"/>
+  <path class="line" d="M 884 244 L 884 292"/>
+  <path class="soft-line" d="M 824 316 C 760 374 652 366 620 332"/>
+  <path class="line" d="M 952 215 C 970 215 976 215 984 215"/>
+  <path class="accent-line" d="M 1024 226 L 1024 248"/>
+
+  <rect class="panel" x="184" y="408" width="732" height="34" rx="6"/>
+  <text class="mono" x="214" y="430">load tile -> __syncthreads() -> reuse in dot product -> __syncthreads() -> overwrite next tile</text>
+</svg>

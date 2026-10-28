@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="560" viewBox="0 0 1120 560" role="img" aria-labelledby="title desc">
+  <title id="title">Python-facing CUDA library stack</title>
+  <desc id="desc">A technical diagram showing Python frameworks, Python-facing CUDA libraries, CUDA runtime libraries, driver, and GPU hardware.</desc>
+  <defs>
+    <style>
+      text { font-family: Arial, sans-serif; }
+      .bg { fill: #F5F1EA; }
+      .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.4; }
+      .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; }
+      .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+      .line { fill: none; stroke: #111111; stroke-width: 1.8; }
+      .dash { fill: none; stroke: #6F6A63; stroke-width: 1.3; stroke-dasharray: 6 5; }
+      .label { fill: #050505; font-size: 17px; font-weight: 700; }
+      .small { fill: #6F6A63; font-size: 13px; }
+      .red { fill: #D9392E; font-size: 13px; font-weight: 700; }
+      .arrow { fill: #111111; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1120" height="560"/>
+
+  <rect class="box" x="72" y="70" width="250" height="90" rx="8"/>
+  <text class="label" x="106" y="106">Python workload</text>
+  <text class="small" x="102" y="130">train.py, serve.py, notebooks</text>
+
+  <rect class="box" x="430" y="54" width="260" height="122" rx="8"/>
+  <text class="label" x="478" y="88">AI frameworks</text>
+  <text class="small" x="466" y="114">PyTorch, TensorFlow, JAX</text>
+  <text class="small" x="466" y="138">torch.compile, TorchInductor</text>
+
+  <rect class="accent" x="792" y="54" width="276" height="122" rx="8"/>
+  <text class="label" x="842" y="88">Python CUDA layer</text>
+  <text class="small" x="828" y="114">Triton, CUDA Python, Warp</text>
+  <text class="small" x="828" y="138">cuPyNumeric, cuTile</text>
+
+  <rect class="box" x="188" y="272" width="250" height="110" rx="8"/>
+  <text class="label" x="236" y="310">CUDA libraries</text>
+  <text class="small" x="226" y="336">cuBLAS, cuDNN, NCCL</text>
+  <text class="small" x="226" y="360">CUTLASS-backed kernels</text>
+
+  <rect class="soft" x="562" y="272" width="250" height="110" rx="8"/>
+  <text class="label" x="614" y="310">CUDA runtime</text>
+  <text class="small" x="620" y="336">cudart, streams</text>
+  <text class="small" x="620" y="360">memory allocation, launch</text>
+
+  <rect class="box" x="390" y="444" width="250" height="74" rx="8"/>
+  <text class="label" x="454" y="474">NVIDIA driver</text>
+  <text class="small" x="438" y="498">JIT PTX, submit GPU work</text>
+
+  <rect class="accent" x="766" y="444" width="250" height="74" rx="8"/>
+  <text class="label" x="842" y="474">GPU</text>
+  <text class="small" x="820" y="498">SMs, Tensor Cores, HBM</text>
+
+  <line class="line" x1="322" y1="115" x2="430" y2="115"/>
+  <polygon class="arrow" points="430,115 418,109 418,121"/>
+  <line class="line" x1="690" y1="115" x2="792" y2="115"/>
+  <polygon class="arrow" points="792,115 780,109 780,121"/>
+  <path class="line" d="M 560 176 C 530 232, 420 238, 360 272"/>
+  <polygon class="arrow" points="360,272 367,260 373,270"/>
+  <path class="line" d="M 930 176 C 900 238, 802 248, 736 272"/>
+  <polygon class="arrow" points="736,272 746,262 750,274"/>
+  <line class="line" x1="438" y1="327" x2="562" y2="327"/>
+  <polygon class="arrow" points="562,327 550,321 550,333"/>
+  <path class="line" d="M 687 382 C 670 424, 610 428, 558 444"/>
+  <polygon class="arrow" points="558,444 568,434 571,446"/>
+  <line class="line" x1="640" y1="481" x2="766" y2="481"/>
+  <polygon class="arrow" points="766,481 754,475 754,487"/>
+
+  <path class="dash" d="M 792 158 C 690 218, 526 220, 438 280"/>
+  <text class="red" x="112" y="230">Python API choices still determine kernel path, layout, and autotuning.</text>
+</svg>

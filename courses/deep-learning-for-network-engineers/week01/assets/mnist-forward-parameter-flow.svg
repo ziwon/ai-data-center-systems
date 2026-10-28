@@ -1,0 +1,171 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="560" viewBox="0 0 1120 560" role="img" aria-labelledby="title desc">
+  <title id="title">MNIST forward pass parameter flow</title>
+  <desc id="desc">A 28 by 28 MNIST image is flattened into 784 inputs, passed through a 128 neuron hidden layer, converted to 10 output logits, and normalized by SoftMax into digit probabilities.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+    </marker>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#0f172a" flood-opacity="0.10"/>
+    </filter>
+    <style>
+      .bg { fill: #ffffff; }
+      text { font-family: Arial, sans-serif; }
+      .title { font-size: 24px; font-weight: 700; fill: #0f172a; }
+      .subtitle { font-size: 14px; font-weight: 400; fill: #475569; }
+      .label { font-size: 16px; font-weight: 700; fill: #0f172a; }
+      .small { font-size: 13px; font-weight: 400; fill: #334155; }
+      .tiny { font-size: 11px; font-weight: 400; fill: #475569; }
+      .num { font-size: 14px; font-weight: 700; fill: #7c2d12; }
+      .box-input { fill: #eef6ff; stroke: #2563eb; stroke-width: 1.5; }
+      .box-transform { fill: #f8fafc; stroke: #64748b; stroke-width: 1.5; }
+      .box-layer { fill: #ecfdf5; stroke: #059669; stroke-width: 1.5; }
+      .box-output { fill: #fff7ed; stroke: #ea580c; stroke-width: 1.5; }
+      .box-param { fill: #f5f3ff; stroke: #7c3aed; stroke-width: 1.5; }
+      .note { fill: #fff1f2; stroke: #e11d48; stroke-width: 1.3; stroke-dasharray: 5 4; }
+      .line { stroke: #475569; stroke-width: 2; fill: none; marker-end: url(#arrow); }
+      .thin { stroke: #94a3b8; stroke-width: 1; fill: none; }
+      .pixel0 { fill: #0f172a; }
+      .pixel1 { fill: #334155; }
+      .pixel2 { fill: #94a3b8; }
+      .pixel3 { fill: #e2e8f0; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1120" height="560"/>
+  <text class="title" x="40" y="46">MNIST Forward Pass and Parameter Footprint</text>
+  <text class="subtitle" x="40" y="72">Image classification turns pixels into logits, probabilities, gradients, and memory footprint.</text>
+
+  <g filter="url(#shadow)">
+    <rect class="box-input" x="40" y="115" width="160" height="250" rx="8"/>
+    <text class="label" x="68" y="145">MNIST Image</text>
+    <text class="small" x="68" y="168">28 x 28 grayscale</text>
+    <text class="small" x="68" y="188">pixel intensity</text>
+    <g transform="translate(73 212)">
+      <rect x="0" y="0" width="92" height="92" fill="#f8fafc" stroke="#cbd5e1"/>
+      <rect class="pixel3" x="6" y="6" width="10" height="10"/>
+      <rect class="pixel2" x="18" y="6" width="10" height="10"/>
+      <rect class="pixel1" x="30" y="6" width="10" height="10"/>
+      <rect class="pixel0" x="42" y="6" width="10" height="10"/>
+      <rect class="pixel1" x="54" y="6" width="10" height="10"/>
+      <rect class="pixel3" x="66" y="6" width="10" height="10"/>
+      <rect class="pixel3" x="78" y="6" width="8" height="10"/>
+      <rect class="pixel3" x="6" y="18" width="10" height="10"/>
+      <rect class="pixel1" x="18" y="18" width="10" height="10"/>
+      <rect class="pixel0" x="30" y="18" width="10" height="10"/>
+      <rect class="pixel0" x="42" y="18" width="10" height="10"/>
+      <rect class="pixel2" x="54" y="18" width="10" height="10"/>
+      <rect class="pixel3" x="66" y="18" width="10" height="10"/>
+      <rect class="pixel3" x="78" y="18" width="8" height="10"/>
+      <rect class="pixel3" x="6" y="30" width="10" height="10"/>
+      <rect class="pixel3" x="18" y="30" width="10" height="10"/>
+      <rect class="pixel1" x="30" y="30" width="10" height="10"/>
+      <rect class="pixel0" x="42" y="30" width="10" height="10"/>
+      <rect class="pixel0" x="54" y="30" width="10" height="10"/>
+      <rect class="pixel2" x="66" y="30" width="10" height="10"/>
+      <rect class="pixel3" x="78" y="30" width="8" height="10"/>
+      <rect class="pixel3" x="6" y="42" width="10" height="10"/>
+      <rect class="pixel3" x="18" y="42" width="10" height="10"/>
+      <rect class="pixel3" x="30" y="42" width="10" height="10"/>
+      <rect class="pixel1" x="42" y="42" width="10" height="10"/>
+      <rect class="pixel0" x="54" y="42" width="10" height="10"/>
+      <rect class="pixel0" x="66" y="42" width="10" height="10"/>
+      <rect class="pixel2" x="78" y="42" width="8" height="10"/>
+      <rect class="pixel3" x="6" y="54" width="10" height="10"/>
+      <rect class="pixel3" x="18" y="54" width="10" height="10"/>
+      <rect class="pixel2" x="30" y="54" width="10" height="10"/>
+      <rect class="pixel0" x="42" y="54" width="10" height="10"/>
+      <rect class="pixel0" x="54" y="54" width="10" height="10"/>
+      <rect class="pixel2" x="66" y="54" width="10" height="10"/>
+      <rect class="pixel3" x="78" y="54" width="8" height="10"/>
+      <rect class="pixel3" x="6" y="66" width="10" height="10"/>
+      <rect class="pixel2" x="18" y="66" width="10" height="10"/>
+      <rect class="pixel0" x="30" y="66" width="10" height="10"/>
+      <rect class="pixel0" x="42" y="66" width="10" height="10"/>
+      <rect class="pixel2" x="54" y="66" width="10" height="10"/>
+      <rect class="pixel3" x="66" y="66" width="10" height="10"/>
+      <rect class="pixel3" x="78" y="66" width="8" height="10"/>
+      <rect class="pixel2" x="6" y="78" width="10" height="8"/>
+      <rect class="pixel0" x="18" y="78" width="10" height="8"/>
+      <rect class="pixel1" x="30" y="78" width="10" height="8"/>
+      <rect class="pixel3" x="42" y="78" width="10" height="8"/>
+      <rect class="pixel3" x="54" y="78" width="10" height="8"/>
+      <rect class="pixel3" x="66" y="78" width="10" height="8"/>
+      <rect class="pixel3" x="78" y="78" width="8" height="8"/>
+    </g>
+    <text class="tiny" x="74" y="328">0 = black, 255 = white</text>
+  </g>
+
+  <line class="line" x1="205" y1="240" x2="265" y2="240"/>
+  <g filter="url(#shadow)">
+    <rect class="box-transform" x="270" y="150" width="145" height="180" rx="8"/>
+    <text class="label" x="306" y="183">Flatten</text>
+    <text class="small" x="298" y="212">28 x 28</text>
+    <text class="num" x="304" y="238">784 inputs</text>
+    <text class="tiny" x="292" y="270">one pixel per</text>
+    <text class="tiny" x="292" y="288">input feature</text>
+  </g>
+
+  <line class="line" x1="420" y1="240" x2="480" y2="240"/>
+  <g filter="url(#shadow)">
+    <rect class="box-layer" x="485" y="115" width="170" height="250" rx="8"/>
+    <text class="label" x="522" y="145">Hidden Layer</text>
+    <text class="num" x="535" y="172">128 neurons</text>
+    <g transform="translate(515 198)">
+      <circle cx="12" cy="12" r="8" fill="#059669"/>
+      <circle cx="42" cy="12" r="8" fill="#059669"/>
+      <circle cx="72" cy="12" r="8" fill="#059669"/>
+      <circle cx="102" cy="12" r="8" fill="#059669"/>
+      <circle cx="12" cy="44" r="8" fill="#059669"/>
+      <circle cx="42" cy="44" r="8" fill="#059669"/>
+      <circle cx="72" cy="44" r="8" fill="#059669"/>
+      <circle cx="102" cy="44" r="8" fill="#059669"/>
+      <circle cx="12" cy="76" r="8" fill="#059669"/>
+      <circle cx="42" cy="76" r="8" fill="#059669"/>
+      <text class="tiny" x="69" y="80">...</text>
+      <circle cx="102" cy="76" r="8" fill="#059669"/>
+    </g>
+    <text class="small" x="512" y="310">ReLU activations</text>
+    <text class="num" x="508" y="334">784 x 128 = 100,352</text>
+  </g>
+
+  <line class="line" x1="660" y1="240" x2="720" y2="240"/>
+  <g filter="url(#shadow)">
+    <rect class="box-output" x="725" y="115" width="165" height="250" rx="8"/>
+    <text class="label" x="763" y="145">Output Layer</text>
+    <text class="num" x="770" y="172">10 neurons</text>
+    <g transform="translate(750 198)">
+      <rect x="0" y="0" width="110" height="12" rx="6" fill="#fed7aa"/>
+      <rect x="0" y="22" width="80" height="12" rx="6" fill="#fed7aa"/>
+      <rect x="0" y="44" width="132" height="12" rx="6" fill="#ea580c"/>
+      <rect x="0" y="66" width="58" height="12" rx="6" fill="#fed7aa"/>
+      <rect x="0" y="88" width="95" height="12" rx="6" fill="#fed7aa"/>
+    </g>
+    <text class="small" x="763" y="310">logits</text>
+    <text class="num" x="755" y="334">128 x 10 = 1,280</text>
+  </g>
+
+  <line class="line" x1="895" y1="240" x2="955" y2="240"/>
+  <g filter="url(#shadow)">
+    <rect class="box-output" x="960" y="150" width="120" height="180" rx="8"/>
+    <text class="label" x="990" y="183">SoftMax</text>
+    <text class="small" x="983" y="212">probability</text>
+    <text class="small" x="984" y="232">distribution</text>
+    <text class="num" x="996" y="262">class 0..9</text>
+    <text class="tiny" x="992" y="292">sum = 1.0</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect class="box-param" x="180" y="415" width="760" height="96" rx="8"/>
+    <text class="label" x="210" y="447">Parameter and Memory Takeaway</text>
+    <text class="small" x="210" y="474">Hidden weights: 100,352 | Output weights: 1,280 | Total weights: 101,632</text>
+    <text class="small" x="210" y="496">FP32 storage: 101,632 x 4 bytes = 406,528 bytes before gradients, activations, and optimizer states</text>
+  </g>
+
+  <g>
+    <rect class="note" x="40" y="415" width="120" height="96" rx="8"/>
+    <text class="small" x="64" y="450">Model size</text>
+    <text class="small" x="58" y="472">starts with</text>
+    <text class="small" x="68" y="494">weights</text>
+  </g>
+</svg>

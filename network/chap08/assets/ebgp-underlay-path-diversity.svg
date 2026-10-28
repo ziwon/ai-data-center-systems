@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="620" viewBox="0 0 1120 620" role="img" aria-labelledby="title desc">
+  <title id="title">eBGP underlay path diversity in an AI fabric</title>
+  <desc id="desc">A leaf receives multiple BGP paths through spines. Unnumbered peering, ADD-PATH, link bandwidth, and minimum peer policy preserve path diversity and weighted forwarding.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.4; }
+    .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; }
+    .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.5; }
+    .wide { fill: none; stroke: #111111; stroke-width: 3; }
+    .accent-line { fill: none; stroke: #D9392E; stroke-width: 2.4; }
+    .muted-line { fill: none; stroke: #D8D1C7; stroke-width: 1.2; stroke-dasharray: 7 6; }
+    .label { font-family: Inter, Arial, sans-serif; font-size: 16px; font-weight: 700; fill: #050505; }
+    .small { font-family: Inter, Arial, sans-serif; font-size: 12px; fill: #6F6A63; }
+    .tiny { font-family: Inter, Arial, sans-serif; font-size: 11px; fill: #6F6A63; }
+    .red { fill: #D9392E; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#111111"/>
+    </marker>
+    <marker id="arrowAccent" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#D9392E"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1120" height="620"/>
+
+  <g transform="translate(74 74)">
+    <rect class="box" x="0" y="250" width="150" height="82" rx="6"/>
+    <text class="label" x="75" y="282" text-anchor="middle">Leaf A</text>
+    <text class="small" x="75" y="305" text-anchor="middle">ingress ECMP</text>
+
+    <rect class="box" x="785" y="250" width="150" height="82" rx="6"/>
+    <text class="label" x="860" y="282" text-anchor="middle">Leaf D</text>
+    <text class="small" x="860" y="305" text-anchor="middle">GPU prefix</text>
+
+    <rect class="box" x="285" y="70" width="150" height="72" rx="6"/>
+    <text class="label" x="360" y="100" text-anchor="middle">Spine A</text>
+    <text class="small" x="360" y="122" text-anchor="middle">400G path</text>
+
+    <rect class="accent" x="392" y="250" width="150" height="72" rx="6"/>
+    <text class="label" x="467" y="280" text-anchor="middle">Spine B</text>
+    <text class="small" x="467" y="302" text-anchor="middle">800G path</text>
+
+    <rect class="box" x="285" y="430" width="150" height="72" rx="6"/>
+    <text class="label" x="360" y="460" text-anchor="middle">Spine C</text>
+    <text class="small" x="360" y="482" text-anchor="middle">400G path</text>
+
+    <path class="line" d="M150 286 C208 210 235 133 285 106" marker-end="url(#arrow)"/>
+    <path class="accent-line" d="M150 291 H392" marker-end="url(#arrowAccent)"/>
+    <path class="line" d="M150 296 C210 374 239 445 285 466" marker-end="url(#arrow)"/>
+
+    <path class="line" d="M435 106 C573 126 672 204 785 278" marker-end="url(#arrow)"/>
+    <path class="accent-line" d="M542 286 H785" marker-end="url(#arrowAccent)"/>
+    <path class="line" d="M435 466 C576 438 684 363 785 305" marker-end="url(#arrow)"/>
+
+    <rect class="soft" x="16" y="32" width="215" height="94" rx="6"/>
+    <text class="label" x="123.5" y="65" text-anchor="middle">BGP unnumbered</text>
+    <text class="small" x="123.5" y="90" text-anchor="middle">IPv6 link-local sessions</text>
+    <text class="small" x="123.5" y="110" text-anchor="middle">carry IPv4 NLRI</text>
+
+    <rect class="soft" x="625" y="32" width="230" height="94" rx="6"/>
+    <text class="label" x="740" y="65" text-anchor="middle">ADD-PATH</text>
+    <text class="small" x="740" y="90" text-anchor="middle">advertise more than best path</text>
+    <text class="small" x="740" y="110" text-anchor="middle">for path diversity</text>
+
+    <rect class="accent" x="608" y="407" width="250" height="100" rx="6"/>
+    <text class="label" x="733" y="439" text-anchor="middle">Link bandwidth community</text>
+    <text class="small" x="733" y="464" text-anchor="middle">weighted ECMP sends more buckets</text>
+    <text class="small" x="733" y="484" text-anchor="middle">toward higher-capacity next hops</text>
+
+    <rect class="soft" x="30" y="420" width="205" height="92" rx="6"/>
+    <text class="label" x="132.5" y="453" text-anchor="middle">Minimum peers</text>
+    <text class="small" x="132.5" y="478" text-anchor="middle">stop using a prefix when</text>
+    <text class="small" x="132.5" y="498" text-anchor="middle">ECMP width collapses</text>
+
+    <path class="muted-line" d="M231 78 C294 51 580 49 625 78" marker-end="url(#arrow)"/>
+    <path class="muted-line" d="M608 457 C520 503 326 513 235 466" marker-end="url(#arrow)"/>
+    <text class="tiny red" x="568" y="274">preferred share</text>
+  </g>
+</svg>

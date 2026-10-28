@@ -1,0 +1,512 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1800 2100" role="img" aria-labelledby="title desc">
+  <title id="title">Kimi K3 detailed architecture</title>
+  <desc id="desc">Detailed official-corrected architecture of Kimi K3 covering Block Attention Residuals, Kimi Delta Attention, the hybrid language backbone, Stable LatentMoE, NoPE Gated MLA, and the MoonViT-V2 vision pathway.</desc>
+  <style>
+    .bg { fill: #F3EFE7; }
+    .panel { fill: none; stroke: #111111; stroke-width: 2; stroke-dasharray: 10 7; rx: 14; }
+    .subpanel { fill: #F5F1EA; stroke: #D8D1C7; stroke-width: 2; rx: 10; }
+    .node { fill: #F5F1EA; stroke: #111111; stroke-width: 1.7; rx: 8; }
+    .node-soft { fill: #E7E0D6; stroke: #111111; stroke-width: 1.5; rx: 8; }
+    .node-dark { fill: #111111; stroke: #111111; stroke-width: 1.5; rx: 8; }
+    .node-accent { fill: #D9392E; stroke: #111111; stroke-width: 1.5; rx: 8; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.7; marker-end: url(#arrow); }
+    .line-plain { fill: none; stroke: #111111; stroke-width: 1.7; }
+    .line-dashed { fill: none; stroke: #6F6A63; stroke-width: 1.4; stroke-dasharray: 7 6; marker-end: url(#arrow-gray); }
+    .divider { stroke: #D8D1C7; stroke-width: 2; stroke-dasharray: 4 6; }
+    .title { font-family: "DejaVu Sans", Arial, sans-serif; font-size: 24px; font-weight: 700; fill: #050505; }
+    .subtitle { font-family: "DejaVu Sans", Arial, sans-serif; font-size: 18px; font-weight: 700; fill: #050505; }
+    .label { font-family: "DejaVu Sans", Arial, sans-serif; font-size: 15px; font-weight: 600; fill: #050505; }
+    .label-white { font-family: "DejaVu Sans", Arial, sans-serif; font-size: 15px; font-weight: 600; fill: #F5F1EA; }
+    .small { font-family: "DejaVu Sans", Arial, sans-serif; font-size: 14px; font-weight: 400; fill: #050505; }
+    .tiny { font-family: "DejaVu Sans", Arial, sans-serif; font-size: 13px; font-weight: 400; fill: #6F6A63; }
+    .micro { font-family: "DejaVu Sans", Arial, sans-serif; font-size: 11px; font-weight: 400; fill: #6F6A63; }
+    .accent { font-family: "DejaVu Sans", Arial, sans-serif; font-size: 14px; font-weight: 700; fill: #D9392E; }
+    .number { font-family: "DejaVu Sans", Arial, sans-serif; font-size: 21px; font-weight: 800; fill: #050505; }
+    .center { text-anchor: middle; dominant-baseline: middle; }
+    .left { text-anchor: start; dominant-baseline: middle; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#111111"/>
+    </marker>
+    <marker id="arrow-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#6F6A63"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1800" height="2100"/>
+
+  <!-- Block Attention Residuals -->
+  <g aria-label="Detailed Block Attention Residuals">
+    <rect class="panel" x="35" y="35" width="520" height="400"/>
+    <text class="title left" x="55" y="66">Block Attention Residuals</text>
+    <text class="tiny left" x="55" y="92">93 layers · block size 12 · 8 layer blocks + embedding source</text>
+
+    <rect class="node-soft" x="55" y="115" width="85" height="38"/>
+    <rect class="node-soft" x="155" y="115" width="85" height="38"/>
+    <rect class="node-soft" x="255" y="115" width="85" height="38"/>
+    <rect class="node-soft" x="355" y="115" width="85" height="38"/>
+    <rect class="node-accent" x="455" y="115" width="80" height="38"/>
+    <text class="small center" x="97.5" y="134">embedding</text>
+    <text class="small center" x="197.5" y="134">block 1</text>
+    <text class="small center" x="297.5" y="134">block 2</text>
+    <text class="small center" x="397.5" y="134">…</text>
+    <text class="label-white center" x="495" y="134">partial</text>
+
+    <path class="line-plain" d="M97 153 V177"/>
+    <path class="line-plain" d="M197 153 V177"/>
+    <path class="line-plain" d="M297 153 V177"/>
+    <path class="line-plain" d="M397 153 V177"/>
+    <path class="line-plain" d="M495 153 V177"/>
+    <rect class="node" x="55" y="177" width="480" height="42"/>
+    <text class="label center" x="295" y="198">stack block values V</text>
+    <text class="micro center" x="295" y="213">[sources ≤ 9, sequence, 7168]</text>
+
+    <rect class="node" x="55" y="252" width="100" height="44"/>
+    <rect class="node" x="175" y="252" width="120" height="44"/>
+    <rect class="node" x="315" y="252" width="100" height="44"/>
+    <rect class="node" x="435" y="252" width="100" height="44"/>
+    <text class="micro center" x="105" y="274">pseudo-query w</text>
+    <text class="small center" x="235" y="274">RMSNorm(K)</text>
+    <text class="small center" x="365" y="274">einsum logits</text>
+    <text class="small center" x="485" y="274">softmax α</text>
+    <path class="line" d="M295 219 V238 H235 V252"/>
+    <path class="line" d="M105 296 V315 H365 V296"/>
+    <path class="line" d="M295 274 H315"/>
+    <path class="line" d="M415 274 H435"/>
+
+    <rect class="node-dark" x="315" y="330" width="220" height="48"/>
+    <text class="label-white center" x="425" y="348">einsum(α, V)</text>
+    <text class="micro center" style="fill:#D8D1C7" x="425" y="366">depth mixture · [seq, 7168]</text>
+    <path class="line" d="M485 296 V330"/>
+    <path class="line-dashed" d="M500 219 V315 H425 V330"/>
+    <path class="line" d="M425 378 V397"/>
+
+    <text class="accent left" x="55" y="348">Selective retrieval over depth</text>
+    <text class="tiny left" x="55" y="374">O(Nd) state instead of O(Ld)</text>
+    <text class="micro left" x="55" y="410">First layer of a block reads completed blocks; later layers also read the current partial sum.</text>
+  </g>
+
+  <!-- Kimi Delta Attention -->
+  <g aria-label="Detailed Kimi Delta Attention">
+    <rect class="panel" x="35" y="460" width="520" height="560"/>
+    <text class="title left" x="55" y="491">Kimi Delta Attention</text>
+    <text class="tiny left" x="55" y="518">69 layers · 96 heads · d_head 128 · ShortConv kernel 4</text>
+
+    <rect class="node-dark" x="175" y="545" width="240" height="44"/>
+    <text class="label-white center" x="295" y="567">input x · hidden 7168</text>
+
+    <path class="line-plain" d="M295 589 V607 H95 V620"/>
+    <path class="line-plain" d="M295 607 H195 V620"/>
+    <path class="line-plain" d="M295 607 H295 V620"/>
+    <path class="line-plain" d="M295 607 H395 V620"/>
+    <path class="line-plain" d="M295 607 H495 V620"/>
+
+    <rect class="node" x="50" y="620" width="90" height="130"/>
+    <rect class="node" x="150" y="620" width="90" height="130"/>
+    <rect class="node" x="250" y="620" width="90" height="130"/>
+    <rect class="node" x="350" y="620" width="90" height="130"/>
+    <rect class="node" x="450" y="620" width="85" height="130"/>
+    <text class="label center" x="95" y="641">Q</text>
+    <text class="micro center" x="95" y="667">Linear</text>
+    <text class="micro center" x="95" y="686">ShortConv4</text>
+    <text class="micro center" x="95" y="705">Swish</text>
+    <text class="micro center" x="95" y="724">L2 Norm</text>
+    <text class="label center" x="195" y="641">K</text>
+    <text class="micro center" x="195" y="667">Linear</text>
+    <text class="micro center" x="195" y="686">ShortConv4</text>
+    <text class="micro center" x="195" y="705">Swish</text>
+    <text class="micro center" x="195" y="724">L2 Norm</text>
+    <text class="label center" x="295" y="641">V</text>
+    <text class="micro center" x="295" y="667">Linear</text>
+    <text class="micro center" x="295" y="686">ShortConv4</text>
+    <text class="micro center" x="295" y="705">Swish</text>
+    <text class="micro center" x="295" y="730">d_v = 128</text>
+    <text class="label center" x="395" y="641">α</text>
+    <text class="micro center" x="395" y="667">low-rank proj</text>
+    <text class="micro center" x="395" y="686">g = −5·sigmoid</text>
+    <text class="micro center" x="395" y="705">α = exp(g)</text>
+    <text class="micro center" x="395" y="730">channel-wise</text>
+    <text class="label center" x="492.5" y="641">β</text>
+    <text class="micro center" x="492.5" y="677">Linear</text>
+    <text class="micro center" x="492.5" y="701">Sigmoid</text>
+    <text class="micro center" x="492.5" y="730">write strength</text>
+
+    <path class="line" d="M95 750 V785"/>
+    <path class="line" d="M195 750 V775 H215 V785"/>
+    <path class="line" d="M295 750 V775 H275 V785"/>
+    <path class="line" d="M395 750 V775 H375 V785"/>
+    <path class="line" d="M492 750 V785"/>
+    <rect class="node-accent" x="85" y="785" width="420" height="74"/>
+    <text class="label-white center" x="295" y="805">KDA recurrent update</text>
+    <text class="micro center" style="fill:#F5F1EA" x="295" y="826">Sₜ = (I − βₜkₜkₜᵀ)Diag(αₜ)Sₜ₋₁ + βₜkₜvₜᵀ</text>
+    <text class="micro center" style="fill:#F5F1EA" x="295" y="847">Sₜ ∈ ℝ¹²⁸×¹²⁸ per head · fixed size across sequence length</text>
+
+    <rect class="node" x="70" y="892" width="185" height="46"/>
+    <rect class="node" x="285" y="892" width="235" height="46"/>
+    <text class="small center" x="162.5" y="915">head-wise RMSNorm(õ)</text>
+    <text class="micro center" x="402.5" y="915">full-rank gate · Sigmoid(Wg x)</text>
+    <path class="line" d="M295 859 V878 H162 V892"/>
+    <path class="line-dashed" d="M415 567 H535 V915 H520"/>
+
+    <rect class="node-dark" x="115" y="962" width="360" height="44"/>
+    <text class="label-white center" x="295" y="984">Linear O [gate ⊙ normalized output]</text>
+    <path class="line" d="M162 938 V950 H295 V962"/>
+    <path class="line" d="M402 938 V950 H295 V962"/>
+  </g>
+
+  <!-- Backbone -->
+  <g aria-label="Detailed language model backbone">
+    <rect class="panel" x="580" y="35" width="380" height="985"/>
+    <text class="title left" x="600" y="66">LM backbone · 93 layers</text>
+    <text class="tiny left" x="600" y="92">2.78T total · 104.2B active · hidden 7168</text>
+    <text class="micro left" x="600" y="112">MTP: report table = 1 · released checkpoint config = 0</text>
+
+    <rect class="node-dark" x="655" y="135" width="230" height="44"/>
+    <text class="label-white center" x="770" y="157">LM head · vocab 163,840</text>
+    <rect class="node" x="655" y="205" width="230" height="44"/>
+    <text class="label center" x="770" y="227">RMSNorm</text>
+    <path class="line" d="M770 205 V179"/>
+
+    <rect class="subpanel" x="600" y="280" width="340" height="92"/>
+    <text class="subtitle left" x="615" y="303">Final layer 93</text>
+    <rect class="node" x="615" y="320" width="95" height="38"/>
+    <rect class="node-accent" x="722" y="320" width="95" height="38"/>
+    <rect class="node" x="829" y="320" width="96" height="38"/>
+    <text class="micro center" x="662.5" y="339">AttnRes + Norm</text>
+    <text class="label-white center" x="769.5" y="339">Gated MLA</text>
+    <text class="micro center" x="877" y="339">Stable MoE</text>
+    <path class="line" d="M710 339 H722"/>
+    <path class="line" d="M817 339 H829"/>
+    <path class="line" d="M770 280 V249"/>
+
+    <rect class="subpanel" x="595" y="400" width="350" height="475"/>
+    <text class="number left" x="610" y="426">23× hybrid pattern</text>
+    <text class="tiny left" x="610" y="449">layers 1–92 · each: 3 KDA + 1 Gated MLA</text>
+
+    <rect class="node" x="610" y="475" width="95" height="52"/>
+    <rect class="node" x="717" y="475" width="95" height="52"/>
+    <rect class="node" x="824" y="475" width="105" height="52"/>
+    <text class="micro center" x="657.5" y="494">AttnRes</text>
+    <text class="micro center" x="657.5" y="513">+ RMSNorm</text>
+    <text class="label center" x="764.5" y="501">KDA</text>
+    <text class="micro center" x="876.5" y="494">Stable MoE*</text>
+    <text class="micro center" x="876.5" y="513">+ AttnRes</text>
+    <path class="line" d="M705 501 H717"/>
+    <path class="line" d="M812 501 H824"/>
+
+    <rect class="node" x="610" y="565" width="95" height="52"/>
+    <rect class="node" x="717" y="565" width="95" height="52"/>
+    <rect class="node" x="824" y="565" width="105" height="52"/>
+    <text class="micro center" x="657.5" y="584">AttnRes</text>
+    <text class="micro center" x="657.5" y="603">+ RMSNorm</text>
+    <text class="label center" x="764.5" y="591">KDA</text>
+    <text class="micro center" x="876.5" y="584">Stable MoE</text>
+    <text class="micro center" x="876.5" y="603">+ AttnRes</text>
+    <path class="line" d="M705 591 H717"/>
+    <path class="line" d="M812 591 H824"/>
+
+    <rect class="node" x="610" y="655" width="95" height="52"/>
+    <rect class="node" x="717" y="655" width="95" height="52"/>
+    <rect class="node" x="824" y="655" width="105" height="52"/>
+    <text class="micro center" x="657.5" y="674">AttnRes</text>
+    <text class="micro center" x="657.5" y="693">+ RMSNorm</text>
+    <text class="label center" x="764.5" y="681">KDA</text>
+    <text class="micro center" x="876.5" y="674">Stable MoE</text>
+    <text class="micro center" x="876.5" y="693">+ AttnRes</text>
+    <path class="line" d="M705 681 H717"/>
+    <path class="line" d="M812 681 H824"/>
+
+    <rect class="node" x="610" y="745" width="95" height="52"/>
+    <rect class="node-accent" x="717" y="745" width="95" height="52"/>
+    <rect class="node" x="824" y="745" width="105" height="52"/>
+    <text class="micro center" x="657.5" y="764">AttnRes</text>
+    <text class="micro center" x="657.5" y="783">+ RMSNorm</text>
+    <text class="label-white center" x="764.5" y="771">Gated MLA</text>
+    <text class="micro center" x="876.5" y="764">Stable MoE</text>
+    <text class="micro center" x="876.5" y="783">+ AttnRes</text>
+    <path class="line" d="M705 771 H717"/>
+    <path class="line" d="M812 771 H824"/>
+
+    <text class="micro left" x="610" y="832">* Layer 1 replaces Stable LatentMoE with dense FFN.</text>
+    <text class="micro left" x="610" y="852">Layer 2–93 use Stable LatentMoE.</text>
+
+    <rect class="node-dark" x="625" y="935" width="290" height="48"/>
+    <text class="label-white center" x="770" y="959">shared embedding · 7168</text>
+    <path class="line" d="M770 935 V875"/>
+    <path class="line" d="M770 400 V372"/>
+  </g>
+
+  <!-- Stable LatentMoE -->
+  <g aria-label="Detailed Stable LatentMoE">
+    <rect class="panel" x="985" y="35" width="780" height="430"/>
+    <text class="title left" x="1005" y="66">Stable LatentMoE</text>
+    <text class="tiny left" x="1005" y="92">896 routed experts · Top-16 · 2 shared experts · auxiliary-loss-free sigmoid routing</text>
+
+    <rect class="node-dark" x="1005" y="115" width="150" height="44"/>
+    <text class="label-white center" x="1080" y="137">input x · 7168</text>
+    <rect class="node-accent" x="1190" y="115" width="110" height="44"/>
+    <text class="label-white center" x="1245" y="137">Router</text>
+    <rect class="node" x="1325" y="115" width="120" height="44"/>
+    <text class="small center" x="1385" y="137">+ frozen QB bias</text>
+    <rect class="node" x="1470" y="115" width="115" height="44"/>
+    <text class="label center" x="1527.5" y="137">Top-16 / 896</text>
+    <text class="micro left" x="1600" y="129">bias selects experts;</text>
+    <text class="micro left" x="1600" y="146">raw scores set weights</text>
+    <path class="line" d="M1155 137 H1190"/>
+    <path class="line" d="M1300 137 H1325"/>
+    <path class="line" d="M1445 137 H1470"/>
+
+    <rect class="node" x="1005" y="205" width="150" height="48"/>
+    <text class="small center" x="1080" y="222">W↓ payload</text>
+    <text class="tiny center" x="1080" y="242">7168 → 3584</text>
+    <path class="line" d="M1080 159 V205"/>
+
+    <rect class="node-soft" x="1190" y="185" width="300" height="112"/>
+    <text class="small center" x="1340" y="205">selected routed expert · hidden 3072</text>
+    <text class="micro center" x="1340" y="228">gate branch · tanh soft cap + sigmoid · β₁=4</text>
+    <text class="micro center" x="1340" y="250">up branch · tanh soft cap · β₂=25</text>
+    <text class="micro center" x="1340" y="272">product → down projection · output 3584</text>
+    <path class="line" d="M1155 229 H1190"/>
+    <path class="line-dashed" d="M1527 159 V175 H1340 V185"/>
+
+    <rect class="node" x="1515" y="205" width="105" height="48"/>
+    <text class="small center" x="1567.5" y="222">weighted Σ</text>
+    <text class="micro center" x="1567.5" y="242">16 experts</text>
+    <path class="line" d="M1490 229 H1515"/>
+
+    <rect class="node" x="1515" y="275" width="105" height="44"/>
+    <text class="small center" x="1567.5" y="297">RMSNorm</text>
+    <path class="line" d="M1567 253 V275"/>
+    <rect class="node" x="1640" y="270" width="105" height="54"/>
+    <text class="micro center" x="1692.5" y="288">W↑ projection</text>
+    <text class="micro center" x="1692.5" y="307">3584 → 7168</text>
+    <path class="line" d="M1620 297 H1640"/>
+
+    <rect class="node" x="1190" y="345" width="300" height="60"/>
+    <text class="small center" x="1340" y="365">2× full-width shared experts · summed</text>
+    <text class="tiny center" x="1340" y="389">7168 → 33792 → 7168 · SiTU-GLU</text>
+    <path class="line" d="M1165 147 V375 H1190"/>
+
+    <circle cx="1692" cy="385" r="18" fill="#D9392E" stroke="#111111" stroke-width="2"/>
+    <text class="label-white center" x="1692" y="386">+</text>
+    <path class="line" d="M1692 324 V367"/>
+    <path class="line" d="M1490 375 H1650 V385 H1674"/>
+    <path class="line" d="M1710 385 H1745"/>
+    <text class="micro left" x="1515" y="426">routed path only:</text>
+    <text class="micro left" x="1515" y="442">weighted Σ → RMSNorm → W↑</text>
+  </g>
+
+  <!-- Gated MLA -->
+  <g aria-label="Detailed NoPE Gated MLA">
+    <rect class="panel" x="985" y="490" width="780" height="530"/>
+    <text class="title left" x="1005" y="521">Gated MLA · global attention</text>
+    <text class="tiny left" x="1005" y="548">24 layers · 96 heads · NoPE · head dim 128</text>
+    <text class="tiny left" x="1005" y="567">q LoRA rank 1536 · kv LoRA/cache rank 512</text>
+    <text class="accent left" x="1005" y="587">No RoPE or positional cache path is used by K3 MLA.</text>
+
+    <rect class="node-dark" x="1260" y="970" width="230" height="42"/>
+    <text class="label-white center" x="1375" y="991">input x · hidden 7168</text>
+
+    <rect class="node" x="1020" y="920" width="230" height="44"/>
+    <text class="small center" x="1135" y="935">Q down projection</text>
+    <text class="micro center" x="1135" y="953">7168 → q LoRA rank 1536</text>
+    <rect class="node" x="1020" y="860" width="230" height="44"/>
+    <text class="small center" x="1135" y="875">RMSNorm → Q up</text>
+    <text class="micro center" x="1135" y="893">1536 → 96 × 128</text>
+    <rect class="node-soft" x="1020" y="800" width="230" height="44"/>
+    <text class="small center" x="1135" y="815">Q · 96 × 128</text>
+    <text class="micro center" x="1135" y="833">content-only · NoPE</text>
+    <path class="line" d="M1260 991 H995 V942 H1020"/>
+    <path class="line" d="M1135 920 V904"/>
+    <path class="line" d="M1135 860 V844"/>
+
+    <rect class="node" x="1500" y="920" width="230" height="44"/>
+    <text class="small center" x="1615" y="935">KV down projection</text>
+    <text class="micro center" x="1615" y="953">7168 → kv LoRA rank 512</text>
+    <rect class="node" x="1500" y="850" width="230" height="54"/>
+    <text class="small center" x="1615" y="867">RMSNorm · latent KV cache</text>
+    <text class="micro center" x="1615" y="888">cache cₜ · 512 values per token</text>
+    <rect class="node" x="1500" y="800" width="230" height="40"/>
+    <text class="small center" x="1615" y="820">KV up → K / V · 96 × 128</text>
+    <path class="line" d="M1490 991 H1755 V942 H1730"/>
+    <path class="line" d="M1615 920 V904"/>
+    <path class="line" d="M1615 850 V840"/>
+
+    <rect class="node-accent" x="1205" y="725" width="340" height="58"/>
+    <text class="label-white center" x="1375" y="746">Global multi-head attention</text>
+    <text class="label-white center" x="1375" y="768">unrestricted content interaction</text>
+    <path class="line" d="M1135 800 V754 H1205"/>
+    <path class="line" d="M1615 800 V754 H1545"/>
+
+    <rect class="node" x="1205" y="655" width="340" height="48"/>
+    <text class="small center" x="1375" y="672">Sigmoid(Wg x) ⊙ attention output</text>
+    <text class="micro center" x="1375" y="691">input-dependent full-rank channel gate</text>
+    <path class="line" d="M1375 725 V703"/>
+    <path class="line-dashed" d="M1490 991 H1745 V679 H1545"/>
+
+    <rect class="node-dark" x="1260" y="605" width="230" height="36"/>
+    <text class="label-white center" x="1375" y="623">Linear O · output 7168</text>
+    <path class="line" d="M1375 655 V641"/>
+  </g>
+
+  <!-- Vision pathway -->
+  <g aria-label="Detailed MoonViT-V2 vision pathway">
+    <line class="divider" x1="35" y1="1050" x2="1765" y2="1050"/>
+    <text class="title left" x="55" y="1084">Native vision pathway · MoonViT-V2</text>
+    <text class="tiny left" x="55" y="1108">401M parameters · trained from scratch · image/video parameters shared · next-token prediction objective</text>
+    <rect class="panel" x="35" y="1125" width="1730" height="940"/>
+
+    <!-- Vision overview -->
+    <rect class="node-accent" x="60" y="1175" width="150" height="56"/>
+    <text class="label-white center" x="135" y="1194">images / video</text>
+    <text class="label-white center" x="135" y="1214">frames</text>
+    <rect class="node" x="245" y="1175" width="150" height="56"/>
+    <text class="small center" x="320" y="1194">image processor</text>
+    <text class="micro center" x="320" y="1214">pixels · grid t/h/w</text>
+    <rect class="node" x="430" y="1175" width="150" height="56"/>
+    <text class="small center" x="505" y="1194">PatchEmbed</text>
+    <text class="micro center" x="505" y="1214">patch 14 · hidden 1024</text>
+    <rect class="node" x="615" y="1175" width="170" height="56"/>
+    <text class="small center" x="700" y="1194">27× MoonViT blocks</text>
+    <text class="micro center" x="700" y="1214">12 heads · MLP 4096</text>
+    <rect class="node-accent" x="820" y="1175" width="155" height="56"/>
+    <text class="label-white center" x="897.5" y="1194">2×2 pixel shuffle</text>
+    <text class="micro center" style="fill:#F5F1EA" x="897.5" y="1214">visual tokens ÷ 4</text>
+    <rect class="node" x="1010" y="1175" width="165" height="56"/>
+    <text class="small center" x="1092.5" y="1194">PatchMergerV2</text>
+    <text class="micro center" x="1092.5" y="1214">MLP projector → 7168</text>
+    <rect class="node-dark" x="1210" y="1175" width="170" height="56"/>
+    <text class="label-white center" x="1295" y="1194">merge modalities</text>
+    <text class="micro center" style="fill:#D8D1C7" x="1295" y="1214">shared token stream</text>
+    <rect class="node-dark" x="1415" y="1175" width="300" height="56"/>
+    <text class="label-white center" x="1565" y="1194">language backbone</text>
+    <text class="micro center" style="fill:#D8D1C7" x="1565" y="1214">hidden 7168 · context 1M</text>
+    <path class="line" d="M210 1203 H245"/>
+    <path class="line" d="M395 1203 H430"/>
+    <path class="line" d="M580 1203 H615"/>
+    <path class="line" d="M785 1203 H820"/>
+    <path class="line" d="M975 1203 H1010"/>
+    <path class="line" d="M1175 1203 H1210"/>
+    <path class="line" d="M1380 1203 H1415"/>
+
+    <!-- Factorized attention detail -->
+    <rect class="subpanel" x="60" y="1300" width="350" height="600"/>
+    <text class="subtitle left" x="80" y="1330">Factorized attention detail</text>
+    <text class="tiny left" x="80" y="1355">fully shared parameters for images and videos</text>
+    <rect class="node-dark" x="115" y="1818" width="240" height="44"/>
+    <text class="label-white center" x="235" y="1840">vision hidden · 1024</text>
+    <rect class="node" x="115" y="1748" width="240" height="44"/>
+    <text class="small center" x="235" y="1770">QKV projection · 1024 → 1536</text>
+    <rect class="node" x="90" y="1645" width="290" height="76"/>
+    <text class="small center" x="235" y="1665">intra-frame spatial attention</text>
+    <text class="micro center" x="235" y="1687">12 heads · position within each frame</text>
+    <text class="micro center" x="235" y="1706">image path uses the spatial pass</text>
+    <rect class="node" x="90" y="1535" width="290" height="76"/>
+    <text class="small center" x="235" y="1555">inter-frame temporal pass</text>
+    <text class="micro center" x="235" y="1577">shared weights across video frames</text>
+    <text class="micro center" x="235" y="1596">temporal pooling compresses time tokens</text>
+    <rect class="node-accent" x="115" y="1445" width="240" height="54"/>
+    <text class="label-white center" x="235" y="1465">factorized output</text>
+    <text class="micro center" style="fill:#F5F1EA" x="235" y="1485">spatial + temporal context</text>
+    <path class="line" d="M235 1818 V1792"/>
+    <path class="line" d="M235 1748 V1721"/>
+    <path class="line" d="M235 1645 V1611"/>
+    <path class="line" d="M235 1535 V1499"/>
+    <text class="micro left" x="80" y="1878">No separate post-hoc modality alignment stage.</text>
+  </g>
+
+  <!-- MoonViT block -->
+  <g aria-label="MoonViT-V2 transformer block">
+    <rect class="subpanel" x="440" y="1300" width="500" height="720"/>
+    <text class="subtitle left" x="460" y="1330">27× MoonViT-V2 block</text>
+    <text class="tiny left" x="460" y="1355">RMSNorm · no linear/attention bias · hidden 1024</text>
+
+    <rect class="node-dark" x="570" y="1935" width="240" height="44"/>
+    <text class="label-white center" x="690" y="1957">block input · 1024</text>
+    <rect class="node" x="570" y="1865" width="240" height="44"/>
+    <text class="small center" x="690" y="1887">RMSNorm</text>
+    <rect class="node-accent" x="530" y="1765" width="320" height="66"/>
+    <text class="label-white center" x="690" y="1786">factorized spatial / temporal attention</text>
+    <text class="micro center" style="fill:#F5F1EA" x="690" y="1810">temporal pooling on video tokens</text>
+    <circle cx="690" cy="1715" r="17" fill="#D9392E" stroke="#111111" stroke-width="2"/>
+    <text class="label-white center" x="690" y="1716">+</text>
+    <path class="line-dashed" d="M570 1957 H490 V1715 H673"/>
+
+    <rect class="node" x="570" y="1645" width="240" height="44"/>
+    <text class="small center" x="690" y="1667">RMSNorm</text>
+    <rect class="node" x="530" y="1535" width="320" height="82"/>
+    <text class="small center" x="690" y="1555">MLP2</text>
+    <text class="micro center" x="690" y="1577">Linear 1024 → 4096 · GELU</text>
+    <text class="micro center" x="690" y="1598">Linear 4096 → 1024</text>
+    <circle cx="690" cy="1485" r="17" fill="#D9392E" stroke="#111111" stroke-width="2"/>
+    <text class="label-white center" x="690" y="1486">+</text>
+    <path class="line-dashed" d="M673 1715 H490 V1485 H673"/>
+    <rect class="node-dark" x="570" y="1405" width="240" height="44"/>
+    <text class="label-white center" x="690" y="1427">block output · 1024</text>
+
+    <path class="line" d="M690 1935 V1909"/>
+    <path class="line" d="M690 1865 V1831"/>
+    <path class="line" d="M690 1765 V1732"/>
+    <path class="line" d="M690 1698 V1689"/>
+    <path class="line" d="M690 1645 V1617"/>
+    <path class="line" d="M690 1535 V1502"/>
+    <path class="line" d="M690 1468 V1449"/>
+  </g>
+
+  <!-- PatchMergerV2 detail -->
+  <g aria-label="PatchMergerV2 detail">
+    <rect class="subpanel" x="970" y="1300" width="360" height="600"/>
+    <text class="subtitle left" x="990" y="1330">PatchMergerV2 detail</text>
+    <text class="tiny left" x="990" y="1355">lightweight projector into the text space</text>
+
+    <rect class="node-dark" x="1030" y="1815" width="240" height="44"/>
+    <text class="label-white center" x="1150" y="1837">MoonViT features · 1024</text>
+    <rect class="node-accent" x="1030" y="1735" width="240" height="54"/>
+    <text class="label-white center" x="1150" y="1755">2×2 pixel shuffle</text>
+    <text class="micro center" style="fill:#F5F1EA" x="1150" y="1776">four neighboring patches → one token</text>
+    <rect class="node" x="1030" y="1655" width="240" height="48"/>
+    <text class="small center" x="1150" y="1672">PatchMergerV2</text>
+    <text class="micro center" x="1150" y="1691">MLP projector · GELU</text>
+    <rect class="node" x="1030" y="1585" width="240" height="44"/>
+    <text class="small center" x="1150" y="1607">project to hidden 7168</text>
+    <rect class="node-dark" x="1030" y="1515" width="240" height="44"/>
+    <text class="label-white center" x="1150" y="1537">visual tokens · 7168</text>
+    <path class="line" d="M1150 1815 V1789"/>
+    <path class="line" d="M1150 1735 V1703"/>
+    <path class="line" d="M1150 1655 V1629"/>
+    <path class="line" d="M1150 1585 V1559"/>
+    <text class="micro left" x="990" y="1878">The public config names this projector `patchmergerv2`.</text>
+  </g>
+
+  <!-- Shared multimodal token stream -->
+  <g aria-label="Text and visual token merge">
+    <rect class="subpanel" x="1360" y="1300" width="380" height="600"/>
+    <text class="subtitle left" x="1380" y="1330">Shared multimodal token stream</text>
+    <text class="tiny left" x="1380" y="1355">text, image, and video share one backbone context</text>
+
+    <rect class="node" x="1380" y="1815" width="160" height="44"/>
+    <text class="small center" x="1460" y="1837">text → tokenizer</text>
+    <rect class="node" x="1380" y="1745" width="160" height="44"/>
+    <text class="small center" x="1460" y="1767">embedding · 7168</text>
+    <rect class="node" x="1560" y="1745" width="160" height="54"/>
+    <text class="small center" x="1640" y="1763">visual tokens</text>
+    <text class="micro center" x="1640" y="1783">PatchMergerV2 · 7168</text>
+    <circle cx="1550" cy="1655" r="18" fill="#D9392E" stroke="#111111" stroke-width="2"/>
+    <text class="label-white center" x="1550" y="1656">+</text>
+    <rect class="node-dark" x="1410" y="1565" width="280" height="54"/>
+    <text class="label-white center" x="1550" y="1584">merged token sequence</text>
+    <text class="micro center" style="fill:#D8D1C7" x="1550" y="1606">one context · hidden 7168</text>
+    <rect class="node-dark" x="1410" y="1475" width="280" height="48"/>
+    <text class="label-white center" x="1550" y="1499">Kimi K3 language backbone</text>
+    <path class="line" d="M1460 1815 V1789"/>
+    <path class="line" d="M1460 1745 V1655 H1532"/>
+    <path class="line" d="M1640 1745 V1655 H1568"/>
+    <path class="line" d="M1550 1637 V1619"/>
+    <path class="line" d="M1550 1565 V1523"/>
+    <text class="micro left" x="1380" y="1874">Model architecture supports image and video.</text>
+    <text class="micro left" x="1380" y="1890">Public self-hosted processor support can be narrower.</text>
+  </g>
+
+  <text class="micro left" x="55" y="2042">Sources: Kimi K3 Technical Report §2 and the released Hugging Face config. The detailed figure omits the draft’s RoPE/PE-cache MLA path because K3 sets mla_use_nope=true.</text>
+</svg>

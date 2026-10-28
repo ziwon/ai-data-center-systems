@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="560" viewBox="0 0 960 560" role="img" aria-labelledby="title desc">
+  <title id="title">Roofline model</title>
+  <desc id="desc">A simple roofline diagram showing memory-bound and compute-bound regions as arithmetic intensity increases.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .axis { stroke: #111111; stroke-width: 3.5; fill: none; stroke-linecap: square; }
+    .roof { stroke: #111111; stroke-width: 5; fill: none; stroke-linecap: square; stroke-linejoin: round; }
+    .crit { stroke: #D9392E; stroke-width: 3; fill: none; stroke-dasharray: 9 9; }
+    .grid { stroke: #D8D1C7; stroke-width: 1.2; fill: none; }
+    .text { fill: #050505; font-family: Arial, Helvetica, sans-serif; }
+    .muted { fill: #6F6A63; font-family: Arial, Helvetica, sans-serif; }
+    .label { font-size: 30px; font-weight: 600; }
+    .axis-label { font-size: 34px; font-weight: 700; }
+    .small { font-size: 20px; }
+    .accent { fill: #D9392E; }
+  </style>
+
+  <rect class="bg" width="960" height="560" />
+
+  <path class="grid" d="M190 100 H825" />
+  <path class="grid" d="M190 200 H825" />
+  <path class="grid" d="M190 300 H825" />
+  <path class="grid" d="M320 430 V80" />
+  <path class="grid" d="M450 430 V80" />
+  <path class="grid" d="M580 430 V80" />
+  <path class="grid" d="M710 430 V80" />
+
+  <path class="axis" d="M190 430 H825" />
+  <path class="axis" d="M190 430 V80" />
+
+  <path class="roof" d="M190 430 L560 170 H825" />
+  <path class="crit" d="M560 430 V170" />
+
+  <text class="text axis-label" x="420" y="505">Arithmetic intensity</text>
+  <text class="text axis-label" x="76" y="268" transform="rotate(-90 76 268)">Throughput</text>
+
+  <text class="text label" x="315" y="345">Memory bound</text>
+  <text class="text label" x="642" y="280">Compute bound</text>
+
+  <text class="muted small" x="575" y="454">critical intensity</text>
+  <text class="muted small" x="602" y="160">peak compute</text>
+  <text class="muted small" x="305" y="210">limited by bandwidth</text>
+
+  <circle cx="560" cy="170" r="6" fill="#D9392E" />
+</svg>

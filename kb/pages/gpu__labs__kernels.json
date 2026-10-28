@@ -1,0 +1,746 @@
+{
+  "version": 1,
+  "current": {
+    "id": "/gpu/labs/kernels/",
+    "title": "Kernel Case Studies (practice)",
+    "route": "/gpu/labs/kernels/",
+    "group": "gpu",
+    "keywords": [
+      "lecture",
+      "kernels",
+      "triton",
+      "matmul",
+      "cutlass",
+      "kernel",
+      "gemm",
+      "fused",
+      "attention",
+      "studies"
+    ],
+    "excerpt": "References and backlog for hands-on GPU kernel case studies — the do half of this track. Learn the patterns in PMPP and Heterogeneous Systems, then..."
+  },
+  "nodes": [
+    {
+      "id": "/gpu/labs/kernels/",
+      "title": "Kernel Case Studies (practice)",
+      "route": "/gpu/labs/kernels/",
+      "group": "gpu",
+      "keywords": [
+        "lecture",
+        "kernels",
+        "triton",
+        "matmul",
+        "cutlass",
+        "kernel",
+        "gemm",
+        "fused",
+        "attention",
+        "studies"
+      ],
+      "excerpt": "References and backlog for hands-on GPU kernel case studies — the do half of this track. Learn the patterns in PMPP and Heterogeneous Systems, then..."
+    },
+    {
+      "id": "/gpu/",
+      "title": "GPU Systems",
+      "route": "/gpu/",
+      "group": "gpu",
+      "keywords": [
+        "플랫폼",
+        "참고자료",
+        "cuda",
+        "메모리",
+        "모델과",
+        "gpu",
+        "아티클",
+        "컴퓨팅",
+        "아키텍처",
+        "익힙니다"
+      ],
+      "excerpt": "GPU 아키텍처와 CUDA 프로그래밍부터 Kubernetes GPU 플랫폼 운영까지 다루는 문서 모음입니다. 강좌는 실행 원리를 익히는 데, 참고자료는 세부 동작을 확인하는 데, 실습과 기술 아티클은 성능 분석과 운영 판단에 활용할 수 있습니다."
+    },
+    {
+      "id": "/gpu/appendix/cuda/",
+      "title": "CUDA (reference)",
+      "route": "/gpu/appendix/cuda/",
+      "group": "gpu",
+      "keywords": [
+        "cuda",
+        "lookup",
+        "language",
+        "guidelines",
+        "ptx/sass",
+        "analyze",
+        "api",
+        "reference",
+        "spaces",
+        "nvcc"
+      ],
+      "excerpt": "Official NVIDIA CUDA programming documentation. This is a lookup resource for API and language details — not a course. Learn CUDA through PMPP; write and..."
+    },
+    {
+      "id": "/gpu/gpu-mode/",
+      "title": "GPU MODE",
+      "route": "/gpu/gpu-mode/",
+      "group": "gpu",
+      "keywords": [
+        "lectures",
+        "talks",
+        "ongoing",
+        "mode",
+        "lecture",
+        "advanced",
+        "theme",
+        "youtube",
+        "watch",
+        "gpu"
+      ],
+      "excerpt": "Advanced, ongoing feed for modern ML kernels (formerly CUDA MODE). Treat this as a later / advanced course: come here after the PMPP foundation is in place...."
+    },
+    {
+      "id": "/gpu/heterogeneous-systems/",
+      "title": "Heterogeneous Systems (Onur Mutlu)",
+      "route": "/gpu/heterogeneous-systems/",
+      "group": "gpu",
+      "keywords": [
+        "pmpp",
+        "onur",
+        "mutlu",
+        "irregular",
+        "meeting",
+        "patterns",
+        "parallel",
+        "course",
+        "pattern",
+        "heterogeneous"
+      ],
+      "excerpt": "A complementary course to PMPP, used in parallel for a second pass over the classic parallel patterns behind GPU kernels. Where PMPP is the spine, this..."
+    },
+    {
+      "id": "/gpu/labs/profiling/",
+      "title": "Profiling (practice)",
+      "route": "/gpu/labs/profiling/",
+      "group": "gpu",
+      "keywords": [
+        "practice",
+        "profiling",
+        "hit",
+        "cores",
+        "saying",
+        "performance-analysis",
+        "every",
+        "launch-overhead-bound",
+        "coalesced",
+        "hands-on"
+      ],
+      "excerpt": "Nsight Compute and related GPU performance-analysis references. This is the hands-on tool you run while learning: for every concept in PMPP and every kernel..."
+    },
+    {
+      "id": "/gpu/pmpp/",
+      "title": "PMPP / Programming Massively Parallel Processors",
+      "route": "/gpu/pmpp/",
+      "group": "gpu",
+      "keywords": [
+        "programming",
+        "massively",
+        "pmpp",
+        "processors",
+        "parallel",
+        "notes",
+        "lecture",
+        "cuda",
+        "primary",
+        "gpu"
+      ],
+      "excerpt": "The primary spine of this GPU track: the CUDA and parallel-programming foundation based on Programming Massively Parallel Processors . Everything else..."
+    },
+    {
+      "id": "concept:attention",
+      "kind": "concept",
+      "title": "Attention",
+      "label": "Attention",
+      "group": "model-architecture",
+      "description": "Transformer attention mechanism and its MHA, MQA, GQA, RoPE, and FlashAttention variants.",
+      "keywords": [
+        "Attention",
+        "attention",
+        "self-attention",
+        "MHA",
+        "MQA",
+        "GQA",
+        "RoPE",
+        "FlashAttention"
+      ]
+    },
+    {
+      "id": "concept:kv-cache",
+      "kind": "concept",
+      "title": "KV Cache",
+      "label": "KV Cache",
+      "group": "inference",
+      "description": "Transformer key-value cache used to avoid recomputing attention state during decoding.",
+      "keywords": [
+        "KV Cache",
+        "KV cache",
+        "key-value cache",
+        "KV-cache",
+        "k/v cache"
+      ]
+    },
+    {
+      "id": "/inference/",
+      "title": "Inference",
+      "route": "/inference/",
+      "group": "inference",
+      "keywords": [
+        "하드웨어",
+        "메모리",
+        "최적화",
+        "다룹니다",
+        "참고자료",
+        "살펴봅니다",
+        "주차별",
+        "세대별",
+        "아키텍처",
+        "추론의"
+      ],
+      "excerpt": "LLM inference notes covering KV cache, quantization, speculative decoding, FlashAttention, SGLang production serving, and model serving profiles."
+    },
+    {
+      "id": "/storage/mlperf-storage/",
+      "title": "MLPerf Storage Benchmark",
+      "route": "/storage/mlperf-storage/",
+      "group": "storage",
+      "keywords": [
+        "storage",
+        "object",
+        "vectordb",
+        "인덱스",
+        "benchmark",
+        "i/o",
+        "cache",
+        "체크포인트",
+        "s3-compatible",
+        "checkpointing"
+      ],
+      "excerpt": "MLCommons Storage는 ML 워크로드를 지원하는 스토리지 시스템의 성능을 측정하기 위한 MLPerf Storage Benchmark Suite입니다. 단순 파일시스템 벤치마크가 아니라 학습 데이터 로딩, 체크포인트 저장/복구, LLM KV cache offload,..."
+    },
+    {
+      "id": "/courses/cme295/",
+      "title": "CME295 Lecture Notes",
+      "route": "/courses/cme295/",
+      "group": "courses/cme295",
+      "keywords": [
+        "lecture",
+        "reasoning",
+        "다이어그램",
+        "preference",
+        "grpo",
+        "sft",
+        "llm",
+        "transformer",
+        "human",
+        "pre-training"
+      ],
+      "excerpt": "CME295 lecture notes on transformers, language models, and practical AI systems concepts with engineering-focused annotations."
+    },
+    {
+      "id": "/courses/cme295/lec-01/",
+      "title": "Lecture 1: Transformer",
+      "route": "/courses/cme295/lec-01/",
+      "group": "courses/cme295",
+      "keywords": [
+        "token",
+        "rnn",
+        "embedding",
+        "decoder",
+        "self-attention",
+        "text",
+        "one-hot",
+        "representation",
+        "sentence",
+        "label"
+      ],
+      "excerpt": "이번 강의의 목표는 Transformer를 갑자기 등장한 LLM 구조로 보는 것이 아니라, NLP 문제와 기존 sequence model의 한계에서 자연스럽게 등장한 architecture로 이해하는 것이다."
+    },
+    {
+      "id": "/courses/cme295/lec-02/",
+      "title": "Lecture 2: Transformer-Based Models & Tricks",
+      "route": "/courses/cme295/lec-02/",
+      "group": "courses/cme295",
+      "keywords": [
+        "token",
+        "bert",
+        "position",
+        "attention",
+        "embedding",
+        "positional",
+        "nsp",
+        "encoder",
+        "transformer",
+        "cls"
+      ],
+      "excerpt": "이번 강의의 목표는 원래 Transformer 구조가 오늘날 LLM과 BERT 계열 모델로 어떻게 변형되었는지 이해하는 것이다."
+    },
+    {
+      "id": "/courses/cme295/lec-03/",
+      "title": "Lecture 3: Large Language Models, Decoding, Prompting, and Inference",
+      "route": "/courses/cme295/lec-03/",
+      "group": "courses/cme295",
+      "keywords": [
+        "token",
+        "decoding",
+        "model",
+        "probability",
+        "context",
+        "expert",
+        "decoder-only",
+        "sampling",
+        "llm",
+        "temperature"
+      ],
+      "excerpt": "이번 강의의 목표는 현대 LLM을 decoder-only Transformer 기반의 next-token prediction system 으로 이해하고, 그 위에서 실제 응답이 어떻게 생성되고 최적화되는지 파악하는 것이다."
+    },
+    {
+      "id": "/courses/cs336/lec-01/",
+      "title": "Lecture 1: Overview and Tokenization",
+      "route": "/courses/cs336/lec-01/",
+      "group": "courses/cs336",
+      "keywords": [
+        "token",
+        "model",
+        "merge",
+        "bpe",
+        "vocabulary",
+        "tokenizer",
+        "corpus",
+        "evaluation",
+        "training",
+        "byte"
+      ],
+      "excerpt": "이 노트는 1시간 19분 22초 분량의 English caption과 공식 executable trace의 lecture 01.py 를 함께 대조해 작성했다. 자막은 강사의 구두 설명과 맥락을, executable trace는 수식·코드·assignment 항목을 확인하는..."
+    }
+  ],
+  "edges": [
+    {
+      "source": "/courses/cme295/",
+      "target": "/courses/cme295/lec-01/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/courses/cme295/",
+      "target": "/courses/cme295/lec-02/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": [
+        "transformer"
+      ]
+    },
+    {
+      "source": "/courses/cme295/",
+      "target": "/courses/cme295/lec-03/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": [
+        "llm"
+      ]
+    },
+    {
+      "source": "/gpu/",
+      "target": "/gpu/appendix/cuda/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": [
+        "cuda"
+      ]
+    },
+    {
+      "source": "/gpu/",
+      "target": "/gpu/gpu-mode/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": [
+        "gpu"
+      ]
+    },
+    {
+      "source": "/gpu/",
+      "target": "/gpu/heterogeneous-systems/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/gpu/",
+      "target": "/gpu/labs/kernels/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/gpu/",
+      "target": "/gpu/labs/profiling/",
+      "type": "link+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/gpu/",
+      "target": "/gpu/pmpp/",
+      "type": "link+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/gpu/appendix/cuda/",
+      "target": "/gpu/gpu-mode/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/gpu/appendix/cuda/",
+      "target": "/gpu/labs/kernels/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/gpu/appendix/cuda/",
+      "target": "/gpu/pmpp/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": [
+        "cuda"
+      ]
+    },
+    {
+      "source": "/gpu/gpu-mode/",
+      "target": "/gpu/heterogeneous-systems/",
+      "type": "link+semantic",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/gpu/gpu-mode/",
+      "target": "/gpu/labs/kernels/",
+      "type": "link+semantic",
+      "weight": 1,
+      "terms": [
+        "lecture"
+      ]
+    },
+    {
+      "source": "/gpu/gpu-mode/",
+      "target": "/gpu/labs/profiling/",
+      "type": "link+semantic",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/gpu/gpu-mode/",
+      "target": "/gpu/pmpp/",
+      "type": "link+semantic",
+      "weight": 1,
+      "terms": [
+        "lecture",
+        "gpu"
+      ]
+    },
+    {
+      "source": "/gpu/heterogeneous-systems/",
+      "target": "/gpu/labs/kernels/",
+      "type": "link+semantic",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/gpu/heterogeneous-systems/",
+      "target": "/gpu/pmpp/",
+      "type": "link+semantic",
+      "weight": 1,
+      "terms": [
+        "pmpp",
+        "parallel"
+      ]
+    },
+    {
+      "source": "/gpu/labs/kernels/",
+      "target": "/gpu/labs/profiling/",
+      "type": "link+semantic",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/gpu/labs/kernels/",
+      "target": "/gpu/pmpp/",
+      "type": "link",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/gpu/labs/profiling/",
+      "target": "/gpu/pmpp/",
+      "type": "link+semantic",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/courses/cme295/lec-01/",
+      "target": "/courses/cme295/lec-02/",
+      "type": "semantic+section",
+      "weight": 0.985,
+      "terms": [
+        "token",
+        "embedding"
+      ]
+    },
+    {
+      "source": "/courses/cme295/lec-01/",
+      "target": "/courses/cme295/lec-03/",
+      "type": "semantic+section",
+      "weight": 0.966,
+      "terms": [
+        "token"
+      ]
+    },
+    {
+      "source": "/courses/cme295/",
+      "target": "concept:attention",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "attention",
+        "Attention",
+        "FlashAttention",
+        "MHA"
+      ]
+    },
+    {
+      "source": "/courses/cme295/",
+      "target": "concept:kv-cache",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "KV cache",
+        "KV Cache"
+      ]
+    },
+    {
+      "source": "/courses/cme295/lec-01/",
+      "target": "concept:attention",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "attention",
+        "Attention",
+        "self-attention"
+      ]
+    },
+    {
+      "source": "/courses/cme295/lec-02/",
+      "target": "/courses/cme295/lec-03/",
+      "type": "semantic+section",
+      "weight": 0.93,
+      "terms": [
+        "token"
+      ]
+    },
+    {
+      "source": "/courses/cme295/lec-02/",
+      "target": "concept:attention",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "attention",
+        "Attention",
+        "RoPE",
+        "self-attention"
+      ]
+    },
+    {
+      "source": "/courses/cme295/lec-02/",
+      "target": "concept:kv-cache",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "KV cache",
+        "KV Cache"
+      ]
+    },
+    {
+      "source": "/courses/cme295/lec-03/",
+      "target": "concept:attention",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "attention",
+        "Attention",
+        "GQA",
+        "MQA"
+      ]
+    },
+    {
+      "source": "/courses/cme295/lec-03/",
+      "target": "concept:kv-cache",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "KV cache",
+        "KV Cache"
+      ]
+    },
+    {
+      "source": "/courses/cs336/lec-01/",
+      "target": "concept:attention",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "attention",
+        "Attention"
+      ]
+    },
+    {
+      "source": "/courses/cs336/lec-01/",
+      "target": "concept:kv-cache",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "KV cache",
+        "KV Cache",
+        "KV-cache"
+      ]
+    },
+    {
+      "source": "/gpu/labs/kernels/",
+      "target": "concept:attention",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "attention",
+        "Attention",
+        "FlashAttention"
+      ]
+    },
+    {
+      "source": "/inference/",
+      "target": "concept:attention",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "attention",
+        "Attention",
+        "FlashAttention"
+      ]
+    },
+    {
+      "source": "/inference/",
+      "target": "concept:kv-cache",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "KV cache",
+        "KV Cache"
+      ]
+    },
+    {
+      "source": "/storage/mlperf-storage/",
+      "target": "concept:kv-cache",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "KV cache",
+        "KV Cache"
+      ]
+    },
+    {
+      "source": "/gpu/gpu-mode/",
+      "target": "concept:attention",
+      "type": "mentions",
+      "weight": 0.88,
+      "terms": [
+        "FlashAttention",
+        "attention",
+        "Attention"
+      ]
+    },
+    {
+      "source": "/courses/cme295/lec-01/",
+      "target": "concept:kv-cache",
+      "type": "mentions",
+      "weight": 0.83,
+      "terms": [
+        "KV cache",
+        "KV Cache"
+      ]
+    },
+    {
+      "source": "/gpu/appendix/cuda/",
+      "target": "/gpu/labs/profiling/",
+      "type": "semantic+section",
+      "weight": 0.806,
+      "terms": []
+    },
+    {
+      "source": "/gpu/labs/kernels/",
+      "target": "concept:kv-cache",
+      "type": "mentions",
+      "weight": 0.805,
+      "terms": [
+        "KV-cache"
+      ]
+    },
+    {
+      "source": "/courses/cme295/lec-01/",
+      "target": "/courses/cs336/lec-01/",
+      "type": "semantic",
+      "weight": 0.696,
+      "terms": [
+        "token"
+      ]
+    },
+    {
+      "source": "/gpu/heterogeneous-systems/",
+      "target": "/gpu/labs/profiling/",
+      "type": "semantic",
+      "weight": 0.687,
+      "terms": []
+    },
+    {
+      "source": "/gpu/labs/kernels/",
+      "target": "/inference/",
+      "type": "semantic",
+      "weight": 0.668,
+      "terms": []
+    },
+    {
+      "source": "/courses/cme295/",
+      "target": "/courses/cs336/lec-01/",
+      "type": "semantic",
+      "weight": 0.666,
+      "terms": []
+    },
+    {
+      "source": "/inference/",
+      "target": "/storage/mlperf-storage/",
+      "type": "semantic",
+      "weight": 0.641,
+      "terms": []
+    },
+    {
+      "source": "/gpu/labs/kernels/",
+      "target": "/storage/mlperf-storage/",
+      "type": "semantic",
+      "weight": 0.619,
+      "terms": []
+    },
+    {
+      "source": "/gpu/appendix/cuda/",
+      "target": "/gpu/heterogeneous-systems/",
+      "type": "section",
+      "weight": 0.18,
+      "terms": []
+    }
+  ]
+}

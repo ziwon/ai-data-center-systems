@@ -1,0 +1,678 @@
+<!DOCTYPE html><html lang="en" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-bguv2lll"> <head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>How to Think About GPUs | AI Data Center Systems</title><link rel="canonical" href="https://adcs.restack.tech/inference/efficient-llm-inference-systems/appendix/hardware-architectures/gpus.ko/"/><link rel="sitemap" href="/sitemap-index.xml"/><script async src="https://www.googletagmanager.com/gtag/js?id=G-76LFZJVBTE"></script><script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-76LFZJVBTE');
+      </script><script async crossorigin="anonymous" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8128231647578658"></script><link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v6.4.8"/><meta name="generator" content="Starlight v0.40.0"/><meta property="og:title" content="How to Think About GPUs"/><meta property="og:url" content="https://adcs.restack.tech/inference/efficient-llm-inference-systems/appendix/hardware-architectures/gpus.ko/"/><meta property="og:locale" content="en"/><meta property="og:description" content="이 글은 NVIDIA GPU를 LLM scaling 관점에서 설명한다. 핵심은 GPU를 하나의 큰 계산기로 보지 않는 것이다."/><meta property="og:site_name" content="AI Data Center Systems"/><meta name="description" content="이 글은 NVIDIA GPU를 LLM scaling 관점에서 설명한다. 핵심은 GPU를 하나의 큰 계산기로 보지 않는 것이다."/><meta property="og:type" content="article"/><meta property="og:image" content="https://adcs.restack.tech/og/inference/efficient-llm-inference-systems/appendix/hardware-architectures/gpus.ko.png?v=2"/><meta property="og:image:width" content="1200"/><meta property="og:image:height" content="630"/><meta name="twitter:image" content="https://adcs.restack.tech/og/inference/efficient-llm-inference-systems/appendix/hardware-architectures/gpus.ko.png?v=2"/><meta name="twitter:card" content="summary_large_image"/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/_astro/print.DNXP8c50.css" media="print"><link rel="stylesheet" href="/_astro/common.DYbqSTpl.css"><script type="module" src="/_astro/page.CtJXHRyR.js"></script></head> <body class="astro-bguv2lll"> <a href="#_top" class="astro-7q3lir66">Skip to content</a> <script>
+  (() => {
+    try {
+      const savedMode = localStorage.getItem('adcs-navigation-mode');
+      document.documentElement.dataset.navigationMode = savedMode === 'compact' ? 'compact' : 'normal';
+    } catch {
+      document.documentElement.dataset.navigationMode = 'normal';
+    }
+  })();
+</script> <div class="page sl-flex astro-4toy2ex6"> <header class="header astro-4toy2ex6"><div class="header astro-3ef6ksr2"> <div class="title-wrapper sl-flex astro-3ef6ksr2"> <a href="/" class="site-title sl-flex astro-m46x6ez3">  <span class="astro-m46x6ez3" translate="no"> AI Data Center Systems </span> </a> <button class="navigation-mode-toggle print:hidden astro-3ef6ksr2" type="button" aria-label="Compact navigation" aria-pressed="false" title="Use compact navigation"> <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" class="astro-3ef6ksr2"> <rect x="3" y="4" width="18" height="16" rx="2" class="astro-3ef6ksr2"></rect> <path d="M9 4v16M6.5 10 4.5 12l2 2" class="astro-3ef6ksr2"></path> </svg> </button> </div> <div class="sl-flex print:hidden astro-3ef6ksr2"> <site-search class="astro-3ef6ksr2 astro-v37mnknz" data-translations="{&quot;placeholder&quot;:&quot;Search&quot;}"> <button data-open-modal disabled aria-label="Search" aria-keyshortcuts="Control+K" class="astro-v37mnknz"> <svg aria-hidden="true" class="astro-v37mnknz astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg> <span class="sl-hidden md:sl-block astro-v37mnknz" aria-hidden="true">Search</span> <kbd class="sl-hidden md:sl-flex astro-v37mnknz" style="display: none;"> <kbd class="astro-v37mnknz">Ctrl</kbd><kbd class="astro-v37mnknz">K</kbd> </kbd> </button> <dialog style="padding:0" aria-label="Search" class="astro-v37mnknz"> <div class="dialog-frame sl-flex astro-v37mnknz">  <button data-close-modal class="sl-flex md:sl-hidden astro-v37mnknz"> Cancel </button> <div class="search-container astro-v37mnknz"> <div id="starlight__search" class="astro-v37mnknz"></div> </div> </div> </dialog> </site-search>  <script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script> <script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.D1WXcfCt.js"></script>  </div> <div class="sl-hidden md:sl-flex print:hidden right-group astro-3ef6ksr2"> <div class="sl-flex social-icons astro-3ef6ksr2"> <a href="https://github.com/ziwon/ai-data-center-systems" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">GitHub</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script> <script type="module">const r="starlight-theme",o=e=>e==="auto"||e==="dark"||e==="light"?e:"auto",c=()=>o(typeof localStorage<"u"&&localStorage.getItem(r));function n(e){typeof localStorage<"u"&&localStorage.setItem(r,e==="light"||e==="dark"?e:"")}const l=()=>matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";function t(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e==="auto"?l():e,n(e)}matchMedia("(prefers-color-scheme: light)").addEventListener("change",()=>{c()==="auto"&&t("auto")});class s extends HTMLElement{constructor(){super(),t(c()),this.querySelector("select")?.addEventListener("change",a=>{a.currentTarget instanceof HTMLSelectElement&&t(o(a.currentTarget.value))})}}customElements.define("starlight-theme-select",s);</script> <script type="module">class s extends HTMLElement{constructor(){super();const e=this.querySelector("select");e&&(e.addEventListener("change",t=>{t.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=t.currentTarget.value)}),window.addEventListener("pageshow",t=>{if(!t.persisted)return;const n=e.querySelector("option[selected]")?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}}customElements.define("starlight-lang-select",s);</script> </div> </div></header> <nav class="sidebar print:hidden astro-4toy2ex6" aria-label="Main"> <starlight-menu-button class="print:hidden astro-jif73yzw"> <button aria-expanded="false" aria-label="Menu" aria-controls="starlight__sidebar" class="sl-flex md:sl-hidden astro-jif73yzw"> <svg aria-hidden="true" class="open-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg> <svg aria-hidden="true" class="close-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg> </button> </starlight-menu-button> <script type="module">class s extends HTMLElement{constructor(){super(),this.btn=this.querySelector("button"),this.btn.addEventListener("click",()=>this.toggleExpanded());const t=this.closest("nav");t&&t.addEventListener("keyup",e=>this.closeOnEscape(e))}setExpanded(t){this.setAttribute("aria-expanded",String(t)),document.body.toggleAttribute("data-mobile-menu-expanded",t)}toggleExpanded(){this.setExpanded(this.getAttribute("aria-expanded")!=="true")}closeOnEscape(t){t.code==="Escape"&&(this.setExpanded(!1),this.btn.focus())}}customElements.define("starlight-menu-button",s);</script>  <div id="starlight__sidebar" class="sidebar-pane astro-4toy2ex6"> <div class="navigation-controls astro-4toy2ex6"> <button class="navigation-drawer-toggle astro-4toy2ex6" type="button" aria-controls="starlight__sidebar-content" aria-expanded="false" title="Open navigation"> <svg class="navigation-menu-icon astro-4toy2ex6" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"> <path d="M4 6h16M4 12h16M4 18h16" class="astro-4toy2ex6"></path> </svg> <svg class="navigation-close-icon astro-4toy2ex6" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"> <path d="m6 6 12 12M18 6 6 18" class="astro-4toy2ex6"></path> </svg> <span class="navigation-drawer-label astro-4toy2ex6">Open navigation</span> </button> </div> <div id="starlight__sidebar-content" class="sidebar-content sl-flex astro-4toy2ex6"> <ul class="starlight-sidebar-topics astro-2fh6iaza"> <li class="astro-2fh6iaza"> <a aria-label="Network" title="Network" href="/network/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8.7 10a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-6.27-6.3a1 1 0 0 0-1.42 1.42ZM21 14a1 1 0 0 0-1 1v3.59L15.44 14A1 1 0 0 0 14 15.44L18.59 20H15a1 1 0 0 0 0 2h6a1 1 0 0 0 .38-.08 1 1 0 0 0 .54-.54A1 1 0 0 0 22 21v-6a1 1 0 0 0-1-1Zm.92-11.38a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-6a1 1 0 0 0 0 2h3.59L2.29 20.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V9a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z"/></svg> </div> <div class="astro-2fh6iaza"> Network  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="GPU &amp; Accelerator Systems" title="GPU &amp; Accelerator Systems" href="/gpu/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> </div> <div class="astro-2fh6iaza"> GPU &amp; Accelerator Systems  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Storage" title="Storage" href="/storage/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8 16.5a1 1 0 1 0 1 1 1 1 0 0 0-1-1M12 2C8 2 4 3.37 4 6v12c0 2.63 4 4 8 4s8-1.37 8-4V6c0-2.63-4-4-8-4m6 16c0 .71-2.28 2-6 2s-6-1.29-6-2v-3.27A13 13 0 0 0 12 16a13 13 0 0 0 6-1.27Zm0-6c0 .71-2.28 2-6 2s-6-1.29-6-2V8.73A13 13 0 0 0 12 10a13 13 0 0 0 6-1.27Zm-6-4C8.28 8 6 6.71 6 6s2.28-2 6-2 6 1.29 6 2-2.28 2-6 2m-4 2.5a1 1 0 1 0 1 1 1 1 0 0 0-1-1"/></svg> </div> <div class="astro-2fh6iaza"> Storage  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Training" title="Training" href="/training/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1 1v8a1 1 0 0 0 2 0v-8a1 1 0 0 0-1-1m5-10a1 1 0 0 0-1 1v18a1 1 0 0 0 2 0V3a1 1 0 0 0-1-1m10 14a1 1 0 0 0-1 1v4a1 1 0 0 0 2 0v-4a1 1 0 0 0-1-1m-5-8a1 1 0 0 0-1 1v12a1 1 0 0 0 2 0V9a1 1 0 0 0-1-1"/></svg> </div> <div class="astro-2fh6iaza"> Training  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Inference" title="Inference" data-topic-icon="brain" href="/inference/" class="starlight-sidebar-topics-current astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 22H5a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3h1a4 4 0 0 1 7.3-2.18c.448.64.692 1.4.7 2.18h3a1 1 0 0 1 1 1v3a4 4 0 0 1 2.18 7.3A3.86 3.86 0 0 1 18 18v3a1 1 0 0 1-1 1ZM5 8a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11v-3.18a1 1 0 0 1 1.33-.95 1.77 1.77 0 0 0 1.74-.23 2 2 0 0 0 .93-1.37 2 2 0 0 0-.48-1.59 1.89 1.89 0 0 0-2.17-.55 1 1 0 0 1-1.33-.95V8h-3.2a1 1 0 0 1-1-1.33 1.77 1.77 0 0 0-.23-1.74 1.939 1.939 0 0 0-3-.43A2 2 0 0 0 8 6c.002.23.046.456.13.67A1 1 0 0 1 7.18 8H5Z"/></svg> </div> <div class="astro-2fh6iaza"> Inference  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="MLOps" title="MLOps" data-topic-icon="cycle" href="/mlops/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8.7 10a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-6.27-6.3a1 1 0 0 0-1.42 1.42ZM21 14a1 1 0 0 0-1 1v3.59L15.44 14A1 1 0 0 0 14 15.44L18.59 20H15a1 1 0 0 0 0 2h6a1 1 0 0 0 .38-.08 1 1 0 0 0 .54-.54A1 1 0 0 0 22 21v-6a1 1 0 0 0-1-1Zm.92-11.38a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-6a1 1 0 0 0 0 2h3.59L2.29 20.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V9a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z"/></svg> </div> <div class="astro-2fh6iaza"> MLOps  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Systems Performance" title="Systems Performance" href="/systems-performance/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path fill-rule="evenodd" d="M1.44 8.855v-.001l3.527-3.516c.34-.344.802-.541 1.285-.548h6.649l.947-.947c3.07-3.07 6.207-3.072 7.62-2.868a1.821 1.821 0 0 1 1.557 1.557c.204 1.413.203 4.55-2.868 7.62l-.946.946v6.649a1.845 1.845 0 0 1-.549 1.286l-3.516 3.528a1.844 1.844 0 0 1-3.11-.944l-.858-4.275-4.52-4.52-2.31-.463-1.964-.394A1.847 1.847 0 0 1 .98 10.693a1.843 1.843 0 0 1 .46-1.838Zm5.379 2.017-3.873-.776L6.32 6.733h4.638l-4.14 4.14Zm8.403-5.655c2.459-2.46 4.856-2.463 5.89-2.33.134 1.035.13 3.432-2.329 5.891l-6.71 6.71-3.561-3.56 6.71-6.711Zm-1.318 15.837-.776-3.873 4.14-4.14v4.639l-3.364 3.374Z" clip-rule="evenodd"/><path d="M9.318 18.345a.972.972 0 0 0-1.86-.561c-.482 1.435-1.687 2.204-2.934 2.619a8.22 8.22 0 0 1-1.23.302c.062-.365.157-.79.303-1.229.415-1.247 1.184-2.452 2.62-2.935a.971.971 0 1 0-.62-1.842c-.12.04-.236.084-.35.13-2.02.828-3.012 2.588-3.493 4.033a10.383 10.383 0 0 0-.51 2.845l-.001.016v.063c0 .536.434.972.97.972H2.24a7.21 7.21 0 0 0 .878-.065c.527-.063 1.248-.19 2.02-.447 1.445-.48 3.205-1.472 4.033-3.494a5.828 5.828 0 0 0 .147-.407Z"/></svg> </div> <div class="astro-2fh6iaza"> Systems Performance  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Courses" title="Courses" href="/courses/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.17 2.06A13.1 13.1 0 0 0 19 1.87a12.94 12.94 0 0 0-7 2.05 12.94 12.94 0 0 0-7-2 13.1 13.1 0 0 0-2.17.19 1 1 0 0 0-.83 1v12a1 1 0 0 0 1.17 1 10.9 10.9 0 0 1 8.25 1.91l.12.07h.11a.91.91 0 0 0 .7 0h.11l.12-.07A10.899 10.899 0 0 1 20.83 16 1 1 0 0 0 22 15V3a1 1 0 0 0-.83-.94ZM11 15.35a12.87 12.87 0 0 0-6-1.48H4v-10c.333-.02.667-.02 1 0a10.86 10.86 0 0 1 6 1.8v9.68Zm9-1.44h-1a12.87 12.87 0 0 0-6 1.48V5.67a10.86 10.86 0 0 1 6-1.8c.333-.02.667-.02 1 0v10.04Zm1.17 4.15a13.098 13.098 0 0 0-2.17-.19 12.94 12.94 0 0 0-7 2.05 12.94 12.94 0 0 0-7-2.05c-.727.003-1.453.066-2.17.19A1 1 0 0 0 2 19.21a1 1 0 0 0 1.17.79 10.9 10.9 0 0 1 8.25 1.91 1 1 0 0 0 1.16 0A10.9 10.9 0 0 1 20.83 20a1 1 0 0 0 1.17-.79 1 1 0 0 0-.83-1.15Z"/></svg> </div> <div class="astro-2fh6iaza"> Courses  </div> </a> </li> </ul>  <doc-sidebar-controls hidden="true" class="astro-v3kklmrl"> <div class="tree-controls astro-v3kklmrl" role="group" aria-label="문서 목록 펼침 설정"> <button type="button" data-action="expand" aria-controls="document-tree" aria-label="모든 문서 분류 펼치기" class="astro-v3kklmrl">펼치기</button> <span aria-hidden="true" class="astro-v3kklmrl">/</span> <button type="button" data-action="collapse" aria-controls="document-tree" aria-label="모든 문서 분류 접기" class="astro-v3kklmrl">접기</button> </div> </doc-sidebar-controls> <script type="module">class d extends HTMLElement{connectedCallback(){const n=document.getElementById("document-tree");if(!n||this.dataset.initialized)return;this.dataset.initialized="true",this.hidden=!1;const e=Array.from(n.querySelectorAll("details")),r=this.querySelector('[data-action="expand"]'),i=this.querySelector('[data-action="collapse"]');for(const t of e)t.open=!1;let o=n.querySelector('[aria-current="page"]')?.closest("details");for(;o&&n.contains(o);)o.open=!0,o=o.parentElement?.closest("details")??null;const a=()=>{r?.setAttribute("aria-disabled",String(e.every(t=>t.open))),i?.setAttribute("aria-disabled",String(e.every(t=>!t.open)))};this.addEventListener("click",t=>{const s=t.target instanceof Element?t.target.closest("button[data-action]"):null;if(!s||s.getAttribute("aria-disabled")==="true")return;const l=s.dataset.action==="expand";for(const c of e)c.open=l;a()});for(const t of e)t.addEventListener("toggle",a);a()}}customElements.get("doc-sidebar-controls")||customElements.define("doc-sidebar-controls",d);</script> <div id="document-tree"> <sl-sidebar-state-persist data-hash="15y10hp" class="astro-kku4brbg"> <script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script>  <ul class="top-level astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/inference/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">Inference 목록</span>  </a> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">추론 시스템 강좌 · 6</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="0"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">강좌 안내</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/week01/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 1 — Understanding Performance Metrics</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/week02/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 2 — Hardware Foundations for Inference</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/week03/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 3 — Transformer Inference and the KV Cache</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/week04/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 4 — Quantization</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/week04/results/results/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 4 Lab Results</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/week05/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 5 — Speculative Decoding</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">FlashAttention · 2</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="1"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/inference/flashattention-from-first-principles/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">FlashAttention from First Principles · English</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/flashattention-from-first-principles/readme.ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">원리로 이해하는 FlashAttention · 한국어</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <a href="/inference/sglang-production-practices/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">SGLang in 2026: Engineering a Production-Grade LLM Serving Stack</span>  </a> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">기초 참고자료 · 2</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="2"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">참고자료 모아보기</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/llm-inference/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">LLM Inference</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/transformer/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Transformer</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">하드웨어 아키텍처 · 5</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="3"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/hardware-architectures/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">하드웨어 읽기 안내</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/hardware-architectures/domain-specific-architectures-for-ai-inference.ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Domain-Specific Architectures for AI Inference</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/hardware-architectures/gpus.ko/" aria-current="page" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">How to Think About GPUs</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/hardware-architectures/npus.ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">How to Think About NPUs</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/hardware-architectures/roofline.ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">All About Rooflines</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/hardware-architectures/tpus.ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">How to Think About TPUs</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">모델 아키텍처 · 2</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="4"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/inference/models/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">모델 문서 모아보기</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/models/kimi-k2-5-scaling/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">How We Scaled Kimi K2.5: 토큰 효율, 장문 컨텍스트, 에이전트 스웜</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/models/kimi-k3/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Kimi K3 기술 해부: 2.8T MoE, KDA, Attention Residuals, 그리고 64-GPU 서빙</span>  </a> </li> </ul> </details> </li> </ul>  <script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script> </sl-sidebar-state-persist> <div class="md:sl-hidden"> <div class="mobile-preferences sl-flex astro-wu23bvmt"> <div class="social-icons astro-wu23bvmt"> <a href="https://github.com/ziwon/ai-data-center-systems" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">GitHub</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script>   </div> </div> </div>  </div> </div> </nav> <div class="main-frame astro-4toy2ex6">  <script type="module">const a=document.getElementById("starlight__sidebar"),n=a?.querySelector("sl-sidebar-state-persist"),o="sl-sidebar-state",i=()=>{let t=[];const e=n?.dataset.hash||"";try{const s=sessionStorage.getItem(o),r=JSON.parse(s||"{}");Array.isArray(r.open)&&r.hash===e&&(t=r.open)}catch{}return{hash:e,open:t,scroll:a?.scrollTop||0}},c=t=>{try{sessionStorage.setItem(o,JSON.stringify(t))}catch{}},d=()=>c(i()),l=(t,e)=>{const s=i();s.open[e]=t,c(s)};n?.addEventListener("click",t=>{if(!(t.target instanceof Element))return;const e=t.target.closest("summary")?.closest("details");if(!e)return;const s=e.querySelector("sl-sidebar-restore"),r=parseInt(s?.dataset.index||"");isNaN(r)||l(!e.open,r)});addEventListener("visibilitychange",()=>{document.visibilityState==="hidden"&&d()});addEventListener("pageHide",d);</script> <div class="lg:sl-flex astro-67yu43on"> <aside class="right-sidebar-container print:hidden astro-67yu43on"> <div class="right-sidebar astro-67yu43on"> <div class="lg:sl-hidden astro-rl4sue7z"><mobile-starlight-toc data-min-h="2" data-max-h="2" class="astro-doynk5tl"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-doynk5tl"><details id="starlight__mobile-toc" class="astro-doynk5tl"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-doynk5tl"><span class="toggle sl-flex astro-doynk5tl">On this page<svg aria-hidden="true" class="caret astro-doynk5tl astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-doynk5tl"></span></summary><div class="dropdown astro-doynk5tl"><ul class="isMobile astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#reading-map" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Reading Map</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#1-gpu의-기본-단위-sm" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">1. GPU의 기본 단위: SM</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#2-tensor-core와-low-precision" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">2. Tensor Core와 Low Precision</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#3-simt와-warp-divergence" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">3. SIMT와 Warp Divergence</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#4-gpu-memory-hierarchy" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">4. GPU Memory Hierarchy</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#5-gpu는-왜-많은-sm을-가지는가" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">5. GPU는 왜 많은 SM을 가지는가</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#6-gpu-networking-node-안과-밖" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">6. GPU Networking: Node 안과 밖</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#7-collectives를-roofline으로-보기" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">7. Collectives를 Roofline으로 보기</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#8-gpu와-tpu의-차이" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">8. GPU와 TPU의 차이</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#9-inference-관점의-practical-tips-and-notes" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">9. Inference 관점의 Practical Tips and Notes</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#10-repository-connections" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">10. Repository Connections</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#11-check-questions" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">11. Check Questions</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#references" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">References</span> </a>  </li> </ul></div></details></nav></mobile-starlight-toc><script type="module" src="/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.hwBsy0Mo.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-rl4sue7z"><div class="sl-container astro-rl4sue7z"><kb-graph-card> <button class="kb-graph-card" type="button" data-open aria-haspopup="dialog"> <span class="kb-graph-copy"> <span class="kb-graph-title">Knowledge graph</span> <span class="kb-graph-subtitle" data-count>Loading related docs</span> </span> <span class="kb-graph-thumb" aria-hidden="true" data-map></span> <span class="kb-graph-expand" aria-hidden="true">Expand</span> </button> <dialog class="kb-graph-dialog" aria-label="Knowledge graph" data-dialog> <div class="kb-graph-panel"> <div class="kb-graph-panel-header"> <div> <p>Knowledge graph</p> <h2 data-heading>Related documents</h2> </div> <div class="kb-graph-tabs" role="tablist" aria-label="Knowledge graph views"> <button type="button" role="tab" aria-selected="true" data-tab="page">This page</button> <button type="button" role="tab" aria-selected="false" data-tab="global">Full graph</button> </div> <button type="button" data-close aria-label="Close knowledge graph">×</button> </div> <div class="kb-graph-stage" data-stage data-view="page"> <div data-page-stage></div> <div data-global-stage hidden></div> </div> </div> </dialog> </kb-graph-card> <script type="module" src="/_astro/KnowledgeGraphCard.astro_astro_type_script_index_0_lang.C475L69c.js"></script><starlight-toc data-min-h="2" data-max-h="2"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">On this page</h2><ul class="astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#reading-map" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Reading Map</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#1-gpu의-기본-단위-sm" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">1. GPU의 기본 단위: SM</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#2-tensor-core와-low-precision" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">2. Tensor Core와 Low Precision</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#3-simt와-warp-divergence" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">3. SIMT와 Warp Divergence</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#4-gpu-memory-hierarchy" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">4. GPU Memory Hierarchy</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#5-gpu는-왜-많은-sm을-가지는가" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">5. GPU는 왜 많은 SM을 가지는가</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#6-gpu-networking-node-안과-밖" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">6. GPU Networking: Node 안과 밖</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#7-collectives를-roofline으로-보기" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">7. Collectives를 Roofline으로 보기</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#8-gpu와-tpu의-차이" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">8. GPU와 TPU의 차이</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#9-inference-관점의-practical-tips-and-notes" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">9. Inference 관점의 Practical Tips and Notes</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#10-repository-connections" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">10. Repository Connections</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#11-check-questions" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">11. Check Questions</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#references" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">References</span> </a>  </li> </ul></nav></starlight-toc><script type="module" src="/_astro/TableOfContents.astro_astro_type_script_index_0_lang.FuRcXuRY.js"></script></div></div> </div> </aside> <div class="main-pane astro-67yu43on">  <main data-pagefind-body class="astro-bguv2lll" lang="en" dir="ltr">    <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <h1 id="_top" class="astro-j6tvhyss">How to Think About GPUs</h1> </div> </div> <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <starlight-image-zoom> <template class="astro-vjux6bgf"> <dialog class="starlight-image-zoom-dialog astro-vjux6bgf"> <button aria-label="Unzoom image" class="starlight-image-zoom-control astro-vjux6bgf"> <svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" class="astro-vjux6bgf"> <use href="#starlight-image-zoom-icon-unzoom" class="astro-vjux6bgf"></use> </svg> </button> <figure class="astro-vjux6bgf"></figure> </dialog> </template> <svg xmlns="http://www.w3.org/2000/svg" style="display:none" class="astro-vjux6bgf"> <symbol id="starlight-image-zoom-icon-zoom" viewBox="0 0 24 24" class="astro-vjux6bgf"> <path d="M9.79 12.79 4 18.59V17a1 1 0 0 0-2 0v4a1 1 0 0 0 .08.38 1 1 0 0 0 .54.54A1 1 0 0 0 3 22h4a1 1 0 0 0 0-2H5.41l5.8-5.79a1 1 0 0 0-1.42-1.42ZM21.92 2.62a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-4a1 1 0 0 0 0 2h1.59l-5.8 5.79a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V7a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z" class="astro-vjux6bgf"></path> </symbol> <symbol id="starlight-image-zoom-icon-unzoom" viewBox="0 0 24 24" class="astro-vjux6bgf"> <path d="M21.71 2.29a1 1 0 0 0-1.42 0l-5.79 5.8V6.5a1 1 0 0 0-2 0v4a1 1 0 0 0 .08.38 1 1 0 0 0 .54.54 1 1 0 0 0 .38.08h4a1 1 0 0 0 0-2h-1.59l5.8-5.79a1 1 0 0 0 0-1.42ZM10.88 12.58a1 1 0 0 0-.38-.08h-4a1 1 0 0 0 0 2h1.59l-5.8 5.79a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l5.79-5.8v1.59a1 1 0 0 0 2 0v-4a1 1 0 0 0-.08-.38 1 1 0 0 0-.54-.54Z" class="astro-vjux6bgf"></path> </symbol> </svg> </starlight-image-zoom>   <script type="module" src="/_astro/ImageZoom.astro_astro_type_script_index_0_lang.CZmBqK-T.js"></script> <div class="sl-markdown-content"> <blockquote>
+<p>Source: <a href="https://jax-ml.github.io/scaling-book/gpus/">How to Think About GPUs</a>, part of <em>How To Scale Your Model</em>, published 2025-08-18.</p>
+<p>This is a Korean lecture-note adaptation, not a line-by-line full translation. The goal is to translate the GPU mental model and connect it to LLM inference, quantization, and distributed serving notes in this repository.</p>
+<p>Figures from the JAX Scaling Book are reused under the repository’s <a href="assets/jax-scaling-book/LICENSE">MIT License</a>.</p>
+</blockquote>
+<div class="sl-heading-wrapper level-h2"><h2 id="reading-map">Reading Map</h2><a class="sl-anchor-link" href="#reading-map"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Reading Map”</span></a></div>
+<p>이 글은 NVIDIA GPU를 LLM scaling 관점에서 설명한다. 핵심은 GPU를 하나의 큰 계산기로 보지 않는 것이다.</p>
+<blockquote>
+<p>GPU는 많은 SM, Tensor Core, CUDA core, register, SMEM, L2, HBM, NVLink/NVSwitch, InfiniBand가 계층적으로 연결된 시스템이다.</p>
+</blockquote>
+<p>LLM 성능은 이 계층 중 어디에서 traffic이 막히는지에 따라 달라진다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="1-gpu의-기본-단위-sm">1. GPU의 기본 단위: SM</h2><a class="sl-anchor-link" href="#1-gpu의-기본-단위-sm"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “1. GPU의 기본 단위: SM”</span></a></div>
+<p>H100/B200 같은 modern ML GPU는 여러 개의 SM(Streaming Multiprocessor)을 가진다. 각 SM은 독립적인 작은 processor처럼 동작하며, 그 안에 Tensor Core, CUDA core, register file, shared memory가 있다.</p>
+<p><starlight-image-zoom-zoomable><img src="/inference/efficient-llm-inference-systems/appendix/hardware-architectures/assets/jax-scaling-book/gpu/gpu-diagram.png" alt="Abstract GPU layout"><button aria-label="Zoom image: Abstract GPU layout" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<p>Source: <a href="https://jax-ml.github.io/scaling-book/gpus/">JAX Scaling Book, “How to Think About GPUs”</a>, MIT License. The original caption describes this as an abstract layout of an H100/B200-style GPU with many SMs connected to HBM.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Unit</th><th>Role</th></tr></thead><tbody><tr><td>Tensor Core</td><td>matrix multiplication의 대부분을 처리한다.</td></tr><tr><td>CUDA cores</td><td>elementwise op, control-heavy op, reductions 등을 처리한다.</td></tr><tr><td>Warp scheduler</td><td>warp를 선택해 실행하고 latency를 숨긴다.</td></tr><tr><td>Register file</td><td>thread-local 값을 보관한다.</td></tr><tr><td>SMEM/L1</td><td>tile, activation, temporary data를 가까이 둔다.</td></tr></tbody></table>
+<p>LLM에서 FLOPS의 대부분은 matmul이므로 Tensor Core가 가장 중요하다. 하지만 전체 성능은 Tensor Core만으로 결정되지 않는다. Tensor Core에 tile을 제때 공급하지 못하면 peak FLOPS는 의미가 없다.</p>
+<p><starlight-image-zoom-zoomable><img src="/inference/efficient-llm-inference-systems/appendix/hardware-architectures/assets/jax-scaling-book/gpu/blackwell-sm.png" alt="H100 SM diagram"><button aria-label="Zoom image: H100 SM diagram" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<p>Source: <a href="https://jax-ml.github.io/scaling-book/gpus/">JAX Scaling Book, “How to Think About GPUs”</a>, MIT License. The original figure cites a Wccftech H100 SM diagram and explains SM subpartitions, Tensor Cores, warp schedulers, register files, CUDA cores, and L1 data cache.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="2-tensor-core와-low-precision">2. Tensor Core와 Low Precision</h2><a class="sl-anchor-link" href="#2-tensor-core와-low-precision"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “2. Tensor Core와 Low Precision”</span></a></div>
+<p>GPU 세대가 바뀔수록 Tensor Core는 더 큰 tile과 낮은 precision을 처리한다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Generation intuition</th><th>Important change</th></tr></thead><tbody><tr><td>Volta/Turing</td><td>Tensor Core가 본격적으로 등장</td></tr><tr><td>Ampere</td><td>TF32/BF16/FP16 path 확대</td></tr><tr><td>Hopper</td><td>FP8, TMA, warpgroup-level programming</td></tr><tr><td>Blackwell</td><td>FP4/NVFP4, 더 큰 Tensor Core, TMEM</td></tr></tbody></table>
+<p>낮은 precision은 두 방식으로 성능을 바꾼다.</p>
+<ol>
+<li>같은 memory bandwidth로 더 많은 element를 읽는다.</li>
+<li>같은 silicon area에서 더 많은 multiply-accumulate를 처리한다.</li>
+</ol>
+<p>Week 4의 메시지와 연결하면 다음과 같다.</p>
+<div class="expressive-code"><link rel="stylesheet" href="/_astro/ec.v4551.css"><script type="module" src="/_astro/ec.0vx5m.js"></script><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Prefill:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">large GEMM -> Tensor Core throughput 중요 -> FP8/FP4 path가 중요</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Decode:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">small GEMV-like work -> HBM bytes 중요 -> W4/W8 weight traffic 감소가 중요</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Prefill:  large GEMM -> Tensor Core throughput 중요 -> FP8/FP4 path가 중요Decode:  small GEMV-like work -> HBM bytes 중요 -> W4/W8 weight traffic 감소가 중요"><div></div></button></div></figure></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="21-a100에서-b300까지-무엇이-바뀌었나">2.1 A100에서 B300까지: 무엇이 바뀌었나</h3><a class="sl-anchor-link" href="#21-a100에서-b300까지-무엇이-바뀌었나"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “2.1 A100에서 B300까지: 무엇이 바뀌었나”</span></a></div>
+<p>NVIDIA GPU 세대 변화는 단순히 FLOPS가 늘어난 역사가 아니다. LLM 관점에서는 memory capacity, HBM bandwidth, low precision format, scale-up interconnect가 함께 바뀌었다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Generation</th><th>Public memory signal</th><th>Low-precision / compute signal</th><th>Interconnect signal</th><th>Inference implication</th></tr></thead><tbody><tr><td>A100</td><td>80GB HBM2e, over 2TB/s memory bandwidth</td><td>TF32, FP16/BF16, INT8/INT4 Tensor Core</td><td>NVLink generation used for 8-GPU nodes</td><td>70B-class serving은 대개 sharding/quantization이 필요하고, decode는 HBM traffic에 민감하다.</td></tr><tr><td>H100</td><td>HBM3, about 3TB/s class memory bandwidth</td><td>FP8 Transformer Engine, TMA, Hopper programming model</td><td>NVLink/NVSwitch, Quantum-2 InfiniBand ecosystem</td><td>FP8 prefill/training path와 faster collectives가 중요해진다.</td></tr><tr><td>H200</td><td>141GB HBM3e, 4.8TB/s memory bandwidth</td><td>Hopper compute with larger/faster memory</td><td>Hopper NVLink/NVL system family</td><td>같은 Hopper compute라도 larger KV cache와 model fit이 좋아져 inference에 유리하다.</td></tr><tr><td>B200 / DGX B200</td><td>DGX B200: 8 GPUs, 1,440GB total HBM3e, 64TB/s total HBM bandwidth</td><td>Blackwell FP4/FP8 Tensor Core path</td><td>5th-gen NVLink, 14.4TB/s aggregate NVLink bandwidth in DGX B200</td><td>FP4/NVFP4 weight path와 large memory bandwidth가 decode cost/token을 낮추는 방향이다.</td></tr><tr><td>B300 / DGX B300</td><td>DGX B300 user guide: 8 x 288GB Blackwell Ultra GPUs</td><td>DGX B300: 144 PFLOPS FP4 inference class system number</td><td>5th-gen NVLink, 14.4TB/s aggregate NVLink bandwidth in DGX B300</td><td>더 큰 per-node memory envelope가 long-context, MoE, high-concurrency inference의 headroom을 넓힌다.</td></tr></tbody></table>
+<p>이 표는 procurement table이 아니라 읽는 법이다. A100에서 H200까지는 “한 GPU에 더 많은 model/KV state를 올리는 능력”이 크게 개선되었고, Blackwell 세대에서는 FP4와 rack-scale NVLink domain이 inference economics의 중심으로 올라온다. 같은 parameter count라도 context length, batch size, KV cache format, quantization format에 따라 필요한 GPU 수가 바뀐다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="3-simt와-warp-divergence">3. SIMT와 Warp Divergence</h2><a class="sl-anchor-link" href="#3-simt와-warp-divergence"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3. SIMT와 Warp Divergence”</span></a></div>
+<p>GPU는 SIMT(Single Instruction, Multiple Threads) 모델을 사용한다. 같은 warp 안의 thread들이 같은 instruction을 실행할 때 효율이 높다. 분기 조건이 갈라지면 warp divergence가 생기고 일부 lane이 놀게 된다.</p>
+<p>LLM의 dense matmul은 매우 규칙적이어서 GPU에 잘 맞는다. 반면 다음 작업은 더 조심해야 한다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Workload</th><th>Risk</th></tr></thead><tbody><tr><td>token sampling</td><td>branching, small kernels, CPU/GPU sync</td></tr><tr><td>MoE routing</td><td>irregular dispatch, AllToAll, load imbalance</td></tr><tr><td>sparse attention</td><td>irregular memory access</td></tr><tr><td>small batch decode</td><td>low occupancy, launch overhead</td></tr></tbody></table>
+<p>그래서 serving system은 단순히 kernel 하나만 빠르게 만드는 것이 아니라, batching, scheduling, routing, fusion까지 함께 맞춰야 한다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="4-gpu-memory-hierarchy">4. GPU Memory Hierarchy</h2><a class="sl-anchor-link" href="#4-gpu-memory-hierarchy"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “4. GPU Memory Hierarchy”</span></a></div>
+<p>GPU memory hierarchy는 LLM inference의 성능 언어다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Level</th><th>Scope</th><th>Practical meaning</th></tr></thead><tbody><tr><td>Registers</td><td>thread/subpartition</td><td>가장 빠르지만 매우 작다.</td></tr><tr><td>SMEM/L1</td><td>SM-local</td><td>tile과 temporary buffer를 둔다.</td></tr><tr><td>TMEM</td><td>Blackwell Tensor Core feeding</td><td>큰 Tensor Core를 먹이기 위한 새 공간이다.</td></tr><tr><td>L2</td><td>GPU-wide shared cache</td><td>SM 간 공유되는 마지막 on-chip cache다.</td></tr><tr><td>HBM</td><td>device memory</td><td>weights, activations, KV cache의 주 저장소다.</td></tr><tr><td>NVLink/NVSwitch</td><td>GPU-GPU</td><td>tensor parallelism과 collective에 중요하다.</td></tr><tr><td>PCIe/InfiniBand</td><td>host/node/rack</td><td>scale-out과 storage/host path에 중요하다.</td></tr></tbody></table>
+<p>Week 2에서 강조한 것처럼, optimization은 traffic을 느린 계층에서 빠른 계층으로 당기는 일이다.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    A[HBM] --> B[L2]
+    B --> C[SMEM / L1]
+    C --> D[Registers / TMEM]
+    D --> E[Tensor Core]
+
+    classDef primary fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef secondary fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef note fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef accent fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    class A accent
+    class B,C secondary
+    class D note
+    class E primary</pre>
+<div class="sl-heading-wrapper level-h3"><h3 id="41-model-fit-weights보다-kv-cache가-먼저-막힐-수-있다">4.1 Model fit: weights보다 KV cache가 먼저 막힐 수 있다</h3><a class="sl-anchor-link" href="#41-model-fit-weights보다-kv-cache가-먼저-막힐-수-있다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “4.1 Model fit: weights보다 KV cache가 먼저 막힐 수 있다”</span></a></div>
+<p>GPU memory fit을 볼 때 가장 흔한 실수는 model weight만 계산하는 것이다. Weight는 시작점일 뿐이고, production serving에서는 KV cache, activation/workspace, fragmentation, runtime reserve가 같이 들어간다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">weight memory ~= parameters x bytes_per_parameter</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">KV cache memory ~= layers</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">                  </span></span><span style="--0:#d6deeb;--1:#403f53">x sequence_length</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">                  </span></span><span style="--0:#d6deeb;--1:#403f53">x kv_heads</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">                  </span></span><span style="--0:#d6deeb;--1:#403f53">x head_dim</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">                  </span></span><span style="--0:#d6deeb;--1:#403f53">x 2  # key and value</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">                  </span></span><span style="--0:#d6deeb;--1:#403f53">x bytes_per_element</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">                  </span></span><span style="--0:#d6deeb;--1:#403f53">x batch_or_concurrency</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="weight memory ~= parameters x bytes_per_parameterKV cache memory ~= layers                  x sequence_length                  x kv_heads                  x head_dim                  x 2  # key and value                  x bytes_per_element                  x batch_or_concurrency"><div></div></button></div></figure></div>
+<p>예를 들어 70B model이 weight-only quantization으로 한 GPU memory budget에 가까스로 들어간다고 해도, 긴 context와 높은 concurrency를 붙이면 KV cache가 먼저 한계를 만든다. H200과 Blackwell의 큰 memory가 inference에서 중요한 이유는 단순히 더 큰 model을 올리기 위해서만이 아니라, 같은 model에서 더 긴 context와 더 많은 동시 request를 담기 위해서다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Fit question</th><th>Why it matters</th></tr></thead><tbody><tr><td>weights만 들어가는가, KV cache까지 들어가는가?</td><td>“load 가능”과 “serve 가능”은 다르다.</td></tr><tr><td>target context length는 얼마인가?</td><td>decode capacity는 KV bytes/token에 민감하다.</td></tr><tr><td>batch/concurrency가 얼마인가?</td><td>KV cache는 request 수와 함께 증가한다.</td></tr><tr><td>quantization format은 무엇인가?</td><td>weight memory와 compute path는 줄어도 KV dtype이 그대로일 수 있다.</td></tr><tr><td>fragmentation과 reserve는 얼마나 잡는가?</td><td>PagedAttention도 allocator overhead와 block waste를 완전히 없애지는 않는다.</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h2"><h2 id="5-gpu는-왜-많은-sm을-가지는가">5. GPU는 왜 많은 SM을 가지는가</h2><a class="sl-anchor-link" href="#5-gpu는-왜-많은-sm을-가지는가"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “5. GPU는 왜 많은 SM을 가지는가”</span></a></div>
+<p>GPU는 수백 개의 작은 작업을 동시에 실행해 latency를 숨긴다. Memory load가 걸린 warp가 기다리는 동안 다른 warp를 실행한다.</p>
+<p>이 방식은 batch가 크고 tile이 충분히 많을 때 잘 동작한다. 반대로 decode batch가 작으면 다음 문제가 생긴다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Symptom</th><th>Explanation</th></tr></thead><tbody><tr><td>GPU-Util은 높은데 throughput이 낮다</td><td>kernel이 계속 실행되지만 Tensor Core/HBM을 충분히 쓰지 못한다.</td></tr><tr><td>batch=1 decode가 느리다</td><td>launch overhead와 memory latency를 숨길 work가 부족하다.</td></tr><tr><td>small model이 H100에서 비효율적이다</td><td>problem size가 GPU를 채우지 못한다.</td></tr></tbody></table>
+<p>이 레포의 Week 2 lab 결과와 정확히 연결된다. <code dir="auto">nvidia-smi</code>의 GPU-Util은 “GPU가 바쁜가”를 말할 뿐, “peak에 가깝게 유용한 일을 하는가”를 말하지 않는다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="6-gpu-networking-node-안과-밖">6. GPU Networking: Node 안과 밖</h2><a class="sl-anchor-link" href="#6-gpu-networking-node-안과-밖"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “6. GPU Networking: Node 안과 밖”</span></a></div>
+<p>GPU scale-out은 두 계층으로 나눠 봐야 한다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Scope</th><th>Fabric</th><th>Typical use</th></tr></thead><tbody><tr><td>Intra-node</td><td>NVLink / NVSwitch</td><td>tensor parallelism, fast AllReduce</td></tr><tr><td>Inter-node</td><td>InfiniBand / Ethernet RDMA</td><td>data parallelism, pipeline parallelism, expert parallelism</td></tr><tr><td>Rack-scale</td><td>NVL72 같은 NVSwitch fabric</td><td>더 큰 scale-up island</td></tr></tbody></table>
+<p>Tensor parallelism은 layer 내부에서 자주 통신하므로 빠른 scale-up fabric에 묶는 것이 좋다. Pipeline parallelism은 layer boundary activation만 넘기므로 상대적으로 scale-out에 더 적합하다. MoE expert parallelism은 AllToAll이 많아 fabric과 routing의 영향을 크게 받는다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="61-interconnect-용어를-분리해서-읽기">6.1 Interconnect 용어를 분리해서 읽기</h3><a class="sl-anchor-link" href="#61-interconnect-용어를-분리해서-읽기"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “6.1 Interconnect 용어를 분리해서 읽기”</span></a></div>
+<p>GPU interconnect 문서를 읽을 때는 비슷한 이름을 구분해야 한다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Term</th><th>Scope</th><th>Practical reading</th></tr></thead><tbody><tr><td>NV-HBI</td><td>Blackwell package 내부 die-to-die</td><td>dual-die GPU를 하나의 accelerator처럼 보이게 하는 내부 연결이다.</td></tr><tr><td>NVLink-C2C</td><td>CPU-GPU chip-to-chip</td><td>Grace Hopper/Blackwell 같은 CPU-GPU coherent 연결에 가깝다.</td></tr><tr><td>NVLink</td><td>GPU-GPU link</td><td>tensor parallel collective, P2P, fast scale-up traffic에 중요하다.</td></tr><tr><td>NVSwitch</td><td>여러 GPU 사이 switch fabric</td><td>8-GPU node 또는 NVL72 같은 larger scale-up island를 만든다.</td></tr><tr><td>PCIe</td><td>host/device/NIC standard I/O</td><td>CPU path, NIC, storage, fallback, non-NVLink P2P의 현실적 한계다.</td></tr><tr><td>InfiniBand / RoCE</td><td>node/rack/cluster network</td><td>scale-out training/serving, DP/PP/EP traffic을 담당한다.</td></tr></tbody></table>
+<p>이 계층을 섞어 말하면 성능 추정이 틀어진다. Tensor parallel AllReduce가 NVLink domain 안에 머무르는지, rack 밖 RDMA를 건너는지에 따라 같은 GPU 수라도 latency와 throughput이 크게 달라진다.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    A[One GPU&#x3C;br/>SM / HBM / L2] --> B[Package / board&#x3C;br/>NV-HBI / C2C]
+    B --> C[Node scale-up&#x3C;br/>NVLink / NVSwitch]
+    C --> D[Rack scale-up island&#x3C;br/>NVL72 class fabric]
+    D -.-> E[Cluster scale-out&#x3C;br/>InfiniBand / RoCE]
+
+    A --> F[local tensor kernels]
+    C --> G[tensor parallel collectives]
+    D --> H[large model shard&#x3C;br/>rack-local serving]
+    E --> I[pipeline / expert / data parallel&#x3C;br/>cross-rack traffic]
+
+    classDef primary fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef secondary fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef note fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef accent fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    class A primary
+    class B,C,D secondary
+    class E accent
+    class F,G,H,I note</pre>
+<p>Blackwell NVL72 같은 rack-scale design은 “scale-out network가 빨라졌다”기보다, fast scale-up island를 rack 단위로 넓히려는 시도로 읽는 편이 정확하다. 그래도 cluster 전체가 하나의 NVLink domain이 되는 것은 아니며, island 밖으로 나가면 InfiniBand/RoCE의 scheduling, routing, congestion 문제가 다시 등장한다.</p>
+<p><starlight-image-zoom-zoomable><img src="/inference/efficient-llm-inference-systems/appendix/hardware-architectures/assets/jax-scaling-book/gpu/superpod-diagram.png" alt="H100 SuperPod networking diagram"><button aria-label="Zoom image: H100 SuperPod networking diagram" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<p>Source: <a href="https://jax-ml.github.io/scaling-book/gpus/">JAX Scaling Book, “How to Think About GPUs”</a>, MIT License. The original caption uses this as a typical H100 network: 8 GPUs form an NVLink domain through NVSwitches, and nodes are connected with switched InfiniBand.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="7-collectives를-roofline으로-보기">7. Collectives를 Roofline으로 보기</h2><a class="sl-anchor-link" href="#7-collectives를-roofline으로-보기"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “7. Collectives를 Roofline으로 보기”</span></a></div>
+<p>LLM scaling에서는 compute roofline만으로 부족하다. communication roofline이 필요하다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">compute time ~= FLOPs / GPU compute throughput</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">communication time ~= bytes / collective bandwidth</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="compute time ~= FLOPs / GPU compute throughputcommunication time ~= bytes / collective bandwidth"><div></div></button></div></figure></div>
+<p>성능이 잘 scale하려면 compute time이 communication time을 가릴 수 있어야 한다. 그렇지 않으면 GPU를 더 넣어도 속도가 늘지 않는다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Parallelism</th><th>Communication pattern</th><th>Bottleneck lens</th></tr></thead><tbody><tr><td>Data parallelism</td><td>gradient AllReduce / ReduceScatter</td><td>batch tokens per GPU가 충분해야 한다.</td></tr><tr><td>Tensor parallelism</td><td>activation AllReduce / AllGather</td><td>NVLink bandwidth와 latency가 중요하다.</td></tr><tr><td>Pipeline parallelism</td><td>activation send/recv</td><td>bubble과 stage balance가 중요하다.</td></tr><tr><td>Expert parallelism</td><td>token AllToAll</td><td>load balance와 fabric routing이 중요하다.</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h2"><h2 id="8-gpu와-tpu의-차이">8. GPU와 TPU의 차이</h2><a class="sl-anchor-link" href="#8-gpu와-tpu의-차이"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “8. GPU와 TPU의 차이”</span></a></div>
+<p>원문은 GPU를 TPU와 비교하면서 설명한다. 둘은 모두 “matrix multiply unit + fast memory + network”라는 큰 구조를 공유하지만, 중요한 차이가 있다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Dimension</th><th>GPU</th><th>TPU</th></tr></thead><tbody><tr><td>Compute granularity</td><td>많은 SM이 병렬 실행</td><td>상대적으로 큰 MXU 중심</td></tr><tr><td>Flexibility</td><td>CUDA ecosystem과 thread-level flexibility</td><td>compiler-managed regular execution</td></tr><tr><td>Memory</td><td>register/SMEM/L2/HBM/TMEM 계층</td><td>VMEM/HBM 중심</td></tr><tr><td>Network</td><td>NVLink/NVSwitch/IB ecosystem</td><td>ICI/DCN topology</td></tr><tr><td>Best fit</td><td>broad workloads, custom kernels, production serving</td><td>regular large matmul, JAX/XLA compiled workloads</td></tr></tbody></table>
+<p>GPU의 강점은 flexibility다. 단점도 flexibility에서 나온다. 같은 연산이라도 kernel choice, layout, batch shape, fusion 여부에 따라 성능이 크게 흔들린다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="9-inference-관점의-practical-tips-and-notes">9. Inference 관점의 Practical Tips and Notes</h2><a class="sl-anchor-link" href="#9-inference-관점의-practical-tips-and-notes"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “9. Inference 관점의 Practical Tips and Notes”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="prefill">Prefill</h3><a class="sl-anchor-link" href="#prefill"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Prefill”</span></a></div>
+<p>Prefill은 긴 prompt를 병렬로 처리한다. 큰 GEMM과 attention이 많고 Tensor Core를 잘 채울 수 있다. FP8/FP4 같은 lower precision compute path가 직접적인 효과를 낸다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="decode">Decode</h3><a class="sl-anchor-link" href="#decode"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Decode”</span></a></div>
+<p>Decode는 token을 하나씩 생성한다. batch가 충분히 크지 않으면 GEMV와 작은 attention kernel이 많아진다. 이때 HBM bandwidth, KV cache layout, kernel launch overhead, batching scheduler가 중요하다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="quantization">Quantization</h3><a class="sl-anchor-link" href="#quantization"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Quantization”</span></a></div>
+<p>Weight-only quantization은 decode에 특히 효과적이다. Weight+activation quantization 또는 FP8은 prefill compute path에서 더 중요하다. 어느 쪽이 더 큰 이득인지는 workload mix에 따라 달라진다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="distributed-serving">Distributed Serving</h3><a class="sl-anchor-link" href="#distributed-serving"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Distributed Serving”</span></a></div>
+<p>TP는 빠른 scale-up fabric에 넣고, PP는 느린 scale-out fabric으로 넘길 수 있다. MoE는 별도 검증이 필요하다. Expert routing이 fabric에 어떤 traffic pattern을 만드는지 보지 않으면 peak FLOPS로는 예측할 수 없다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="power-and-cooling-are-architecture-constraints">Power and cooling are architecture constraints</h3><a class="sl-anchor-link" href="#power-and-cooling-are-architecture-constraints"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Power and cooling are architecture constraints”</span></a></div>
+<p>Blackwell급 systems에서는 GPU 선택이 곧 power/cooling/topology 선택이다. DGX B200 같은 8-GPU system은 NVIDIA product page 기준 최대 약 14.3kW system power를 제시한다. 이런 class의 서버에서는 “GPU가 몇 FLOPS인가”만이 아니라 다음을 같이 봐야 한다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Question</th><th>Why it matters</th></tr></thead><tbody><tr><td>rack power budget이 몇 kW인가?</td><td>GPU 수보다 먼저 power feed와 cooling이 한계를 만든다.</td></tr><tr><td>air cooling으로 가능한가, liquid cooling이 필요한가?</td><td>deployment lead time과 facility requirement가 달라진다.</td></tr><tr><td>tokens/sec/GPU가 아니라 tokens/sec/rack은 어떤가?</td><td>serving capacity는 rack power와 network까지 포함해야 한다.</td></tr><tr><td>NVLink domain을 넓히기 위해 어떤 rack layout이 필요한가?</td><td>cabling, switch, NIC, serviceability가 topology의 일부다.</td></tr><tr><td>power cap을 걸면 p99와 throughput이 어떻게 변하는가?</td><td>perf/W 최적점은 max-TDP 설정과 다를 수 있다.</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h2"><h2 id="10-repository-connections">10. Repository Connections</h2><a class="sl-anchor-link" href="#10-repository-connections"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “10. Repository Connections”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Repository topic</th><th>Connection</th></tr></thead><tbody><tr><td>Week 2 hardware foundations</td><td>SM, Tensor Core, memory hierarchy, GPU-Util 해석과 직접 연결된다.</td></tr><tr><td>Week 3 KV cache</td><td>decode path에서 HBM traffic과 KV cache layout을 설명한다.</td></tr><tr><td>Week 4 quantization</td><td>FP8/FP4/W4A16이 prefill/decode에 다르게 작용하는 이유를 설명한다.</td></tr><tr><td>AI Systems Performance Engineering Chapter 4</td><td>NCCL, NVLink, RDMA, collective roofline과 연결된다.</td></tr><tr><td>AI Systems Performance Engineering Chapter 3</td><td>Kubernetes에서 CPU pinning, NUMA locality, Topology Manager가 GPU serving p99와 training step time에 미치는 영향을 연결한다.</td></tr><tr><td>NPU appendix</td><td>GPU의 scale-up fabric과 NPU의 compiler/runtime envelope를 비교하는 기준을 제공한다.</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h2"><h2 id="11-check-questions">11. Check Questions</h2><a class="sl-anchor-link" href="#11-check-questions"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “11. Check Questions”</span></a></div>
+<ol>
+<li>GPU에서 Tensor Core와 CUDA core의 역할은 어떻게 다른가?</li>
+<li>Decode batch가 작을 때 H100 같은 큰 GPU가 비효율적인 이유는 무엇인가?</li>
+<li><code dir="auto">nvidia-smi</code> GPU-Util이 높은데도 실제 throughput이 낮을 수 있는 이유는 무엇인가?</li>
+<li>Tensor parallelism을 보통 NVLink/NVSwitch 안에 묶는 이유는 무엇인가?</li>
+<li>Prefill과 decode에서 quantization의 이득이 다르게 나타나는 이유는 무엇인가?</li>
+<li>“model weights가 GPU memory에 들어간다”와 “production serving이 가능하다”는 왜 다른 말인가?</li>
+<li>NVLink/NVSwitch domain 안에 머무르는 traffic과 InfiniBand/RoCE를 건너는 traffic은 어떻게 다르게 평가해야 하는가?</li>
+<li>Blackwell 세대에서 power/cooling이 architecture constraint가 되는 이유는 무엇인가?</li>
+</ol>
+<div class="sl-heading-wrapper level-h2"><h2 id="references">References</h2><a class="sl-anchor-link" href="#references"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “References”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Topic</th><th>Source</th></tr></thead><tbody><tr><td>JAX Scaling Book GPU chapter</td><td><a href="https://jax-ml.github.io/scaling-book/gpus/">https://jax-ml.github.io/scaling-book/gpus/</a></td></tr><tr><td>NVIDIA A100 product page</td><td><a href="https://www.nvidia.com/en-us/data-center/a100/">https://www.nvidia.com/en-us/data-center/a100/</a></td></tr><tr><td>NVIDIA H100 product page</td><td><a href="https://www.nvidia.com/en-us/data-center/h100/">https://www.nvidia.com/en-us/data-center/h100/</a></td></tr><tr><td>NVIDIA H200 product page</td><td><a href="https://www.nvidia.com/en-us/data-center/h200/">https://www.nvidia.com/en-us/data-center/h200/</a></td></tr><tr><td>NVIDIA DGX B200 product page</td><td><a href="https://www.nvidia.com/en-us/data-center/dgx-b200/">https://www.nvidia.com/en-us/data-center/dgx-b200/</a></td></tr><tr><td>NVIDIA DGX B300 product page</td><td><a href="https://www.nvidia.com/en-us/data-center/dgx-b300/">https://www.nvidia.com/en-us/data-center/dgx-b300/</a></td></tr><tr><td>NVIDIA DGX B300 user guide</td><td><a href="https://docs.nvidia.com/dgx/dgxb300-user-guide/introduction-to-dgxb300.html">https://docs.nvidia.com/dgx/dgxb300-user-guide/introduction-to-dgxb300.html</a></td></tr><tr><td>NVIDIA Blackwell architecture</td><td><a href="https://www.nvidia.com/en-us/data-center/technologies/blackwell-architecture/">https://www.nvidia.com/en-us/data-center/technologies/blackwell-architecture/</a></td></tr></tbody></table> </div> <footer class="sl-flex astro-3yyafb3n"> <div class="meta sl-flex astro-3yyafb3n"> <a href="https://github.com/ziwon/ai-data-center-systems/edit/main/inference/efficient-llm-inference-systems/appendix/hardware-architectures/gpus.ko.md" class="sl-flex print:hidden astro-eez2twj6"><svg aria-hidden="true" class="astro-eez2twj6 astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.2em;"><path d="M22 7.24a1 1 0 0 0-.29-.71l-4.24-4.24a1 1 0 0 0-1.1-.22 1 1 0 0 0-.32.22l-2.83 2.83L2.29 16.05a1 1 0 0 0-.29.71V21a1 1 0 0 0 1 1h4.24a1 1 0 0 0 .76-.29l10.87-10.93L21.71 8c.1-.1.17-.2.22-.33a1 1 0 0 0 0-.24v-.14l.07-.05ZM6.83 20H4v-2.83l9.93-9.93 2.83 2.83L6.83 20ZM18.17 8.66l-2.83-2.83 1.42-1.41 2.82 2.82-1.41 1.42Z"/></svg>Edit page</a> <p>Last updated: <time datetime="2026-07-26T08:06:10.000Z">Jul 26, 2026</time></p> </div> <div class="pagination-links print:hidden astro-u2l5gyhi" dir="ltr"> <a href="/inference/efficient-llm-inference-systems/appendix/hardware-architectures/domain-specific-architectures-for-ai-inference.ko/" rel="prev" class="astro-u2l5gyhi"> <svg aria-hidden="true" class="astro-u2l5gyhi astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17 11H9.41l3.3-3.29a1.004 1.004 0 1 0-1.42-1.42l-5 5a1 1 0 0 0-.21.33 1 1 0 0 0 0 .76 1 1 0 0 0 .21.33l5 5a1.002 1.002 0 0 0 1.639-.325 1 1 0 0 0-.219-1.095L9.41 13H17a1 1 0 0 0 0-2Z"/></svg> <span class="astro-u2l5gyhi"> Previous <br class="astro-u2l5gyhi"> <span class="link-title astro-u2l5gyhi">Domain-Specific Architectures for AI Inference</span> </span> </a> <a href="/inference/efficient-llm-inference-systems/appendix/hardware-architectures/npus.ko/" rel="next" class="astro-u2l5gyhi"> <svg aria-hidden="true" class="astro-u2l5gyhi astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17.92 11.62a1.001 1.001 0 0 0-.21-.33l-5-5a1.003 1.003 0 1 0-1.42 1.42l3.3 3.29H7a1 1 0 0 0 0 2h7.59l-3.3 3.29a1.002 1.002 0 0 0 .325 1.639 1 1 0 0 0 1.095-.219l5-5a1 1 0 0 0 .21-.33 1 1 0 0 0 0-.76Z"/></svg> <span class="astro-u2l5gyhi"> Next <br class="astro-u2l5gyhi"> <span class="link-title astro-u2l5gyhi">How to Think About NPUs</span> </span> </a> </div>  </footer> </div> </div>  </main> </div> </div> </div> <ask-docs-widget> <button class="ask-fab" type="button" data-open aria-label="Ask this docs"> <span class="ask-fab-icon" aria-hidden="true">?</span>
+Ask this docs
+</button> <div class="ask-panel" data-panel hidden> <div class="ask-resize-handle" data-resize aria-hidden="true"></div> <div class="ask-panel-inner"> <header class="ask-header"> <div> <p class="ask-eyebrow">AI Data Center Systems</p> <h2 class="ask-title">Ask this docs</h2> </div> <div class="ask-header-controls"> <button class="ask-mode-btn" data-mode-btn="right" title="오른쪽 패널" aria-label="오른쪽 패널"> <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="6" height="16" rx="1.5" opacity="0.35"></rect><rect x="8" y="0" width="8" height="16" rx="1.5"></rect></svg> </button> <button class="ask-mode-btn" data-mode-btn="bottom" title="하단 패널" aria-label="하단 패널"> <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="16" height="6" rx="1.5" opacity="0.35"></rect><rect x="0" y="8" width="16" height="8" rx="1.5"></rect></svg> </button> <button class="ask-mode-btn" data-mode-btn="expand" title="전체 확장" aria-label="전체 확장"> <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 5.5V1h4.5M10.5 1H15v4.5M15 10.5V15h-4.5M5.5 15H1v-4.5"></path></svg> </button> <button class="ask-close-btn" type="button" aria-label="닫기" data-close> <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13"></path></svg> </button> </div> </header> <div class="ask-body"> <label class="ask-field"> <span class="ask-field-row"> <span>Question</span> <span class="ask-char" data-char>0 / 800</span> </span> <textarea name="question" rows="3" maxlength="800" placeholder="이 문서에서 핵심 운영 체크포인트는 무엇인가요?" data-question></textarea> <span class="ask-hint">시간당 최대 20회 · 질문당 최대 800자</span> </label> <div class="ask-actions"> <button class="ask-submit" type="button" data-submit> <svg class="ask-spinner" viewBox="0 0 24 24" fill="none" aria-hidden="true" hidden> <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2.5" stroke-dasharray="56" stroke-dashoffset="14" stroke-linecap="round"></circle> </svg> <span data-submit-label>Ask</span> </button> <p class="ask-status" data-status></p> </div> <section class="ask-answer" data-answer hidden></section> <section class="ask-sources" data-sources hidden> <h3>Sources</h3> <ul class="ask-source-chips" data-source-list></ul> </section> </div> </div> </div> <div class="ask-backdrop" data-backdrop hidden></div> </ask-docs-widget> <script type="module" src="/_astro/AskDocs.astro_astro_type_script_index_0_lang.BbnAb04M.js"></script> </div> <script type="module">const r=document.documentElement,c=document.querySelector("#starlight__sidebar"),s=document.querySelector(".navigation-mode-toggle"),a=document.querySelector(".navigation-drawer-toggle"),u=window.matchMedia("(min-width: 50rem)");function d(){return r.dataset.navigationMode==="compact"}function o(){return r.dataset.navigationDrawer==="open"}function l(){const e=d(),t=e&&o();s?.setAttribute("aria-pressed",String(e)),s?.setAttribute("title",e?"Use normal navigation":"Use compact navigation"),a?.setAttribute("aria-expanded",String(t)),a?.setAttribute("title",t?"Close navigation":"Open navigation");const n=a?.querySelector(".navigation-drawer-label");n&&(n.textContent=t?"Close navigation":"Open navigation")}function i(e,t=!1){const n=!!(e&&d()&&u.matches);r.dataset.navigationDrawer=n?"open":"closed",l(),n?requestAnimationFrame(()=>{const g=c?.querySelector('a[aria-current="page"]'),m=c?.querySelector(".starlight-sidebar-topics-current");(g??m)?.focus()}):t&&a?.focus()}function p(e){r.dataset.navigationMode=e,i(!1);try{localStorage.setItem("adcs-navigation-mode",e)}catch{}l()}s?.addEventListener("click",()=>{p(d()?"normal":"compact")});a?.addEventListener("click",()=>{i(!o(),o())});document.addEventListener("keydown",e=>{e.key==="Escape"&&o()&&i(!1,!0)});document.addEventListener("pointerdown",e=>{!o()||!(e.target instanceof Node)||c?.contains(e.target)||i(!1)});u.addEventListener("change",()=>i(!1));r.dataset.navigationDrawer="closed";l();</script> </body></html>

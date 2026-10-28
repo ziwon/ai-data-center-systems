@@ -1,0 +1,142 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 660" role="img" aria-labelledby="title desc">
+  <title id="title">Interleaved and blocked ISPC iteration assignment across eight program instances</title>
+  <desc id="desc">For programCount eight, interleaved assignment maps each SIMD step to contiguous addresses using step times programCount plus programIndex. Blocked assignment maps lanes to distant addresses using programIndex times blockSize plus step and may require a gather.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .frame { fill: none; stroke: #111111; stroke-width: 2; }
+    .cell { fill: none; stroke: #D8D1C7; stroke-width: 1.5; }
+    .active { fill: #D9392E; stroke: #D9392E; stroke-width: 1.5; }
+    .line { fill: none; stroke: #111111; stroke-width: 2; }
+    .dash { fill: none; stroke: #6F6A63; stroke-width: 1.5; stroke-dasharray: 5 5; }
+    .text { fill: #050505; font-family: Inter, Arial, sans-serif; font-size: 16px; }
+    .label { fill: #050505; font-family: Inter, Arial, sans-serif; font-size: 22px; font-weight: 700; }
+    .small { fill: #6F6A63; font-family: Inter, Arial, sans-serif; font-size: 14px; }
+    .lane { fill: #6F6A63; font-family: Inter, Arial, sans-serif; font-size: 14px; font-weight: 700; text-anchor: middle; }
+    .formula { fill: #050505; font-family: Consolas, monospace; font-size: 16px; text-anchor: middle; }
+    .white { fill: #F5F1EA; font-family: Inter, Arial, sans-serif; font-size: 15px; font-weight: 700; }
+    .key { fill: #D9392E; font-family: Inter, Arial, sans-serif; font-size: 17px; font-weight: 700; }
+  </style>
+
+  <rect class="bg" width="1120" height="660"/>
+
+  <text class="label" x="55" y="45">Interleaved assignment</text>
+  <text class="small" x="55" y="70">At one SIMD step, lanes touch adjacent addresses.</text>
+  <text class="small" x="125" y="94">programIndex / SIMD lane →</text>
+  <text class="small" x="55" y="114">step ↓</text>
+  <text class="lane" x="189" y="114">0</text>
+  <text class="lane" x="297" y="114">1</text>
+  <text class="lane" x="405" y="114">2</text>
+  <text class="lane" x="513" y="114">3</text>
+  <text class="lane" x="621" y="114">4</text>
+  <text class="lane" x="729" y="114">5</text>
+  <text class="lane" x="837" y="114">6</text>
+  <text class="lane" x="943" y="114">7</text>
+
+  <g transform="translate(125 120)">
+    <rect class="frame" x="0" y="0" width="880" height="120"/>
+    <line class="dash" x1="0" y1="60" x2="880" y2="60"/>
+    <text class="text" x="-25" y="36">0</text>
+    <text class="text" x="-25" y="96">1</text>
+
+    <g>
+      <rect class="active" x="20" y="16" width="88" height="28"/>
+      <rect class="active" x="128" y="16" width="88" height="28"/>
+      <rect class="active" x="236" y="16" width="88" height="28"/>
+      <rect class="active" x="344" y="16" width="88" height="28"/>
+      <rect class="active" x="452" y="16" width="88" height="28"/>
+      <rect class="active" x="560" y="16" width="88" height="28"/>
+      <rect class="active" x="668" y="16" width="88" height="28"/>
+      <rect class="active" x="776" y="16" width="84" height="28"/>
+      <text class="white" x="58" y="36">0</text>
+      <text class="white" x="166" y="36">1</text>
+      <text class="white" x="274" y="36">2</text>
+      <text class="white" x="382" y="36">3</text>
+      <text class="white" x="490" y="36">4</text>
+      <text class="white" x="598" y="36">5</text>
+      <text class="white" x="706" y="36">6</text>
+      <text class="white" x="812" y="36">7</text>
+    </g>
+
+    <g>
+      <rect class="cell" x="20" y="76" width="88" height="28"/>
+      <rect class="cell" x="128" y="76" width="88" height="28"/>
+      <rect class="cell" x="236" y="76" width="88" height="28"/>
+      <rect class="cell" x="344" y="76" width="88" height="28"/>
+      <rect class="cell" x="452" y="76" width="88" height="28"/>
+      <rect class="cell" x="560" y="76" width="88" height="28"/>
+      <rect class="cell" x="668" y="76" width="88" height="28"/>
+      <rect class="cell" x="776" y="76" width="84" height="28"/>
+      <text class="text" x="52" y="96">8</text>
+      <text class="text" x="158" y="96">9</text>
+      <text class="text" x="264" y="96">10</text>
+      <text class="text" x="372" y="96">11</text>
+      <text class="text" x="480" y="96">12</text>
+      <text class="text" x="588" y="96">13</text>
+      <text class="text" x="696" y="96">14</text>
+      <text class="text" x="804" y="96">15</text>
+    </g>
+  </g>
+  <text class="formula" x="560" y="270">index = step × programCount + programIndex</text>
+  <text class="key" x="430" y="305">packed vector load</text>
+  <path class="line" d="M370 296 H420"/>
+  <path class="line" d="M620 296 H670"/>
+
+  <text class="label" x="55" y="365">Blocked assignment</text>
+  <text class="small" x="55" y="390">At one SIMD step, lanes touch distant addresses (blockSize = 8).</text>
+  <text class="small" x="125" y="414">programIndex / SIMD lane →</text>
+  <text class="small" x="55" y="434">step ↓</text>
+  <text class="lane" x="189" y="434">0</text>
+  <text class="lane" x="297" y="434">1</text>
+  <text class="lane" x="405" y="434">2</text>
+  <text class="lane" x="513" y="434">3</text>
+  <text class="lane" x="621" y="434">4</text>
+  <text class="lane" x="729" y="434">5</text>
+  <text class="lane" x="837" y="434">6</text>
+  <text class="lane" x="943" y="434">7</text>
+
+  <g transform="translate(125 440)">
+    <rect class="frame" x="0" y="0" width="880" height="120"/>
+    <line class="dash" x1="0" y1="60" x2="880" y2="60"/>
+    <text class="text" x="-25" y="34">0</text>
+    <text class="text" x="-25" y="96">1</text>
+
+    <rect class="active" x="20" y="16" width="88" height="28"/>
+    <rect class="active" x="128" y="16" width="88" height="28"/>
+    <rect class="active" x="236" y="16" width="88" height="28"/>
+    <rect class="active" x="344" y="16" width="88" height="28"/>
+    <rect class="active" x="452" y="16" width="88" height="28"/>
+    <rect class="active" x="560" y="16" width="88" height="28"/>
+    <rect class="active" x="668" y="16" width="88" height="28"/>
+    <rect class="active" x="776" y="16" width="84" height="28"/>
+    <text class="white" x="58" y="36">0</text>
+    <text class="white" x="158" y="36">8</text>
+    <text class="white" x="264" y="36">16</text>
+    <text class="white" x="372" y="36">24</text>
+    <text class="white" x="480" y="36">32</text>
+    <text class="white" x="588" y="36">40</text>
+    <text class="white" x="696" y="36">48</text>
+    <text class="white" x="804" y="36">56</text>
+
+    <rect class="cell" x="20" y="76" width="88" height="28"/>
+    <rect class="cell" x="128" y="76" width="88" height="28"/>
+    <rect class="cell" x="236" y="76" width="88" height="28"/>
+    <rect class="cell" x="344" y="76" width="88" height="28"/>
+    <rect class="cell" x="452" y="76" width="88" height="28"/>
+    <rect class="cell" x="560" y="76" width="88" height="28"/>
+    <rect class="cell" x="668" y="76" width="88" height="28"/>
+    <rect class="cell" x="776" y="76" width="84" height="28"/>
+    <text class="text" x="58" y="96">1</text>
+    <text class="text" x="158" y="96">9</text>
+    <text class="text" x="264" y="96">17</text>
+    <text class="text" x="372" y="96">25</text>
+    <text class="text" x="480" y="96">33</text>
+    <text class="text" x="588" y="96">41</text>
+    <text class="text" x="696" y="96">49</text>
+    <text class="text" x="804" y="96">57</text>
+  </g>
+
+  <text class="formula" x="560" y="590">index = programIndex × blockSize + step</text>
+  <path class="line" d="M370 616 H455"/>
+  <path class="line" d="M665 616 H750"/>
+  <text class="key" x="470" y="622">gather may be required</text>
+</svg>

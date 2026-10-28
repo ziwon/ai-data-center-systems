@@ -1,0 +1,667 @@
+<!DOCTYPE html><html lang="en" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-bguv2lll"> <head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Lecture 2: A Modern Multi-Core Processor | AI Data Center Systems</title><link rel="canonical" href="https://adcs.restack.tech/gpu/cs149/lec02/"/><link rel="sitemap" href="/sitemap-index.xml"/><script async src="https://www.googletagmanager.com/gtag/js?id=G-76LFZJVBTE"></script><script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-76LFZJVBTE');
+      </script><script async crossorigin="anonymous" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8128231647578658"></script><link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v6.4.8"/><meta name="generator" content="Starlight v0.40.0"/><meta property="og:title" content="Lecture 2: A Modern Multi-Core Processor"/><meta property="og:url" content="https://adcs.restack.tech/gpu/cs149/lec02/"/><meta property="og:locale" content="en"/><meta property="og:description" content="이번 강의의 목표는 modern processor가 hardware 수준에서 parallelism을 어떤 방식으로 제공하는지 이해하는 것이다. 1강에서는 program을 instruction stream으로 보고 speedup과 efficiency를 구분했다. 2강에서는 이..."/><meta property="og:site_name" content="AI Data Center Systems"/><meta name="description" content="이번 강의의 목표는 modern processor가 hardware 수준에서 parallelism을 어떤 방식으로 제공하는지 이해하는 것이다. 1강에서는 program을 instruction stream으로 보고 speedup과 efficiency를 구분했다. 2강에서는 이..."/><meta property="og:type" content="article"/><meta property="og:image" content="https://adcs.restack.tech/og/gpu/cs149/lec02.png?v=2"/><meta property="og:image:width" content="1200"/><meta property="og:image:height" content="630"/><meta name="twitter:image" content="https://adcs.restack.tech/og/gpu/cs149/lec02.png?v=2"/><meta name="twitter:card" content="summary_large_image"/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/_astro/print.DNXP8c50.css" media="print"><link rel="stylesheet" href="/_astro/common.DYbqSTpl.css"><script type="module" src="/_astro/page.CtJXHRyR.js"></script></head> <body class="astro-bguv2lll"> <a href="#_top" class="astro-7q3lir66">Skip to content</a> <script>
+  (() => {
+    try {
+      const savedMode = localStorage.getItem('adcs-navigation-mode');
+      document.documentElement.dataset.navigationMode = savedMode === 'compact' ? 'compact' : 'normal';
+    } catch {
+      document.documentElement.dataset.navigationMode = 'normal';
+    }
+  })();
+</script> <div class="page sl-flex astro-4toy2ex6"> <header class="header astro-4toy2ex6"><div class="header astro-3ef6ksr2"> <div class="title-wrapper sl-flex astro-3ef6ksr2"> <a href="/" class="site-title sl-flex astro-m46x6ez3">  <span class="astro-m46x6ez3" translate="no"> AI Data Center Systems </span> </a> <button class="navigation-mode-toggle print:hidden astro-3ef6ksr2" type="button" aria-label="Compact navigation" aria-pressed="false" title="Use compact navigation"> <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" class="astro-3ef6ksr2"> <rect x="3" y="4" width="18" height="16" rx="2" class="astro-3ef6ksr2"></rect> <path d="M9 4v16M6.5 10 4.5 12l2 2" class="astro-3ef6ksr2"></path> </svg> </button> </div> <div class="sl-flex print:hidden astro-3ef6ksr2"> <site-search class="astro-3ef6ksr2 astro-v37mnknz" data-translations="{&quot;placeholder&quot;:&quot;Search&quot;}"> <button data-open-modal disabled aria-label="Search" aria-keyshortcuts="Control+K" class="astro-v37mnknz"> <svg aria-hidden="true" class="astro-v37mnknz astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg> <span class="sl-hidden md:sl-block astro-v37mnknz" aria-hidden="true">Search</span> <kbd class="sl-hidden md:sl-flex astro-v37mnknz" style="display: none;"> <kbd class="astro-v37mnknz">Ctrl</kbd><kbd class="astro-v37mnknz">K</kbd> </kbd> </button> <dialog style="padding:0" aria-label="Search" class="astro-v37mnknz"> <div class="dialog-frame sl-flex astro-v37mnknz">  <button data-close-modal class="sl-flex md:sl-hidden astro-v37mnknz"> Cancel </button> <div class="search-container astro-v37mnknz"> <div id="starlight__search" class="astro-v37mnknz"></div> </div> </div> </dialog> </site-search>  <script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script> <script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.D1WXcfCt.js"></script>  </div> <div class="sl-hidden md:sl-flex print:hidden right-group astro-3ef6ksr2"> <div class="sl-flex social-icons astro-3ef6ksr2"> <a href="https://github.com/ziwon/ai-data-center-systems" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">GitHub</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script> <script type="module">const r="starlight-theme",o=e=>e==="auto"||e==="dark"||e==="light"?e:"auto",c=()=>o(typeof localStorage<"u"&&localStorage.getItem(r));function n(e){typeof localStorage<"u"&&localStorage.setItem(r,e==="light"||e==="dark"?e:"")}const l=()=>matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";function t(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e==="auto"?l():e,n(e)}matchMedia("(prefers-color-scheme: light)").addEventListener("change",()=>{c()==="auto"&&t("auto")});class s extends HTMLElement{constructor(){super(),t(c()),this.querySelector("select")?.addEventListener("change",a=>{a.currentTarget instanceof HTMLSelectElement&&t(o(a.currentTarget.value))})}}customElements.define("starlight-theme-select",s);</script> <script type="module">class s extends HTMLElement{constructor(){super();const e=this.querySelector("select");e&&(e.addEventListener("change",t=>{t.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=t.currentTarget.value)}),window.addEventListener("pageshow",t=>{if(!t.persisted)return;const n=e.querySelector("option[selected]")?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}}customElements.define("starlight-lang-select",s);</script> </div> </div></header> <nav class="sidebar print:hidden astro-4toy2ex6" aria-label="Main"> <starlight-menu-button class="print:hidden astro-jif73yzw"> <button aria-expanded="false" aria-label="Menu" aria-controls="starlight__sidebar" class="sl-flex md:sl-hidden astro-jif73yzw"> <svg aria-hidden="true" class="open-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg> <svg aria-hidden="true" class="close-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg> </button> </starlight-menu-button> <script type="module">class s extends HTMLElement{constructor(){super(),this.btn=this.querySelector("button"),this.btn.addEventListener("click",()=>this.toggleExpanded());const t=this.closest("nav");t&&t.addEventListener("keyup",e=>this.closeOnEscape(e))}setExpanded(t){this.setAttribute("aria-expanded",String(t)),document.body.toggleAttribute("data-mobile-menu-expanded",t)}toggleExpanded(){this.setExpanded(this.getAttribute("aria-expanded")!=="true")}closeOnEscape(t){t.code==="Escape"&&(this.setExpanded(!1),this.btn.focus())}}customElements.define("starlight-menu-button",s);</script>  <div id="starlight__sidebar" class="sidebar-pane astro-4toy2ex6"> <div class="navigation-controls astro-4toy2ex6"> <button class="navigation-drawer-toggle astro-4toy2ex6" type="button" aria-controls="starlight__sidebar-content" aria-expanded="false" title="Open navigation"> <svg class="navigation-menu-icon astro-4toy2ex6" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"> <path d="M4 6h16M4 12h16M4 18h16" class="astro-4toy2ex6"></path> </svg> <svg class="navigation-close-icon astro-4toy2ex6" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"> <path d="m6 6 12 12M18 6 6 18" class="astro-4toy2ex6"></path> </svg> <span class="navigation-drawer-label astro-4toy2ex6">Open navigation</span> </button> </div> <div id="starlight__sidebar-content" class="sidebar-content sl-flex astro-4toy2ex6"> <ul class="starlight-sidebar-topics astro-2fh6iaza"> <li class="astro-2fh6iaza"> <a aria-label="Network" title="Network" href="/network/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8.7 10a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-6.27-6.3a1 1 0 0 0-1.42 1.42ZM21 14a1 1 0 0 0-1 1v3.59L15.44 14A1 1 0 0 0 14 15.44L18.59 20H15a1 1 0 0 0 0 2h6a1 1 0 0 0 .38-.08 1 1 0 0 0 .54-.54A1 1 0 0 0 22 21v-6a1 1 0 0 0-1-1Zm.92-11.38a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-6a1 1 0 0 0 0 2h3.59L2.29 20.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V9a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z"/></svg> </div> <div class="astro-2fh6iaza"> Network  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="GPU &amp; Accelerator Systems" title="GPU &amp; Accelerator Systems" href="/gpu/" class="starlight-sidebar-topics-current astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> </div> <div class="astro-2fh6iaza"> GPU &amp; Accelerator Systems  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Storage" title="Storage" href="/storage/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8 16.5a1 1 0 1 0 1 1 1 1 0 0 0-1-1M12 2C8 2 4 3.37 4 6v12c0 2.63 4 4 8 4s8-1.37 8-4V6c0-2.63-4-4-8-4m6 16c0 .71-2.28 2-6 2s-6-1.29-6-2v-3.27A13 13 0 0 0 12 16a13 13 0 0 0 6-1.27Zm0-6c0 .71-2.28 2-6 2s-6-1.29-6-2V8.73A13 13 0 0 0 12 10a13 13 0 0 0 6-1.27Zm-6-4C8.28 8 6 6.71 6 6s2.28-2 6-2 6 1.29 6 2-2.28 2-6 2m-4 2.5a1 1 0 1 0 1 1 1 1 0 0 0-1-1"/></svg> </div> <div class="astro-2fh6iaza"> Storage  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Training" title="Training" href="/training/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1 1v8a1 1 0 0 0 2 0v-8a1 1 0 0 0-1-1m5-10a1 1 0 0 0-1 1v18a1 1 0 0 0 2 0V3a1 1 0 0 0-1-1m10 14a1 1 0 0 0-1 1v4a1 1 0 0 0 2 0v-4a1 1 0 0 0-1-1m-5-8a1 1 0 0 0-1 1v12a1 1 0 0 0 2 0V9a1 1 0 0 0-1-1"/></svg> </div> <div class="astro-2fh6iaza"> Training  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Inference" title="Inference" data-topic-icon="brain" href="/inference/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 22H5a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3h1a4 4 0 0 1 7.3-2.18c.448.64.692 1.4.7 2.18h3a1 1 0 0 1 1 1v3a4 4 0 0 1 2.18 7.3A3.86 3.86 0 0 1 18 18v3a1 1 0 0 1-1 1ZM5 8a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11v-3.18a1 1 0 0 1 1.33-.95 1.77 1.77 0 0 0 1.74-.23 2 2 0 0 0 .93-1.37 2 2 0 0 0-.48-1.59 1.89 1.89 0 0 0-2.17-.55 1 1 0 0 1-1.33-.95V8h-3.2a1 1 0 0 1-1-1.33 1.77 1.77 0 0 0-.23-1.74 1.939 1.939 0 0 0-3-.43A2 2 0 0 0 8 6c.002.23.046.456.13.67A1 1 0 0 1 7.18 8H5Z"/></svg> </div> <div class="astro-2fh6iaza"> Inference  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="MLOps" title="MLOps" data-topic-icon="cycle" href="/mlops/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8.7 10a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-6.27-6.3a1 1 0 0 0-1.42 1.42ZM21 14a1 1 0 0 0-1 1v3.59L15.44 14A1 1 0 0 0 14 15.44L18.59 20H15a1 1 0 0 0 0 2h6a1 1 0 0 0 .38-.08 1 1 0 0 0 .54-.54A1 1 0 0 0 22 21v-6a1 1 0 0 0-1-1Zm.92-11.38a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-6a1 1 0 0 0 0 2h3.59L2.29 20.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V9a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z"/></svg> </div> <div class="astro-2fh6iaza"> MLOps  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Systems Performance" title="Systems Performance" href="/systems-performance/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path fill-rule="evenodd" d="M1.44 8.855v-.001l3.527-3.516c.34-.344.802-.541 1.285-.548h6.649l.947-.947c3.07-3.07 6.207-3.072 7.62-2.868a1.821 1.821 0 0 1 1.557 1.557c.204 1.413.203 4.55-2.868 7.62l-.946.946v6.649a1.845 1.845 0 0 1-.549 1.286l-3.516 3.528a1.844 1.844 0 0 1-3.11-.944l-.858-4.275-4.52-4.52-2.31-.463-1.964-.394A1.847 1.847 0 0 1 .98 10.693a1.843 1.843 0 0 1 .46-1.838Zm5.379 2.017-3.873-.776L6.32 6.733h4.638l-4.14 4.14Zm8.403-5.655c2.459-2.46 4.856-2.463 5.89-2.33.134 1.035.13 3.432-2.329 5.891l-6.71 6.71-3.561-3.56 6.71-6.711Zm-1.318 15.837-.776-3.873 4.14-4.14v4.639l-3.364 3.374Z" clip-rule="evenodd"/><path d="M9.318 18.345a.972.972 0 0 0-1.86-.561c-.482 1.435-1.687 2.204-2.934 2.619a8.22 8.22 0 0 1-1.23.302c.062-.365.157-.79.303-1.229.415-1.247 1.184-2.452 2.62-2.935a.971.971 0 1 0-.62-1.842c-.12.04-.236.084-.35.13-2.02.828-3.012 2.588-3.493 4.033a10.383 10.383 0 0 0-.51 2.845l-.001.016v.063c0 .536.434.972.97.972H2.24a7.21 7.21 0 0 0 .878-.065c.527-.063 1.248-.19 2.02-.447 1.445-.48 3.205-1.472 4.033-3.494a5.828 5.828 0 0 0 .147-.407Z"/></svg> </div> <div class="astro-2fh6iaza"> Systems Performance  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Courses" title="Courses" href="/courses/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.17 2.06A13.1 13.1 0 0 0 19 1.87a12.94 12.94 0 0 0-7 2.05 12.94 12.94 0 0 0-7-2 13.1 13.1 0 0 0-2.17.19 1 1 0 0 0-.83 1v12a1 1 0 0 0 1.17 1 10.9 10.9 0 0 1 8.25 1.91l.12.07h.11a.91.91 0 0 0 .7 0h.11l.12-.07A10.899 10.899 0 0 1 20.83 16 1 1 0 0 0 22 15V3a1 1 0 0 0-.83-.94ZM11 15.35a12.87 12.87 0 0 0-6-1.48H4v-10c.333-.02.667-.02 1 0a10.86 10.86 0 0 1 6 1.8v9.68Zm9-1.44h-1a12.87 12.87 0 0 0-6 1.48V5.67a10.86 10.86 0 0 1 6-1.8c.333-.02.667-.02 1 0v10.04Zm1.17 4.15a13.098 13.098 0 0 0-2.17-.19 12.94 12.94 0 0 0-7 2.05 12.94 12.94 0 0 0-7-2.05c-.727.003-1.453.066-2.17.19A1 1 0 0 0 2 19.21a1 1 0 0 0 1.17.79 10.9 10.9 0 0 1 8.25 1.91 1 1 0 0 0 1.16 0A10.9 10.9 0 0 1 20.83 20a1 1 0 0 0 1.17-.79 1 1 0 0 0-.83-1.15Z"/></svg> </div> <div class="astro-2fh6iaza"> Courses  </div> </a> </li> </ul>  <doc-sidebar-controls hidden="true" class="astro-v3kklmrl"> <div class="tree-controls astro-v3kklmrl" role="group" aria-label="문서 목록 펼침 설정"> <button type="button" data-action="expand" aria-controls="document-tree" aria-label="모든 문서 분류 펼치기" class="astro-v3kklmrl">펼치기</button> <span aria-hidden="true" class="astro-v3kklmrl">/</span> <button type="button" data-action="collapse" aria-controls="document-tree" aria-label="모든 문서 분류 접기" class="astro-v3kklmrl">접기</button> </div> </doc-sidebar-controls> <script type="module">class d extends HTMLElement{connectedCallback(){const n=document.getElementById("document-tree");if(!n||this.dataset.initialized)return;this.dataset.initialized="true",this.hidden=!1;const e=Array.from(n.querySelectorAll("details")),r=this.querySelector('[data-action="expand"]'),i=this.querySelector('[data-action="collapse"]');for(const t of e)t.open=!1;let o=n.querySelector('[aria-current="page"]')?.closest("details");for(;o&&n.contains(o);)o.open=!0,o=o.parentElement?.closest("details")??null;const a=()=>{r?.setAttribute("aria-disabled",String(e.every(t=>t.open))),i?.setAttribute("aria-disabled",String(e.every(t=>!t.open)))};this.addEventListener("click",t=>{const s=t.target instanceof Element?t.target.closest("button[data-action]"):null;if(!s||s.getAttribute("aria-disabled")==="true")return;const l=s.dataset.action==="expand";for(const c of e)c.open=l;a()});for(const t of e)t.addEventListener("toggle",a);a()}}customElements.get("doc-sidebar-controls")||customElements.define("doc-sidebar-controls",d);</script> <div id="document-tree"> <sl-sidebar-state-persist data-hash="10trvcz" class="astro-kku4brbg"> <script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script>  <ul class="top-level astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/gpu/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">GPU 전체 목록</span>  </a> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">기술 아티클 · 5</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="0"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/gpu/articles/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">아티클 모아보기</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/articles/dgx-b200-rm-rf-recovery/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Recovering a DGX B200 Node After an Accidental rm -rf</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/articles/dgx-b200-rm-rf-recovery.ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">rm -rf 사고로 손상된 DGX B200 노드 복구기</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/articles/gpu-infrastructure-operations-and-platform-design.ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">GPU 인프라 운영과 플랫폼 설계: 하드웨어 장애 분석부터 멀티테넌시까지</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/articles/hami-core-deep-dive.ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">HAMi-core 심층 분석: `libvgpu.so`는 GPU를 어떻게 나누는가</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/articles/hami-dra-gpu-sharing.ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">DRA와 HAMi로 보는 Kubernetes GPU 분할</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">CS149 · 병렬 컴퓨팅 · 10</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="1"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/gpu/cs149/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">강좌 안내</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/cs149/lec01/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 1: Why Parallelism? Why Efficiency?</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/cs149/lec02/" aria-current="page" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 2: A Modern Multi-Core Processor</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/cs149/lec03/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 3: Multi-Core Architecture, Part II and ISPC</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/cs149/lec04/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 4: Parallel Programming Basics</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/cs149/lec05/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 5: Performance Optimization I — Work Distribution and Scheduling</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/cs149/lec06/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 6: Performance Optimization II — Locality, Communication, and Contention</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/cs149/lec07/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 7: GPU Architecture and CUDA Programming</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/cs149/lec08/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 8: Data-Parallel Thinking</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/cs149/lec09/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 9: Distributed Data-Parallel Computing Using Spark</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/cs149/lec10/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 10: Efficiently Evaluating DNNs on GPUs</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">PMPP · CUDA 프로그래밍 · 4</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="2"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/gpu/pmpp/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">강좌 안내</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/pmpp/lec02/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 2: Data Parallel Programming and the CUDA Programming Model</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/pmpp/lec03/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 3: Multidimensional Grids and Data</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/pmpp/lec04/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 4: GPU Architecture</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/pmpp/lec05/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 5: Memory Architecture and Tiling</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">참고자료 · 2</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="3"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/gpu/appendix/architecture/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">GPU Architecture (reference)</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/appendix/cuda/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">CUDA (reference)</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">실습 · 2</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="4"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/gpu/labs/kernels/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Kernel Case Studies (practice)</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/labs/profiling/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Profiling (practice)</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <a href="/gpu/heterogeneous-systems/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">Heterogeneous Systems (Onur Mutlu)</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/gpu/gpu-mode/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">GPU MODE</span>  </a> </li> </ul>  <script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script> </sl-sidebar-state-persist> <div class="md:sl-hidden"> <div class="mobile-preferences sl-flex astro-wu23bvmt"> <div class="social-icons astro-wu23bvmt"> <a href="https://github.com/ziwon/ai-data-center-systems" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">GitHub</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script>   </div> </div> </div>  </div> </div> </nav> <div class="main-frame astro-4toy2ex6">  <script type="module">const a=document.getElementById("starlight__sidebar"),n=a?.querySelector("sl-sidebar-state-persist"),o="sl-sidebar-state",i=()=>{let t=[];const e=n?.dataset.hash||"";try{const s=sessionStorage.getItem(o),r=JSON.parse(s||"{}");Array.isArray(r.open)&&r.hash===e&&(t=r.open)}catch{}return{hash:e,open:t,scroll:a?.scrollTop||0}},c=t=>{try{sessionStorage.setItem(o,JSON.stringify(t))}catch{}},d=()=>c(i()),l=(t,e)=>{const s=i();s.open[e]=t,c(s)};n?.addEventListener("click",t=>{if(!(t.target instanceof Element))return;const e=t.target.closest("summary")?.closest("details");if(!e)return;const s=e.querySelector("sl-sidebar-restore"),r=parseInt(s?.dataset.index||"");isNaN(r)||l(!e.open,r)});addEventListener("visibilitychange",()=>{document.visibilityState==="hidden"&&d()});addEventListener("pageHide",d);</script> <div class="lg:sl-flex astro-67yu43on"> <aside class="right-sidebar-container print:hidden astro-67yu43on"> <div class="right-sidebar astro-67yu43on"> <div class="lg:sl-hidden astro-rl4sue7z"><mobile-starlight-toc data-min-h="2" data-max-h="2" class="astro-doynk5tl"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-doynk5tl"><details id="starlight__mobile-toc" class="astro-doynk5tl"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-doynk5tl"><span class="toggle sl-flex astro-doynk5tl">On this page<svg aria-hidden="true" class="caret astro-doynk5tl astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-doynk5tl"></span></summary><div class="dropdown astro-doynk5tl"><ul class="isMobile astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#table-of-contents" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Table of Contents</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#goal" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Goal</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#lecture-overview" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Lecture Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#visual-map" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Visual Map</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#processor-review" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Processor Review</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#caches-and-locality" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Caches and Locality</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#three-ways-to-improve-processor-utilization" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Three Ways to Improve Processor Utilization</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#multi-core-execution" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Multi-Core Execution</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#simd-execution" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">SIMD Execution</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#coherent-and-divergent-execution" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Coherent and Divergent Execution</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#explicit-and-implicit-simd" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Explicit and Implicit SIMD</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#hardware-multi-threading" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Hardware Multi-Threading</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#latency-hiding" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Latency Hiding</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#nvidia-v100-as-a-throughput-processor" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">NVIDIA V100 as a Throughput Processor</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#gpu-systems-lens" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">GPU Systems Lens</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#practical-tips-and-notes" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Practical Tips and Notes</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#lecture-summary" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Lecture Summary</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#key-terms" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Key Terms</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#questions" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Questions</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#answers" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Answers</span> </a>  </li> </ul></div></details></nav></mobile-starlight-toc><script type="module" src="/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.hwBsy0Mo.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-rl4sue7z"><div class="sl-container astro-rl4sue7z"><kb-graph-card> <button class="kb-graph-card" type="button" data-open aria-haspopup="dialog"> <span class="kb-graph-copy"> <span class="kb-graph-title">Knowledge graph</span> <span class="kb-graph-subtitle" data-count>Loading related docs</span> </span> <span class="kb-graph-thumb" aria-hidden="true" data-map></span> <span class="kb-graph-expand" aria-hidden="true">Expand</span> </button> <dialog class="kb-graph-dialog" aria-label="Knowledge graph" data-dialog> <div class="kb-graph-panel"> <div class="kb-graph-panel-header"> <div> <p>Knowledge graph</p> <h2 data-heading>Related documents</h2> </div> <div class="kb-graph-tabs" role="tablist" aria-label="Knowledge graph views"> <button type="button" role="tab" aria-selected="true" data-tab="page">This page</button> <button type="button" role="tab" aria-selected="false" data-tab="global">Full graph</button> </div> <button type="button" data-close aria-label="Close knowledge graph">×</button> </div> <div class="kb-graph-stage" data-stage data-view="page"> <div data-page-stage></div> <div data-global-stage hidden></div> </div> </div> </dialog> </kb-graph-card> <script type="module" src="/_astro/KnowledgeGraphCard.astro_astro_type_script_index_0_lang.C475L69c.js"></script><starlight-toc data-min-h="2" data-max-h="2"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">On this page</h2><ul class="astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#table-of-contents" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Table of Contents</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#goal" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Goal</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#lecture-overview" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Lecture Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#visual-map" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Visual Map</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#processor-review" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Processor Review</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#caches-and-locality" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Caches and Locality</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#three-ways-to-improve-processor-utilization" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Three Ways to Improve Processor Utilization</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#multi-core-execution" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Multi-Core Execution</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#simd-execution" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">SIMD Execution</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#coherent-and-divergent-execution" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Coherent and Divergent Execution</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#explicit-and-implicit-simd" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Explicit and Implicit SIMD</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#hardware-multi-threading" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Hardware Multi-Threading</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#latency-hiding" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Latency Hiding</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#nvidia-v100-as-a-throughput-processor" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">NVIDIA V100 as a Throughput Processor</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#gpu-systems-lens" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">GPU Systems Lens</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#practical-tips-and-notes" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Practical Tips and Notes</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#lecture-summary" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Lecture Summary</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#key-terms" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Key Terms</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#questions" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Questions</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#answers" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Answers</span> </a>  </li> </ul></nav></starlight-toc><script type="module" src="/_astro/TableOfContents.astro_astro_type_script_index_0_lang.FuRcXuRY.js"></script></div></div> </div> </aside> <div class="main-pane astro-67yu43on">  <main data-pagefind-body class="astro-bguv2lll" lang="en" dir="ltr">    <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <h1 id="_top" class="astro-j6tvhyss">Lecture 2: A Modern Multi-Core Processor</h1> </div> </div> <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <starlight-image-zoom> <template class="astro-vjux6bgf"> <dialog class="starlight-image-zoom-dialog astro-vjux6bgf"> <button aria-label="Unzoom image" class="starlight-image-zoom-control astro-vjux6bgf"> <svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" class="astro-vjux6bgf"> <use href="#starlight-image-zoom-icon-unzoom" class="astro-vjux6bgf"></use> </svg> </button> <figure class="astro-vjux6bgf"></figure> </dialog> </template> <svg xmlns="http://www.w3.org/2000/svg" style="display:none" class="astro-vjux6bgf"> <symbol id="starlight-image-zoom-icon-zoom" viewBox="0 0 24 24" class="astro-vjux6bgf"> <path d="M9.79 12.79 4 18.59V17a1 1 0 0 0-2 0v4a1 1 0 0 0 .08.38 1 1 0 0 0 .54.54A1 1 0 0 0 3 22h4a1 1 0 0 0 0-2H5.41l5.8-5.79a1 1 0 0 0-1.42-1.42ZM21.92 2.62a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-4a1 1 0 0 0 0 2h1.59l-5.8 5.79a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V7a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z" class="astro-vjux6bgf"></path> </symbol> <symbol id="starlight-image-zoom-icon-unzoom" viewBox="0 0 24 24" class="astro-vjux6bgf"> <path d="M21.71 2.29a1 1 0 0 0-1.42 0l-5.79 5.8V6.5a1 1 0 0 0-2 0v4a1 1 0 0 0 .08.38 1 1 0 0 0 .54.54 1 1 0 0 0 .38.08h4a1 1 0 0 0 0-2h-1.59l5.8-5.79a1 1 0 0 0 0-1.42ZM10.88 12.58a1 1 0 0 0-.38-.08h-4a1 1 0 0 0 0 2h1.59l-5.8 5.79a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l5.79-5.8v1.59a1 1 0 0 0 2 0v-4a1 1 0 0 0-.08-.38 1 1 0 0 0-.54-.54Z" class="astro-vjux6bgf"></path> </symbol> </svg> </starlight-image-zoom>   <script type="module" src="/_astro/ImageZoom.astro_astro_type_script_index_0_lang.CZmBqK-T.js"></script> <div class="sl-markdown-content"> <p>Source: <a href="https://www.youtube.com/watch?v=CKmNpAO5rS4">Stanford CS149 2023 Lecture 2</a></p>
+<p>Course materials:</p>
+<ul>
+<li><a href="https://gfxcourses.stanford.edu/cs149/fall23/lecture/multicore/">CS149 Fall 2023 Lecture 2 course page</a></li>
+<li><a href="https://gfxcourses.stanford.edu/cs149/fall23content/media/multicore/02_basicarch_xX3ssOi.pdf">Lecture 2 slides PDF</a></li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="table-of-contents">Table of Contents</h2><a class="sl-anchor-link" href="#table-of-contents"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Table of Contents”</span></a></div>
+<ul>
+<li><a href="#goal">Goal</a></li>
+<li><a href="#lecture-overview">Lecture Overview</a></li>
+<li><a href="#visual-map">Visual Map</a></li>
+<li><a href="#processor-review">Processor Review</a></li>
+<li><a href="#caches-and-locality">Caches and Locality</a></li>
+<li><a href="#three-ways-to-improve-processor-utilization">Three Ways to Improve Processor Utilization</a></li>
+<li><a href="#multi-core-execution">Multi-Core Execution</a></li>
+<li><a href="#simd-execution">SIMD Execution</a></li>
+<li><a href="#coherent-and-divergent-execution">Coherent and Divergent Execution</a></li>
+<li><a href="#explicit-and-implicit-simd">Explicit and Implicit SIMD</a></li>
+<li><a href="#hardware-multi-threading">Hardware Multi-Threading</a></li>
+<li><a href="#latency-hiding">Latency Hiding</a></li>
+<li><a href="#nvidia-v100-as-a-throughput-processor">NVIDIA V100 as a Throughput Processor</a></li>
+<li><a href="#gpu-systems-lens">GPU Systems Lens</a></li>
+<li><a href="#practical-tips-and-notes">Practical Tips and Notes</a></li>
+<li><a href="#lecture-summary">Lecture Summary</a></li>
+<li><a href="#key-terms">Key Terms</a></li>
+<li><a href="#questions">Questions</a></li>
+<li><a href="#answers">Answers</a></li>
+</ul>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="goal">Goal</h2><a class="sl-anchor-link" href="#goal"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Goal”</span></a></div>
+<p>이번 강의의 목표는 modern processor가 hardware 수준에서 parallelism을 어떤 방식으로 제공하는지 이해하는 것이다. 1강에서는 program을 instruction stream으로 보고 speedup과 efficiency를 구분했다. 2강에서는 이 관점을 바탕으로, 하나의 processor chip 안에서 multi-core, SIMD execution, hardware multi-threading이 어떻게 결합되는지를 살펴본다.</p>
+<p>핵심 메시지는 다음과 같다.</p>
+<blockquote>
+<p>Modern parallel processor는 단순히 core 수가 많은 machine이 아니다. 여러 core가 독립적인 instruction stream을 실행하고, 각 core 내부의 SIMD는 하나의 instruction을 여러 data에 적용한다. 또한 hardware thread를 번갈아 실행해 memory latency로 인한 idle 시간을 줄인다. 높은 utilization을 얻으려면 parallel program이 이 세 형태의 parallelism을 모두 충분히 제공해야 한다.</p>
+</blockquote>
+<p>이 강의는 다음을 다룬다.</p>
+<ul>
+<li>Program과 processor instruction 복습</li>
+<li>Cache line, cache hit/miss, temporal locality, spatial locality</li>
+<li>Multi-core execution과 instruction stream의 독립성</li>
+<li>SIMD execution과 control logic amortization</li>
+<li>Conditional execution에서 SIMD lane이 낭비되는 이유</li>
+<li>Instruction stream coherence와 divergent execution</li>
+<li>CPU의 explicit SIMD와 GPU의 implicit SIMD</li>
+<li>Hardware multi-threading을 통한 memory latency hiding</li>
+<li>NVIDIA V100을 throughput-oriented processor로 보는 관점</li>
+</ul>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="lecture-overview">Lecture Overview</h2><a class="sl-anchor-link" href="#lecture-overview"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Lecture Overview”</span></a></div>
+<p>강의는 1강의 내용을 복습하며 시작한다. Program은 processor instruction의 목록이고, processor는 instruction을 fetch/decode한 뒤 execution unit에서 실행하여 register와 memory state를 변경한다. Superscalar processor는 instruction stream에서 서로 의존하지 않는 instruction을 찾아 여러 execution unit에 동시에 배정한다. 그러나 하나의 instruction stream에서 hardware가 자동으로 발견할 수 있는 parallelism에는 한계가 있다.</p>
+<p>이어서 cache를 다룬다. Cache는 program의 출력에는 영향을 주지 않는 hardware implementation detail이지만, performance에는 큰 차이를 만든다. Cache는 memory 값 일부를 on-chip에 보관하고, 같은 data를 다시 사용하는 temporal locality와 인접한 address를 함께 사용하는 spatial locality를 활용한다. Data를 cache line 단위로 옮기므로, array를 순차적으로 접근하는 pattern은 cache에 특히 유리하다.</p>
+<p>강의의 핵심은 modern processor가 더 많은 parallel work를 처리하는 세 가지 방식이다. 첫째, multi-core에서는 여러 core가 서로 다른 instruction stream을 독립적으로 실행한다. 둘째, SIMD는 하나의 instruction을 여러 data element에 적용하여 control logic 비용을 분산한다. 셋째, hardware multi-threading은 한 thread가 memory load처럼 latency가 큰 operation을 기다리는 동안 다른 hardware thread의 instruction을 실행하여 execution unit의 idle 시간을 줄인다.</p>
+<p>후반부에서는 각 방식의 전제 조건과 비용을 살펴본다. Multi-core에는 충분한 independent work가 필요하고, SIMD에서는 많은 work item이 같은 instruction sequence를 따라야 하며, hardware multi-threading에는 memory stall 동안 실행할 수 있는 runnable thread가 충분해야 한다. NVIDIA V100 사례는 GPU가 이 세 조건을 활용해 throughput을 높이는 processor임을 보여준다.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="visual-map">Visual Map</h2><a class="sl-anchor-link" href="#visual-map"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Visual Map”</span></a></div>
+<p>2강의 hardware model은 세 형태의 parallelism이 상호 보완적으로 작동하여 utilization을 높이는 구조로 이해할 수 있다.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    P[Program work] --> C[Multi-core&#x3C;br/>many instruction streams]
+    P --> S[SIMD&#x3C;br/>one instruction, many data]
+    P --> T[Hardware multi-threading&#x3C;br/>many runnable contexts]
+
+    C --> U[Higher utilization]
+    S --> U
+    T --> U
+
+    U --> G[GPU throughput model&#x3C;br/>SMs, warps, latency hiding]
+
+    S --> D[Divergence risk&#x3C;br/>masked lanes]
+    T --> M[Memory latency&#x3C;br/>hidden, not removed]
+    C --> W[Work distribution&#x3C;br/>enough independent tasks]
+
+    classDef primary fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef secondary fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef note fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef accent fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    class P primary
+    class C,S,T secondary
+    class W,D,M note
+    class U,G accent</pre>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="processor-review">Processor Review</h2><a class="sl-anchor-link" href="#processor-review"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Processor Review”</span></a></div>
+<p>Processor는 instruction stream을 실행한다. 단순화하면 processor는 다음 요소로 구성된다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Component</th><th>Role</th></tr></thead><tbody><tr><td>Fetch/decode</td><td>다음에 실행할 instruction을 가져오고 해석한다</td></tr><tr><td>Execution context</td><td>Register처럼 program state를 저장한다</td></tr><tr><td>Execution unit</td><td>Arithmetic, load/store, branch 같은 operation을 수행한다</td></tr><tr><td>Memory system</td><td>Instruction이 읽고 쓰는 memory address space를 제공한다</td></tr></tbody></table>
+<p>1강에서 다룬 simple processor는 한 clock에 instruction 하나를 실행한다고 가정했다. Superscalar processor는 여러 execution unit을 두고, dependency가 없는 instruction을 같은 cycle에 병렬로 실행한다.</p>
+<div class="expressive-code"><link rel="stylesheet" href="/_astro/ec.v4551.css"><script type="module" src="/_astro/ec.0vx5m.js"></script><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">instruction stream</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> dependency analysis</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> independent instructions run in parallel</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="instruction stream  -> dependency analysis  -> independent instructions run in parallel"><div></div></button></div></figure></div>
+<p>Processor는 program의 의미를 바꿀 수 없다. 내부적으로 out-of-order execution을 수행하더라도, single-thread program이 관찰하는 결과는 source program의 dependency와 semantics를 만족해야 한다. 이 제약 때문에 superscalar execution만으로 modern chip의 execution unit을 모두 활용하기는 어렵다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="caches-and-locality">Caches and Locality</h2><a class="sl-anchor-link" href="#caches-and-locality"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Caches and Locality”</span></a></div>
+<p>Program의 관점에서는 memory가 byte-addressable address space로 보이지만, 실제 DRAM은 processor execution unit보다 훨씬 느리다. Cache는 이 latency를 줄이기 위해 memory value의 일부를 on-chip에 보관한다.</p>
+<p>Cache는 보통 cache line 단위로 동작한다. 예를 들어 line size가 4 bytes인 cache에서 address <code dir="auto">0x0</code>을 읽으면 <code dir="auto">0x0</code>부터 <code dir="auto">0x3</code>까지가 하나의 line으로 함께 cache에 적재된다. 따라서 뒤이은 <code dir="auto">0x1</code>, <code dir="auto">0x2</code>, <code dir="auto">0x3</code> 접근은 모두 hit이 된다.</p>
+<p><starlight-image-zoom-zoomable><img src="/gpu/cs149/lec02/assets/cache-line-locality.svg" alt="Cache line locality"><button aria-label="Zoom image: Cache line locality" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Locality</th><th>Meaning</th><th>Cache effect</th></tr></thead><tbody><tr><td>Temporal locality</td><td>이미 접근한 data를 곧 다시 접근한다</td><td>같은 cache line을 재사용한다</td></tr><tr><td>Spatial locality</td><td>가까운 address를 곧 접근한다</td><td>line fetch가 다음 접근을 미리 가져온다</td></tr></tbody></table>
+<p>Cache miss는 원인에 따라 세 가지로 나눠 볼 수 있다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Miss type</th><th>Meaning</th></tr></thead><tbody><tr><td>Cold miss</td><td>해당 data를 처음 접근해서 cache에 없었다</td></tr><tr><td>Capacity miss</td><td>cache가 더 컸다면 남아 있었을 data가 용량 부족으로 evict되었다</td></tr><tr><td>Conflict miss</td><td>cache organization 탓에 둘 이상의 data가 같은 자리를 두고 경쟁한다</td></tr></tbody></table>
+<p>Cache가 모든 memory 문제를 자동으로 해결하는 것은 아니다. Cache가 효과를 내려면 program의 access pattern 자체에 locality가 있어야 한다. Random access, 큰 working set, 불리한 data layout은 cache capacity가 충분해도 낮은 hit rate를 초래할 수 있다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="three-ways-to-improve-processor-utilization">Three Ways to Improve Processor Utilization</h2><a class="sl-anchor-link" href="#three-ways-to-improve-processor-utilization"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Three Ways to Improve Processor Utilization”</span></a></div>
+<p>Lecture 2는 modern chip이 utilization을 높이는 방식을 세 가지로 정리한다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Hardware mechanism</th><th>What it exploits</th><th>Program requirement</th></tr></thead><tbody><tr><td>Multi-core</td><td>Independent instruction streams</td><td>충분한 task/thread-level parallelism</td></tr><tr><td>SIMD</td><td>Same instruction over many data</td><td>Coherent instruction stream</td></tr><tr><td>Hardware multi-threading</td><td>Work to run while another thread stalls</td><td>Latency를 숨길 만큼 많은 runnable threads</td></tr></tbody></table>
+<p>이 세 방식은 서로를 대체하는 선택지가 아니라 함께 사용되는 조합이다. CPU는 multi-core, SIMD, SMT를 함께 사용하고, GPU도 여러 SM, warp-level SIMD, 많은 resident warp를 함께 활용한다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="multi-core-execution">Multi-Core Execution</h2><a class="sl-anchor-link" href="#multi-core-execution"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Multi-Core Execution”</span></a></div>
+<p>Multi-core processor는 execution core를 여러 개 둔 구조다. 각 core는 자신에게 할당된 instruction stream을 fetch/decode하고 실행한다. 따라서 multi-core에서는 control flow가 서로 다른 thread나 task도 동시에 실행할 수 있다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">core 0 -> instruction stream A</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">core 1 -> instruction stream B</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">core 2 -> instruction stream C</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">...</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="core 0 -> instruction stream Acore 1 -> instruction stream Bcore 2 -> instruction stream C..."><div></div></button></div></figure></div>
+<p>이 구조의 장점은 유연성이다. Core마다 다른 branch와 function을 실행하고, 서로 다른 memory address에 접근할 수 있다. SIMD처럼 모든 lane이 같은 instruction을 따라야 한다는 제약이 없기 때문이다.</p>
+<p>그러나 multi-core만으로는 충분하지 않다. Core 수가 늘어나면 fetch/decode/control logic, cache, execution resource도 그에 맞춰 늘어난다. 또한 program이 충분한 independent work를 제공하지 못하면 core는 idle 상태가 된다. Parallel program에서 work decomposition과 scheduling이 중요한 이유다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="simd-execution">SIMD Execution</h2><a class="sl-anchor-link" href="#simd-execution"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “SIMD Execution”</span></a></div>
+<p>SIMD는 single instruction, multiple data의 약자다. Instruction 하나를 fetch/decode한 뒤, 여러 execution lane이 각자 담당한 data element에 같은 operation을 수행한다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">one instruction: y[i] = x[i] * 2</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">lane 0 -> x[0]</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">lane 1 -> x[1]</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">lane 2 -> x[2]</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">...</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">lane 7 -> x[7]</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="one instruction: y[i] = x[i] * 2lane 0 -> x[0]lane 1 -> x[1]lane 2 -> x[2]...lane 7 -> x[7]"><div></div></button></div></figure></div>
+<p>SIMD의 핵심 이점은 control overhead를 여러 연산에 분산하는 데 있다. Fetch/decode/control logic 하나로 여러 ALU lane을 제어하므로, 같은 silicon budget에서 더 높은 arithmetic throughput을 얻을 수 있다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Property</th><th>Multi-core</th><th>SIMD</th></tr></thead><tbody><tr><td>Instruction streams</td><td>여러 stream 가능</td><td>하나의 shared stream</td></tr><tr><td>Control flow flexibility</td><td>높음</td><td>낮음</td></tr><tr><td>Area efficiency for data-parallel math</td><td>낮거나 중간</td><td>높음</td></tr><tr><td>Best fit</td><td>Independent tasks</td><td>Same operation over many elements</td></tr></tbody></table>
+<p>Data-parallel loop, vector math, image processing, dense linear algebra는 SIMD에 적합하다. 반대로 lane마다 branch가 다르거나 loop 횟수가 제각각인 irregular workload에서는 SIMD efficiency가 크게 낮아진다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="coherent-and-divergent-execution">Coherent and Divergent Execution</h2><a class="sl-anchor-link" href="#coherent-and-divergent-execution"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Coherent and Divergent Execution”</span></a></div>
+<p>SIMD를 효율적으로 활용하려면 많은 data element가 같은 instruction sequence를 따라야 한다. 강의에서는 이를 instruction stream coherence 또는 coherent execution이라고 부른다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="c"><code><div class="ec-line"><div class="code"><span style="--0:#82AAFF;--1:#3B61B0">forall</span><span style="--0:#D6DEEB;--1:#403F53"> (</span><span style="--0:#C792EA;--1:#8844AE">int</span><span style="--0:#D6DEEB;--1:#403F53"> i from </span><span style="--0:#F78C6C;--1:#AA0982">0</span><span style="--1:#403F53"><span style="--0:#D6DEEB"> to </span><span style="--0:#D7DBE0">N</span><span style="--0:#D6DEEB">) {</span></span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#C792EA;--1:#8844AE">float</span><span style="--0:#D6DEEB;--1:#403F53"> t </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C5E478;--1:#3B61B0">x</span><span style="--0:#D6DEEB;--1:#403F53">[i];</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#D6DEEB;--1:#403F53">    </span></span><span style="--0:#D6DEEB;--1:#403F53">t </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> t </span><span style="--0:#7FDBCA;--1:#096E72">*</span><span style="--0:#D6DEEB;--1:#403F53"> t;</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#C5E478;--1:#3B61B0">y</span><span style="--0:#D6DEEB;--1:#403F53">[i] </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> t;</span></div></div><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">}</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="forall (int i from 0 to N) {    float t = x[i];    t = t * t;    y[i] = t;}"><div></div></button></div></figure></div>
+<p>이 loop에서는 모든 element가 같은 instruction을 수행하므로 SIMD에 적합하다. 문제는 conditional execution이 포함될 때 발생한다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="c"><code><div class="ec-line"><div class="code"><span style="--0:#82AAFF;--1:#3B61B0">forall</span><span style="--0:#D6DEEB;--1:#403F53"> (</span><span style="--0:#C792EA;--1:#8844AE">int</span><span style="--0:#D6DEEB;--1:#403F53"> i from </span><span style="--0:#F78C6C;--1:#AA0982">0</span><span style="--1:#403F53"><span style="--0:#D6DEEB"> to </span><span style="--0:#D7DBE0">N</span><span style="--0:#D6DEEB">) {</span></span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#C792EA;--1:#8844AE">float</span><span style="--0:#D6DEEB;--1:#403F53"> t </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C5E478;--1:#3B61B0">x</span><span style="--0:#D6DEEB;--1:#403F53">[i];</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#C792EA;--1:#8844AE">if</span><span style="--0:#D6DEEB;--1:#403F53"> (t </span><span style="--0:#C792EA;--1:#8844AE">></span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--1:#AA0982"><span style="--0:#F78C6C">0.0</span><span style="--0:#FFEB95">f</span></span><span style="--0:#D6DEEB;--1:#403F53">) {</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#D6DEEB;--1:#403F53">        </span></span><span style="--0:#D6DEEB;--1:#403F53">t </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> t </span><span style="--0:#7FDBCA;--1:#096E72">*</span><span style="--0:#D6DEEB;--1:#403F53"> t;</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#D6DEEB;--1:#403F53">    </span></span><span style="--0:#D6DEEB;--1:#403F53">} </span><span style="--0:#C792EA;--1:#8844AE">else</span><span style="--0:#D6DEEB;--1:#403F53"> {</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#D6DEEB;--1:#403F53">        </span></span><span style="--0:#D6DEEB;--1:#403F53">t </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> t </span><span style="--0:#7FDBCA;--1:#096E72">+</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--1:#AA0982"><span style="--0:#F78C6C">30.0</span><span style="--0:#FFEB95">f</span></span><span style="--0:#D6DEEB;--1:#403F53">;</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#D6DEEB;--1:#403F53">    </span></span><span style="--0:#D6DEEB;--1:#403F53">}</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#C5E478;--1:#3B61B0">y</span><span style="--0:#D6DEEB;--1:#403F53">[i] </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> t;</span></div></div><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">}</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="forall (int i from 0 to N) {    float t = x[i];    if (t > 0.0f) {        t = t * t;    } else {        t = t + 30.0f;    }    y[i] = t;}"><div></div></button></div></figure></div>
+<p>SIMD processor는 같은 cycle에 lane마다 다른 instruction을 실행할 수 없다. 따라서 한 branch path를 실행할 때는 조건이 false인 lane을 mask하고, 반대 path를 실행할 때는 조건이 true였던 lane을 mask한다. 이 과정에서 일부 ALU lane은 useful work를 수행하지 못한다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Situation</th><th>SIMD behavior</th></tr></thead><tbody><tr><td>All lanes take same path</td><td>Full lane utilization</td></tr><tr><td>Half lanes take each path</td><td>Each path runs with some lanes masked</td></tr><tr><td>Each lane needs distinct control flow</td><td>Worst-case utilization can be very low</td></tr></tbody></table>
+<p>Divergent execution은 instruction stream coherence가 깨진 상태를 말한다. GPU programming에서 warp divergence가 성능을 낮추는 이유도 같은 원리다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="explicit-and-implicit-simd">Explicit and Implicit SIMD</h2><a class="sl-anchor-link" href="#explicit-and-implicit-simd"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Explicit and Implicit SIMD”</span></a></div>
+<p>Modern CPU와 GPU는 SIMD를 programmer에게 서로 다른 방식으로 제공한다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Style</th><th>Where common</th><th>Programmer/compiler view</th></tr></thead><tbody><tr><td>Explicit SIMD</td><td>CPU AVX, AVX-512, ARM Neon</td><td>Binary에 vector instruction이 보인다</td></tr><tr><td>Implicit SIMD</td><td>Many GPUs</td><td>Programmer는 scalar thread를 쓰지만 hardware가 warp/wavefront로 묶어 SIMD 실행한다</td></tr></tbody></table>
+<p>CPU에서는 compiler가 loop를 auto-vectorize하거나, programmer가 intrinsics를 직접 사용하거나, parallel language의 semantics가 compiler에 vectorization 기회를 전달한다. 반면 GPU에서는 programmer가 각 thread가 실행할 scalar code를 작성하고, hardware가 여러 thread를 warp로 묶어 같은 instruction을 SIMD 방식으로 실행한다.</p>
+<p>둘의 차이는 abstraction을 제공하는 방식에 있다. GPU thread가 겉보기에는 독립적으로 보이더라도, 같은 warp 안에서는 instruction stream coherence가 성능에 중요하다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="hardware-multi-threading">Hardware Multi-Threading</h2><a class="sl-anchor-link" href="#hardware-multi-threading"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Hardware Multi-Threading”</span></a></div>
+<p>Hardware multi-threading은 core가 여러 thread의 execution context를 동시에 유지하는 방식이다. 한 thread가 long-latency memory operation을 기다리는 동안, core는 준비된 다른 thread의 instruction을 실행한다.</p>
+<p>중요한 점은 multi-threading이 memory latency 자체를 줄이지는 않는다는 것이다. 대신 latency로 인해 execution unit이 idle 상태에 머무는 시간을 줄인다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Mechanism</th><th>Meaning</th><th>Example</th></tr></thead><tbody><tr><td>Interleaved multi-threading</td><td>매 cycle 한 ready thread를 골라 instruction을 실행한다</td><td>Temporal multi-threading</td></tr><tr><td>Simultaneous multi-threading</td><td>한 cycle에 여러 thread의 instruction을 execution units에 issue한다</td><td>Intel Hyper-Threading</td></tr></tbody></table>
+<p>Hardware multi-threading이 효과를 내려면, 기다리는 thread를 대신해 실행할 ready thread가 core에 있어야 한다. Throughput processor가 많은 hardware thread context를 두는 이유가 여기에 있다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="latency-hiding">Latency Hiding</h2><a class="sl-anchor-link" href="#latency-hiding"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Latency Hiding”</span></a></div>
+<p>강의의 latency hiding 예시는 다음 원리를 보여 준다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">thread does:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">arithmetic arithmetic arithmetic load</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">load latency:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">12 cycles</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="thread does:  arithmetic arithmetic arithmetic loadload latency:  12 cycles"><div></div></button></div></figure></div>
+<p>Thread가 하나뿐이면 load 이후 core는 다음 instruction을 실행하지 못한 채 대기한다. 반면 hardware thread가 여러 개라면 thread 0이 load를 기다리는 동안 thread 1, 2, 3의 arithmetic instruction을 실행할 수 있다. 강의 예시처럼 arithmetic instruction 세 개 뒤에 12-cycle load가 오는 경우, 다섯 개의 thread가 있으면 utilization을 100%까지 높일 수 있다.</p>
+<p><starlight-image-zoom-zoomable><img src="/gpu/cs149/lec02/assets/latency-hiding-timeline.svg" alt="Latency hiding timeline"><button aria-label="Zoom image: Latency hiding timeline" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<p>Memory access 하나당 arithmetic이 많을수록 latency hiding에 필요한 thread 수는 줄어든다. 예를 들어 arithmetic instruction 여섯 개 뒤에 동일한 12-cycle load가 온다면, 더 적은 thread로도 latency를 숨길 수 있다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Workload property</th><th>Threads needed for latency hiding</th></tr></thead><tbody><tr><td>Low arithmetic per memory access</td><td>More threads needed</td></tr><tr><td>High arithmetic per memory access</td><td>Fewer threads needed</td></tr><tr><td>Long memory latency</td><td>More independent work needed</td></tr><tr><td>Short memory latency or good cache locality</td><td>Fewer threads needed</td></tr></tbody></table>
+<p>이 관점은 GPU의 occupancy와 arithmetic intensity를 이해하는 출발점이 된다. 많은 resident warp는 latency를 숨길 수 있도록 다른 실행 대상을 준비해 두고, arithmetic intensity는 memory stall 사이에 수행할 useful work의 양을 나타낸다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="nvidia-v100-as-a-throughput-processor">NVIDIA V100 as a Throughput Processor</h2><a class="sl-anchor-link" href="#nvidia-v100-as-a-throughput-processor"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “NVIDIA V100 as a Throughput Processor”</span></a></div>
+<p>Lecture 2는 NVIDIA V100을 modern throughput-oriented processor의 사례로 소개한다. V100은 여러 SM으로 구성되며, 각 SM은 많은 warp execution context와 넓은 SIMD execution resource를 갖는다.</p>
+<p>강의 슬라이드에서 설명하는 V100 SM의 특징은 다음과 같다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>V100 SM concept</th><th>Meaning</th></tr></thead><tbody><tr><td>Warp</td><td>32개 data item 또는 thread가 함께 움직이는 SIMD execution group</td></tr><tr><td>Many warp contexts</td><td>Memory stall 동안 다른 warp를 실행하기 위해 유지하는 state</td></tr><tr><td>SIMD ALUs</td><td>같은 instruction을 여러 data lane에 적용</td></tr><tr><td>Tensor cores</td><td>Matrix 연산이 많은 workload를 위한 specialized execution unit</td></tr><tr><td>Large register file</td><td>많은 resident warp의 context를 동시에 유지</td></tr></tbody></table>
+<p>슬라이드에 따르면 V100 전체는 80개의 SM으로 구성되고, GPU memory는 HBM을 통해 높은 bandwidth를 제공한다. 핵심은 GPU가 개별 operation의 latency를 낮추는 processor라기보다, 많은 independent work를 보유하고 번갈아 실행해 전체 throughput을 극대화하는 processor라는 점이다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="gpu-systems-lens">GPU Systems Lens</h2><a class="sl-anchor-link" href="#gpu-systems-lens"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “GPU Systems Lens”</span></a></div>
+<p>Lecture 2의 개념은 GPU 성능을 분석하는 기본 틀이 된다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Lecture 2 concept</th><th>GPU/CUDA interpretation</th></tr></thead><tbody><tr><td>Multi-core</td><td>여러 SM이 block/warp 단위 work를 병렬로 처리한다</td></tr><tr><td>SIMD</td><td>Warp 안의 lane들이 같은 instruction을 실행한다</td></tr><tr><td>Instruction stream coherence</td><td>Warp divergence가 적을수록 SIMD lane을 효율적으로 활용할 수 있다</td></tr><tr><td>Hardware multi-threading</td><td>SM이 여러 resident warp를 보유하고 ready warp를 골라 실행한다</td></tr><tr><td>Latency hiding</td><td>Memory stall 동안 다른 warp를 실행한다</td></tr><tr><td>Cache locality</td><td>Coalesced access, L1/L2 reuse, shared-memory tiling</td></tr><tr><td>Arithmetic per memory access</td><td>Arithmetic intensity와 필요한 occupancy를 결정한다</td></tr></tbody></table>
+<p>LLM inference와 training에서는 이 강의의 내용이 다음 질문으로 이어진다.</p>
+<ul>
+<li>Kernel이 충분한 warp/block을 제공하여 모든 SM에 work를 공급하는가?</li>
+<li>Branch나 길이가 서로 다른 loop 때문에 warp divergence가 커지지는 않는가?</li>
+<li>Memory access가 coalesced되어 있고 cache나 shared memory의 reuse가 있는가?</li>
+<li>Tensor Core와 SIMD lane이 실제로 useful work를 수행하는가?</li>
+<li>Memory-bound kernel에서 occupancy를 더 올리는 것이 latency hiding에 도움이 되는가?</li>
+<li>Arithmetic intensity가 낮은 kernel을 fusion이나 tiling으로 개선할 수 있는가?</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="practical-tips-and-notes">Practical Tips and Notes</h2><a class="sl-anchor-link" href="#practical-tips-and-notes"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Practical Tips and Notes”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="utilization을-세-층으로-나누어-살펴보기">Utilization을 세 층으로 나누어 살펴보기</h3><a class="sl-anchor-link" href="#utilization을-세-층으로-나누어-살펴보기"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Utilization을 세 층으로 나누어 살펴보기”</span></a></div>
+<p>GPU나 CPU 성능을 평가할 때 단순히 parallelism이 있다고만 해서는 충분하지 않다. 다음 세 층을 각각 확인해야 한다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Layer</th><th>First check</th></tr></thead><tbody><tr><td>Across cores</td><td>모든 core/SM에 work가 배정되는가?</td></tr><tr><td>Within SIMD lanes</td><td>lane/warp가 같은 useful instruction을 수행하는가?</td></tr><tr><td>Over time</td><td>memory stall 동안 실행할 다른 work가 남아 있는가?</td></tr></tbody></table>
+<p>성능이 기대보다 낮다면 어느 층에서 resource가 놀고 있는지부터 구분해야 한다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="divergence는-correctness-bug가-아니라-efficiency-bug다">Divergence는 correctness bug가 아니라 efficiency bug다</h3><a class="sl-anchor-link" href="#divergence는-correctness-bug가-아니라-efficiency-bug다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Divergence는 correctness bug가 아니라 efficiency bug다”</span></a></div>
+<p>Branch가 분기되어도 계산의 correctness는 유지될 수 있다. 문제는 같은 SIMD group의 lane이 서로 다른 path를 따르면 일부 lane이 masked-off 상태가 되어 연산에 참여하지 못한다는 점이다. 따라서 CUDA에서는 같은 warp 안의 branch coherence를 높일 수 있도록 data layout과 work assignment를 설계하는 것이 중요하다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="thread-수는-많을수록-항상-좋은-것이-아니다">Thread 수는 많을수록 항상 좋은 것이 아니다</h3><a class="sl-anchor-link" href="#thread-수는-많을수록-항상-좋은-것이-아니다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Thread 수는 많을수록 항상 좋은 것이 아니다”</span></a></div>
+<p>Hardware multi-threading은 latency hiding에 유용하지만, execution unit이 이미 100% utilization에 도달했다면 thread를 더 늘려도 효과는 제한적이다. 오히려 register pressure, cache pressure, scheduling overhead가 커질 수 있다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="arithmetic-intensity는-latency-hiding-요구량을-바꾼다">Arithmetic intensity는 latency hiding 요구량을 바꾼다</h3><a class="sl-anchor-link" href="#arithmetic-intensity는-latency-hiding-요구량을-바꾼다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Arithmetic intensity는 latency hiding 요구량을 바꾼다”</span></a></div>
+<p>Memory access 하나당 수행하는 arithmetic이 많으면 적은 thread로도 memory latency를 숨기기 쉽다. 반대로 load/store가 대부분인 kernel은 resident warp를 늘려도 bandwidth와 latency의 제약을 받을 가능성이 높다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="cache는-access-pattern의-결과다">Cache는 access pattern의 결과다</h3><a class="sl-anchor-link" href="#cache는-access-pattern의-결과다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Cache는 access pattern의 결과다”</span></a></div>
+<p>Cache hit rate는 hardware cache size만으로 결정되지 않는다. Array 순회 방식, data layout, tiling, reuse distance가 cache behavior를 좌우한다. GPU의 shared memory tiling과 coalescing도 같은 원리를 명시적으로 적용하는 기법으로 볼 수 있다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="lecture-summary">Lecture Summary</h2><a class="sl-anchor-link" href="#lecture-summary"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Lecture Summary”</span></a></div>
+<p>이번 강의는 modern parallel processor를 multi-core, SIMD, hardware multi-threading의 조합으로 설명했다. Multi-core는 서로 다른 instruction stream을 병렬로 실행하고, SIMD는 같은 instruction을 여러 data에 적용해 arithmetic throughput을 높인다. Hardware multi-threading은 memory stall 동안 다른 thread의 instruction을 실행하여 latency로 인한 idle 시간을 줄인다.</p>
+<p>효율적인 parallel program은 다음 세 조건을 모두 만족해야 한다.</p>
+<ul>
+<li>모든 core와 execution unit을 활용할 만큼 parallel work가 충분해야 한다.</li>
+<li>SIMD lane이 낭비되지 않도록 같은 instruction sequence를 따르는 work item이 많아야 한다.</li>
+<li>Memory latency를 숨길 만큼 runnable work가 충분해야 한다.</li>
+</ul>
+<p>GPU는 이 원리를 집약적으로 활용하는 throughput processor다. CUDA의 block, warp, occupancy, coalescing, divergence, shared memory는 모두 이 강의에서 설명한 hardware model을 바탕으로 이해할 수 있다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="key-terms">Key Terms</h2><a class="sl-anchor-link" href="#key-terms"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Key Terms”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Term</th><th>Meaning</th></tr></thead><tbody><tr><td>Multi-core processor</td><td>여러 개의 execution core를 가진 processor</td></tr><tr><td>Instruction stream</td><td>Processor가 순서대로 실행하는 instruction의 흐름</td></tr><tr><td>Cache line</td><td>Cache와 memory 사이에서 한 번에 이동하는 data block</td></tr><tr><td>Temporal locality</td><td>같은 data를 시간적으로 가깝게 다시 쓰는 성질</td></tr><tr><td>Spatial locality</td><td>서로 가까운 memory address를 연속해서 사용하는 성질</td></tr><tr><td>Cache hit</td><td>요청한 data가 cache에 있는 경우</td></tr><tr><td>Cache miss</td><td>요청한 data가 cache에 없어 memory에서 가져와야 하는 경우</td></tr><tr><td>SIMD</td><td>하나의 instruction을 여러 data element에 적용하는 실행 방식</td></tr><tr><td>SIMD lane</td><td>SIMD instruction을 수행하는 data-parallel execution slot</td></tr><tr><td>Instruction stream coherence</td><td>여러 work item이 같은 instruction sequence를 따르는 성질</td></tr><tr><td>Divergent execution</td><td>같은 SIMD group 안의 work item들이 서로 다른 control flow를 타는 상태</td></tr><tr><td>Explicit SIMD</td><td>Vector instruction을 compiler 또는 binary 수준에서 명시하는 SIMD</td></tr><tr><td>Implicit SIMD</td><td>Scalar thread abstraction 아래에서 hardware가 SIMD로 실행하는 방식</td></tr><tr><td>Hardware multi-threading</td><td>Core가 여러 thread context를 유지하며 번갈아 실행하는 방식</td></tr><tr><td>Latency hiding</td><td>Long-latency operation 동안 다른 work를 실행하여 utilization을 유지하는 기법</td></tr><tr><td>Arithmetic intensity</td><td>Memory access 또는 전송한 byte 수에 대한 arithmetic work의 비율</td></tr><tr><td>Warp</td><td>NVIDIA GPU에서 함께 SIMD 방식으로 실행되는 thread group</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h2"><h2 id="questions">Questions</h2><a class="sl-anchor-link" href="#questions"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Questions”</span></a></div>
+<ol>
+<li>Modern processor가 활용하는 세 가지 주요 parallel execution 형태는 무엇인가?</li>
+<li>Cache line은 spatial locality와 어떤 관련이 있는가?</li>
+<li>Temporal locality와 spatial locality는 어떻게 다른가?</li>
+<li>Multi-core execution과 SIMD execution은 instruction stream 측면에서 무엇이 다른가?</li>
+<li>SIMD가 area-efficient한 이유는 무엇인가?</li>
+<li>Conditional branch가 SIMD utilization을 떨어뜨리는 이유는 무엇인가?</li>
+<li>Instruction stream coherence란 무엇인가?</li>
+<li>Explicit SIMD와 implicit SIMD는 어떻게 다른가?</li>
+<li>Hardware multi-threading은 memory latency를 줄이는가, 숨기는가?</li>
+<li>Memory access 하나당 arithmetic이 많아지면 latency hiding에 필요한 thread 수는 어떻게 변하는가?</li>
+<li>V100 같은 GPU를 throughput-oriented processor라고 부르는 이유는 무엇인가?</li>
+<li>CUDA의 warp divergence는 Lecture 2의 어떤 개념과 연결되는가?</li>
+</ol>
+<div class="sl-heading-wrapper level-h2"><h2 id="answers">Answers</h2><a class="sl-anchor-link" href="#answers"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Answers”</span></a></div>
+<ol>
+<li>Multi-core execution, SIMD execution, hardware multi-threading이다.</li>
+<li>Cache가 line 단위로 인접한 address를 함께 가져오기 때문에, 순차 접근은 한 번의 miss 뒤에 여러 cache hit으로 이어질 수 있다.</li>
+<li>Temporal locality는 같은 data를 짧은 시간 안에 다시 사용하는 성질이고, spatial locality는 서로 가까운 address를 연속해서 사용하는 성질이다.</li>
+<li>Multi-core에서는 core마다 서로 다른 instruction stream을 실행할 수 있지만, SIMD에서는 여러 lane이 하나의 instruction stream을 공유한다.</li>
+<li>하나의 fetch/decode/control path가 여러 ALU lane을 제어하므로, control overhead를 여러 data operation에 분산할 수 있기 때문이다.</li>
+<li>Lane마다 branch path가 다르면 일부 lane이 mask되어 useful work를 수행하지 못하기 때문이다.</li>
+<li>여러 parallel work item이 같은 instruction sequence를 따르는 성질이다.</li>
+<li>Explicit SIMD는 vector instruction이 compiler/binary에 명시되며, implicit SIMD는 programmer가 scalar thread를 작성해도 hardware가 여러 thread를 묶어 SIMD로 실행한다.</li>
+<li>줄이지 않고 숨긴다. Memory operation의 latency는 그대로지만, 기다리는 동안 다른 thread를 실행해 idle 시간을 줄인다.</li>
+<li>줄어든다. Memory stall 사이에 수행할 arithmetic work가 많아지기 때문이다.</li>
+<li>많은 SM, SIMD lane, resident warp를 활용하여 개별 operation의 latency보다 전체 throughput을 극대화하도록 설계되었기 때문이다.</li>
+<li>Instruction stream coherence와 divergent execution이다.</li>
+</ol> </div> <footer class="sl-flex astro-3yyafb3n"> <div class="meta sl-flex astro-3yyafb3n"> <a href="https://github.com/ziwon/ai-data-center-systems/edit/main/gpu/cs149/lec02/README.md" class="sl-flex print:hidden astro-eez2twj6"><svg aria-hidden="true" class="astro-eez2twj6 astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.2em;"><path d="M22 7.24a1 1 0 0 0-.29-.71l-4.24-4.24a1 1 0 0 0-1.1-.22 1 1 0 0 0-.32.22l-2.83 2.83L2.29 16.05a1 1 0 0 0-.29.71V21a1 1 0 0 0 1 1h4.24a1 1 0 0 0 .76-.29l10.87-10.93L21.71 8c.1-.1.17-.2.22-.33a1 1 0 0 0 0-.24v-.14l.07-.05ZM6.83 20H4v-2.83l9.93-9.93 2.83 2.83L6.83 20ZM18.17 8.66l-2.83-2.83 1.42-1.41 2.82 2.82-1.41 1.42Z"/></svg>Edit page</a> <p>Last updated: <time datetime="2026-07-26T07:46:40.000Z">Jul 26, 2026</time></p> </div> <div class="pagination-links print:hidden astro-u2l5gyhi" dir="ltr"> <a href="/gpu/cs149/lec01/" rel="prev" class="astro-u2l5gyhi"> <svg aria-hidden="true" class="astro-u2l5gyhi astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17 11H9.41l3.3-3.29a1.004 1.004 0 1 0-1.42-1.42l-5 5a1 1 0 0 0-.21.33 1 1 0 0 0 0 .76 1 1 0 0 0 .21.33l5 5a1.002 1.002 0 0 0 1.639-.325 1 1 0 0 0-.219-1.095L9.41 13H17a1 1 0 0 0 0-2Z"/></svg> <span class="astro-u2l5gyhi"> Previous <br class="astro-u2l5gyhi"> <span class="link-title astro-u2l5gyhi">Lecture 1: Why Parallelism? Why Efficiency?</span> </span> </a> <a href="/gpu/cs149/lec03/" rel="next" class="astro-u2l5gyhi"> <svg aria-hidden="true" class="astro-u2l5gyhi astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17.92 11.62a1.001 1.001 0 0 0-.21-.33l-5-5a1.003 1.003 0 1 0-1.42 1.42l3.3 3.29H7a1 1 0 0 0 0 2h7.59l-3.3 3.29a1.002 1.002 0 0 0 .325 1.639 1 1 0 0 0 1.095-.219l5-5a1 1 0 0 0 .21-.33 1 1 0 0 0 0-.76Z"/></svg> <span class="astro-u2l5gyhi"> Next <br class="astro-u2l5gyhi"> <span class="link-title astro-u2l5gyhi">Lecture 3: Multi-Core Architecture, Part II and ISPC</span> </span> </a> </div>  </footer> </div> </div>  </main> </div> </div> </div> <ask-docs-widget> <button class="ask-fab" type="button" data-open aria-label="Ask this docs"> <span class="ask-fab-icon" aria-hidden="true">?</span>
+Ask this docs
+</button> <div class="ask-panel" data-panel hidden> <div class="ask-resize-handle" data-resize aria-hidden="true"></div> <div class="ask-panel-inner"> <header class="ask-header"> <div> <p class="ask-eyebrow">AI Data Center Systems</p> <h2 class="ask-title">Ask this docs</h2> </div> <div class="ask-header-controls"> <button class="ask-mode-btn" data-mode-btn="right" title="오른쪽 패널" aria-label="오른쪽 패널"> <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="6" height="16" rx="1.5" opacity="0.35"></rect><rect x="8" y="0" width="8" height="16" rx="1.5"></rect></svg> </button> <button class="ask-mode-btn" data-mode-btn="bottom" title="하단 패널" aria-label="하단 패널"> <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="16" height="6" rx="1.5" opacity="0.35"></rect><rect x="0" y="8" width="16" height="8" rx="1.5"></rect></svg> </button> <button class="ask-mode-btn" data-mode-btn="expand" title="전체 확장" aria-label="전체 확장"> <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 5.5V1h4.5M10.5 1H15v4.5M15 10.5V15h-4.5M5.5 15H1v-4.5"></path></svg> </button> <button class="ask-close-btn" type="button" aria-label="닫기" data-close> <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13"></path></svg> </button> </div> </header> <div class="ask-body"> <label class="ask-field"> <span class="ask-field-row"> <span>Question</span> <span class="ask-char" data-char>0 / 800</span> </span> <textarea name="question" rows="3" maxlength="800" placeholder="이 문서에서 핵심 운영 체크포인트는 무엇인가요?" data-question></textarea> <span class="ask-hint">시간당 최대 20회 · 질문당 최대 800자</span> </label> <div class="ask-actions"> <button class="ask-submit" type="button" data-submit> <svg class="ask-spinner" viewBox="0 0 24 24" fill="none" aria-hidden="true" hidden> <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2.5" stroke-dasharray="56" stroke-dashoffset="14" stroke-linecap="round"></circle> </svg> <span data-submit-label>Ask</span> </button> <p class="ask-status" data-status></p> </div> <section class="ask-answer" data-answer hidden></section> <section class="ask-sources" data-sources hidden> <h3>Sources</h3> <ul class="ask-source-chips" data-source-list></ul> </section> </div> </div> </div> <div class="ask-backdrop" data-backdrop hidden></div> </ask-docs-widget> <script type="module" src="/_astro/AskDocs.astro_astro_type_script_index_0_lang.BbnAb04M.js"></script> </div> <script type="module">const r=document.documentElement,c=document.querySelector("#starlight__sidebar"),s=document.querySelector(".navigation-mode-toggle"),a=document.querySelector(".navigation-drawer-toggle"),u=window.matchMedia("(min-width: 50rem)");function d(){return r.dataset.navigationMode==="compact"}function o(){return r.dataset.navigationDrawer==="open"}function l(){const e=d(),t=e&&o();s?.setAttribute("aria-pressed",String(e)),s?.setAttribute("title",e?"Use normal navigation":"Use compact navigation"),a?.setAttribute("aria-expanded",String(t)),a?.setAttribute("title",t?"Close navigation":"Open navigation");const n=a?.querySelector(".navigation-drawer-label");n&&(n.textContent=t?"Close navigation":"Open navigation")}function i(e,t=!1){const n=!!(e&&d()&&u.matches);r.dataset.navigationDrawer=n?"open":"closed",l(),n?requestAnimationFrame(()=>{const g=c?.querySelector('a[aria-current="page"]'),m=c?.querySelector(".starlight-sidebar-topics-current");(g??m)?.focus()}):t&&a?.focus()}function p(e){r.dataset.navigationMode=e,i(!1);try{localStorage.setItem("adcs-navigation-mode",e)}catch{}l()}s?.addEventListener("click",()=>{p(d()?"normal":"compact")});a?.addEventListener("click",()=>{i(!o(),o())});document.addEventListener("keydown",e=>{e.key==="Escape"&&o()&&i(!1,!0)});document.addEventListener("pointerdown",e=>{!o()||!(e.target instanceof Node)||c?.contains(e.target)||i(!1)});u.addEventListener("change",()=>i(!1));r.dataset.navigationDrawer="closed";l();</script> </body></html>

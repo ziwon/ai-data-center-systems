@@ -1,0 +1,1155 @@
+{
+  "version": 1,
+  "current": {
+    "id": "/systems-performance/articles/keeping-gpu-workloads-numa-local-in-kubernetes.ko/",
+    "title": "Keeping GPU Workloads NUMA-Local in Kubernetes",
+    "route": "/systems-performance/articles/keeping-gpu-workloads-numa-local-in-kubernetes.ko/",
+    "group": "systems-performance",
+    "keywords": [
+      "numa",
+      "cpu",
+      "pod",
+      "node",
+      "container",
+      "kubelet",
+      "manager",
+      "memory",
+      "request",
+      "gpu"
+    ],
+    "excerpt": "GPU workload에서 CPU가 request preparation, batching, dataloader, pinned memory staging처럼 GPU로 가는 data path에 있다면, Kubernetes의 기본 resource scheduling만으로는 부족하다...."
+  },
+  "nodes": [
+    {
+      "id": "/systems-performance/articles/keeping-gpu-workloads-numa-local-in-kubernetes.ko/",
+      "title": "Keeping GPU Workloads NUMA-Local in Kubernetes",
+      "route": "/systems-performance/articles/keeping-gpu-workloads-numa-local-in-kubernetes.ko/",
+      "group": "systems-performance",
+      "keywords": [
+        "numa",
+        "cpu",
+        "pod",
+        "node",
+        "container",
+        "kubelet",
+        "manager",
+        "memory",
+        "request",
+        "gpu"
+      ],
+      "excerpt": "GPU workload에서 CPU가 request preparation, batching, dataloader, pinned memory staging처럼 GPU로 가는 data path에 있다면, Kubernetes의 기본 resource scheduling만으로는 부족하다...."
+    },
+    {
+      "id": "/gpu/articles/gpu-infrastructure-operations-and-platform-design.ko/",
+      "title": "GPU 인프라 운영과 플랫폼 설계: 하드웨어 장애 분석부터 멀티테넌시까지",
+      "route": "/gpu/articles/gpu-infrastructure-operations-and-platform-design.ko/",
+      "group": "gpu",
+      "keywords": [
+        "gpu",
+        "메모리",
+        "호스트",
+        "작업을",
+        "드라이버",
+        "iommu",
+        "재시작",
+        "서비스",
+        "workload",
+        "않는다"
+      ],
+      "excerpt": "GPU 노드를 재부팅한 뒤 학습이 다시 진행되고 step time도 기준선으로 돌아왔다고 하자. 당장의 장애는 수습했다. 하지만 작업을 다시 돌리는 것만으로 사건 처리가 끝나지는 않는다. 같은 구성을 쓰는 다른 노드에도 문제가 있는지, 재발 조건을 알고 있는지, 다음 패치에서도..."
+    },
+    {
+      "id": "/systems-performance/",
+      "title": "AI Systems Performance Engineering",
+      "route": "/systems-performance/",
+      "group": "systems-performance",
+      "keywords": [
+        "engineering",
+        "2025.12",
+        "2026.04",
+        "2025.08",
+        "books",
+        "uncore",
+        "numa-aware",
+        "talks",
+        "gpu-local",
+        "policies"
+      ],
+      "excerpt": "AI systems performance engineering notes covering GPU hardware, Linux and container tuning, CUDA, PyTorch, profiling, and distributed communication."
+    },
+    {
+      "id": "/systems-performance/chap03/",
+      "title": "Chapter 3: OS, Docker, and Kubernetes Tuning for GPU-Based Environments",
+      "route": "/systems-performance/chap03/",
+      "group": "systems-performance",
+      "keywords": [
+        "gpu",
+        "cpu",
+        "kubernetes",
+        "memory",
+        "container",
+        "mig",
+        "cuda",
+        "numa",
+        "image",
+        "mps"
+      ],
+      "excerpt": "이번 장의 목표는 GPU 서버의 OS, Docker, Kubernetes 환경을 단순한 설치 대상이 아니라 GPU goodput을 결정하는 성능 계층 으로 이해하는 것이다."
+    },
+    {
+      "id": "/systems-performance/articles/never-underestimate-memory-architecture.ko/",
+      "title": "Never Underestimate Memory Architecture",
+      "route": "/systems-performance/articles/never-underestimate-memory-architecture.ko/",
+      "group": "systems-performance",
+      "keywords": [
+        "cpu",
+        "numa",
+        "memory",
+        "manager",
+        "instance",
+        "zone",
+        "node",
+        "uncore",
+        "gpu",
+        "cloud"
+      ],
+      "excerpt": "대형 서버와 cloud VM에서는 CPU, memory, cache, PCIe device가 균일하게 연결되어 있지 않다. Workload가 NUMA boundary와 shared uncore resource를 넘나들면 같은 일을 하면서도 CPU 사용량, step time,..."
+    },
+    {
+      "id": "concept:numa",
+      "kind": "concept",
+      "title": "NUMA",
+      "label": "NUMA",
+      "group": "systems",
+      "description": "CPU and memory locality model that matters for GPU, NIC, and memory placement.",
+      "keywords": [
+        "NUMA",
+        "NUMA locality",
+        "NUMA node",
+        "NUMA domain",
+        "remote memory"
+      ]
+    },
+    {
+      "id": "concept:topology-aware-scheduling",
+      "kind": "concept",
+      "title": "Topology-Aware Scheduling",
+      "label": "Topology-Aware Scheduling",
+      "group": "kubernetes",
+      "description": "Placement decisions that keep CPUs, memory, NICs, and GPUs close to each other.",
+      "keywords": [
+        "Topology-Aware Scheduling",
+        "topology-aware scheduling",
+        "Topology Manager",
+        "CPU Manager",
+        "Memory Manager",
+        "single-numa-node"
+      ]
+    },
+    {
+      "id": "concept:congestion-control",
+      "kind": "concept",
+      "title": "Congestion Control",
+      "label": "Congestion Control",
+      "group": "network",
+      "description": "Mechanisms that prevent fabric overload, queue buildup, and packet loss.",
+      "keywords": [
+        "Congestion Control",
+        "congestion control",
+        "ECN",
+        "PFC",
+        "DCQCN",
+        "lossless Ethernet",
+        "tail latency"
+      ]
+    },
+    {
+      "id": "concept:nccl",
+      "kind": "concept",
+      "title": "NCCL",
+      "label": "NCCL",
+      "group": "distributed-training",
+      "description": "NVIDIA collective communication library used by distributed GPU training.",
+      "keywords": [
+        "NCCL",
+        "collectives",
+        "all-reduce",
+        "allreduce",
+        "reduce-scatter",
+        "all-gather"
+      ]
+    },
+    {
+      "id": "concept:rdma",
+      "kind": "concept",
+      "title": "RDMA",
+      "label": "RDMA",
+      "group": "network",
+      "description": "Remote direct memory access data path for low-latency GPU and storage communication.",
+      "keywords": [
+        "RDMA",
+        "Remote Direct Memory Access",
+        "InfiniBand verbs"
+      ]
+    },
+    {
+      "id": "/systems-performance/chap06/",
+      "title": "Chapter 6: GPU Architecture, CUDA Programming, and Maximizing Occupancy",
+      "route": "/systems-performance/chap06/",
+      "group": "systems-performance",
+      "keywords": [
+        "occupancy",
+        "memory",
+        "warp",
+        "kernel",
+        "block",
+        "nsight",
+        "register",
+        "thread",
+        "gpu",
+        "spill"
+      ],
+      "excerpt": "이번 장의 목표는 CUDA 코드를 많이 외우는 것이 아니라, GPU가 왜 빠르고 왜 느려지는지 실행 구조를 기준으로 설명할 수 있는 mental model 을 만드는 것이다."
+    },
+    {
+      "id": "/courses/deep-learning-for-network-engineers/week04/",
+      "title": "Week 4: RDMA and GPU Cluster Communication",
+      "route": "/courses/deep-learning-for-network-engineers/week04/",
+      "group": "courses/deep-learning-for-network-engineers",
+      "keywords": [
+        "rank",
+        "rdma",
+        "nccl",
+        "queue",
+        "host",
+        "memory",
+        "transport",
+        "gpu",
+        "path",
+        "key"
+      ],
+      "excerpt": "이번 주 목표는 Chapter 9와 Chapter 14를 연결해서, RDMA가 GPU memory 사이의 빠른 data movement를 어떻게 만들고, NCCL이 distributed training job 안에서 어떤 communication pattern을 만드는지 이해하는..."
+    },
+    {
+      "id": "/gpu/cs149/lec06/",
+      "title": "Lecture 6: Performance Optimization II — Locality, Communication, and Contention",
+      "route": "/gpu/cs149/lec06/",
+      "group": "gpu",
+      "keywords": [
+        "슬라이드",
+        "communication",
+        "intensity",
+        "cache",
+        "message",
+        "work",
+        "blocking",
+        "memory",
+        "ghost",
+        "assignment"
+      ],
+      "excerpt": "본문의 캡처는 69쪽 PDF를 표지부터 1-based로 센 공식 Lecture 6 슬라이드 p. 6, 8, 11, 18, 21, 23, 24, 26, 29, 31, 34, 35, 43, 44, 50, 57이다. Build/animation 중복과..."
+    },
+    {
+      "id": "/network/chap01/",
+      "title": "Chapter 1: Wonders in the Workload",
+      "route": "/network/chap01/",
+      "group": "network",
+      "keywords": [
+        "rdma",
+        "nic",
+        "memory",
+        "infiniband",
+        "remote",
+        "rnic",
+        "queue",
+        "send",
+        "kernel",
+        "training"
+      ],
+      "excerpt": "The machine learning lifecycle consists of data gathering, training, inference, retrieval augmentation, monitoring, and retraining."
+    },
+    {
+      "id": "/systems-performance/chap01/",
+      "title": "Chapter 1: Introduction and AI System Overview",
+      "route": "/systems-performance/chap01/",
+      "group": "systems-performance",
+      "keywords": [
+        "gpu",
+        "goodput",
+        "mechanical",
+        "dataloader",
+        "nsight",
+        "nccl",
+        "time",
+        "throughput",
+        "최적화",
+        "memory"
+      ],
+      "excerpt": "이 챕터는 AI Systems Performance Engineering 을 바라보는 사고 모델(mental model)을 소개한다."
+    },
+    {
+      "id": "/courses/deep-learning-for-network-engineers/",
+      "title": "Deep Learning for Network Engineers",
+      "route": "/courses/deep-learning-for-network-engineers/",
+      "group": "courses/deep-learning-for-network-engineers",
+      "keywords": [
+        "study",
+        "backend",
+        "networks",
+        "focus",
+        "training",
+        "deep",
+        "engineers",
+        "congestion",
+        "distributed",
+        "understand"
+      ],
+      "excerpt": "Deep learning systems notes for network engineers covering training fundamentals, parallelism, collectives, RDMA, RoCE, and NCCL behavior."
+    },
+    {
+      "id": "/courses/deep-learning-for-network-engineers/week01/",
+      "title": "Week 1: From Artificial Neuron to AI Training Fabric",
+      "route": "/courses/deep-learning-for-network-engineers/week01/",
+      "group": "courses/deep-learning-for-network-engineers",
+      "keywords": [
+        "gradient",
+        "weight",
+        "training",
+        "pass",
+        "gpu",
+        "neuron",
+        "synchronization",
+        "network",
+        "책에서",
+        "loss"
+      ],
+      "excerpt": "이번 주 목표는 기본적인 Deep Learning 학습 과정이 어떻게 network design 문제로 이어지는지 이해하는 것이다."
+    },
+    {
+      "id": "/courses/deep-learning-for-network-engineers/week03/",
+      "title": "Week 3: Parallelism Strategies in Deep Learning",
+      "route": "/courses/deep-learning-for-network-engineers/week03/",
+      "group": "courses/deep-learning-for-network-engineers",
+      "keywords": [
+        "parallelism",
+        "gpu",
+        "gradient",
+        "pipeline",
+        "expert",
+        "stage",
+        "tensor",
+        "training",
+        "micro-batch",
+        "communication"
+      ],
+      "excerpt": "이번 주 목표는 대규모 deep learning training이 왜 parallelism을 필요로 하는지 , 그리고 각 parallelization strategy가 GPU memory, GPU utilization, backend network design에 어떤 영향을..."
+    },
+    {
+      "id": "/inference/efficient-llm-inference-systems/appendix/hardware-architectures/domain-specific-architectures-for-ai-inference.ko/",
+      "title": "Domain-Specific Architectures for AI Inference",
+      "route": "/inference/efficient-llm-inference-systems/appendix/hardware-architectures/domain-specific-architectures-for-ai-inference.ko/",
+      "group": "inference",
+      "keywords": [
+        "dsa",
+        "cache",
+        "week",
+        "compute",
+        "hardware",
+        "tensor",
+        "inference",
+        "decode",
+        "sram",
+        "scratchpad"
+      ],
+      "excerpt": "저자는 이 질문에 답하기 위해 Transformer inference의 병목을 먼저 분석하고, 거기서 하드웨어 설계 원칙을 끌어낸다. 결론은 다음과 같다."
+    },
+    {
+      "id": "/network/articles/cloud-data-center-network-now-and-next.ko/",
+      "title": "Cloud Data Center Network의 지금과 앞으로",
+      "route": "/network/articles/cloud-data-center-network-now-and-next.ko/",
+      "group": "network",
+      "keywords": [
+        "network",
+        "ethernet",
+        "fabric",
+        "ai/ml",
+        "rdma",
+        "routing",
+        "frontend",
+        "traffic",
+        "adaptive",
+        "rack"
+      ],
+      "excerpt": "Cloud-native web-scale network는 많은 작은 TCP flow를 commodity Ethernet/Clos/ECMP로 처리하는 데 최적화되어 왔다. 그러나 AI/ML workload는 GPU 간 동기화, RDMA, collective..."
+    }
+  ],
+  "edges": [
+    {
+      "source": "/courses/deep-learning-for-network-engineers/",
+      "target": "/courses/deep-learning-for-network-engineers/week01/",
+      "type": "link+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/",
+      "target": "/courses/deep-learning-for-network-engineers/week03/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": [
+        "training"
+      ]
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/",
+      "target": "/courses/deep-learning-for-network-engineers/week04/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/gpu/articles/gpu-infrastructure-operations-and-platform-design.ko/",
+      "target": "/systems-performance/articles/keeping-gpu-workloads-numa-local-in-kubernetes.ko/",
+      "type": "link",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/systems-performance/",
+      "target": "/systems-performance/articles/keeping-gpu-workloads-numa-local-in-kubernetes.ko/",
+      "type": "link+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/systems-performance/",
+      "target": "/systems-performance/articles/never-underestimate-memory-architecture.ko/",
+      "type": "link+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/systems-performance/",
+      "target": "/systems-performance/chap01/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/systems-performance/",
+      "target": "/systems-performance/chap03/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/systems-performance/",
+      "target": "/systems-performance/chap06/",
+      "type": "link+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/systems-performance/articles/keeping-gpu-workloads-numa-local-in-kubernetes.ko/",
+      "target": "/systems-performance/chap03/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": [
+        "gpu",
+        "cpu",
+        "memory",
+        "container"
+      ]
+    },
+    {
+      "source": "/systems-performance/articles/never-underestimate-memory-architecture.ko/",
+      "target": "/systems-performance/chap03/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": [
+        "gpu",
+        "cpu",
+        "memory",
+        "numa"
+      ]
+    },
+    {
+      "source": "/systems-performance/articles/keeping-gpu-workloads-numa-local-in-kubernetes.ko/",
+      "target": "/systems-performance/articles/never-underestimate-memory-architecture.ko/",
+      "type": "semantic+section",
+      "weight": 0.999,
+      "terms": [
+        "cpu",
+        "numa",
+        "memory",
+        "manager"
+      ]
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/",
+      "target": "concept:congestion-control",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "congestion control",
+        "Congestion Control",
+        "DCQCN",
+        "ECN"
+      ]
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week01/",
+      "target": "concept:congestion-control",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "tail latency",
+        "ECN",
+        "PFC",
+        "congestion control"
+      ]
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week03/",
+      "target": "concept:congestion-control",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "congestion control",
+        "Congestion Control",
+        "DCQCN",
+        "ECN"
+      ]
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week03/",
+      "target": "concept:nccl",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "allreduce",
+        "NCCL"
+      ]
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week03/",
+      "target": "concept:rdma",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "RDMA"
+      ]
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week04/",
+      "target": "concept:congestion-control",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "PFC",
+        "ECN",
+        "tail latency"
+      ]
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week04/",
+      "target": "concept:nccl",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "NCCL",
+        "allreduce"
+      ]
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week04/",
+      "target": "concept:numa",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "remote memory",
+        "NUMA",
+        "NUMA domain"
+      ]
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week04/",
+      "target": "concept:rdma",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "RDMA",
+        "Remote Direct Memory Access"
+      ]
+    },
+    {
+      "source": "/gpu/articles/gpu-infrastructure-operations-and-platform-design.ko/",
+      "target": "concept:nccl",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "NCCL",
+        "allreduce"
+      ]
+    },
+    {
+      "source": "/gpu/articles/gpu-infrastructure-operations-and-platform-design.ko/",
+      "target": "concept:numa",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "NUMA"
+      ]
+    },
+    {
+      "source": "/gpu/articles/gpu-infrastructure-operations-and-platform-design.ko/",
+      "target": "concept:rdma",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "RDMA"
+      ]
+    },
+    {
+      "source": "/gpu/articles/gpu-infrastructure-operations-and-platform-design.ko/",
+      "target": "concept:topology-aware-scheduling",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "Topology Manager",
+        "CPU Manager",
+        "Memory Manager",
+        "single-numa-node"
+      ]
+    },
+    {
+      "source": "/gpu/cs149/lec06/",
+      "target": "concept:numa",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "NUMA",
+        "remote memory",
+        "NUMA node"
+      ]
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/appendix/hardware-architectures/domain-specific-architectures-for-ai-inference.ko/",
+      "target": "concept:nccl",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "allreduce",
+        "NCCL",
+        "collectives"
+      ]
+    },
+    {
+      "source": "/network/articles/cloud-data-center-network-now-and-next.ko/",
+      "target": "concept:congestion-control",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "congestion control",
+        "Congestion Control",
+        "ECN",
+        "PFC"
+      ]
+    },
+    {
+      "source": "/network/articles/cloud-data-center-network-now-and-next.ko/",
+      "target": "concept:rdma",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "RDMA"
+      ]
+    },
+    {
+      "source": "/network/chap01/",
+      "target": "concept:congestion-control",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "tail latency",
+        "congestion control",
+        "Congestion Control",
+        "PFC"
+      ]
+    },
+    {
+      "source": "/network/chap01/",
+      "target": "concept:nccl",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "NCCL",
+        "allreduce",
+        "collectives"
+      ]
+    },
+    {
+      "source": "/network/chap01/",
+      "target": "concept:numa",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "remote memory"
+      ]
+    },
+    {
+      "source": "/network/chap01/",
+      "target": "concept:rdma",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "RDMA",
+        "InfiniBand verbs"
+      ]
+    },
+    {
+      "source": "/systems-performance/articles/keeping-gpu-workloads-numa-local-in-kubernetes.ko/",
+      "target": "concept:numa",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "NUMA",
+        "NUMA node",
+        "NUMA locality",
+        "remote memory"
+      ]
+    },
+    {
+      "source": "/systems-performance/articles/keeping-gpu-workloads-numa-local-in-kubernetes.ko/",
+      "target": "concept:topology-aware-scheduling",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "single-numa-node",
+        "Memory Manager",
+        "CPU Manager",
+        "Topology Manager"
+      ]
+    },
+    {
+      "source": "/systems-performance/articles/never-underestimate-memory-architecture.ko/",
+      "target": "concept:numa",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "NUMA",
+        "NUMA node",
+        "NUMA domain",
+        "remote memory"
+      ]
+    },
+    {
+      "source": "/systems-performance/articles/never-underestimate-memory-architecture.ko/",
+      "target": "concept:topology-aware-scheduling",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "CPU Manager",
+        "Topology Manager",
+        "single-numa-node"
+      ]
+    },
+    {
+      "source": "/systems-performance/chap01/",
+      "target": "concept:nccl",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "NCCL",
+        "all-reduce"
+      ]
+    },
+    {
+      "source": "/systems-performance/chap01/",
+      "target": "concept:topology-aware-scheduling",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "topology-aware scheduling",
+        "Topology-Aware Scheduling"
+      ]
+    },
+    {
+      "source": "/systems-performance/chap03/",
+      "target": "concept:nccl",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "NCCL",
+        "all-gather",
+        "all-reduce"
+      ]
+    },
+    {
+      "source": "/systems-performance/chap03/",
+      "target": "concept:numa",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "NUMA",
+        "NUMA node",
+        "NUMA locality",
+        "remote memory"
+      ]
+    },
+    {
+      "source": "/systems-performance/chap03/",
+      "target": "concept:rdma",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "RDMA"
+      ]
+    },
+    {
+      "source": "/systems-performance/chap03/",
+      "target": "concept:topology-aware-scheduling",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "Topology Manager",
+        "CPU Manager",
+        "single-numa-node",
+        "topology-aware scheduling"
+      ]
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week01/",
+      "target": "/courses/deep-learning-for-network-engineers/week03/",
+      "type": "semantic+section",
+      "weight": 0.921,
+      "terms": [
+        "gpu",
+        "gradient",
+        "training"
+      ]
+    },
+    {
+      "source": "/systems-performance/articles/never-underestimate-memory-architecture.ko/",
+      "target": "concept:nccl",
+      "type": "mentions",
+      "weight": 0.905,
+      "terms": [
+        "NCCL"
+      ]
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week01/",
+      "target": "concept:nccl",
+      "type": "mentions",
+      "weight": 0.88,
+      "terms": [
+        "allreduce",
+        "NCCL"
+      ]
+    },
+    {
+      "source": "/systems-performance/chap01/",
+      "target": "concept:rdma",
+      "type": "mentions",
+      "weight": 0.88,
+      "terms": [
+        "RDMA"
+      ]
+    },
+    {
+      "source": "/gpu/cs149/lec06/",
+      "target": "concept:nccl",
+      "type": "mentions",
+      "weight": 0.855,
+      "terms": [
+        "all-gather",
+        "all-reduce",
+        "reduce-scatter"
+      ]
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/appendix/hardware-architectures/domain-specific-architectures-for-ai-inference.ko/",
+      "target": "concept:congestion-control",
+      "type": "mentions",
+      "weight": 0.855,
+      "terms": [
+        "tail latency"
+      ]
+    },
+    {
+      "source": "/network/articles/cloud-data-center-network-now-and-next.ko/",
+      "target": "concept:nccl",
+      "type": "mentions",
+      "weight": 0.855,
+      "terms": [
+        "NCCL"
+      ]
+    },
+    {
+      "source": "/systems-performance/articles/keeping-gpu-workloads-numa-local-in-kubernetes.ko/",
+      "target": "concept:congestion-control",
+      "type": "mentions",
+      "weight": 0.855,
+      "terms": [
+        "tail latency"
+      ]
+    },
+    {
+      "source": "/systems-performance/articles/never-underestimate-memory-architecture.ko/",
+      "target": "concept:rdma",
+      "type": "mentions",
+      "weight": 0.855,
+      "terms": [
+        "RDMA"
+      ]
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/",
+      "target": "concept:nccl",
+      "type": "mentions",
+      "weight": 0.83,
+      "terms": [
+        "allreduce",
+        "NCCL"
+      ]
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week01/",
+      "target": "concept:rdma",
+      "type": "mentions",
+      "weight": 0.83,
+      "terms": [
+        "RDMA"
+      ]
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week03/",
+      "target": "concept:numa",
+      "type": "mentions",
+      "weight": 0.83,
+      "terms": [
+        "NUMA",
+        "remote memory"
+      ]
+    },
+    {
+      "source": "/gpu/articles/gpu-infrastructure-operations-and-platform-design.ko/",
+      "target": "concept:congestion-control",
+      "type": "mentions",
+      "weight": 0.83,
+      "terms": [
+        "tail latency"
+      ]
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/appendix/hardware-architectures/domain-specific-architectures-for-ai-inference.ko/",
+      "target": "concept:rdma",
+      "type": "mentions",
+      "weight": 0.83,
+      "terms": [
+        "RDMA"
+      ]
+    },
+    {
+      "source": "/systems-performance/",
+      "target": "concept:numa",
+      "type": "mentions",
+      "weight": 0.83,
+      "terms": [
+        "NUMA"
+      ]
+    },
+    {
+      "source": "/systems-performance/articles/keeping-gpu-workloads-numa-local-in-kubernetes.ko/",
+      "target": "concept:nccl",
+      "type": "mentions",
+      "weight": 0.83,
+      "terms": [
+        "NCCL"
+      ]
+    },
+    {
+      "source": "/systems-performance/articles/never-underestimate-memory-architecture.ko/",
+      "target": "concept:congestion-control",
+      "type": "mentions",
+      "weight": 0.83,
+      "terms": [
+        "tail latency"
+      ]
+    },
+    {
+      "source": "/systems-performance/chap01/",
+      "target": "concept:numa",
+      "type": "mentions",
+      "weight": 0.83,
+      "terms": [
+        "NUMA"
+      ]
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/",
+      "target": "concept:rdma",
+      "type": "mentions",
+      "weight": 0.805,
+      "terms": [
+        "RDMA"
+      ]
+    },
+    {
+      "source": "/systems-performance/",
+      "target": "concept:topology-aware-scheduling",
+      "type": "mentions",
+      "weight": 0.805,
+      "terms": [
+        "CPU Manager"
+      ]
+    },
+    {
+      "source": "/systems-performance/articles/keeping-gpu-workloads-numa-local-in-kubernetes.ko/",
+      "target": "concept:rdma",
+      "type": "mentions",
+      "weight": 0.805,
+      "terms": [
+        "RDMA"
+      ]
+    },
+    {
+      "source": "/systems-performance/articles/keeping-gpu-workloads-numa-local-in-kubernetes.ko/",
+      "target": "/systems-performance/chap06/",
+      "type": "semantic+section",
+      "weight": 0.788,
+      "terms": [
+        "memory",
+        "gpu"
+      ]
+    },
+    {
+      "source": "/systems-performance/chap03/",
+      "target": "/systems-performance/chap06/",
+      "type": "semantic",
+      "weight": 0.727,
+      "terms": [
+        "memory",
+        "gpu"
+      ]
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week04/",
+      "target": "/systems-performance/chap06/",
+      "type": "semantic",
+      "weight": 0.683,
+      "terms": [
+        "memory",
+        "gpu"
+      ]
+    },
+    {
+      "source": "/gpu/articles/gpu-infrastructure-operations-and-platform-design.ko/",
+      "target": "/systems-performance/chap06/",
+      "type": "semantic",
+      "weight": 0.669,
+      "terms": [
+        "gpu"
+      ]
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week04/",
+      "target": "/network/articles/cloud-data-center-network-now-and-next.ko/",
+      "type": "semantic",
+      "weight": 0.658,
+      "terms": [
+        "rdma"
+      ]
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week01/",
+      "target": "/network/chap01/",
+      "type": "semantic",
+      "weight": 0.655,
+      "terms": [
+        "training"
+      ]
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week04/",
+      "target": "/gpu/cs149/lec06/",
+      "type": "semantic",
+      "weight": 0.655,
+      "terms": [
+        "memory"
+      ]
+    },
+    {
+      "source": "/gpu/cs149/lec06/",
+      "target": "/systems-performance/chap06/",
+      "type": "semantic",
+      "weight": 0.655,
+      "terms": [
+        "memory"
+      ]
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week01/",
+      "target": "/systems-performance/chap01/",
+      "type": "semantic",
+      "weight": 0.65,
+      "terms": [
+        "gpu"
+      ]
+    },
+    {
+      "source": "/network/chap01/",
+      "target": "/systems-performance/chap01/",
+      "type": "semantic",
+      "weight": 0.645,
+      "terms": [
+        "memory"
+      ]
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/",
+      "target": "/network/chap01/",
+      "type": "semantic",
+      "weight": 0.643,
+      "terms": [
+        "training"
+      ]
+    },
+    {
+      "source": "/network/articles/cloud-data-center-network-now-and-next.ko/",
+      "target": "/network/chap01/",
+      "type": "section",
+      "weight": 0.297,
+      "terms": []
+    },
+    {
+      "source": "/systems-performance/articles/keeping-gpu-workloads-numa-local-in-kubernetes.ko/",
+      "target": "/systems-performance/chap01/",
+      "type": "section",
+      "weight": 0.297,
+      "terms": []
+    },
+    {
+      "source": "/systems-performance/articles/never-underestimate-memory-architecture.ko/",
+      "target": "/systems-performance/chap01/",
+      "type": "section",
+      "weight": 0.297,
+      "terms": []
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week01/",
+      "target": "/courses/deep-learning-for-network-engineers/week04/",
+      "type": "section",
+      "weight": 0.18,
+      "terms": []
+    },
+    {
+      "source": "/systems-performance/articles/never-underestimate-memory-architecture.ko/",
+      "target": "/systems-performance/chap06/",
+      "type": "section",
+      "weight": 0.18,
+      "terms": []
+    }
+  ]
+}

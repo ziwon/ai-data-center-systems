@@ -1,0 +1,130 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1360" height="600" viewBox="0 0 1360 600" role="img" aria-labelledby="title desc">
+  <title id="title">Shared accumulator barriers compared with versioned accumulators</title>
+  <desc id="desc">The left side shows three barriers required when reset, accumulation, and convergence checks reuse one diff variable. The right side shows three rotating diff slots that reduce synchronization to one barrier per iteration.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L9,4.5 L0,9 Z" fill="#111111"/>
+    </marker>
+    <marker id="arrow-accent" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L9,4.5 L0,9 Z" fill="#D9392E"/>
+    </marker>
+  </defs>
+  <style>
+    .bg { fill: #F3EFE7; }
+    .panel { fill: none; stroke: #D8D1C7; stroke-width: 1.5; }
+    .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.5; }
+    .box-soft { fill: #E9E3D9; stroke: #D8D1C7; stroke-width: 1.5; }
+    .box-accent { fill: #F4D8D3; stroke: #D9392E; stroke-width: 2; }
+    .heading { font: 700 28px Inter, Arial, sans-serif; fill: #050505; }
+    .sub { font: 16px Inter, Arial, sans-serif; fill: #6F6A63; }
+    .label { font: 700 17px Inter, Arial, sans-serif; fill: #050505; }
+    .small { font: 15px Inter, Arial, sans-serif; fill: #050505; }
+    .muted { font: 14px Inter, Arial, sans-serif; fill: #6F6A63; }
+    .mono { font: 600 15px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fill: #050505; }
+    .barrier { stroke: #D9392E; stroke-width: 4; }
+    .flow { fill: none; stroke: #111111; stroke-width: 1.8; marker-end: url(#arrow); }
+    .flow-accent { fill: none; stroke: #D9392E; stroke-width: 2; marker-end: url(#arrow-accent); }
+  </style>
+
+  <rect class="bg" width="1360" height="600"/>
+  <rect class="panel" x="34" y="28" width="625" height="544" rx="4"/>
+  <rect class="panel" x="701" y="28" width="625" height="544" rx="4"/>
+
+  <text class="heading" x="66" y="72">One shared accumulator</text>
+  <text class="sub" x="66" y="100">Reset, update, and check reuse the same address.</text>
+
+  <rect class="box" x="66" y="150" width="105" height="66" rx="3"/>
+  <text class="label" x="118.5" y="178" text-anchor="middle">Reset</text>
+  <text class="mono" x="118.5" y="201" text-anchor="middle">diff = 0</text>
+
+  <line class="barrier" x1="194" y1="132" x2="194" y2="234"/>
+  <text class="small" x="194" y="124" text-anchor="middle">B1</text>
+
+  <rect class="box" x="218" y="150" width="120" height="66" rx="3"/>
+  <text class="label" x="278" y="178" text-anchor="middle">Accumulate</text>
+  <text class="mono" x="278" y="201" text-anchor="middle">diff += p</text>
+
+  <line class="barrier" x1="361" y1="132" x2="361" y2="234"/>
+  <text class="small" x="361" y="124" text-anchor="middle">B2</text>
+
+  <rect class="box" x="385" y="150" width="94" height="66" rx="3"/>
+  <text class="label" x="432" y="178" text-anchor="middle">Check</text>
+  <text class="mono" x="432" y="201" text-anchor="middle">read diff</text>
+
+  <line class="barrier" x1="502" y1="132" x2="502" y2="234"/>
+  <text class="small" x="502" y="124" text-anchor="middle">B3</text>
+
+  <rect class="box" x="526" y="150" width="100" height="66" rx="3"/>
+  <text class="label" x="576" y="178" text-anchor="middle">Next</text>
+  <text class="small" x="576" y="201" text-anchor="middle">iteration</text>
+
+  <path class="flow" d="M171 183 H184"/>
+  <path class="flow" d="M204 183 H208"/>
+  <path class="flow" d="M338 183 H351"/>
+  <path class="flow" d="M371 183 H375"/>
+  <path class="flow" d="M479 183 H492"/>
+  <path class="flow" d="M512 183 H516"/>
+
+  <path class="flow-accent" d="M576 232 C576 278,118 278,118 232"/>
+  <text class="small" x="347" y="304" text-anchor="middle">The next iteration returns to the same storage.</text>
+
+  <rect class="box-soft" x="66" y="340" width="560" height="84" rx="3"/>
+  <text class="label" x="88" y="371">Why three barriers?</text>
+  <text class="small" x="88" y="398">A late reset can erase a partial; an early check can read an incomplete sum;</text>
+  <text class="small" x="88" y="419">an early next iteration can overwrite the value another worker is checking.</text>
+
+  <rect class="box-accent" x="66" y="462" width="560" height="70" rx="3"/>
+  <text class="label" x="88" y="491">Cost</text>
+  <text class="small" x="150" y="491">three global phase boundaries per iteration</text>
+  <text class="muted" x="88" y="516">All workers wait at B1, B2, and B3.</text>
+
+  <text class="heading" x="733" y="72">Versioned accumulators</text>
+  <text class="sub" x="733" y="100">Three slots rotate through current, next, and cooldown roles.</text>
+
+  <text class="label" x="760" y="151">epoch</text>
+  <text class="mono" x="884" y="151" text-anchor="middle">diff[0]</text>
+  <text class="mono" x="1044" y="151" text-anchor="middle">diff[1]</text>
+  <text class="mono" x="1204" y="151" text-anchor="middle">diff[2]</text>
+
+  <text class="label" x="773" y="202" text-anchor="middle">t</text>
+  <rect class="box-accent" x="814" y="172" width="140" height="54" rx="3"/>
+  <text class="label" x="884" y="195" text-anchor="middle">current</text>
+  <text class="muted" x="884" y="215" text-anchor="middle">add + check</text>
+  <rect class="box-soft" x="974" y="172" width="140" height="54" rx="3"/>
+  <text class="label" x="1044" y="195" text-anchor="middle">next</text>
+  <text class="muted" x="1044" y="215" text-anchor="middle">clear</text>
+  <rect class="box" x="1134" y="172" width="140" height="54" rx="3"/>
+  <text class="label" x="1204" y="204" text-anchor="middle">cooldown</text>
+
+  <text class="label" x="773" y="276" text-anchor="middle">t+1</text>
+  <rect class="box" x="814" y="246" width="140" height="54" rx="3"/>
+  <text class="label" x="884" y="278" text-anchor="middle">cooldown</text>
+  <rect class="box-accent" x="974" y="246" width="140" height="54" rx="3"/>
+  <text class="label" x="1044" y="269" text-anchor="middle">current</text>
+  <text class="muted" x="1044" y="289" text-anchor="middle">add + check</text>
+  <rect class="box-soft" x="1134" y="246" width="140" height="54" rx="3"/>
+  <text class="label" x="1204" y="269" text-anchor="middle">next</text>
+  <text class="muted" x="1204" y="289" text-anchor="middle">clear</text>
+
+  <text class="label" x="773" y="350" text-anchor="middle">t+2</text>
+  <rect class="box-soft" x="814" y="320" width="140" height="54" rx="3"/>
+  <text class="label" x="884" y="343" text-anchor="middle">next</text>
+  <text class="muted" x="884" y="363" text-anchor="middle">clear</text>
+  <rect class="box" x="974" y="320" width="140" height="54" rx="3"/>
+  <text class="label" x="1044" y="352" text-anchor="middle">cooldown</text>
+  <rect class="box-accent" x="1134" y="320" width="140" height="54" rx="3"/>
+  <text class="label" x="1204" y="343" text-anchor="middle">current</text>
+  <text class="muted" x="1204" y="363" text-anchor="middle">add + check</text>
+
+  <rect class="box-soft" x="733" y="407" width="561" height="60" rx="3"/>
+  <text class="small" x="756" y="443">add current + clear next</text>
+  <path class="flow" d="M948 438 H981"/>
+  <text class="label" x="1022" y="443" text-anchor="middle">barrier</text>
+  <path class="flow" d="M1064 438 H1097"/>
+  <text class="small" x="1112" y="443">check, then rotate</text>
+
+  <rect class="box-accent" x="733" y="492" width="561" height="40" rx="3"/>
+  <text class="label" x="753" y="518">Trade-off</text>
+  <text class="small" x="842" y="518">small footprint increase → one barrier per iteration</text>
+  <text class="mono" x="1013" y="558" text-anchor="middle">index = (index + 1) % 3</text>
+</svg>

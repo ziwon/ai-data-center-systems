@@ -1,0 +1,1261 @@
+<!DOCTYPE html><html lang="en" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-bguv2lll"> <head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Chapter 2: "The Common-Man View" of AI Data Center Fabrics | AI Data Center Systems</title><link rel="canonical" href="https://adcs.restack.tech/network/chap02/"/><link rel="sitemap" href="/sitemap-index.xml"/><script async src="https://www.googletagmanager.com/gtag/js?id=G-76LFZJVBTE"></script><script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-76LFZJVBTE');
+      </script><script async crossorigin="anonymous" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8128231647578658"></script><link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v6.4.8"/><meta name="generator" content="Starlight v0.40.0"/><meta property="og:title" content="Chapter 2: &quot;The Common-Man View&quot; of AI Data Center Fabrics"/><meta property="og:url" content="https://adcs.restack.tech/network/chap02/"/><meta property="og:locale" content="en"/><meta property="og:description" content="This chapter explains why AI/ML data center fabrics are different from traditional data center networks ."/><meta property="og:site_name" content="AI Data Center Systems"/><meta name="description" content="This chapter explains why AI/ML data center fabrics are different from traditional data center networks ."/><meta property="og:type" content="article"/><meta property="og:image" content="https://adcs.restack.tech/og/network/chap02.png?v=2"/><meta property="og:image:width" content="1200"/><meta property="og:image:height" content="630"/><meta name="twitter:image" content="https://adcs.restack.tech/og/network/chap02.png?v=2"/><meta name="twitter:card" content="summary_large_image"/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/_astro/print.DNXP8c50.css" media="print"><link rel="stylesheet" href="/_astro/common.DYbqSTpl.css"><script type="module" src="/_astro/page.CtJXHRyR.js"></script></head> <body class="astro-bguv2lll"> <a href="#_top" class="astro-7q3lir66">Skip to content</a> <script>
+  (() => {
+    try {
+      const savedMode = localStorage.getItem('adcs-navigation-mode');
+      document.documentElement.dataset.navigationMode = savedMode === 'compact' ? 'compact' : 'normal';
+    } catch {
+      document.documentElement.dataset.navigationMode = 'normal';
+    }
+  })();
+</script> <div class="page sl-flex astro-4toy2ex6"> <header class="header astro-4toy2ex6"><div class="header astro-3ef6ksr2"> <div class="title-wrapper sl-flex astro-3ef6ksr2"> <a href="/" class="site-title sl-flex astro-m46x6ez3">  <span class="astro-m46x6ez3" translate="no"> AI Data Center Systems </span> </a> <button class="navigation-mode-toggle print:hidden astro-3ef6ksr2" type="button" aria-label="Compact navigation" aria-pressed="false" title="Use compact navigation"> <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" class="astro-3ef6ksr2"> <rect x="3" y="4" width="18" height="16" rx="2" class="astro-3ef6ksr2"></rect> <path d="M9 4v16M6.5 10 4.5 12l2 2" class="astro-3ef6ksr2"></path> </svg> </button> </div> <div class="sl-flex print:hidden astro-3ef6ksr2"> <site-search class="astro-3ef6ksr2 astro-v37mnknz" data-translations="{&quot;placeholder&quot;:&quot;Search&quot;}"> <button data-open-modal disabled aria-label="Search" aria-keyshortcuts="Control+K" class="astro-v37mnknz"> <svg aria-hidden="true" class="astro-v37mnknz astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg> <span class="sl-hidden md:sl-block astro-v37mnknz" aria-hidden="true">Search</span> <kbd class="sl-hidden md:sl-flex astro-v37mnknz" style="display: none;"> <kbd class="astro-v37mnknz">Ctrl</kbd><kbd class="astro-v37mnknz">K</kbd> </kbd> </button> <dialog style="padding:0" aria-label="Search" class="astro-v37mnknz"> <div class="dialog-frame sl-flex astro-v37mnknz">  <button data-close-modal class="sl-flex md:sl-hidden astro-v37mnknz"> Cancel </button> <div class="search-container astro-v37mnknz"> <div id="starlight__search" class="astro-v37mnknz"></div> </div> </div> </dialog> </site-search>  <script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script> <script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.D1WXcfCt.js"></script>  </div> <div class="sl-hidden md:sl-flex print:hidden right-group astro-3ef6ksr2"> <div class="sl-flex social-icons astro-3ef6ksr2"> <a href="https://github.com/ziwon/ai-data-center-systems" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">GitHub</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script> <script type="module">const r="starlight-theme",o=e=>e==="auto"||e==="dark"||e==="light"?e:"auto",c=()=>o(typeof localStorage<"u"&&localStorage.getItem(r));function n(e){typeof localStorage<"u"&&localStorage.setItem(r,e==="light"||e==="dark"?e:"")}const l=()=>matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";function t(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e==="auto"?l():e,n(e)}matchMedia("(prefers-color-scheme: light)").addEventListener("change",()=>{c()==="auto"&&t("auto")});class s extends HTMLElement{constructor(){super(),t(c()),this.querySelector("select")?.addEventListener("change",a=>{a.currentTarget instanceof HTMLSelectElement&&t(o(a.currentTarget.value))})}}customElements.define("starlight-theme-select",s);</script> <script type="module">class s extends HTMLElement{constructor(){super();const e=this.querySelector("select");e&&(e.addEventListener("change",t=>{t.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=t.currentTarget.value)}),window.addEventListener("pageshow",t=>{if(!t.persisted)return;const n=e.querySelector("option[selected]")?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}}customElements.define("starlight-lang-select",s);</script> </div> </div></header> <nav class="sidebar print:hidden astro-4toy2ex6" aria-label="Main"> <starlight-menu-button class="print:hidden astro-jif73yzw"> <button aria-expanded="false" aria-label="Menu" aria-controls="starlight__sidebar" class="sl-flex md:sl-hidden astro-jif73yzw"> <svg aria-hidden="true" class="open-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg> <svg aria-hidden="true" class="close-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg> </button> </starlight-menu-button> <script type="module">class s extends HTMLElement{constructor(){super(),this.btn=this.querySelector("button"),this.btn.addEventListener("click",()=>this.toggleExpanded());const t=this.closest("nav");t&&t.addEventListener("keyup",e=>this.closeOnEscape(e))}setExpanded(t){this.setAttribute("aria-expanded",String(t)),document.body.toggleAttribute("data-mobile-menu-expanded",t)}toggleExpanded(){this.setExpanded(this.getAttribute("aria-expanded")!=="true")}closeOnEscape(t){t.code==="Escape"&&(this.setExpanded(!1),this.btn.focus())}}customElements.define("starlight-menu-button",s);</script>  <div id="starlight__sidebar" class="sidebar-pane astro-4toy2ex6"> <div class="navigation-controls astro-4toy2ex6"> <button class="navigation-drawer-toggle astro-4toy2ex6" type="button" aria-controls="starlight__sidebar-content" aria-expanded="false" title="Open navigation"> <svg class="navigation-menu-icon astro-4toy2ex6" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"> <path d="M4 6h16M4 12h16M4 18h16" class="astro-4toy2ex6"></path> </svg> <svg class="navigation-close-icon astro-4toy2ex6" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"> <path d="m6 6 12 12M18 6 6 18" class="astro-4toy2ex6"></path> </svg> <span class="navigation-drawer-label astro-4toy2ex6">Open navigation</span> </button> </div> <div id="starlight__sidebar-content" class="sidebar-content sl-flex astro-4toy2ex6"> <ul class="starlight-sidebar-topics astro-2fh6iaza"> <li class="astro-2fh6iaza"> <a aria-label="Network" title="Network" href="/network/" class="starlight-sidebar-topics-current astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8.7 10a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-6.27-6.3a1 1 0 0 0-1.42 1.42ZM21 14a1 1 0 0 0-1 1v3.59L15.44 14A1 1 0 0 0 14 15.44L18.59 20H15a1 1 0 0 0 0 2h6a1 1 0 0 0 .38-.08 1 1 0 0 0 .54-.54A1 1 0 0 0 22 21v-6a1 1 0 0 0-1-1Zm.92-11.38a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-6a1 1 0 0 0 0 2h3.59L2.29 20.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V9a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z"/></svg> </div> <div class="astro-2fh6iaza"> Network  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="GPU &amp; Accelerator Systems" title="GPU &amp; Accelerator Systems" href="/gpu/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> </div> <div class="astro-2fh6iaza"> GPU &amp; Accelerator Systems  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Storage" title="Storage" href="/storage/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8 16.5a1 1 0 1 0 1 1 1 1 0 0 0-1-1M12 2C8 2 4 3.37 4 6v12c0 2.63 4 4 8 4s8-1.37 8-4V6c0-2.63-4-4-8-4m6 16c0 .71-2.28 2-6 2s-6-1.29-6-2v-3.27A13 13 0 0 0 12 16a13 13 0 0 0 6-1.27Zm0-6c0 .71-2.28 2-6 2s-6-1.29-6-2V8.73A13 13 0 0 0 12 10a13 13 0 0 0 6-1.27Zm-6-4C8.28 8 6 6.71 6 6s2.28-2 6-2 6 1.29 6 2-2.28 2-6 2m-4 2.5a1 1 0 1 0 1 1 1 1 0 0 0-1-1"/></svg> </div> <div class="astro-2fh6iaza"> Storage  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Training" title="Training" href="/training/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1 1v8a1 1 0 0 0 2 0v-8a1 1 0 0 0-1-1m5-10a1 1 0 0 0-1 1v18a1 1 0 0 0 2 0V3a1 1 0 0 0-1-1m10 14a1 1 0 0 0-1 1v4a1 1 0 0 0 2 0v-4a1 1 0 0 0-1-1m-5-8a1 1 0 0 0-1 1v12a1 1 0 0 0 2 0V9a1 1 0 0 0-1-1"/></svg> </div> <div class="astro-2fh6iaza"> Training  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Inference" title="Inference" data-topic-icon="brain" href="/inference/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 22H5a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3h1a4 4 0 0 1 7.3-2.18c.448.64.692 1.4.7 2.18h3a1 1 0 0 1 1 1v3a4 4 0 0 1 2.18 7.3A3.86 3.86 0 0 1 18 18v3a1 1 0 0 1-1 1ZM5 8a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11v-3.18a1 1 0 0 1 1.33-.95 1.77 1.77 0 0 0 1.74-.23 2 2 0 0 0 .93-1.37 2 2 0 0 0-.48-1.59 1.89 1.89 0 0 0-2.17-.55 1 1 0 0 1-1.33-.95V8h-3.2a1 1 0 0 1-1-1.33 1.77 1.77 0 0 0-.23-1.74 1.939 1.939 0 0 0-3-.43A2 2 0 0 0 8 6c.002.23.046.456.13.67A1 1 0 0 1 7.18 8H5Z"/></svg> </div> <div class="astro-2fh6iaza"> Inference  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="MLOps" title="MLOps" data-topic-icon="cycle" href="/mlops/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8.7 10a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-6.27-6.3a1 1 0 0 0-1.42 1.42ZM21 14a1 1 0 0 0-1 1v3.59L15.44 14A1 1 0 0 0 14 15.44L18.59 20H15a1 1 0 0 0 0 2h6a1 1 0 0 0 .38-.08 1 1 0 0 0 .54-.54A1 1 0 0 0 22 21v-6a1 1 0 0 0-1-1Zm.92-11.38a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-6a1 1 0 0 0 0 2h3.59L2.29 20.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V9a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z"/></svg> </div> <div class="astro-2fh6iaza"> MLOps  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Systems Performance" title="Systems Performance" href="/systems-performance/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path fill-rule="evenodd" d="M1.44 8.855v-.001l3.527-3.516c.34-.344.802-.541 1.285-.548h6.649l.947-.947c3.07-3.07 6.207-3.072 7.62-2.868a1.821 1.821 0 0 1 1.557 1.557c.204 1.413.203 4.55-2.868 7.62l-.946.946v6.649a1.845 1.845 0 0 1-.549 1.286l-3.516 3.528a1.844 1.844 0 0 1-3.11-.944l-.858-4.275-4.52-4.52-2.31-.463-1.964-.394A1.847 1.847 0 0 1 .98 10.693a1.843 1.843 0 0 1 .46-1.838Zm5.379 2.017-3.873-.776L6.32 6.733h4.638l-4.14 4.14Zm8.403-5.655c2.459-2.46 4.856-2.463 5.89-2.33.134 1.035.13 3.432-2.329 5.891l-6.71 6.71-3.561-3.56 6.71-6.711Zm-1.318 15.837-.776-3.873 4.14-4.14v4.639l-3.364 3.374Z" clip-rule="evenodd"/><path d="M9.318 18.345a.972.972 0 0 0-1.86-.561c-.482 1.435-1.687 2.204-2.934 2.619a8.22 8.22 0 0 1-1.23.302c.062-.365.157-.79.303-1.229.415-1.247 1.184-2.452 2.62-2.935a.971.971 0 1 0-.62-1.842c-.12.04-.236.084-.35.13-2.02.828-3.012 2.588-3.493 4.033a10.383 10.383 0 0 0-.51 2.845l-.001.016v.063c0 .536.434.972.97.972H2.24a7.21 7.21 0 0 0 .878-.065c.527-.063 1.248-.19 2.02-.447 1.445-.48 3.205-1.472 4.033-3.494a5.828 5.828 0 0 0 .147-.407Z"/></svg> </div> <div class="astro-2fh6iaza"> Systems Performance  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Courses" title="Courses" href="/courses/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.17 2.06A13.1 13.1 0 0 0 19 1.87a12.94 12.94 0 0 0-7 2.05 12.94 12.94 0 0 0-7-2 13.1 13.1 0 0 0-2.17.19 1 1 0 0 0-.83 1v12a1 1 0 0 0 1.17 1 10.9 10.9 0 0 1 8.25 1.91l.12.07h.11a.91.91 0 0 0 .7 0h.11l.12-.07A10.899 10.899 0 0 1 20.83 16 1 1 0 0 0 22 15V3a1 1 0 0 0-.83-.94ZM11 15.35a12.87 12.87 0 0 0-6-1.48H4v-10c.333-.02.667-.02 1 0a10.86 10.86 0 0 1 6 1.8v9.68Zm9-1.44h-1a12.87 12.87 0 0 0-6 1.48V5.67a10.86 10.86 0 0 1 6-1.8c.333-.02.667-.02 1 0v10.04Zm1.17 4.15a13.098 13.098 0 0 0-2.17-.19 12.94 12.94 0 0 0-7 2.05 12.94 12.94 0 0 0-7-2.05c-.727.003-1.453.066-2.17.19A1 1 0 0 0 2 19.21a1 1 0 0 0 1.17.79 10.9 10.9 0 0 1 8.25 1.91 1 1 0 0 0 1.16 0A10.9 10.9 0 0 1 20.83 20a1 1 0 0 0 1.17-.79 1 1 0 0 0-.83-1.15Z"/></svg> </div> <div class="astro-2fh6iaza"> Courses  </div> </a> </li> </ul> <sl-sidebar-state-persist data-hash="0j7rqvj" class="astro-kku4brbg"> <script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script>  <ul class="top-level astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">AI Data Center Network</span>  </a> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">articles</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="0"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">cloud-data-center-network-now-and-next.ko</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="1"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/articles/cloud-data-center-network-now-and-next.ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Cloud Data Center Network의 지금과 앞으로</span>  </a> </li> </ul> </details> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap01</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="2"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap01/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 1: Wonders in the Workload</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap02</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="3"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap02/" aria-current="page" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 2: &quot;The Common-Man View&quot; of AI Data Center Fabrics</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap03</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="4"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap03/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 3: Network Design Considerations</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap04</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="5"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap04/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 4: Optics and Cable Management</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap05</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="6"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap05/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 5: Thermal and Power Efficiency Considerations</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap06</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="7"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap06/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 6: Efficient Load Balancing</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap07</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="8"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap07/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 7: RoCEv2 Transport and Congestion Management</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap08</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="9"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap08/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 8: IP Routing for AI/ML Fabrics</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap09</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="10"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap09/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 9: Storage Network Design and Technologies for AI Data Centers</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap10</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="11"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap10/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 10: AI Network Performance KPIs</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap11</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="12"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap11/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 11: Monitoring and Telemetry</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap12</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="13"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap12/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 12: Ultra Ethernet Consortium, UEC</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">clos-ebgp-lab</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="14"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/clos-ebgp-lab/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Clos Fabric Lab Series</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">glb-nnhn-bgp-underlay</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="15"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/glb-nnhn-bgp-underlay/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Appendix: BGP-based Underlay and GLB NNHN in AI Data Center Fabrics</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">gpu-cluster-failure-analysis</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="16"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/gpu-cluster-failure-analysis/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">GPU 클러스터 장애 분석: ECC, Xid, RDMA, NCCL Hang은 어떻게 연결되는가</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">ib-packet-analysis</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="17"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/ib-packet-analysis/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">InfiniBand Packet Analysis: A Practical RDMA Transport Primer</span>  </a> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">packet-format-reference</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="18"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/ib-packet-analysis/packet-format-reference/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">InfiniBand Packet Format Reference</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">packet-format-reference_KO</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="19"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/ib-packet-analysis/packet-format-reference_ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">InfiniBand 패킷 형식 참조 문서</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">README_KO</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="20"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/ib-packet-analysis/readme_ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">InfiniBand 패킷 분석: 실전 RDMA 전송 입문서</span>  </a> </li> </ul> </details> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">rdma-examples</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="21"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/rdma-examples/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">RDMA Read/Write 실전 입문</span>  </a> </li> </ul> </details> </li> </ul>  <script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script> </sl-sidebar-state-persist> <div class="md:sl-hidden"> <div class="mobile-preferences sl-flex astro-wu23bvmt"> <div class="social-icons astro-wu23bvmt"> <a href="https://github.com/ziwon/ai-data-center-systems" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">GitHub</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script>   </div> </div> </div> </div> </nav> <div class="main-frame astro-4toy2ex6">  <script type="module">const a=document.getElementById("starlight__sidebar"),n=a?.querySelector("sl-sidebar-state-persist"),o="sl-sidebar-state",i=()=>{let t=[];const e=n?.dataset.hash||"";try{const s=sessionStorage.getItem(o),r=JSON.parse(s||"{}");Array.isArray(r.open)&&r.hash===e&&(t=r.open)}catch{}return{hash:e,open:t,scroll:a?.scrollTop||0}},c=t=>{try{sessionStorage.setItem(o,JSON.stringify(t))}catch{}},d=()=>c(i()),l=(t,e)=>{const s=i();s.open[e]=t,c(s)};n?.addEventListener("click",t=>{if(!(t.target instanceof Element))return;const e=t.target.closest("summary")?.closest("details");if(!e)return;const s=e.querySelector("sl-sidebar-restore"),r=parseInt(s?.dataset.index||"");isNaN(r)||l(!e.open,r)});addEventListener("visibilitychange",()=>{document.visibilityState==="hidden"&&d()});addEventListener("pageHide",d);</script> <div class="lg:sl-flex astro-67yu43on"> <aside class="right-sidebar-container print:hidden astro-67yu43on"> <div class="right-sidebar astro-67yu43on"> <div class="lg:sl-hidden astro-rl4sue7z"><mobile-starlight-toc data-min-h="2" data-max-h="2" class="astro-doynk5tl"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-doynk5tl"><details id="starlight__mobile-toc" class="astro-doynk5tl"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-doynk5tl"><span class="toggle sl-flex astro-doynk5tl">On this page<svg aria-hidden="true" class="caret astro-doynk5tl astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-doynk5tl"></span></summary><div class="dropdown astro-doynk5tl"><ul class="isMobile astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#table-of-contents" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Table of Contents</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#goal" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Goal</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#frontend-vs-backend-ai-network" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Frontend vs Backend AI Network</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#training-vs-inference-ai-data-centers" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Training vs. Inference AI Data Centers</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#infiniband-vs-ethernet-for-ai-training-data-centers" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">InfiniBand vs. Ethernet for AI Training Data Centers</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#ethernet-hardware-switches-and-advanced-software-features" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Ethernet Hardware Switches and Advanced Software Features</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#handling-elephant-flows" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Handling Elephant Flows</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#load-balancing-techniques" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Load-Balancing Techniques</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#congestion-management-and-mitigation-techniques" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Congestion Management and Mitigation Techniques</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#chapter-summary" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Chapter Summary</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#key-terms" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Key Terms</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#questions" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Questions</span> </a>  </li> </ul></div></details></nav></mobile-starlight-toc><script type="module" src="/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.hwBsy0Mo.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-rl4sue7z"><div class="sl-container astro-rl4sue7z"><kb-graph-card> <button class="kb-graph-card" type="button" data-open aria-haspopup="dialog"> <span class="kb-graph-copy"> <span class="kb-graph-title">Knowledge graph</span> <span class="kb-graph-subtitle" data-count>Loading related docs</span> </span> <span class="kb-graph-thumb" aria-hidden="true" data-map></span> <span class="kb-graph-expand" aria-hidden="true">Expand</span> </button> <dialog class="kb-graph-dialog" aria-label="Knowledge graph" data-dialog> <div class="kb-graph-panel"> <div class="kb-graph-panel-header"> <div> <p>Knowledge graph</p> <h2 data-heading>Related documents</h2> </div> <div class="kb-graph-tabs" role="tablist" aria-label="Knowledge graph views"> <button type="button" role="tab" aria-selected="true" data-tab="page">This page</button> <button type="button" role="tab" aria-selected="false" data-tab="global">Full graph</button> </div> <button type="button" data-close aria-label="Close knowledge graph">×</button> </div> <div class="kb-graph-stage" data-stage data-view="page"> <div data-page-stage></div> <div data-global-stage hidden></div> </div> </div> </dialog> </kb-graph-card> <script type="module" src="/_astro/KnowledgeGraphCard.astro_astro_type_script_index_0_lang.C475L69c.js"></script><starlight-toc data-min-h="2" data-max-h="2"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">On this page</h2><ul class="astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#table-of-contents" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Table of Contents</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#goal" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Goal</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#frontend-vs-backend-ai-network" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Frontend vs Backend AI Network</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#training-vs-inference-ai-data-centers" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Training vs. Inference AI Data Centers</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#infiniband-vs-ethernet-for-ai-training-data-centers" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">InfiniBand vs. Ethernet for AI Training Data Centers</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#ethernet-hardware-switches-and-advanced-software-features" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Ethernet Hardware Switches and Advanced Software Features</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#handling-elephant-flows" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Handling Elephant Flows</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#load-balancing-techniques" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Load-Balancing Techniques</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#congestion-management-and-mitigation-techniques" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Congestion Management and Mitigation Techniques</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#chapter-summary" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Chapter Summary</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#key-terms" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Key Terms</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#questions" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Questions</span> </a>  </li> </ul></nav></starlight-toc><script type="module" src="/_astro/TableOfContents.astro_astro_type_script_index_0_lang.FuRcXuRY.js"></script></div></div> </div> </aside> <div class="main-pane astro-67yu43on">  <main data-pagefind-body class="astro-bguv2lll" lang="en" dir="ltr">    <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <h1 id="_top" class="astro-j6tvhyss">Chapter 2: &quot;The Common-Man View&quot; of AI Data Center Fabrics</h1> </div> </div> <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <starlight-image-zoom> <template class="astro-vjux6bgf"> <dialog class="starlight-image-zoom-dialog astro-vjux6bgf"> <button aria-label="Unzoom image" class="starlight-image-zoom-control astro-vjux6bgf"> <svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" class="astro-vjux6bgf"> <use href="#starlight-image-zoom-icon-unzoom" class="astro-vjux6bgf"></use> </svg> </button> <figure class="astro-vjux6bgf"></figure> </dialog> </template> <svg xmlns="http://www.w3.org/2000/svg" style="display:none" class="astro-vjux6bgf"> <symbol id="starlight-image-zoom-icon-zoom" viewBox="0 0 24 24" class="astro-vjux6bgf"> <path d="M9.79 12.79 4 18.59V17a1 1 0 0 0-2 0v4a1 1 0 0 0 .08.38 1 1 0 0 0 .54.54A1 1 0 0 0 3 22h4a1 1 0 0 0 0-2H5.41l5.8-5.79a1 1 0 0 0-1.42-1.42ZM21.92 2.62a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-4a1 1 0 0 0 0 2h1.59l-5.8 5.79a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V7a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z" class="astro-vjux6bgf"></path> </symbol> <symbol id="starlight-image-zoom-icon-unzoom" viewBox="0 0 24 24" class="astro-vjux6bgf"> <path d="M21.71 2.29a1 1 0 0 0-1.42 0l-5.79 5.8V6.5a1 1 0 0 0-2 0v4a1 1 0 0 0 .08.38 1 1 0 0 0 .54.54 1 1 0 0 0 .38.08h4a1 1 0 0 0 0-2h-1.59l5.8-5.79a1 1 0 0 0 0-1.42ZM10.88 12.58a1 1 0 0 0-.38-.08h-4a1 1 0 0 0 0 2h1.59l-5.8 5.79a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l5.79-5.8v1.59a1 1 0 0 0 2 0v-4a1 1 0 0 0-.08-.38 1 1 0 0 0-.54-.54Z" class="astro-vjux6bgf"></path> </symbol> </svg> </starlight-image-zoom>   <script type="module" src="/_astro/ImageZoom.astro_astro_type_script_index_0_lang.CZmBqK-T.js"></script> <div class="sl-markdown-content"> <div class="sl-heading-wrapper level-h2"><h2 id="table-of-contents">Table of Contents</h2><a class="sl-anchor-link" href="#table-of-contents"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Table of Contents”</span></a></div>
+<ul>
+<li><a href="#goal">Goal</a></li>
+<li><a href="#frontend-vs-backend-ai-network">Frontend vs Backend AI Network</a></li>
+<li><a href="#training-vs-inference-ai-data-centers">Training vs. Inference AI Data Centers</a>
+<ul>
+<li><a href="#training-data-centers">Training Data Centers</a></li>
+<li><a href="#inference-data-centers">Inference Data Centers</a></li>
+<li><a href="#traffic-comparisons-and-evolving-data-center-networks">Traffic Comparisons and Evolving Data Center Networks</a></li>
+</ul>
+</li>
+<li><a href="#infiniband-vs-ethernet-for-ai-training-data-centers">InfiniBand vs. Ethernet for AI Training Data Centers</a>
+<ul>
+<li><a href="#infiniband">InfiniBand</a></li>
+<li><a href="#ethernet">Ethernet</a></li>
+</ul>
+</li>
+<li><a href="#ethernet-hardware-switches-and-advanced-software-features">Ethernet Hardware Switches and Advanced Software Features</a>
+<ul>
+<li><a href="#low-entropy-in-rocev2-traffic">Low Entropy in RoCEv2 Traffic</a></li>
+<li><a href="#why-this-matters">Why This Matters</a></li>
+<li><a href="#flowlets">Flowlets</a></li>
+<li><a href="#hardware-and-fabric-design-requirements">Hardware and Fabric Design Requirements</a></li>
+<li><a href="#instructors-view">Instructor’s View</a></li>
+</ul>
+</li>
+<li><a href="#handling-elephant-flows">Handling Elephant Flows</a>
+<ul>
+<li><a href="#why-elephant-flows-are-hard">Why Elephant Flows Are Hard</a></li>
+<li><a href="#burstiness">Burstiness</a></li>
+<li><a href="#incast-congestion">Incast Congestion</a></li>
+</ul>
+</li>
+<li><a href="#load-balancing-techniques">Load-Balancing Techniques</a>
+<ul>
+<li><a href="#static-load-balancing-slb">Static Load Balancing, SLB</a></li>
+<li><a href="#dynamic-load-balancing-dlb">Dynamic Load Balancing, DLB</a></li>
+<li><a href="#global-load-balancing-glb">Global Load Balancing, GLB</a></li>
+<li><a href="#selective-dynamic-load-balancing-sdlb">Selective Dynamic Load Balancing, sDLB</a></li>
+<li><a href="#flow-pinning">Flow Pinning</a></li>
+<li><a href="#load-balancing-summary-table">Load-Balancing Summary Table</a></li>
+<li><a href="#conclusion">Conclusion</a></li>
+</ul>
+</li>
+<li><a href="#congestion-management-and-mitigation-techniques">Congestion Management and Mitigation Techniques</a>
+<ul>
+<li><a href="#proactive-congestion-avoidance">Proactive Congestion Avoidance</a></li>
+<li><a href="#reactive-congestion-control">Reactive Congestion Control</a></li>
+<li><a href="#ecn">ECN</a></li>
+<li><a href="#dcqcn">DCQCN</a></li>
+<li><a href="#pfc">PFC</a></li>
+<li><a href="#how-they-work-together">How They Work Together</a></li>
+<li><a href="#conclusion-1">Conclusion</a></li>
+</ul>
+</li>
+<li><a href="#chapter-summary">Chapter Summary</a></li>
+<li><a href="#key-terms">Key Terms</a></li>
+<li><a href="#questions">Questions</a></li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="goal">Goal</h2><a class="sl-anchor-link" href="#goal"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Goal”</span></a></div>
+<p><starlight-image-zoom-zoomable><img src="https://engineering.fb.com/wp-content/uploads/2024/03/Meta-24K-GenAi-Clusters-hero.png" alt=""><button aria-label="Zoom image" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<p>Source: <a href="https://engineering.fb.com/2024/03/12/data-center-engineering/building-metas-genai-infrastructure/">Building Meta’s GenAI Infrastructure</a></p>
+<p>This chapter explains <strong>why AI/ML data center fabrics are different from traditional data center networks</strong>.</p>
+<p>The main idea is simple:</p>
+<blockquote>
+<p>AI training clusters are expensive because GPUs are expensive.
+Therefore, the network must keep GPUs busy, avoid congestion, and reduce Job Completion Time.</p>
+</blockquote>
+<p>The chapter focuses on six major topics:</p>
+<ul>
+<li>Training vs. Inference AI Data Centers</li>
+<li>InfiniBand vs. Ethernet for AI Training Data Centers</li>
+<li>Ethernet Hardware Switches and Advanced Software Features</li>
+<li>Handling Elephant Flows</li>
+<li>Load-Balancing Techniques</li>
+<li>Congestion Management and Mitigation Techniques</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="frontend-vs-backend-ai-network">Frontend vs Backend AI Network</h2><a class="sl-anchor-link" href="#frontend-vs-backend-ai-network"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Frontend vs Backend AI Network”</span></a></div>
+<p>Large AI training clusters often separate the frontend network for storage/control traffic from the backend fabric for GPU-to-GPU RDMA communication.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TB
+    subgraph FE[Frontend Network]
+        ST[Storage / Data Warehouse]
+        LOG[Logging / Control Plane]
+        API[Cluster Services]
+    end
+
+    subgraph Rack[GPU Training Rack]
+        GPU1[GPU Server 1]
+        GPU2[GPU Server 2]
+        GPU3[GPU Server 3]
+    end
+
+    subgraph BE[Backend Training Fabric]
+        L1[Leaf Switches]
+        S1[Spine Switches]
+        RDMA[Lossless RDMA Fabric]
+        L1 &#x3C;--> S1
+        S1 &#x3C;--> RDMA
+    end
+
+    ST --> GPU1
+    LOG --> GPU2
+    API --> GPU3
+
+    GPU1 &#x3C;--> L1
+    GPU2 &#x3C;--> L1
+    GPU3 &#x3C;--> L1</pre>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="training-vs-inference-ai-data-centers">Training vs. Inference AI Data Centers</h2><a class="sl-anchor-link" href="#training-vs-inference-ai-data-centers"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Training vs. Inference AI Data Centers”</span></a></div>
+<p>AI data centers can be divided into two broad types:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Category</th><th>AI Training Data Center</th><th>AI Inference Data Center</th></tr></thead><tbody><tr><td>Main purpose</td><td>Create or fine-tune models</td><td>Serve trained models</td></tr><tr><td>Example workloads</td><td>Pre-training, fine-tuning, distributed training</td><td>Chatbot, RAG, recommendation, image recognition</td></tr><tr><td>Key metric</td><td>JCT, Job Completion Time</td><td>Latency, TTFT, throughput</td></tr><tr><td>Traffic pattern</td><td>Heavy east-west GPU-to-GPU traffic</td><td>User request/response traffic</td></tr><tr><td>Operational mode</td><td>Usually offline or batch-oriented</td><td>Usually online and real-time</td></tr><tr><td>Main concern</td><td>Keep GPUs busy and finish jobs quickly</td><td>Respond to users quickly and reliably</td></tr><tr><td>Infrastructure focus</td><td>GPUs, HBM, RDMA, storage, backend fabric</td><td>Frontend network, serving stack, edge, cost efficiency</td></tr></tbody></table>
+<p>The chapter contrasts <strong>model creation</strong> and <strong>model serving</strong>. Training is about building the model, while inference is about using the model to answer real-time requests. In this chapter, training is associated with <strong>Job Completion Time</strong>, while inference is associated with <strong>network latency and Time to First Token</strong>.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    subgraph T[AI Training Data Center]
+        T1[Large Training Dataset]
+        T2[Distributed GPU Cluster]
+        T3[Gradient Sync / AllReduce]
+        T4[Model Checkpoint]
+        T5[Trained Model]
+        T1 --> T2 --> T3 --> T4 --> T5
+        TM[Key Metric: JCT]
+    end
+
+    subgraph I[AI Inference Data Center]
+        I1[User Request]
+        I2[Model Serving Runtime]
+        I3[Token Generation / Prediction]
+        I4[User Response]
+        I1 --> I2 --> I3 --> I4
+        IM[Key Metric: Latency / TTFT]
+    end
+
+    T5 -. Deployed Model .-> I2</pre>
+<blockquote>
+<p>Training data centers optimize Job Completion Time.
+Inference data centers optimize user-facing latency and TTFT.</p>
+</blockquote>
+<div class="sl-heading-wrapper level-h3"><h3 id="training-data-centers">Training Data Centers</h3><a class="sl-anchor-link" href="#training-data-centers"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Training Data Centers”</span></a></div>
+<p>Training data centers are built for large-scale distributed computation. A model may be trained across hundreds, thousands, or even tens of thousands of GPUs.</p>
+<p>During training, GPUs repeatedly compute, exchange gradients, synchronize parameters, and proceed to the next step. This creates large volumes of east-west traffic inside the data center.</p>
+<p>The most important performance question is:</p>
+<blockquote>
+<p>How quickly can the training job finish?</p>
+</blockquote>
+<p>That is why <strong>JCT, Job Completion Time</strong>, becomes the most important metric.</p>
+<p>From a network perspective, training data centers require:</p>
+<ul>
+<li>High GPU-to-GPU bandwidth</li>
+<li>Low latency interconnects</li>
+<li>RDMA support</li>
+<li>High-performance backend fabrics</li>
+<li>Large-scale storage access</li>
+<li>Low or no packet loss</li>
+<li>Minimal congestion</li>
+<li>Predictable performance at scale</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="inference-data-centers">Inference Data Centers</h3><a class="sl-anchor-link" href="#inference-data-centers"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Inference Data Centers”</span></a></div>
+<p>Inference data centers run already-trained models. The user sends a request, and the system must return an answer quickly.</p>
+<p>The most important performance question is:</p>
+<blockquote>
+<p>How quickly can the system respond to the user?</p>
+</blockquote>
+<p>For LLM services, one important metric is <strong>TTFT, Time to First Token</strong>. For other inference systems, latency, throughput, and cost per request may be more important.</p>
+<p>Inference data centers require:</p>
+<ul>
+<li>Low latency response</li>
+<li>High request throughput</li>
+<li>Efficient model serving</li>
+<li>Cost and power efficiency</li>
+<li>Integration with APIs and frontend systems</li>
+<li>Security at edge or customer deployments</li>
+<li>Multi-tenancy support</li>
+<li>Operational reliability</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="traffic-comparisons-and-evolving-data-center-networks">Traffic Comparisons and Evolving Data Center Networks</h3><a class="sl-anchor-link" href="#traffic-comparisons-and-evolving-data-center-networks"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Traffic Comparisons and Evolving Data Center Networks”</span></a></div>
+<p>To summarize the traffic patterns and network demands for AI training and inference, the following table compares the traffic patterns and network demands for AI training and inference:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Aspect</th><th>Traditional Workloads</th><th>AI Training</th><th>AI Inference</th></tr></thead><tbody><tr><td>North-South Traffic</td><td>Primary traffic focus; client-server interactions.</td><td>Minimal, limited to fetching datasets and logging.</td><td>Critical for data input/output, but generative AI can tolerate higher latencies due to longer processing times.</td></tr><tr><td>East-West Traffic</td><td>Secondary; low to moderate volume, mainly for server replication, storage, etc.</td><td>Dominant traffic, high bandwidth required between GPUs.</td><td>Minimal, but can occur in complex models that span multiple GPUs.</td></tr><tr><td>Latency Sensitivity</td><td>Important for user-facing services.</td><td>Secondary to bandwidth; network bandwidth is more important to minimize training time.</td><td>For complex tasks, latency is less critical compared to response generation time.</td></tr><tr><td>Network Architecture Needs</td><td>Standard spine-leaf or tree-like topologies with limited internal bandwidth.</td><td>Fat-tree or advanced non-blocking architectures to accommodate high east-west traffic.</td><td>More edge-focused networks, but capable of handling both high north-south and occasional east-west traffic.</td></tr></tbody></table>
+<p>Source: <a href="https://www.terakraft.no/post/datacenter-design-requirements-for-ai-workloads-a-comprenshive-guide">Data Center Design Requirements for AI Workloads: A Comprehensive Guide</a></p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="infiniband-vs-ethernet-for-ai-training-data-centers">InfiniBand vs. Ethernet for AI Training Data Centers</h2><a class="sl-anchor-link" href="#infiniband-vs-ethernet-for-ai-training-data-centers"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “InfiniBand vs. Ethernet for AI Training Data Centers”</span></a></div>
+<p>AI training requires high-performance networking because GPUs must exchange large amounts of data. Two major fabric choices are <strong>InfiniBand</strong> and <strong>Ethernet</strong>, usually with <strong>RoCEv2</strong> when RDMA is required.</p>
+<p><starlight-image-zoom-zoomable><img src="https://www.cisco.com/c/dam/en/us/td/docs/dcn/whitepapers/cisco-data-center-networking-blueprint-for-ai-ml-applications.docx/_jcr_content/renditions/cisco-data-center-networking-blueprint-for-ai-ml-applications_0.jpg" alt=""><button aria-label="Zoom image" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<p>InfiniBand has traditionally been strong in HPC and AI training, but many organizations are now interested in Ethernet because it is open, widely understood, and easier to integrate with existing data center environments.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TB
+    subgraph IB[InfiniBand Fabric]
+        IBG1[GPU Server + HCA]
+        IBSW[InfiniBand Switch Fabric]
+        IBSM[Subnet Manager]
+        IBG2[GPU Server + HCA]
+        IBG1 &#x3C;--> IBSW &#x3C;--> IBG2
+        IBSM -. manages routes .-> IBSW
+        IBF[Native RDMA / Credit-based Flow Control / HPC-oriented]
+    end
+
+    subgraph ETH[Ethernet RoCEv2 Fabric]
+        EG1[GPU Server + Ethernet RNIC]
+        ESW[Ethernet Leaf-Spine Fabric]
+        EG2[GPU Server + Ethernet RNIC]
+        ECTRL[PFC + ECN + DCQCN + QoS]
+        EG1 &#x3C;--> ESW &#x3C;--> EG2
+        ECTRL -. configures lossless behavior .-> ESW
+        EF[Open Ethernet / IP Routing / RoCEv2 / Operational Familiarity]
+    end</pre>
+<div class="sl-heading-wrapper level-h3"><h3 id="infiniband">InfiniBand</h3><a class="sl-anchor-link" href="#infiniband"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “InfiniBand”</span></a></div>
+<p>InfiniBand is widely used in HPC and AI training clusters. It provides low latency, high throughput, and RDMA-based communication.</p>
+<div class="sl-heading-wrapper level-h4"><h4 id="strengths-of-infiniband">Strengths of InfiniBand</h4><a class="sl-anchor-link" href="#strengths-of-infiniband"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Strengths of InfiniBand”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Strength</th><th>Explanation</th></tr></thead><tbody><tr><td>Low latency</td><td>Very suitable for tightly coupled distributed training</td></tr><tr><td>Native RDMA</td><td>Enables direct memory access between nodes</td></tr><tr><td>HPC maturity</td><td>Proven in supercomputing and AI training environments</td></tr><tr><td>Predictable performance</td><td>Often easier to operate for GPU-scale training</td></tr><tr><td>Strong vendor ecosystem</td><td>Especially common in NVIDIA GPU training clusters</td></tr></tbody></table>
+<p>InfiniBand supports RDMA, allowing one node to access another node’s memory without involving the operating system or CPU in the data path. This reduces overhead and improves training efficiency. This chapter notes sub-microsecond latency, RDMA support, and scalability as key InfiniBand advantages.</p>
+<div class="sl-heading-wrapper level-h4"><h4 id="limitations-of-infiniband">Limitations of InfiniBand</h4><a class="sl-anchor-link" href="#limitations-of-infiniband"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Limitations of InfiniBand”</span></a></div>
+<p>InfiniBand may introduce several practical challenges:</p>
+<ul>
+<li>More specialized operational knowledge</li>
+<li>Vendor-specific ecosystem</li>
+<li>Separate tooling from standard Ethernet environments</li>
+<li>Potentially higher cost</li>
+<li>Less natural integration with existing cloud, storage, and enterprise Ethernet networks</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="ethernet">Ethernet</h3><a class="sl-anchor-link" href="#ethernet"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Ethernet”</span></a></div>
+<p>Ethernet is the standard networking technology used in most data centers. For AI training, Ethernet is usually combined with <strong>RoCEv2</strong>, which enables RDMA over Ethernet.</p>
+<div class="sl-heading-wrapper level-h4"><h4 id="strengths-of-ethernet">Strengths of Ethernet</h4><a class="sl-anchor-link" href="#strengths-of-ethernet"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Strengths of Ethernet”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Strength</th><th>Explanation</th></tr></thead><tbody><tr><td>Cost effectiveness</td><td>Commodity switches and cables are widely available</td></tr><tr><td>Operational familiarity</td><td>Most network teams already understand Ethernet</td></tr><tr><td>Compatibility</td><td>Works naturally with existing servers, storage, Kubernetes, cloud, and data center tooling</td></tr><tr><td>Flexibility</td><td>Supports leaf-spine, mesh, multipathing, QoS, and congestion-control mechanisms</td></tr><tr><td>Open ecosystem</td><td>Avoids some vendor-specific constraints</td></tr></tbody></table>
+<p>The chapter emphasizes Ethernet’s cost effectiveness, simplicity, compatibility, and flexibility as major advantages for AI training clusters.</p>
+<div class="sl-heading-wrapper level-h4"><h4 id="limitations-of-ethernet-for-ai-training">Limitations of Ethernet for AI Training</h4><a class="sl-anchor-link" href="#limitations-of-ethernet-for-ai-training"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Limitations of Ethernet for AI Training”</span></a></div>
+<p>Ethernet was not originally designed as a lossless HPC fabric. To support RDMA-based AI workloads, it needs careful design.</p>
+<p>Key challenges include:</p>
+<ul>
+<li>RoCEv2 sensitivity to packet loss</li>
+<li>Congestion management complexity</li>
+<li>PFC and ECN tuning</li>
+<li>RoCEv2 low-entropy traffic</li>
+<li>Load-balancing limitations</li>
+<li>Operational risk when lossless Ethernet is misconfigured</li>
+</ul>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="ethernet-hardware-switches-and-advanced-software-features">Ethernet Hardware Switches and Advanced Software Features</h2><a class="sl-anchor-link" href="#ethernet-hardware-switches-and-advanced-software-features"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Ethernet Hardware Switches and Advanced Software Features”</span></a></div>
+<p>This section explains why standard Ethernet load balancing is not enough for AI/ML fabrics.</p>
+<p>RoCEv2 looks like UDP/IP traffic to Ethernet switches, but the real RDMA semantics live inside the InfiniBand transport header.</p>
+<p><starlight-image-zoom-zoomable><img src="https://www.cisco.com/c/dam/en/us/td/docs/dcn/whitepapers/cisco-data-center-networking-blueprint-for-ai-ml-applications.docx/_jcr_content/renditions/cisco-data-center-networking-blueprint-for-ai-ml-applications_1.jpg" alt=""><button aria-label="Zoom image" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<p>Traditional Ethernet networks often rely on ECMP hashing. ECMP commonly uses packet header fields such as:</p>
+<ul>
+<li>Source IP</li>
+<li>Destination IP</li>
+<li>Source port</li>
+<li>Destination port</li>
+<li>Protocol</li>
+</ul>
+<p>This works well when traffic has enough header diversity. However, AI/ML RoCEv2 traffic often has <strong>low entropy</strong>, meaning many packets look similar to the switch.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="low-entropy-in-rocev2-traffic">Low Entropy in RoCEv2 Traffic</h3><a class="sl-anchor-link" href="#low-entropy-in-rocev2-traffic"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Low Entropy in RoCEv2 Traffic”</span></a></div>
+<p>In networking, <strong>entropy</strong> means the amount of useful variation in packet headers that a switch can use to distribute traffic across multiple paths.</p>
+<p>High entropy means:</p>
+<ul>
+<li>Many flows look different</li>
+<li>ECMP can spread traffic well</li>
+<li>Link utilization is more balanced</li>
+</ul>
+<p>Low entropy means:</p>
+<ul>
+<li>Many flows look similar</li>
+<li>The switch may treat different flows as the same flow</li>
+<li>Multiple large flows may be placed on the same path</li>
+<li>Congestion becomes more likely</li>
+</ul>
+<p>This chapter explains that RoCEv2 traffic can have limited header entropy from the switch’s point of view. RoCEv2 commonly uses UDP destination port 4791, and many AI flows may share similar IP and UDP header fields. Some deployments use the UDP source port or enhanced hashing to add entropy, but simple 5-tuple ECMP can still be ineffective when many large flows look similar.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TB
+    subgraph Servers[GPU Servers]
+        G1[GPU Server A]
+        G2[GPU Server B]
+        G3[GPU Server C]
+    end
+
+    L1[Leaf Switch]
+
+    subgraph Spines[Spine Layer]
+        S1[Spine 1&#x3C;br/>Congested]
+        S2[Spine 2&#x3C;br/>Underused]
+        S3[Spine 3&#x3C;br/>Underused]
+    end
+
+    DST[Destination GPU Server]
+
+    G1 --> L1
+    G2 --> L1
+    G3 --> L1
+
+    L1 == Low-entropy RoCEv2 flows&#x3C;br/>same or similar 5-tuple ==> S1
+    L1 -. available path .-> S2
+    L1 -. available path .-> S3
+
+    S1 ==> DST
+    S2 -. unused capacity .-> DST
+    S3 -. unused capacity .-> DST</pre>
+<blockquote>
+<p>In traditional web traffic, ECMP usually works well because flows have enough header diversity. In RoCEv2-based AI fabrics, the traffic can look too similar, so the switch needs more intelligence than simple 5-tuple hashing.</p>
+</blockquote>
+<div class="sl-heading-wrapper level-h3"><h3 id="why-this-matters">Why This Matters</h3><a class="sl-anchor-link" href="#why-this-matters"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Why This Matters”</span></a></div>
+<p>In AI training, low entropy is dangerous because the flows are not small.</p>
+<p>They are often:</p>
+<ul>
+<li>High bandwidth</li>
+<li>Long lived</li>
+<li>Bursty</li>
+<li>Synchronized across many GPUs</li>
+<li>Sensitive to delay and packet loss</li>
+</ul>
+<p>So if many flows are mapped to the same spine link or output queue, the result can be:</p>
+<ol>
+<li>Queue buildup</li>
+<li>ECN marking</li>
+<li>CNP generation</li>
+<li>DCQCN rate reduction</li>
+<li>PFC pause</li>
+<li>GPU waiting</li>
+<li>Longer JCT</li>
+</ol>
+<div class="sl-heading-wrapper level-h3"><h3 id="flowlets">Flowlets</h3><a class="sl-anchor-link" href="#flowlets"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Flowlets”</span></a></div>
+<p>Because many RoCEv2 flows look similar, switches may treat separate low-entropy flows as parts of the same flow. These smaller units are often discussed as <strong>flowlets</strong>.</p>
+<p>The chapter distinguishes two situations:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Type</th><th>Description</th></tr></thead><tbody><tr><td>Simultaneous low-entropy flows</td><td>Multiple flows exist at the same time between a small number of GPUs</td></tr><tr><td>Sequential low-entropy flows</td><td>One flow ends and another begins, but the switch still treats them similarly</td></tr></tbody></table>
+<p>This matters because flow-level decisions may remain pinned to a poor path longer than expected.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="hardware-and-fabric-design-requirements">Hardware and Fabric Design Requirements</h3><a class="sl-anchor-link" href="#hardware-and-fabric-design-requirements"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Hardware and Fabric Design Requirements”</span></a></div>
+<p>AI/ML Ethernet fabrics require more than basic switching. They need hardware and software features that can understand link utilization, buffer pressure, path quality, and flow behavior.</p>
+<p>Important design requirements include:</p>
+<div class="sl-heading-wrapper level-h4"><h4 id="high-radix-switches-with-high-bandwidth-links">High-Radix Switches with High-Bandwidth Links</h4><a class="sl-anchor-link" href="#high-radix-switches-with-high-bandwidth-links"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “High-Radix Switches with High-Bandwidth Links”</span></a></div>
+<p>Large AI clusters may contain tens of thousands of GPUs. Each GPU or GPU server can have high-speed NICs such as 400G, 800G, or beyond. Therefore, the fabric needs switches with many high-speed ports.</p>
+<div class="sl-heading-wrapper level-h4"><h4 id="low-oversubscription">Low Oversubscription</h4><a class="sl-anchor-link" href="#low-oversubscription"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Low Oversubscription”</span></a></div>
+<p>If GPUs can send at line rate, but uplinks cannot carry the total traffic, congestion becomes unavoidable.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TB
+    subgraph Servers[Server-facing bandwidth]
+        A1[GPU Server 1&#x3C;br/>400G]
+        A2[GPU Server 2&#x3C;br/>400G]
+        A3[GPU Server 3&#x3C;br/>400G]
+        A4[GPU Server 4&#x3C;br/>400G]
+    end
+
+    L[Leaf Switch&#x3C;br/>Downlinks: 1.6T total]
+
+    subgraph Fabric[Fabric-facing bandwidth]
+        U1[Uplink 1&#x3C;br/>400G]
+        U2[Uplink 2&#x3C;br/>400G]
+    end
+
+    S[Spine Layer&#x3C;br/>Uplinks: 800G total]
+
+    A1 --> L
+    A2 --> L
+    A3 --> L
+    A4 --> L
+
+    L --> U1 --> S
+    L --> U2 --> S
+
+    O[Oversubscription = 1.6T : 800G = 2:1]
+    O -.-> L</pre>
+<blockquote>
+<p>Oversubscription occurs when server-facing bandwidth exceeds fabric-facing bandwidth. In AI training fabrics, oversubscription can directly increase Job Completion Time.</p>
+</blockquote>
+<p>For training fabrics, especially backend GPU fabrics, the target is often close to:</p>
+<blockquote>
+<p>1:1 oversubscription, or non-blocking fabric</p>
+</blockquote>
+<div class="sl-heading-wrapper level-h4"><h4 id="optimized-design">Optimized Design</h4><a class="sl-anchor-link" href="#optimized-design"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Optimized Design”</span></a></div>
+<p>AI servers usually contain multiple GPUs and multiple NICs. The network design should consider:</p>
+<ul>
+<li>GPU number</li>
+<li>NIC number</li>
+<li>PCIe topology</li>
+<li>NUMA layout</li>
+<li>NVLink/NVSwitch topology</li>
+<li>NCCL communication pattern</li>
+<li>RDMA path</li>
+<li>Leaf/ToR placement</li>
+</ul>
+<p>The chapter introduces <strong>Rail-Optimized Design, ROD</strong>, and <strong>Rail-Unified Design, RUD</strong>, as optimized design approaches for GPU clusters.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="instructors-view">Instructor’s View</h3><a class="sl-anchor-link" href="#instructors-view"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Instructor’s View”</span></a></div>
+<p>In traditional data centers, you can often add more bandwidth and rely on ECMP. In AI training fabrics, that is not enough.</p>
+<p>The switch must help answer a harder question:</p>
+<blockquote>
+<p>Which path is actually healthy for this high-bandwidth AI flow right now?</p>
+</blockquote>
+<p>That is why modern AI Ethernet fabrics need advanced load balancing and congestion management.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="handling-elephant-flows">Handling Elephant Flows</h2><a class="sl-anchor-link" href="#handling-elephant-flows"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Handling Elephant Flows”</span></a></div>
+<p>An <strong>elephant flow</strong> is a very large traffic flow that consumes significant network bandwidth.</p>
+<p>In AI/ML training, elephant flows are common because distributed training repeatedly moves large data between GPUs and servers.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+sequenceDiagram
+    participant G1 as GPU Server 1
+    participant G2 as GPU Server 2
+    participant G3 as GPU Server 3
+    participant F as AI Fabric
+
+    Note over G1,G3: Step N: Compute Phase
+    G1->>G1: Forward/Backward Compute
+    G2->>G2: Forward/Backward Compute
+    G3->>G3: Forward/Backward Compute
+
+    Note over G1,G3: Gradient Synchronization Phase
+    G1->>F: Large gradient flow
+    G2->>F: Large gradient flow
+    G3->>F: Large gradient flow
+    F->>G1: AllReduce result
+    F->>G2: AllReduce result
+    F->>G3: AllReduce result
+
+    Note over G1,G3: Step N+1: Compute Resumes</pre>
+<blockquote>
+<p>AI training traffic is bursty: network usage rises sharply during gradient synchronization and falls again during compute phases</p>
+</blockquote>
+<p>Examples include:</p>
+<ul>
+<li>Gradient synchronization</li>
+<li>Parameter exchange</li>
+<li>Activation exchange</li>
+<li>Optimizer state movement</li>
+<li>Training dataset transfer</li>
+<li>Checkpoint read/write</li>
+<li>GPU-to-storage transfer</li>
+</ul>
+<p>The chapter defines elephant flows as traffic flows with <strong>low entropy and high bandwidth</strong>. It also explains that large language model training and other distributed training workloads create enormous east-west data exchange across the backend fabric.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="why-elephant-flows-are-hard">Why Elephant Flows Are Hard</h3><a class="sl-anchor-link" href="#why-elephant-flows-are-hard"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Why Elephant Flows Are Hard”</span></a></div>
+<p>Elephant flows are difficult because they can quickly fill a high-speed link.</p>
+<p>For example:</p>
+<ul>
+<li>A GPU server may try to use a full 400G or 800G NIC.</li>
+<li>Many GPU servers may start synchronization at the same time.</li>
+<li>Multiple flows may hash to the same link.</li>
+<li>A receiver may get traffic from many senders at once.</li>
+</ul>
+<p>This can cause:</p>
+<ul>
+<li>Link congestion</li>
+<li>Output queue buildup</li>
+<li>Incast congestion</li>
+<li>ECN marking</li>
+<li>PFC pause</li>
+<li>Lower throughput</li>
+<li>GPU idle time</li>
+<li>Longer training time</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="burstiness">Burstiness</h3><a class="sl-anchor-link" href="#burstiness"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Burstiness”</span></a></div>
+<p>AI training traffic is often bursty.</p>
+<p>During compute phases, the network may be relatively quiet.
+During synchronization phases, many GPUs transmit at the same time.</p>
+<p>A simple mental model:</p>
+<div class="expressive-code"><link rel="stylesheet" href="/_astro/ec.v4551.css"><script type="module" src="/_astro/ec.0vx5m.js"></script><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Compute phase        -> network usage is moderate or low</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Gradient sync phase  -> network usage suddenly spikes</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Next compute phase   -> network usage decreases again</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Compute phase        -> network usage is moderate or lowGradient sync phase  -> network usage suddenly spikesNext compute phase   -> network usage decreases again"><div></div></button></div></figure></div>
+<p>This periodic burst pattern makes the fabric harder to operate than a steady traffic pattern.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="incast-congestion">Incast Congestion</h3><a class="sl-anchor-link" href="#incast-congestion"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Incast Congestion”</span></a></div>
+<p>Incast congestion happens when many senders transmit to one receiver or one output port at the same time.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    G1[GPU 1]
+    G2[GPU 2]
+    G3[GPU 3]
+    G4[GPU 4]
+    SW[Switch Output Queue&#x3C;br/>Queue Builds Up]
+    R[Receiver GPU / Storage Target&#x3C;br/>Limited Ingress Bandwidth]
+
+    G1 --> SW
+    G2 --> SW
+    G3 --> SW
+    G4 --> SW
+    SW ==> R
+
+    C[Incast Congestion:&#x3C;br/>Many senders share one output]
+    C -.-> SW</pre>
+<p>Even if each sender behaves normally, the receiver-side port or intermediate switch output queue may become congested.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="load-balancing-techniques">Load-Balancing Techniques</h2><a class="sl-anchor-link" href="#load-balancing-techniques"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Load-Balancing Techniques”</span></a></div>
+<p>Load balancing is one of the most important proactive techniques in AI/ML fabrics.</p>
+<p>The goal is to spread traffic across available paths so that no single link or queue becomes overloaded.</p>
+<p><starlight-image-zoom-zoomable><img src="https://blogs.cisco.com/gcs/ciscoblogs/1/2024/12/dynamic-load-balancing-min-1024x313.png" alt=""><button aria-label="Zoom image" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<p>Dynamic load balancing (DLB) allows traffic to be distributed more efficiently and dynamically by considering changes in the network. As a result, congestion can be avoided and overall performance improved. By continuously monitoring the network state, it can adjust the path for a flow—switching to less-utilized paths if one becomes overburdened. (Source: <a href="https://blogs.cisco.com/datacenter/nexus-improves-load-balancing-and-brings-uec-closer-to-adoption">blog.cisco.com</a>)</p>
+<p><starlight-image-zoom-zoomable><img src="https://blogs.cisco.com/gcs/ciscoblogs/1/2024/12/DLB-flowlet-mode-distribution-min-1024x314.png" alt=""><button aria-label="Zoom image" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<p>Source: <a href="https://blogs.cisco.com/datacenter/nexus-improves-load-balancing-and-brings-uec-closer-to-adoption">blog.cisco.com</a></p>
+<p>The chapter classifies load-balancing techniques into several types: <strong>SLB, DLB, GLB, sDLB, and flow pinning</strong>.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TB
+    SLB[SLB&#x3C;br/>Static Load Balancing&#x3C;br/>5-tuple hash&#x3C;br/>No real-time awareness]
+    DLB[DLB&#x3C;br/>Dynamic Load Balancing&#x3C;br/>Local link + queue awareness]
+    GLB[GLB&#x3C;br/>Global Load Balancing&#x3C;br/>Local + downstream path awareness]
+    sDLB[sDLB&#x3C;br/>Selective DLB&#x3C;br/>Detect elephant flows&#x3C;br/>Spray selected packets]
+    FP[Flow Pinning&#x3C;br/>Map flows to selected paths&#x3C;br/>Maintain ordering and stability]
+
+    SLB --> DLB --> GLB --> sDLB
+    GLB --> FP
+    DLB --> FP</pre>
+<blockquote>
+<p>Load balancing techniques become more adaptive as they move from static header hashing to local, global, and elephant-flow-aware decisions.</p>
+</blockquote>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    P[Incoming RoCEv2 Flow]
+
+    P --> SLB[SLB&#x3C;br/>Packet Header Only]
+    P --> DLB[DLB&#x3C;br/>Local Link / Queue]
+    P --> GLB[GLB&#x3C;br/>Local + Remote Path Quality]
+    P --> SDLB[sDLB&#x3C;br/>Flow Type / Opcode / Elephant Detection]
+
+    SLB --> O1[Path selected by hash]
+    DLB --> O2[Healthier local path]
+    GLB --> O3[Healthier fabric path]
+    SDLB --> O4[Special handling for elephant flow]</pre>
+<blockquote>
+<p>Different load-balancing techniques use different levels of visibility, from packet headers to fabric-wide path quality.</p>
+</blockquote>
+<div class="sl-heading-wrapper level-h3"><h3 id="static-load-balancing-slb">Static Load Balancing, SLB</h3><a class="sl-anchor-link" href="#static-load-balancing-slb"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Static Load Balancing, SLB”</span></a></div>
+<p>Static Load Balancing is traditional hash-based load balancing.</p>
+<p>It usually uses packet header fields, such as:</p>
+<ul>
+<li>Source IP</li>
+<li>Destination IP</li>
+<li>Source port</li>
+<li>Destination port</li>
+<li>Protocol</li>
+</ul>
+<div class="sl-heading-wrapper level-h4"><h4 id="strengths">Strengths</h4><a class="sl-anchor-link" href="#strengths"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Strengths”</span></a></div>
+<ul>
+<li>Simple</li>
+<li>Predictable</li>
+<li>Easy to implement</li>
+<li>Maintains packet ordering for a flow</li>
+</ul>
+<div class="sl-heading-wrapper level-h4"><h4 id="weaknesses">Weaknesses</h4><a class="sl-anchor-link" href="#weaknesses"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Weaknesses”</span></a></div>
+<ul>
+<li>Does not understand real-time congestion</li>
+<li>Does not consider queue utilization</li>
+<li>Does not consider link health</li>
+<li>Performs poorly when packet entropy is low</li>
+</ul>
+<p>In AI/ML fabrics, SLB is often insufficient because many RoCEv2 flows look similar to the switch.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="dynamic-load-balancing-dlb">Dynamic Load Balancing, DLB</h3><a class="sl-anchor-link" href="#dynamic-load-balancing-dlb"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Dynamic Load Balancing, DLB”</span></a></div>
+<p>Dynamic Load Balancing considers local link conditions.</p>
+<p>It can use information such as:</p>
+<ul>
+<li>Local link utilization</li>
+<li>Local buffer utilization</li>
+<li>Queue pressure</li>
+</ul>
+<div class="sl-heading-wrapper level-h4"><h4 id="strengths-1">Strengths</h4><a class="sl-anchor-link" href="#strengths-1"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Strengths”</span></a></div>
+<ul>
+<li>Better than static hashing</li>
+<li>Can avoid locally congested links</li>
+<li>More adaptive to real-time conditions</li>
+</ul>
+<div class="sl-heading-wrapper level-h4"><h4 id="weaknesses-1">Weaknesses</h4><a class="sl-anchor-link" href="#weaknesses-1"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Weaknesses”</span></a></div>
+<ul>
+<li>Mostly local view</li>
+<li>May not know downstream congestion</li>
+<li>Still may not fully solve fabric-wide imbalance</li>
+</ul>
+<p>DLB answers:</p>
+<blockquote>
+<p>Which local outgoing link looks healthy right now?</p>
+</blockquote>
+<div class="sl-heading-wrapper level-h3"><h3 id="global-load-balancing-glb">Global Load Balancing, GLB</h3><a class="sl-anchor-link" href="#global-load-balancing-glb"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Global Load Balancing, GLB”</span></a></div>
+<p>Global Load Balancing extends DLB by considering broader path information.</p>
+<p>It may include:</p>
+<ul>
+<li>Local link quality</li>
+<li>Local queue size</li>
+<li>Spine link condition</li>
+<li>Next-hop or next-to-next-hop path quality</li>
+</ul>
+<div class="sl-heading-wrapper level-h4"><h4 id="strengths-2">Strengths</h4><a class="sl-anchor-link" href="#strengths-2"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Strengths”</span></a></div>
+<ul>
+<li>More fabric-aware</li>
+<li>Better path selection</li>
+<li>Can avoid downstream congestion more effectively</li>
+</ul>
+<div class="sl-heading-wrapper level-h4"><h4 id="weaknesses-2">Weaknesses</h4><a class="sl-anchor-link" href="#weaknesses-2"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Weaknesses”</span></a></div>
+<ul>
+<li>More complex</li>
+<li>Requires telemetry or path-quality information</li>
+<li>Implementation depends heavily on switch vendor capabilities</li>
+</ul>
+<p>GLB answers:</p>
+<blockquote>
+<p>Which end-to-end path is healthier, not just which local link is free?</p>
+</blockquote>
+<div class="sl-heading-wrapper level-h3"><h3 id="selective-dynamic-load-balancing-sdlb">Selective Dynamic Load Balancing, sDLB</h3><a class="sl-anchor-link" href="#selective-dynamic-load-balancing-sdlb"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Selective Dynamic Load Balancing, sDLB”</span></a></div>
+<p>Selective DLB tries to identify specific large flows, especially elephant flows, and apply more advanced packet distribution.</p>
+<p><starlight-image-zoom-zoomable><img src="https://blogs.cisco.com/gcs/ciscoblogs/1/2024/12/DLP-per-packet-mode2-min-1024x314.png" alt=""><button aria-label="Zoom image" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<p>This chapter notes that sDLB may use deeper RoCEv2 information, such as InfiniBand Base Transport Header fields or opcode matching, to detect elephant flows and enable special load balancing for selected flows. Depending on the implementation, this may use packet spraying, flowlet switching, or another controlled distribution method.</p>
+<div class="sl-heading-wrapper level-h4"><h4 id="strengths-3">Strengths</h4><a class="sl-anchor-link" href="#strengths-3"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Strengths”</span></a></div>
+<ul>
+<li>Targets the flows that matter most</li>
+<li>Helps with elephant flow distribution</li>
+<li>Can improve fabric utilization</li>
+</ul>
+<div class="sl-heading-wrapper level-h4"><h4 id="weaknesses-3">Weaknesses</h4><a class="sl-anchor-link" href="#weaknesses-3"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Weaknesses”</span></a></div>
+<ul>
+<li>More complex</li>
+<li>Packet reordering may become an issue</li>
+<li>Requires capable NICs, switches, and careful design</li>
+</ul>
+<p>sDLB answers:</p>
+<blockquote>
+<p>Can we identify the dangerous large flows and treat them specially?</p>
+</blockquote>
+<div class="sl-heading-wrapper level-h3"><h3 id="flow-pinning">Flow Pinning</h3><a class="sl-anchor-link" href="#flow-pinning"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Flow Pinning”</span></a></div>
+<p>Flow pinning maps a flow to a specific path or interface based on flow characteristics and path state.</p>
+<div class="sl-heading-wrapper level-h4"><h4 id="strengths-4">Strengths</h4><a class="sl-anchor-link" href="#strengths-4"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Strengths”</span></a></div>
+<ul>
+<li>Helps preserve packet ordering</li>
+<li>More controlled than random spraying</li>
+<li>Can be combined with path health information</li>
+</ul>
+<div class="sl-heading-wrapper level-h4"><h4 id="weaknesses-4">Weaknesses</h4><a class="sl-anchor-link" href="#weaknesses-4"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Weaknesses”</span></a></div>
+<ul>
+<li>A pinned flow may still become imbalanced if conditions change</li>
+<li>Requires rebalancing logic</li>
+<li>Poor pinning decisions can create long-lived congestion</li>
+</ul>
+<p>Flow pinning answers:</p>
+<blockquote>
+<p>Once we choose a good path for this flow, should we keep it there?</p>
+</blockquote>
+<div class="sl-heading-wrapper level-h3"><h3 id="load-balancing-summary-table">Load-Balancing Summary Table</h3><a class="sl-anchor-link" href="#load-balancing-summary-table"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Load-Balancing Summary Table”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Technique</th><th>Decision basis</th><th>Scope</th><th>Best for</th><th>Main limitation</th></tr></thead><tbody><tr><td>SLB</td><td>Static header hash</td><td>Flow-level</td><td>Simple ECMP</td><td>Poor with low entropy</td></tr><tr><td>DLB</td><td>Local link and buffer utilization</td><td>Local switch</td><td>Avoiding local congestion</td><td>Limited downstream visibility</td></tr><tr><td>GLB</td><td>Local + remote path quality</td><td>Fabric-aware</td><td>Better end-to-end path choice</td><td>More complex</td></tr><tr><td>sDLB</td><td>Flow identification, opcode, elephant detection</td><td>Selected flows</td><td>Elephant flows</td><td>Possible packet reordering</td></tr><tr><td>Flow pinning</td><td>Flow and path state</td><td>Controlled mapping</td><td>Ordering and stability</td><td>Needs rebalancing</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h3"><h3 id="conclusion">Conclusion</h3><a class="sl-anchor-link" href="#conclusion"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Conclusion”</span></a></div>
+<p>Load balancing in AI fabrics is not just about spreading traffic randomly.</p>
+<p>It is about matching the load-balancing method to the traffic type:</p>
+<ul>
+<li>Small normal flows can use simple hashing.</li>
+<li>Large elephant flows need more intelligent handling.</li>
+<li>Low-entropy RoCEv2 traffic needs special attention.</li>
+<li>Real-time telemetry makes better decisions possible.</li>
+</ul>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="congestion-management-and-mitigation-techniques">Congestion Management and Mitigation Techniques</h2><a class="sl-anchor-link" href="#congestion-management-and-mitigation-techniques"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Congestion Management and Mitigation Techniques”</span></a></div>
+<p>Congestion management is necessary because load balancing is never perfect.</p>
+<p>Even with good ECMP, DLB, or GLB, congestion can still happen due to:</p>
+<ul>
+<li>Elephant flows</li>
+<li>Bursty synchronization</li>
+<li>Incast traffic</li>
+<li>Low entropy</li>
+<li>Oversubscription</li>
+<li>Storage and compute sharing the same leaf switch</li>
+<li>Imperfect hashing</li>
+<li>Sudden workload phase changes</li>
+</ul>
+<p>The chapter divides congestion handling into two categories:</p>
+<ol>
+<li>Proactive congestion avoidance</li>
+<li>Reactive congestion control</li>
+</ol>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    subgraph P[Proactive: Congestion Avoidance]
+        P1[Good Topology Design]
+        P2[Low Oversubscription]
+        P3[ECMP / DLB / GLB / sDLB]
+        P4[Path Rebalancing / Flow Pinning]
+        P1 --> P2 --> P3 --> P4
+    end
+
+    subgraph R[Reactive: Congestion Control]
+        R1[Queue Threshold Exceeded]
+        R2[ECN Marking]
+        R3[CNP to Sender]
+        R4[DCQCN Rate Reduction]
+        R5[PFC Pause if Severe]
+        R1 --> R2 --> R3 --> R4 --> R5
+    end
+
+    P -. reduces probability of .-> R</pre>
+<p>This chapter explains that advanced load balancing is proactive, while ECN and PFC are reactive mechanisms. Properly implemented proactive load balancing should reduce how often reactive mechanisms are triggered.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="proactive-congestion-avoidance">Proactive Congestion Avoidance</h3><a class="sl-anchor-link" href="#proactive-congestion-avoidance"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Proactive Congestion Avoidance”</span></a></div>
+<p>Proactive techniques try to prevent congestion before it happens.</p>
+<p>Examples include:</p>
+<ul>
+<li>Efficient IP ECMP</li>
+<li>DLB</li>
+<li>GLB</li>
+<li>sDLB</li>
+<li>Path rebalancing</li>
+<li>Flow pinning</li>
+<li>Better topology design</li>
+<li>Low oversubscription</li>
+<li>Rail-optimized design</li>
+</ul>
+<p>The goal is:</p>
+<blockquote>
+<p>Select better paths before queues become congested.</p>
+</blockquote>
+<p>Proactive congestion management is preferred because it keeps the fabric efficient without forcing senders to slow down.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="reactive-congestion-control">Reactive Congestion Control</h3><a class="sl-anchor-link" href="#reactive-congestion-control"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Reactive Congestion Control”</span></a></div>
+<p>Reactive techniques respond after congestion is detected.</p>
+<p>Important mechanisms include:</p>
+<ul>
+<li>PFC, Priority Flow Control</li>
+<li>ECN, Explicit Congestion Notification</li>
+<li>DCQCN, Data Center Quantized Congestion Notification</li>
+<li>CNP, Congestion Notification Packet</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="ecn">ECN</h3><a class="sl-anchor-link" href="#ecn"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “ECN”</span></a></div>
+<p>ECN marks packets when a switch queue exceeds a configured threshold.</p>
+<p>The packet is not dropped. Instead, it is marked to indicate congestion.</p>
+<p>Basic flow:</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Switch queue grows</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">        </span></span><span style="--0:#d6deeb;--1:#403f53">↓</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">ECN threshold reached</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">        </span></span><span style="--0:#d6deeb;--1:#403f53">↓</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Packet is marked with congestion indication</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">        </span></span><span style="--0:#d6deeb;--1:#403f53">↓</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Receiver detects congestion mark</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">        </span></span><span style="--0:#d6deeb;--1:#403f53">↓</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Receiver sends congestion notification</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">        </span></span><span style="--0:#d6deeb;--1:#403f53">↓</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Sender reduces transmission rate</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Switch queue grows        ↓ECN threshold reached        ↓Packet is marked with congestion indication        ↓Receiver detects congestion mark        ↓Receiver sends congestion notification        ↓Sender reduces transmission rate"><div></div></button></div></figure></div>
+<p>Congestion on Leaf X triggers some packets to be marked with ECN:</p>
+<p><starlight-image-zoom-zoomable><img src="https://www.cisco.com/c/dam/en/us/td/docs/dcn/whitepapers/cisco-data-center-networking-blueprint-for-ai-ml-applications.docx/_jcr_content/renditions/cisco-data-center-networking-blueprint-for-ai-ml-applications_11.jpg" alt=""><button aria-label="Zoom image" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<p>Source: <a href="https://www.cisco.com/c/en/us/td/docs/dcn/whitepapers/cisco-data-center-networking-blueprint-for-ai-ml-applications.html">cisco.com</a></p>
+<p>Receiver, Host X indicates to Hosts A and B that there is congestion, by sending them CNP packets:</p>
+<p><starlight-image-zoom-zoomable><img src="https://www.cisco.com/c/dam/en/us/td/docs/dcn/whitepapers/cisco-data-center-networking-blueprint-for-ai-ml-applications.docx/_jcr_content/renditions/cisco-data-center-networking-blueprint-for-ai-ml-applications_12.jpg" alt=""><button aria-label="Zoom image" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<p>Source: <a href="https://www.cisco.com/c/en/us/td/docs/dcn/whitepapers/cisco-data-center-networking-blueprint-for-ai-ml-applications.html">cisco.com</a></p>
+<p>ECN is useful because it warns the network before packet loss occurs.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="dcqcn">DCQCN</h3><a class="sl-anchor-link" href="#dcqcn"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “DCQCN”</span></a></div>
+<p>DCQCN is a congestion-control mechanism commonly used with RoCEv2.</p>
+<p>It uses congestion notifications to reduce the sender’s rate.</p>
+<p>Basic flow:</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Congestion occurs</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">        </span></span><span style="--0:#d6deeb;--1:#403f53">↓</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">ECN marks packets</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">        </span></span><span style="--0:#d6deeb;--1:#403f53">↓</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Receiver generates CNP</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">        </span></span><span style="--0:#d6deeb;--1:#403f53">↓</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Sender receives CNP</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">        </span></span><span style="--0:#d6deeb;--1:#403f53">↓</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Sender reduces sending rate</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Congestion occurs        ↓ECN marks packets        ↓Receiver generates CNP        ↓Sender receives CNP        ↓Sender reduces sending rate"><div></div></button></div></figure></div>
+<p>DCQCN helps stabilize RDMA traffic over Ethernet.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="pfc">PFC</h3><a class="sl-anchor-link" href="#pfc"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “PFC”</span></a></div>
+<p>PFC pauses traffic for a specific priority class.</p>
+<p>Unlike traditional Ethernet pause, which can pause all traffic, PFC can pause only selected priority traffic.</p>
+<p>Basic flow:</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Switch buffer becomes dangerous</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">        </span></span><span style="--0:#d6deeb;--1:#403f53">↓</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Switch sends PFC pause frame</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">        </span></span><span style="--0:#d6deeb;--1:#403f53">↓</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Upstream sender pauses traffic for that priority</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">        </span></span><span style="--0:#d6deeb;--1:#403f53">↓</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Buffer overflow is avoided</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">        </span></span><span style="--0:#d6deeb;--1:#403f53">↓</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Frame loss is prevented</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Switch buffer becomes dangerous        ↓Switch sends PFC pause frame        ↓Upstream sender pauses traffic for that priority        ↓Buffer overflow is avoided        ↓Frame loss is prevented"><div></div></button></div></figure></div>
+<p>As the queue on Leaf X continues to build up, the leaf switch generates a PFC pause frame toward the upstream device, such as Spine 1, to pause the congesting priority class:</p>
+<p><starlight-image-zoom-zoomable><img src="https://www.cisco.com/c/dam/en/us/td/docs/dcn/whitepapers/cisco-data-center-networking-blueprint-for-ai-ml-applications.docx/_jcr_content/renditions/cisco-data-center-networking-blueprint-for-ai-ml-applications_13.jpg" alt=""><button aria-label="Zoom image" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<p>Source: <a href="https://www.cisco.com/c/en/us/td/docs/dcn/whitepapers/cisco-data-center-networking-blueprint-for-ai-ml-applications.html">cisco.com</a></p>
+<p>Spine 1 propagates PFC pause frames toward Leaf 1 and Leaf 2:</p>
+<p><starlight-image-zoom-zoomable><img src="https://www.cisco.com/c/dam/en/us/td/docs/dcn/whitepapers/cisco-data-center-networking-blueprint-for-ai-ml-applications.docx/_jcr_content/renditions/cisco-data-center-networking-blueprint-for-ai-ml-applications_14.jpg" alt=""><button aria-label="Zoom image" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<p>Source: <a href="https://www.cisco.com/c/en/us/td/docs/dcn/whitepapers/cisco-data-center-networking-blueprint-for-ai-ml-applications.html">cisco.com</a></p>
+<p>Leaf 1 and Leaf 2 send PFC pause frames down to hosts A and B. This reduces incoming traffic for the paused priority and helps prevent frame loss:</p>
+<p><starlight-image-zoom-zoomable><img src="https://www.cisco.com/c/dam/en/us/td/docs/dcn/whitepapers/cisco-data-center-networking-blueprint-for-ai-ml-applications.docx/_jcr_content/renditions/cisco-data-center-networking-blueprint-for-ai-ml-applications_15.jpg" alt=""><button aria-label="Zoom image" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<p>Source: <a href="https://www.cisco.com/c/en/us/td/docs/dcn/whitepapers/cisco-data-center-networking-blueprint-for-ai-ml-applications.html">cisco.com</a></p>
+<p>PFC is powerful but dangerous if misconfigured. It can prevent packet loss, but it can also create head-of-line blocking, congestion spreading, or operational complexity.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="how-they-work-together">How They Work Together</h3><a class="sl-anchor-link" href="#how-they-work-together"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “How They Work Together”</span></a></div>
+<p>A simplified RoCEv2 congestion-control path looks like this:</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">RoCEv2 elephant flow starts</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">        </span></span><span style="--0:#d6deeb;--1:#403f53">↓</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">ECMP selects path</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">        </span></span><span style="--0:#d6deeb;--1:#403f53">↓</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">If path is balanced:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">traffic uses multiple spine links efficiently</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">        </span></span><span style="--0:#d6deeb;--1:#403f53">↓</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">If path is imbalanced:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">queue builds up on a specific link</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">        </span></span><span style="--0:#d6deeb;--1:#403f53">↓</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">ECN marks packets</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">        </span></span><span style="--0:#d6deeb;--1:#403f53">↓</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Receiver sends CNP</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">        </span></span><span style="--0:#d6deeb;--1:#403f53">↓</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">DCQCN reduces sender rate</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">        </span></span><span style="--0:#d6deeb;--1:#403f53">↓</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">If congestion is severe:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">PFC pauses priority traffic</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">        </span></span><span style="--0:#d6deeb;--1:#403f53">↓</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Frame loss is prevented</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="RoCEv2 elephant flow starts        ↓ECMP selects path        ↓If path is balanced:    traffic uses multiple spine links efficiently        ↓If path is imbalanced:    queue builds up on a specific link        ↓ECN marks packets        ↓Receiver sends CNP        ↓DCQCN reduces sender rate        ↓If congestion is severe:    PFC pauses priority traffic        ↓Frame loss is prevented"><div></div></button></div></figure></div>
+<p>More detailed congestion control flow in RoCEv2:</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+sequenceDiagram
+    participant S as Sender RNIC
+    participant SW as Congested Switch
+    participant R as Receiver RNIC
+
+    S->>SW: RoCEv2 RDMA traffic
+    SW->>SW: Queue builds up
+
+    alt Moderate congestion
+        SW->>R: ECN-marked packet
+        R->>S: CNP Congestion Notification Packet
+        S->>S: DCQCN reduces sending rate
+    else Severe buffer pressure
+        SW->>S: PFC pause frame for priority
+        S->>S: Pause selected priority traffic
+        SW->>SW: Prevent buffer overflow
+    end</pre>
+<blockquote>
+<p>ECN and DCQCN reduce the sender rate when congestion appears, while PFC acts as a last-resort mechanism to prevent packet loss.</p>
+</blockquote>
+<p>Putting it all together:</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+graph LR
+    A[Elephant Flow Begins]
+    B[ECMP / DLB / GLB / sDLB&#x3C;br/>Distributes flows across paths]
+    C{Path Balance OK?}
+    N[No congestion action needed]
+    D{Queue Pressure?}
+    E{Buffer Utilization&#x3C;br/>Critical?}
+    F[ECN Marks Packets]
+    G[Receiver Sends CNP]
+    H[DCQCN Reduces Rate]
+    I[PFC Pauses&#x3C;br/>Priority Traffic]
+
+    A --> B
+    B --> C
+    C -->|Yes| N
+    C -->|No| D
+    D -->|Moderate| F
+    D -->|Heavy| E
+    E -->|No| F
+    E -->|Yes| I
+    F --> G
+    G --> H
+
+    style I fill:#FF6B6B,stroke:#B22222,stroke-width:2px
+    style H fill:#FFA07A,stroke:#FF4500,stroke-width:2px
+    style G fill:#FFD700,stroke:#FF8C00,stroke-width:2px
+    style F fill:#98FB98,stroke:#2E8B57,stroke-width:2px
+    style E fill:#FF4500,stroke:#B22222,stroke-width:2px
+    style D fill:#FFA07A,stroke:#FF4500,stroke-width:2px
+    style C fill:#98FB98,stroke:#2E8B57,stroke-width:2px
+    style B fill:#ADD8E6,stroke:#00008B,stroke-width:2px
+    style A fill:#E0FFFF,stroke:#00008B,stroke-width:2px
+    style N fill:#E6FFE6,stroke:#2E8B57,stroke-width:2px</pre>
+<div class="sl-heading-wrapper level-h3"><h3 id="conclusion-1">Conclusion</h3><a class="sl-anchor-link" href="#conclusion-1"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Conclusion”</span></a></div>
+<p>The hierarchy should be understood like this:</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Best case:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">Good topology + good load balancing</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">        </span></span><span style="--0:#d6deeb;--1:#403f53">↓</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">No congestion</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Normal case:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">Some congestion appears</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">        </span></span><span style="--0:#d6deeb;--1:#403f53">↓</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">ECN + DCQCN reduce rate</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Emergency case:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">Buffer pressure becomes dangerous</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">        </span></span><span style="--0:#d6deeb;--1:#403f53">↓</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">PFC pauses traffic to prevent loss</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Best case:    Good topology + good load balancing        ↓    No congestionNormal case:    Some congestion appears        ↓    ECN + DCQCN reduce rateEmergency case:    Buffer pressure becomes dangerous        ↓    PFC pauses traffic to prevent loss"><div></div></button></div></figure></div>
+<p>In other words:</p>
+<blockquote>
+<p>ECMP/DLB/GLB/sDLB should prevent congestion.
+ECN/DCQCN should control congestion.
+PFC should be the last safety mechanism to prevent packet loss.</p>
+</blockquote>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="chapter-summary">Chapter Summary</h2><a class="sl-anchor-link" href="#chapter-summary"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Chapter Summary”</span></a></div>
+<p>Chapter 2 is not just about individual technologies. It is about understanding the design logic of AI data center fabrics.</p>
+<p>The key lesson is:</p>
+<blockquote>
+<p>AI training networks must be designed around high-bandwidth, low-entropy, bursty, synchronized GPU traffic.</p>
+</blockquote>
+<p>Traditional data center assumptions are often insufficient because AI training creates:</p>
+<ul>
+<li>Massive east-west traffic</li>
+<li>Elephant flows</li>
+<li>Low entropy RoCEv2 flows</li>
+<li>Bursty synchronization traffic</li>
+<li>Incast congestion</li>
+<li>High sensitivity to packet loss</li>
+<li>High sensitivity to GPU idle time</li>
+<li>Strong pressure to reduce JCT</li>
+</ul>
+<p>The main design tools are:</p>
+<ul>
+<li>InfiniBand or RoCEv2-based Ethernet</li>
+<li>High-radix, high-bandwidth switches</li>
+<li>Low oversubscription</li>
+<li>Rail-aware topology design</li>
+<li>Advanced load balancing</li>
+<li>ECN</li>
+<li>DCQCN</li>
+<li>PFC</li>
+<li>Telemetry-based congestion management</li>
+</ul>
+<p>A good final sentence for this chapter would be:</p>
+<blockquote>
+<p>The purpose of an AI data center fabric is not simply to connect GPUs.
+Its real purpose is to make expensive GPUs behave like one large, efficient, synchronized computing system.</p>
+</blockquote>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="key-terms">Key Terms</h2><a class="sl-anchor-link" href="#key-terms"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Key Terms”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Term</th><th>Meaning</th></tr></thead><tbody><tr><td>JCT</td><td>Job Completion Time; key metric for training</td></tr><tr><td>TTFT</td><td>Time to First Token; important inference latency metric</td></tr><tr><td>RDMA</td><td>Remote Direct Memory Access</td></tr><tr><td>RoCEv2</td><td>RDMA over Converged Ethernet v2</td></tr><tr><td>ECMP</td><td>Equal-Cost Multi-Path routing</td></tr><tr><td>Entropy</td><td>Header diversity used for load balancing</td></tr><tr><td>Elephant flow</td><td>Large, high-bandwidth traffic flow</td></tr><tr><td>Incast congestion</td><td>Many senders congesting one receiver or output port</td></tr><tr><td>PFC</td><td>Priority Flow Control</td></tr><tr><td>ECN</td><td>Explicit Congestion Notification</td></tr><tr><td>CNP</td><td>Congestion Notification Packet</td></tr><tr><td>DCQCN</td><td>Data Center Quantized Congestion Notification</td></tr><tr><td>SLB</td><td>Static Load Balancing</td></tr><tr><td>DLB</td><td>Dynamic Load Balancing</td></tr><tr><td>GLB</td><td>Global Load Balancing</td></tr><tr><td>sDLB</td><td>Selective Dynamic Load Balancing</td></tr><tr><td>ROD</td><td>Rail-Optimized Design</td></tr><tr><td>RUD</td><td>Rail-Unified Design</td></tr></tbody></table>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="questions">Questions</h2><a class="sl-anchor-link" href="#questions"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Questions”</span></a></div>
+<p><a href="https://learning.oreilly.com/library/view/ai-data-center/9780135436370/ch02.xhtml#ques2_1a"><strong>1</strong></a>. How do the requirements of AI training data centers differ from those of inference data centers?</p>
+<blockquote>
+<p>AI training data centers are optimized for large-scale distributed computation. Their key metric is Job Completion Time, or JCT. They require many GPUs, high memory bandwidth, high-speed GPU-to-GPU communication, large storage capacity, and often lossless RDMA fabrics.</p>
+<p>AI inference data centers are optimized for serving trained models to users in real time. Their key metrics are latency, throughput, and Time to First Token, or TTFT. They usually need lower latency, predictable response time, cost efficiency, power efficiency, and integration with front-end services, APIs, edge locations, and multi-tenant environments.</p>
+</blockquote>
+<p><a href="https://learning.oreilly.com/library/view/ai-data-center/9780135436370/ch02.xhtml#ques2_2a"><strong>2</strong></a>. What are the technical trade-offs between InfiniBand and Ethernet for AI training cluster deployments?</p>
+<blockquote>
+<p>InfiniBand provides very low latency, native RDMA, mature HPC features, and strong performance for tightly coupled distributed training. It is often easier to get predictable performance for large GPU clusters.</p>
+<p>Ethernet, especially with RoCEv2, provides a more open, widely adopted, and cost-effective infrastructure. It uses familiar tools, integrates well with existing data center networks, and supports broader operational expertise. However, Ethernet requires careful design for lossless transport, congestion control, ECMP load balancing, PFC, ECN, and DCQCN.</p>
+</blockquote>
+<p><a href="https://learning.oreilly.com/library/view/ai-data-center/9780135436370/ch02.xhtml#ques2_3a"><strong>3</strong></a>. Explain the concept of low entropy in AI/ML network traffic and its impact on load balancing.</p>
+<blockquote>
+<p>In networking, entropy means the diversity of packet header information that switches can use to distribute flows across multiple paths. Traditional ECMP usually uses fields such as source IP, destination IP, source port, destination port, and protocol.</p>
+<p>In AI/ML RoCEv2 traffic, many packets can look very similar at the IP and UDP header level. For example, RoCEv2 commonly uses UDP destination port 4791, and traffic may occur between the same pair of GPUs. This creates low entropy, meaning the switch may not have enough header variation to spread traffic evenly.</p>
+<p>The impact is poor load balancing. Multiple large flows may be mapped to the same path, causing congestion, queue buildup, PFC pause, ECN marking, and GPU idle time.</p>
+</blockquote>
+<p><a href="https://learning.oreilly.com/library/view/ai-data-center/9780135436370/ch02.xhtml#ques2_4a"><strong>4</strong></a>. What are elephant flows, and why do they pose a challenge in AI/ML fabrics?</p>
+<blockquote>
+<p>Elephant flows are large, high-bandwidth, long-lived or bursty traffic flows. In AI/ML training, they often appear during gradient synchronization, parameter exchange, checkpointing, or large data transfers between GPUs and storage.</p>
+<p>They are challenging because they can consume most of a NIC or link’s bandwidth. If several elephant flows collide on the same path or output queue, they can create congestion quickly. This increases latency, triggers ECN or PFC, reduces sender rate through DCQCN, and can delay the entire training job.</p>
+</blockquote>
+<p><a href="https://learning.oreilly.com/library/view/ai-data-center/9780135436370/ch02.xhtml#ques2_5a"><strong>5</strong></a>. Describe the proactive and reactive congestion management techniques used in AI/ML fabrics.</p>
+<blockquote>
+<p>Proactive congestion management tries to avoid congestion before it happens. Examples include efficient ECMP, dynamic load balancing, global load balancing, selective DLB, path rebalancing, and flow pinning. These techniques select better paths based on flow characteristics, link utilization, queue status, or remote path quality.</p>
+<p>Reactive congestion management responds after congestion starts to appear. Examples include ECN, PFC, and DCQCN. ECN marks packets when queues exceed a threshold, the receiver generates congestion notification, and the sender reduces its rate through DCQCN. PFC can pause traffic for a specific priority class to prevent packet loss.</p>
+</blockquote>
+<p><a href="https://learning.oreilly.com/library/view/ai-data-center/9780135436370/ch02.xhtml#ques2_6a"><strong>6</strong></a>. How does RoCEv2 address the need for lossless transport in Ethernet-based AI data centers?</p>
+<blockquote>
+<p>RoCEv2 enables RDMA over UDP/IP Ethernet, allowing GPU servers to use RDMA semantics across routable Ethernet networks. However, RDMA is sensitive to packet loss, so Ethernet must be configured to behave like a lossless or near-lossless fabric.</p>
+<p>RoCEv2 typically relies on PFC, ECN, and DCQCN. PFC prevents packet drops by pausing traffic for a specific priority. ECN marks packets when congestion starts. DCQCN uses congestion notifications to reduce the sender’s transmission rate. Together, these mechanisms help prevent frame loss and stabilize RDMA traffic over Ethernet.</p>
+</blockquote>
+<p><a href="https://learning.oreilly.com/library/view/ai-data-center/9780135436370/ch02.xhtml#ques2_7a"><strong>7</strong></a>. What are the main load-balancing techniques used for AI/ML fabrics, and how do they differ?</p>
+<blockquote>
+<p>The main techniques are SLB, DLB, GLB, sDLB, and flow pinning.</p>
+<p>SLB, Static Load Balancing, uses traditional header-based hashing. It is simple but not very effective for AI/ML traffic because it does not consider real-time link or queue utilization.</p>
+<p>DLB, Dynamic Load Balancing, considers local link bandwidth and buffer utilization, so it can choose a healthier local path.</p>
+<p>GLB, Global Load Balancing, adds broader path awareness, including next-hop or next-to-next-hop link quality, making better decisions across the fabric.</p>
+<p>sDLB, Selective Dynamic Load Balancing, identifies elephant flows and can spray packets for selected flows, often using transport-level information such as RoCEv2/BTH opcode matching.</p>
+<p>Flow pinning maps flows to paths based on flow characteristics and path state, often to maintain ordering while still improving utilization.</p>
+</blockquote>
+<p><a href="https://learning.oreilly.com/library/view/ai-data-center/9780135436370/ch02.xhtml#ques2_8a"><strong>8</strong></a>. Why is oversubscription ratio a critical design parameter in AI/ML data center fabrics?</p>
+<blockquote>
+<p>Oversubscription ratio compares the total downstream server-facing bandwidth with the total upstream fabric-facing bandwidth. In AI/ML training, many GPUs can send traffic at line rate at the same time, especially during synchronization phases.</p>
+<p>If the fabric is oversubscribed, the uplinks cannot carry all traffic simultaneously. This creates congestion, queue buildup, ECN marking, PFC pause, and longer job completion time. For large training clusters, a 1:1 or near non-blocking fabric is often preferred in paths where line-rate GPU traffic is expected.</p>
+</blockquote> </div> <footer class="sl-flex astro-3yyafb3n"> <div class="meta sl-flex astro-3yyafb3n"> <a href="https://github.com/ziwon/ai-data-center-systems/edit/main/network/chap02/README.md" class="sl-flex print:hidden astro-eez2twj6"><svg aria-hidden="true" class="astro-eez2twj6 astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.2em;"><path d="M22 7.24a1 1 0 0 0-.29-.71l-4.24-4.24a1 1 0 0 0-1.1-.22 1 1 0 0 0-.32.22l-2.83 2.83L2.29 16.05a1 1 0 0 0-.29.71V21a1 1 0 0 0 1 1h4.24a1 1 0 0 0 .76-.29l10.87-10.93L21.71 8c.1-.1.17-.2.22-.33a1 1 0 0 0 0-.24v-.14l.07-.05ZM6.83 20H4v-2.83l9.93-9.93 2.83 2.83L6.83 20ZM18.17 8.66l-2.83-2.83 1.42-1.41 2.82 2.82-1.41 1.42Z"/></svg>Edit page</a> <p>Last updated: <time datetime="2026-07-22T12:47:10.000Z">Jul 22, 2026</time></p> </div> <div class="pagination-links print:hidden astro-u2l5gyhi" dir="ltr"> <a href="/network/chap01/" rel="prev" class="astro-u2l5gyhi"> <svg aria-hidden="true" class="astro-u2l5gyhi astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17 11H9.41l3.3-3.29a1.004 1.004 0 1 0-1.42-1.42l-5 5a1 1 0 0 0-.21.33 1 1 0 0 0 0 .76 1 1 0 0 0 .21.33l5 5a1.002 1.002 0 0 0 1.639-.325 1 1 0 0 0-.219-1.095L9.41 13H17a1 1 0 0 0 0-2Z"/></svg> <span class="astro-u2l5gyhi"> Previous <br class="astro-u2l5gyhi"> <span class="link-title astro-u2l5gyhi">Chapter 1: Wonders in the Workload</span> </span> </a> <a href="/network/chap03/" rel="next" class="astro-u2l5gyhi"> <svg aria-hidden="true" class="astro-u2l5gyhi astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17.92 11.62a1.001 1.001 0 0 0-.21-.33l-5-5a1.003 1.003 0 1 0-1.42 1.42l3.3 3.29H7a1 1 0 0 0 0 2h7.59l-3.3 3.29a1.002 1.002 0 0 0 .325 1.639 1 1 0 0 0 1.095-.219l5-5a1 1 0 0 0 .21-.33 1 1 0 0 0 0-.76Z"/></svg> <span class="astro-u2l5gyhi"> Next <br class="astro-u2l5gyhi"> <span class="link-title astro-u2l5gyhi">Chapter 3: Network Design Considerations</span> </span> </a> </div>  </footer> </div> </div>  </main> </div> </div> </div> <ask-docs-widget> <button class="ask-fab" type="button" data-open aria-label="Ask this docs"> <span class="ask-fab-icon" aria-hidden="true">?</span>
+Ask this docs
+</button> <div class="ask-panel" data-panel hidden> <div class="ask-resize-handle" data-resize aria-hidden="true"></div> <div class="ask-panel-inner"> <header class="ask-header"> <div> <p class="ask-eyebrow">AI Data Center Systems</p> <h2 class="ask-title">Ask this docs</h2> </div> <div class="ask-header-controls"> <button class="ask-mode-btn" data-mode-btn="right" title="오른쪽 패널" aria-label="오른쪽 패널"> <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="6" height="16" rx="1.5" opacity="0.35"></rect><rect x="8" y="0" width="8" height="16" rx="1.5"></rect></svg> </button> <button class="ask-mode-btn" data-mode-btn="bottom" title="하단 패널" aria-label="하단 패널"> <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="16" height="6" rx="1.5" opacity="0.35"></rect><rect x="0" y="8" width="16" height="8" rx="1.5"></rect></svg> </button> <button class="ask-mode-btn" data-mode-btn="expand" title="전체 확장" aria-label="전체 확장"> <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 5.5V1h4.5M10.5 1H15v4.5M15 10.5V15h-4.5M5.5 15H1v-4.5"></path></svg> </button> <button class="ask-close-btn" type="button" aria-label="닫기" data-close> <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13"></path></svg> </button> </div> </header> <div class="ask-body"> <label class="ask-field"> <span class="ask-field-row"> <span>Question</span> <span class="ask-char" data-char>0 / 800</span> </span> <textarea name="question" rows="3" maxlength="800" placeholder="이 문서에서 핵심 운영 체크포인트는 무엇인가요?" data-question></textarea> <span class="ask-hint">시간당 최대 20회 · 질문당 최대 800자</span> </label> <div class="ask-actions"> <button class="ask-submit" type="button" data-submit> <svg class="ask-spinner" viewBox="0 0 24 24" fill="none" aria-hidden="true" hidden> <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2.5" stroke-dasharray="56" stroke-dashoffset="14" stroke-linecap="round"></circle> </svg> <span data-submit-label>Ask</span> </button> <p class="ask-status" data-status></p> </div> <section class="ask-answer" data-answer hidden></section> <section class="ask-sources" data-sources hidden> <h3>Sources</h3> <ul class="ask-source-chips" data-source-list></ul> </section> </div> </div> </div> <div class="ask-backdrop" data-backdrop hidden></div> </ask-docs-widget> <script type="module" src="/_astro/AskDocs.astro_astro_type_script_index_0_lang.BbnAb04M.js"></script> </div> <script type="module">const r=document.documentElement,c=document.querySelector("#starlight__sidebar"),s=document.querySelector(".navigation-mode-toggle"),a=document.querySelector(".navigation-drawer-toggle"),u=window.matchMedia("(min-width: 50rem)");function d(){return r.dataset.navigationMode==="compact"}function o(){return r.dataset.navigationDrawer==="open"}function l(){const e=d(),t=e&&o();s?.setAttribute("aria-pressed",String(e)),s?.setAttribute("title",e?"Use normal navigation":"Use compact navigation"),a?.setAttribute("aria-expanded",String(t)),a?.setAttribute("title",t?"Close navigation":"Open navigation");const n=a?.querySelector(".navigation-drawer-label");n&&(n.textContent=t?"Close navigation":"Open navigation")}function i(e,t=!1){const n=!!(e&&d()&&u.matches);r.dataset.navigationDrawer=n?"open":"closed",l(),n?requestAnimationFrame(()=>{const g=c?.querySelector('a[aria-current="page"]'),m=c?.querySelector(".starlight-sidebar-topics-current");(g??m)?.focus()}):t&&a?.focus()}function p(e){r.dataset.navigationMode=e,i(!1);try{localStorage.setItem("adcs-navigation-mode",e)}catch{}l()}s?.addEventListener("click",()=>{p(d()?"normal":"compact")});a?.addEventListener("click",()=>{i(!o(),o())});document.addEventListener("keydown",e=>{e.key==="Escape"&&o()&&i(!1,!0)});document.addEventListener("pointerdown",e=>{!o()||!(e.target instanceof Node)||c?.contains(e.target)||i(!1)});u.addEventListener("change",()=>i(!1));r.dataset.navigationDrawer="closed";l();</script> </body></html>

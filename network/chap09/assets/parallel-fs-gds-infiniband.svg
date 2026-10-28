@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="640" viewBox="0 0 1120 640" role="img" aria-labelledby="title desc">
+  <title id="title">Parallel file systems, GPUDirect Storage, and InfiniBand storage</title>
+  <desc id="desc">A model showing POSIX AI applications using a parallel file system over RDMA, GPUDirect Storage bypassing CPU memory, and InfiniBand credit-based flow control as a native lossless transport.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.4; }
+    .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; }
+    .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.5; }
+    .accent-line { fill: none; stroke: #D9392E; stroke-width: 2.2; }
+    .muted-line { fill: none; stroke: #D8D1C7; stroke-width: 1.2; stroke-dasharray: 7 6; }
+    .label { font-family: Inter, Arial, sans-serif; font-size: 15px; font-weight: 700; fill: #050505; }
+    .small { font-family: Inter, Arial, sans-serif; font-size: 12px; fill: #6F6A63; }
+    .head { font-family: Inter, Arial, sans-serif; font-size: 20px; font-weight: 700; fill: #050505; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#111111"/>
+    </marker>
+    <marker id="arrowAccent" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#D9392E"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1120" height="640"/>
+
+  <g transform="translate(58 66)">
+    <rect class="soft" x="0" y="0" width="490" height="236" rx="8"/>
+    <text class="head" x="245" y="36" text-anchor="middle">Parallel file system path</text>
+    <rect class="box" x="34" y="86" width="126" height="64" rx="6"/>
+    <text class="label" x="97" y="114" text-anchor="middle">PyTorch</text>
+    <text class="small" x="97" y="134" text-anchor="middle">POSIX write()</text>
+    <rect class="box" x="206" y="86" width="126" height="64" rx="6"/>
+    <text class="label" x="269" y="114" text-anchor="middle">FS client</text>
+    <text class="small" x="269" y="134" text-anchor="middle">WekaFS / VAST</text>
+    <rect class="box" x="376" y="86" width="90" height="64" rx="6"/>
+    <text class="label" x="421" y="114" text-anchor="middle">Storage</text>
+    <text class="small" x="421" y="134" text-anchor="middle">chunks</text>
+    <path class="line" d="M160 118 H206" marker-end="url(#arrow)"/>
+    <path class="accent-line" d="M332 118 H376" marker-end="url(#arrowAccent)"/>
+    <text class="small" x="245" y="203" text-anchor="middle">Many GPU nodes access shared file paths and metadata in parallel</text>
+
+    <rect class="soft" x="550" y="0" width="490" height="236" rx="8"/>
+    <text class="head" x="795" y="36" text-anchor="middle">GPUDirect Storage path</text>
+    <rect class="box" x="582" y="86" width="104" height="64" rx="6"/>
+    <text class="label" x="634" y="114" text-anchor="middle">Storage</text>
+    <text class="small" x="634" y="134" text-anchor="middle">NVMe array</text>
+    <rect class="box" x="728" y="86" width="104" height="64" rx="6"/>
+    <text class="label" x="780" y="114" text-anchor="middle">RDMA NIC</text>
+    <text class="small" x="780" y="134" text-anchor="middle">RoCEv2 / IB</text>
+    <rect class="accent" x="874" y="86" width="104" height="64" rx="6"/>
+    <text class="label" x="926" y="114" text-anchor="middle">GPU mem</text>
+    <text class="small" x="926" y="134" text-anchor="middle">pinned buffer</text>
+    <path class="line" d="M686 118 H728" marker-end="url(#arrow)"/>
+    <path class="accent-line" d="M832 118 H874" marker-end="url(#arrowAccent)"/>
+    <path class="muted-line" d="M780 150 C793 194 855 202 926 150"/>
+    <text class="small" x="795" y="203" text-anchor="middle">Reduces CPU/system memory copies, jitter, CPU load, and PCIe pressure</text>
+
+    <rect class="soft" x="0" y="304" width="1040" height="180" rx="8"/>
+    <text class="head" x="520" y="340" text-anchor="middle">InfiniBand storage transport</text>
+    <rect class="box" x="96" y="386" width="130" height="58" rx="6"/>
+    <text class="label" x="161" y="420" text-anchor="middle">Endpoint A</text>
+    <rect class="box" x="330" y="386" width="130" height="58" rx="6"/>
+    <text class="label" x="395" y="420" text-anchor="middle">IB switch</text>
+    <rect class="box" x="564" y="386" width="130" height="58" rx="6"/>
+    <text class="label" x="629" y="420" text-anchor="middle">IB switch</text>
+    <rect class="box" x="798" y="386" width="130" height="58" rx="6"/>
+    <text class="label" x="863" y="420" text-anchor="middle">Endpoint B</text>
+    <path class="line" d="M226 410 H330" marker-end="url(#arrow)"/>
+    <path class="accent-line" d="M460 410 H564" marker-end="url(#arrowAccent)"/>
+    <path class="line" d="M694 410 H798" marker-end="url(#arrow)"/>
+    <path class="muted-line" d="M564 433 C520 467 503 467 460 433" marker-end="url(#arrow)"/>
+    <text class="small" x="512" y="480" text-anchor="middle">CBFC credits return per virtual lane; without credit, the sender buffers traffic</text>
+  </g>
+</svg>

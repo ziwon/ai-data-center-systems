@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="760" viewBox="0 0 1400 760" role="img" aria-labelledby="title desc">
+  <title id="title">Materialized attention versus tiled FlashAttention</title>
+  <desc id="desc">The left panel shows standard attention writing score and probability matrices to HBM. The right panel shows FlashAttention keeping only a tile and online softmax state on chip.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f8fafc"/>
+      <stop offset="1" stop-color="#eef2ff"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0f172a" flood-opacity="0.12"/>
+    </filter>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#334155"/>
+    </marker>
+    <marker id="arrow-red" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#dc2626"/>
+    </marker>
+    <style>
+      .title{font:700 30px Inter,Segoe UI,Arial,sans-serif;fill:#0f172a}
+      .panel-title{font:700 22px Inter,Segoe UI,Arial,sans-serif;fill:#0f172a}
+      .label{font:600 17px Inter,Segoe UI,Arial,sans-serif;fill:#0f172a}
+      .small{font:500 14px Inter,Segoe UI,Arial,sans-serif;fill:#475569}
+      .tiny{font:500 12px Inter,Segoe UI,Arial,sans-serif;fill:#64748b}
+      .box{rx:14;ry:14;filter:url(#shadow)}
+      .arrow{stroke:#334155;stroke-width:2.5;fill:none;marker-end:url(#arrow)}
+      .traffic{stroke:#dc2626;stroke-width:3;fill:none;stroke-dasharray:8 6;marker-end:url(#arrow-red)}
+    </style>
+  </defs>
+
+  <rect x="0" y="0" width="1400" height="760" fill="url(#bg)"/>
+  <text x="700" y="52" text-anchor="middle" class="title">The same attention equation, a radically different dataflow</text>
+
+  <rect x="35" y="88" width="650" height="620" rx="24" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <rect x="715" y="88" width="650" height="620" rx="24" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+
+  <text x="360" y="128" text-anchor="middle" class="panel-title">Materialized multi-kernel attention</text>
+  <text x="1040" y="128" text-anchor="middle" class="panel-title">Tiled, fused FlashAttention</text>
+
+  <!-- Left panel -->
+  <rect x="80" y="180" width="100" height="62" class="box" fill="#dbeafe" stroke="#60a5fa"/>
+  <rect x="80" y="275" width="100" height="62" class="box" fill="#dbeafe" stroke="#60a5fa"/>
+  <rect x="80" y="478" width="100" height="62" class="box" fill="#dbeafe" stroke="#60a5fa"/>
+  <text x="130" y="217" text-anchor="middle" class="label">Q</text>
+  <text x="130" y="312" text-anchor="middle" class="label">K</text>
+  <text x="130" y="515" text-anchor="middle" class="label">V</text>
+
+  <rect x="225" y="230" width="120" height="74" class="box" fill="#ede9fe" stroke="#8b5cf6"/>
+  <text x="285" y="260" text-anchor="middle" class="label">GEMM 1</text>
+  <text x="285" y="283" text-anchor="middle" class="small">QKᵀ</text>
+  <path d="M180 211 C200 211 205 245 225 255" class="arrow"/>
+  <path d="M180 306 C200 306 205 286 225 277" class="arrow"/>
+
+  <rect x="390" y="190" width="200" height="110" class="box" fill="#fee2e2" stroke="#ef4444" stroke-width="2"/>
+  <text x="490" y="228" text-anchor="middle" class="label">S = QKᵀ</text>
+  <text x="490" y="253" text-anchor="middle" class="small">N × N score matrix</text>
+  <text x="490" y="278" text-anchor="middle" class="small">materialized in HBM</text>
+  <path d="M345 267 L390 250" class="traffic"/>
+
+  <rect x="420" y="350" width="140" height="72" class="box" fill="#fef3c7" stroke="#f59e0b"/>
+  <text x="490" y="381" text-anchor="middle" class="label">Softmax</text>
+  <text x="490" y="404" text-anchor="middle" class="small">row reduction + exp</text>
+  <path d="M490 300 L490 350" class="traffic"/>
+
+  <rect x="390" y="472" width="200" height="110" class="box" fill="#fee2e2" stroke="#ef4444" stroke-width="2"/>
+  <text x="490" y="510" text-anchor="middle" class="label">P = softmax(S)</text>
+  <text x="490" y="535" text-anchor="middle" class="small">N × N probability matrix</text>
+  <text x="490" y="560" text-anchor="middle" class="small">materialized in HBM</text>
+  <path d="M490 422 L490 472" class="traffic"/>
+
+  <rect x="225" y="555" width="120" height="74" class="box" fill="#ede9fe" stroke="#8b5cf6"/>
+  <text x="285" y="585" text-anchor="middle" class="label">GEMM 2</text>
+  <text x="285" y="608" text-anchor="middle" class="small">PV</text>
+  <path d="M390 545 C370 560 355 579 345 589" class="traffic"/>
+  <path d="M180 509 C205 520 210 568 225 582" class="arrow"/>
+
+  <rect x="80" y="600" width="100" height="62" class="box" fill="#dcfce7" stroke="#22c55e"/>
+  <text x="130" y="637" text-anchor="middle" class="label">O</text>
+  <path d="M225 613 L180 628" class="arrow"/>
+
+  <text x="360" y="680" text-anchor="middle" class="small" fill="#b91c1c">Large quadratic intermediates cross the HBM boundary</text>
+
+  <!-- Right panel -->
+  <rect x="755" y="180" width="115" height="62" class="box" fill="#dbeafe" stroke="#60a5fa"/>
+  <rect x="755" y="275" width="115" height="62" class="box" fill="#dbeafe" stroke="#60a5fa"/>
+  <rect x="755" y="370" width="115" height="62" class="box" fill="#dbeafe" stroke="#60a5fa"/>
+  <text x="812" y="207" text-anchor="middle" class="label">Q tile</text>
+  <text x="812" y="229" text-anchor="middle" class="small">Bᵣ × d</text>
+  <text x="812" y="302" text-anchor="middle" class="label">K tile</text>
+  <text x="812" y="324" text-anchor="middle" class="small">B𝚌 × d</text>
+  <text x="812" y="397" text-anchor="middle" class="label">V tile</text>
+  <text x="812" y="419" text-anchor="middle" class="small">B𝚌 × d</text>
+
+  <rect x="920" y="205" width="220" height="245" rx="20" fill="#f1f5f9" stroke="#64748b" stroke-width="2" filter="url(#shadow)"/>
+  <text x="1030" y="238" text-anchor="middle" class="label">On-chip working set</text>
+  <rect x="955" y="267" width="150" height="62" class="box" fill="#ede9fe" stroke="#8b5cf6"/>
+  <text x="1030" y="294" text-anchor="middle" class="label">Sᵢⱼ = QᵢKⱼᵀ</text>
+  <text x="1030" y="316" text-anchor="middle" class="small">Bᵣ × B𝚌 tile only</text>
+  <rect x="955" y="351" width="150" height="70" class="box" fill="#fef3c7" stroke="#f59e0b"/>
+  <text x="1030" y="380" text-anchor="middle" class="label">Online softmax</text>
+  <text x="1030" y="402" text-anchor="middle" class="small">update m, ℓ, U</text>
+
+  <path d="M870 211 L920 255" class="arrow"/>
+  <path d="M870 306 L920 300" class="arrow"/>
+  <path d="M870 401 L920 390" class="arrow"/>
+
+  <rect x="1185" y="230" width="135" height="180" class="box" fill="#ecfeff" stroke="#06b6d4" stroke-width="2"/>
+  <text x="1252" y="265" text-anchor="middle" class="label">Running state</text>
+  <text x="1252" y="300" text-anchor="middle" class="label">m</text>
+  <text x="1252" y="332" text-anchor="middle" class="label">ℓ</text>
+  <text x="1252" y="364" text-anchor="middle" class="label">U</text>
+  <text x="1252" y="393" text-anchor="middle" class="tiny">O = U / ℓ at end</text>
+  <path d="M1140 335 L1185 320" class="arrow"/>
+  <path d="M1185 355 C1160 390 1160 420 1140 410" class="arrow"/>
+
+  <rect x="950" y="505" width="160" height="72" class="box" fill="#dcfce7" stroke="#22c55e"/>
+  <text x="1030" y="535" text-anchor="middle" class="label">Output tile Oᵢ</text>
+  <text x="1030" y="558" text-anchor="middle" class="small">written once to HBM</text>
+  <path d="M1252 410 C1252 490 1145 525 1110 535" class="arrow"/>
+
+  <rect x="1170" y="505" width="155" height="72" rx="14" fill="#ffffff" stroke="#94a3b8" stroke-width="2" stroke-dasharray="9 7"/>
+  <text x="1247" y="535" text-anchor="middle" class="small">No full N × N</text>
+  <text x="1247" y="557" text-anchor="middle" class="small">S or P in HBM</text>
+
+  <text x="1040" y="630" text-anchor="middle" class="small">Quadratic arithmetic remains; quadratic intermediate storage does not</text>
+  <text x="1040" y="657" text-anchor="middle" class="tiny">Tiles and online statistics remain on chip as long as the kernel schedule permits</text>
+
+  <rect x="755" y="670" width="570" height="24" rx="12" fill="#e0f2fe"/>
+  <text x="1040" y="687" text-anchor="middle" class="tiny">HBM traffic is reduced by changing execution order—not by changing the attention function</text>
+</svg>

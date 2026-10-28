@@ -1,0 +1,1173 @@
+<!DOCTYPE html><html lang="en" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-bguv2lll"> <head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>MLOps: 모델을 배포하는 기술이 아니라 변경을 통제하는 운영 시스템 | AI Data Center Systems</title><link rel="canonical" href="https://adcs.restack.tech/mlops/"/><link rel="sitemap" href="/sitemap-index.xml"/><script async src="https://www.googletagmanager.com/gtag/js?id=G-76LFZJVBTE"></script><script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-76LFZJVBTE');
+      </script><script async crossorigin="anonymous" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8128231647578658"></script><link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v6.4.8"/><meta name="generator" content="Starlight v0.40.0"/><meta property="og:title" content="MLOps: 모델을 배포하는 기술이 아니라 변경을 통제하는 운영 시스템"/><meta property="og:url" content="https://adcs.restack.tech/mlops/"/><meta property="og:locale" content="en"/><meta property="og:description" content="Production MLOps guide covering lifecycle control, reproducibility, lineage, CI/CD/CT, feature stores, progressive delivery, monitoring, and LLMOps."/><meta property="og:site_name" content="AI Data Center Systems"/><meta name="description" content="Production MLOps guide covering lifecycle control, reproducibility, lineage, CI/CD/CT, feature stores, progressive delivery, monitoring, and LLMOps."/><meta property="og:type" content="article"/><meta property="og:image" content="https://adcs.restack.tech/og/mlops.png?v=2"/><meta property="og:image:width" content="1200"/><meta property="og:image:height" content="630"/><meta name="twitter:image" content="https://adcs.restack.tech/og/mlops.png?v=2"/><meta name="twitter:card" content="summary_large_image"/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/_astro/print.DNXP8c50.css" media="print"><link rel="stylesheet" href="/_astro/common.DYbqSTpl.css"><script type="module" src="/_astro/page.CtJXHRyR.js"></script></head> <body class="astro-bguv2lll"> <a href="#_top" class="astro-7q3lir66">Skip to content</a> <script>
+  (() => {
+    try {
+      const savedMode = localStorage.getItem('adcs-navigation-mode');
+      document.documentElement.dataset.navigationMode = savedMode === 'compact' ? 'compact' : 'normal';
+    } catch {
+      document.documentElement.dataset.navigationMode = 'normal';
+    }
+  })();
+</script> <div class="page sl-flex astro-4toy2ex6"> <header class="header astro-4toy2ex6"><div class="header astro-3ef6ksr2"> <div class="title-wrapper sl-flex astro-3ef6ksr2"> <a href="/" class="site-title sl-flex astro-m46x6ez3">  <span class="astro-m46x6ez3" translate="no"> AI Data Center Systems </span> </a> <button class="navigation-mode-toggle print:hidden astro-3ef6ksr2" type="button" aria-label="Compact navigation" aria-pressed="false" title="Use compact navigation"> <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" class="astro-3ef6ksr2"> <rect x="3" y="4" width="18" height="16" rx="2" class="astro-3ef6ksr2"></rect> <path d="M9 4v16M6.5 10 4.5 12l2 2" class="astro-3ef6ksr2"></path> </svg> </button> </div> <div class="sl-flex print:hidden astro-3ef6ksr2"> <site-search class="astro-3ef6ksr2 astro-v37mnknz" data-translations="{&quot;placeholder&quot;:&quot;Search&quot;}"> <button data-open-modal disabled aria-label="Search" aria-keyshortcuts="Control+K" class="astro-v37mnknz"> <svg aria-hidden="true" class="astro-v37mnknz astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg> <span class="sl-hidden md:sl-block astro-v37mnknz" aria-hidden="true">Search</span> <kbd class="sl-hidden md:sl-flex astro-v37mnknz" style="display: none;"> <kbd class="astro-v37mnknz">Ctrl</kbd><kbd class="astro-v37mnknz">K</kbd> </kbd> </button> <dialog style="padding:0" aria-label="Search" class="astro-v37mnknz"> <div class="dialog-frame sl-flex astro-v37mnknz">  <button data-close-modal class="sl-flex md:sl-hidden astro-v37mnknz"> Cancel </button> <div class="search-container astro-v37mnknz"> <div id="starlight__search" class="astro-v37mnknz"></div> </div> </div> </dialog> </site-search>  <script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script> <script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.D1WXcfCt.js"></script>  </div> <div class="sl-hidden md:sl-flex print:hidden right-group astro-3ef6ksr2"> <div class="sl-flex social-icons astro-3ef6ksr2"> <a href="https://github.com/ziwon/ai-data-center-systems" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">GitHub</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script> <script type="module">const r="starlight-theme",o=e=>e==="auto"||e==="dark"||e==="light"?e:"auto",c=()=>o(typeof localStorage<"u"&&localStorage.getItem(r));function n(e){typeof localStorage<"u"&&localStorage.setItem(r,e==="light"||e==="dark"?e:"")}const l=()=>matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";function t(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e==="auto"?l():e,n(e)}matchMedia("(prefers-color-scheme: light)").addEventListener("change",()=>{c()==="auto"&&t("auto")});class s extends HTMLElement{constructor(){super(),t(c()),this.querySelector("select")?.addEventListener("change",a=>{a.currentTarget instanceof HTMLSelectElement&&t(o(a.currentTarget.value))})}}customElements.define("starlight-theme-select",s);</script> <script type="module">class s extends HTMLElement{constructor(){super();const e=this.querySelector("select");e&&(e.addEventListener("change",t=>{t.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=t.currentTarget.value)}),window.addEventListener("pageshow",t=>{if(!t.persisted)return;const n=e.querySelector("option[selected]")?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}}customElements.define("starlight-lang-select",s);</script> </div> </div></header> <nav class="sidebar print:hidden astro-4toy2ex6" aria-label="Main"> <starlight-menu-button class="print:hidden astro-jif73yzw"> <button aria-expanded="false" aria-label="Menu" aria-controls="starlight__sidebar" class="sl-flex md:sl-hidden astro-jif73yzw"> <svg aria-hidden="true" class="open-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg> <svg aria-hidden="true" class="close-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg> </button> </starlight-menu-button> <script type="module">class s extends HTMLElement{constructor(){super(),this.btn=this.querySelector("button"),this.btn.addEventListener("click",()=>this.toggleExpanded());const t=this.closest("nav");t&&t.addEventListener("keyup",e=>this.closeOnEscape(e))}setExpanded(t){this.setAttribute("aria-expanded",String(t)),document.body.toggleAttribute("data-mobile-menu-expanded",t)}toggleExpanded(){this.setExpanded(this.getAttribute("aria-expanded")!=="true")}closeOnEscape(t){t.code==="Escape"&&(this.setExpanded(!1),this.btn.focus())}}customElements.define("starlight-menu-button",s);</script>  <div id="starlight__sidebar" class="sidebar-pane astro-4toy2ex6"> <div class="navigation-controls astro-4toy2ex6"> <button class="navigation-drawer-toggle astro-4toy2ex6" type="button" aria-controls="starlight__sidebar-content" aria-expanded="false" title="Open navigation"> <svg class="navigation-menu-icon astro-4toy2ex6" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"> <path d="M4 6h16M4 12h16M4 18h16" class="astro-4toy2ex6"></path> </svg> <svg class="navigation-close-icon astro-4toy2ex6" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"> <path d="m6 6 12 12M18 6 6 18" class="astro-4toy2ex6"></path> </svg> <span class="navigation-drawer-label astro-4toy2ex6">Open navigation</span> </button> </div> <div id="starlight__sidebar-content" class="sidebar-content sl-flex astro-4toy2ex6"> <ul class="starlight-sidebar-topics astro-2fh6iaza"> <li class="astro-2fh6iaza"> <a aria-label="Network" title="Network" href="/network/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8.7 10a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-6.27-6.3a1 1 0 0 0-1.42 1.42ZM21 14a1 1 0 0 0-1 1v3.59L15.44 14A1 1 0 0 0 14 15.44L18.59 20H15a1 1 0 0 0 0 2h6a1 1 0 0 0 .38-.08 1 1 0 0 0 .54-.54A1 1 0 0 0 22 21v-6a1 1 0 0 0-1-1Zm.92-11.38a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-6a1 1 0 0 0 0 2h3.59L2.29 20.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V9a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z"/></svg> </div> <div class="astro-2fh6iaza"> Network  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="GPU &amp; Accelerator Systems" title="GPU &amp; Accelerator Systems" href="/gpu/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> </div> <div class="astro-2fh6iaza"> GPU &amp; Accelerator Systems  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Storage" title="Storage" href="/storage/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8 16.5a1 1 0 1 0 1 1 1 1 0 0 0-1-1M12 2C8 2 4 3.37 4 6v12c0 2.63 4 4 8 4s8-1.37 8-4V6c0-2.63-4-4-8-4m6 16c0 .71-2.28 2-6 2s-6-1.29-6-2v-3.27A13 13 0 0 0 12 16a13 13 0 0 0 6-1.27Zm0-6c0 .71-2.28 2-6 2s-6-1.29-6-2V8.73A13 13 0 0 0 12 10a13 13 0 0 0 6-1.27Zm-6-4C8.28 8 6 6.71 6 6s2.28-2 6-2 6 1.29 6 2-2.28 2-6 2m-4 2.5a1 1 0 1 0 1 1 1 1 0 0 0-1-1"/></svg> </div> <div class="astro-2fh6iaza"> Storage  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Training" title="Training" href="/training/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1 1v8a1 1 0 0 0 2 0v-8a1 1 0 0 0-1-1m5-10a1 1 0 0 0-1 1v18a1 1 0 0 0 2 0V3a1 1 0 0 0-1-1m10 14a1 1 0 0 0-1 1v4a1 1 0 0 0 2 0v-4a1 1 0 0 0-1-1m-5-8a1 1 0 0 0-1 1v12a1 1 0 0 0 2 0V9a1 1 0 0 0-1-1"/></svg> </div> <div class="astro-2fh6iaza"> Training  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Inference" title="Inference" data-topic-icon="brain" href="/inference/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 22H5a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3h1a4 4 0 0 1 7.3-2.18c.448.64.692 1.4.7 2.18h3a1 1 0 0 1 1 1v3a4 4 0 0 1 2.18 7.3A3.86 3.86 0 0 1 18 18v3a1 1 0 0 1-1 1ZM5 8a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11v-3.18a1 1 0 0 1 1.33-.95 1.77 1.77 0 0 0 1.74-.23 2 2 0 0 0 .93-1.37 2 2 0 0 0-.48-1.59 1.89 1.89 0 0 0-2.17-.55 1 1 0 0 1-1.33-.95V8h-3.2a1 1 0 0 1-1-1.33 1.77 1.77 0 0 0-.23-1.74 1.939 1.939 0 0 0-3-.43A2 2 0 0 0 8 6c.002.23.046.456.13.67A1 1 0 0 1 7.18 8H5Z"/></svg> </div> <div class="astro-2fh6iaza"> Inference  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="MLOps" title="MLOps" data-topic-icon="cycle" href="/mlops/" class="starlight-sidebar-topics-current astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8.7 10a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-6.27-6.3a1 1 0 0 0-1.42 1.42ZM21 14a1 1 0 0 0-1 1v3.59L15.44 14A1 1 0 0 0 14 15.44L18.59 20H15a1 1 0 0 0 0 2h6a1 1 0 0 0 .38-.08 1 1 0 0 0 .54-.54A1 1 0 0 0 22 21v-6a1 1 0 0 0-1-1Zm.92-11.38a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-6a1 1 0 0 0 0 2h3.59L2.29 20.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V9a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z"/></svg> </div> <div class="astro-2fh6iaza"> MLOps  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Systems Performance" title="Systems Performance" href="/systems-performance/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path fill-rule="evenodd" d="M1.44 8.855v-.001l3.527-3.516c.34-.344.802-.541 1.285-.548h6.649l.947-.947c3.07-3.07 6.207-3.072 7.62-2.868a1.821 1.821 0 0 1 1.557 1.557c.204 1.413.203 4.55-2.868 7.62l-.946.946v6.649a1.845 1.845 0 0 1-.549 1.286l-3.516 3.528a1.844 1.844 0 0 1-3.11-.944l-.858-4.275-4.52-4.52-2.31-.463-1.964-.394A1.847 1.847 0 0 1 .98 10.693a1.843 1.843 0 0 1 .46-1.838Zm5.379 2.017-3.873-.776L6.32 6.733h4.638l-4.14 4.14Zm8.403-5.655c2.459-2.46 4.856-2.463 5.89-2.33.134 1.035.13 3.432-2.329 5.891l-6.71 6.71-3.561-3.56 6.71-6.711Zm-1.318 15.837-.776-3.873 4.14-4.14v4.639l-3.364 3.374Z" clip-rule="evenodd"/><path d="M9.318 18.345a.972.972 0 0 0-1.86-.561c-.482 1.435-1.687 2.204-2.934 2.619a8.22 8.22 0 0 1-1.23.302c.062-.365.157-.79.303-1.229.415-1.247 1.184-2.452 2.62-2.935a.971.971 0 1 0-.62-1.842c-.12.04-.236.084-.35.13-2.02.828-3.012 2.588-3.493 4.033a10.383 10.383 0 0 0-.51 2.845l-.001.016v.063c0 .536.434.972.97.972H2.24a7.21 7.21 0 0 0 .878-.065c.527-.063 1.248-.19 2.02-.447 1.445-.48 3.205-1.472 4.033-3.494a5.828 5.828 0 0 0 .147-.407Z"/></svg> </div> <div class="astro-2fh6iaza"> Systems Performance  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Courses" title="Courses" href="/courses/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.17 2.06A13.1 13.1 0 0 0 19 1.87a12.94 12.94 0 0 0-7 2.05 12.94 12.94 0 0 0-7-2 13.1 13.1 0 0 0-2.17.19 1 1 0 0 0-.83 1v12a1 1 0 0 0 1.17 1 10.9 10.9 0 0 1 8.25 1.91l.12.07h.11a.91.91 0 0 0 .7 0h.11l.12-.07A10.899 10.899 0 0 1 20.83 16 1 1 0 0 0 22 15V3a1 1 0 0 0-.83-.94ZM11 15.35a12.87 12.87 0 0 0-6-1.48H4v-10c.333-.02.667-.02 1 0a10.86 10.86 0 0 1 6 1.8v9.68Zm9-1.44h-1a12.87 12.87 0 0 0-6 1.48V5.67a10.86 10.86 0 0 1 6-1.8c.333-.02.667-.02 1 0v10.04Zm1.17 4.15a13.098 13.098 0 0 0-2.17-.19 12.94 12.94 0 0 0-7 2.05 12.94 12.94 0 0 0-7-2.05c-.727.003-1.453.066-2.17.19A1 1 0 0 0 2 19.21a1 1 0 0 0 1.17.79 10.9 10.9 0 0 1 8.25 1.91 1 1 0 0 0 1.16 0A10.9 10.9 0 0 1 20.83 20a1 1 0 0 0 1.17-.79 1 1 0 0 0-.83-1.15Z"/></svg> </div> <div class="astro-2fh6iaza"> Courses  </div> </a> </li> </ul> <sl-sidebar-state-persist data-hash="1cfvtal" class="astro-kku4brbg"> <script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script>  <ul class="top-level astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/mlops/" aria-current="page" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">MLOps: 모델을 배포하는 기술이 아니라 변경을 통제하는 운영 시스템</span>  </a> </li> </ul>  <script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script> </sl-sidebar-state-persist> <div class="md:sl-hidden"> <div class="mobile-preferences sl-flex astro-wu23bvmt"> <div class="social-icons astro-wu23bvmt"> <a href="https://github.com/ziwon/ai-data-center-systems" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">GitHub</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script>   </div> </div> </div> </div> </nav> <div class="main-frame astro-4toy2ex6">  <script type="module">const a=document.getElementById("starlight__sidebar"),n=a?.querySelector("sl-sidebar-state-persist"),o="sl-sidebar-state",i=()=>{let t=[];const e=n?.dataset.hash||"";try{const s=sessionStorage.getItem(o),r=JSON.parse(s||"{}");Array.isArray(r.open)&&r.hash===e&&(t=r.open)}catch{}return{hash:e,open:t,scroll:a?.scrollTop||0}},c=t=>{try{sessionStorage.setItem(o,JSON.stringify(t))}catch{}},d=()=>c(i()),l=(t,e)=>{const s=i();s.open[e]=t,c(s)};n?.addEventListener("click",t=>{if(!(t.target instanceof Element))return;const e=t.target.closest("summary")?.closest("details");if(!e)return;const s=e.querySelector("sl-sidebar-restore"),r=parseInt(s?.dataset.index||"");isNaN(r)||l(!e.open,r)});addEventListener("visibilitychange",()=>{document.visibilityState==="hidden"&&d()});addEventListener("pageHide",d);</script> <div class="lg:sl-flex astro-67yu43on"> <aside class="right-sidebar-container print:hidden astro-67yu43on"> <div class="right-sidebar astro-67yu43on"> <div class="lg:sl-hidden astro-rl4sue7z"><mobile-starlight-toc data-min-h="2" data-max-h="2" class="astro-doynk5tl"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-doynk5tl"><details id="starlight__mobile-toc" class="astro-doynk5tl"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-doynk5tl"><span class="toggle sl-flex astro-doynk5tl">On this page<svg aria-hidden="true" class="caret astro-doynk5tl astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-doynk5tl"></span></summary><div class="dropdown astro-doynk5tl"><ul class="isMobile astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#목차" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">목차</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#1-mlops가-해결하는-실제-문제" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">1. MLOps가 해결하는 실제 문제</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#2-수명주기-선형-파이프라인이-아니라-폐루프-제어" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">2. 수명주기: 선형 파이프라인이 아니라 폐루프 제어</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#3-data-데이터-계약과-시점-정합성" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">3. Data: 데이터 계약과 시점 정합성</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#4-develop-재현-가능한-실험의-조건" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">4. Develop: 재현 가능한 실험의 조건</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#5-build-모델-파일을-릴리스-단위로-바꾸기" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">5. Build: 모델 파일을 릴리스 단위로 바꾸기</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#6-ci-cd-ct를-분리해서-설계하기" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">6. CI, CD, CT를 분리해서 설계하기</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#7-모델-레지스트리와-계보" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">7. 모델 레지스트리와 계보</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#8-feature-store-피처의-시간-의미를-보존하기" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">8. Feature Store: 피처의 시간 의미를 보존하기</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#9-deploy-배포-전략은-실험-전략과-다르다" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">9. Deploy: 배포 전략은 실험 전략과 다르다</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#10-operate-네-층의-관측성을-함께-보기" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">10. Operate: 네 층의 관측성을 함께 보기</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#11-improve-재학습은-자동화보다-제어가-먼저다" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">11. Improve: 재학습은 자동화보다 제어가 먼저다</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#12-참조-아키텍처와-도구-선택" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">12. 참조 아키텍처와 도구 선택</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#13-자주-실패하는-설계와-첫-점검-항목" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">13. 자주 실패하는 설계와 첫 점검 항목</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#14-프로덕션-준비-체크리스트" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">14. 프로덕션 준비 체크리스트</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#15-llmops로-확장할-때-달라지는-것" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">15. LLMOps로 확장할 때 달라지는 것</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#16-결론" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">16. 결론</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#17-참고-자료" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">17. 참고 자료</span> </a>  </li> </ul></div></details></nav></mobile-starlight-toc><script type="module" src="/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.hwBsy0Mo.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-rl4sue7z"><div class="sl-container astro-rl4sue7z"><kb-graph-card> <button class="kb-graph-card" type="button" data-open aria-haspopup="dialog"> <span class="kb-graph-copy"> <span class="kb-graph-title">Knowledge graph</span> <span class="kb-graph-subtitle" data-count>Loading related docs</span> </span> <span class="kb-graph-thumb" aria-hidden="true" data-map></span> <span class="kb-graph-expand" aria-hidden="true">Expand</span> </button> <dialog class="kb-graph-dialog" aria-label="Knowledge graph" data-dialog> <div class="kb-graph-panel"> <div class="kb-graph-panel-header"> <div> <p>Knowledge graph</p> <h2 data-heading>Related documents</h2> </div> <div class="kb-graph-tabs" role="tablist" aria-label="Knowledge graph views"> <button type="button" role="tab" aria-selected="true" data-tab="page">This page</button> <button type="button" role="tab" aria-selected="false" data-tab="global">Full graph</button> </div> <button type="button" data-close aria-label="Close knowledge graph">×</button> </div> <div class="kb-graph-stage" data-stage data-view="page"> <div data-page-stage></div> <div data-global-stage hidden></div> </div> </div> </dialog> </kb-graph-card> <script type="module" src="/_astro/KnowledgeGraphCard.astro_astro_type_script_index_0_lang.C475L69c.js"></script><starlight-toc data-min-h="2" data-max-h="2"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">On this page</h2><ul class="astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#목차" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">목차</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#1-mlops가-해결하는-실제-문제" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">1. MLOps가 해결하는 실제 문제</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#2-수명주기-선형-파이프라인이-아니라-폐루프-제어" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">2. 수명주기: 선형 파이프라인이 아니라 폐루프 제어</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#3-data-데이터-계약과-시점-정합성" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">3. Data: 데이터 계약과 시점 정합성</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#4-develop-재현-가능한-실험의-조건" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">4. Develop: 재현 가능한 실험의 조건</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#5-build-모델-파일을-릴리스-단위로-바꾸기" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">5. Build: 모델 파일을 릴리스 단위로 바꾸기</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#6-ci-cd-ct를-분리해서-설계하기" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">6. CI, CD, CT를 분리해서 설계하기</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#7-모델-레지스트리와-계보" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">7. 모델 레지스트리와 계보</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#8-feature-store-피처의-시간-의미를-보존하기" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">8. Feature Store: 피처의 시간 의미를 보존하기</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#9-deploy-배포-전략은-실험-전략과-다르다" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">9. Deploy: 배포 전략은 실험 전략과 다르다</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#10-operate-네-층의-관측성을-함께-보기" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">10. Operate: 네 층의 관측성을 함께 보기</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#11-improve-재학습은-자동화보다-제어가-먼저다" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">11. Improve: 재학습은 자동화보다 제어가 먼저다</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#12-참조-아키텍처와-도구-선택" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">12. 참조 아키텍처와 도구 선택</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#13-자주-실패하는-설계와-첫-점검-항목" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">13. 자주 실패하는 설계와 첫 점검 항목</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#14-프로덕션-준비-체크리스트" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">14. 프로덕션 준비 체크리스트</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#15-llmops로-확장할-때-달라지는-것" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">15. LLMOps로 확장할 때 달라지는 것</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#16-결론" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">16. 결론</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#17-참고-자료" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">17. 참고 자료</span> </a>  </li> </ul></nav></starlight-toc><script type="module" src="/_astro/TableOfContents.astro_astro_type_script_index_0_lang.FuRcXuRY.js"></script></div></div> </div> </aside> <div class="main-pane astro-67yu43on">  <main data-pagefind-body class="astro-bguv2lll" lang="en" dir="ltr">    <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <h1 id="_top" class="astro-j6tvhyss">MLOps: 모델을 배포하는 기술이 아니라 변경을 통제하는 운영 시스템</h1> </div> </div> <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <starlight-image-zoom> <template class="astro-vjux6bgf"> <dialog class="starlight-image-zoom-dialog astro-vjux6bgf"> <button aria-label="Unzoom image" class="starlight-image-zoom-control astro-vjux6bgf"> <svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" class="astro-vjux6bgf"> <use href="#starlight-image-zoom-icon-unzoom" class="astro-vjux6bgf"></use> </svg> </button> <figure class="astro-vjux6bgf"></figure> </dialog> </template> <svg xmlns="http://www.w3.org/2000/svg" style="display:none" class="astro-vjux6bgf"> <symbol id="starlight-image-zoom-icon-zoom" viewBox="0 0 24 24" class="astro-vjux6bgf"> <path d="M9.79 12.79 4 18.59V17a1 1 0 0 0-2 0v4a1 1 0 0 0 .08.38 1 1 0 0 0 .54.54A1 1 0 0 0 3 22h4a1 1 0 0 0 0-2H5.41l5.8-5.79a1 1 0 0 0-1.42-1.42ZM21.92 2.62a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-4a1 1 0 0 0 0 2h1.59l-5.8 5.79a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V7a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z" class="astro-vjux6bgf"></path> </symbol> <symbol id="starlight-image-zoom-icon-unzoom" viewBox="0 0 24 24" class="astro-vjux6bgf"> <path d="M21.71 2.29a1 1 0 0 0-1.42 0l-5.79 5.8V6.5a1 1 0 0 0-2 0v4a1 1 0 0 0 .08.38 1 1 0 0 0 .54.54 1 1 0 0 0 .38.08h4a1 1 0 0 0 0-2h-1.59l5.8-5.79a1 1 0 0 0 0-1.42ZM10.88 12.58a1 1 0 0 0-.38-.08h-4a1 1 0 0 0 0 2h1.59l-5.8 5.79a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l5.79-5.8v1.59a1 1 0 0 0 2 0v-4a1 1 0 0 0-.08-.38 1 1 0 0 0-.54-.54Z" class="astro-vjux6bgf"></path> </symbol> </svg> </starlight-image-zoom>   <script type="module" src="/_astro/ImageZoom.astro_astro_type_script_index_0_lang.CZmBqK-T.js"></script> <div class="sl-markdown-content"> <p>MLOps를 설명하는 인포그래픽은 보통 <code dir="auto">Data → Develop → Build → Deploy → Operate → Improve</code>라는 순환 구조와 실험 추적, 모델 레지스트리, CI/CD, 컨테이너, 오케스트레이션, 모니터링 같은 도구를 한 장에 배치한다. 전체 지형을 빠르게 파악하기에는 유용하지만, 실제 운영에서 가장 어려운 질문은 그림의 박스 사이에 숨어 있다.</p>
+<p><starlight-image-zoom-zoomable><img src="/mlops/assets/mlops-at-a-glance.png" alt="MLOps lifecycle, tooling, deployment, and monitoring at a glance"><button aria-label="Zoom image: MLOps lifecycle, tooling, deployment, and monitoring at a glance" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<ul>
+<li>어떤 데이터와 코드가 현재 프로덕션 모델을 만들었는가?</li>
+<li>오프라인 평가가 좋아진 모델을 어떤 증거로 프로덕션에 승격할 것인가?</li>
+<li>데이터 분포가 바뀌었다는 이유만으로 재학습을 시작해도 되는가?</li>
+<li>새 모델의 장애를 애플리케이션 장애와 어떻게 구분할 것인가?</li>
+<li>롤백할 때 모델만 되돌리면 되는가, 전처리와 피처 정의도 함께 되돌려야 하는가?</li>
+<li>지연 도착하는 정답 라벨 없이 모델 품질 저하를 어떻게 탐지할 것인가?</li>
+</ul>
+<p>이 글은 인포그래픽의 항목을 도구 목록이 아니라 <strong>변경 관리, 증거 수집, 점진적 전달, 피드백 제어</strong>라는 시스템 관점으로 다시 읽는다. 전통적인 예측 모델을 기본으로 설명하되, 마지막에는 LLM 및 RAG 애플리케이션에 필요한 LLMOps 확장도 다룬다.</p>
+<p>작성 기준: 2026년 7월</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="목차">목차</h2><a class="sl-anchor-link" href="#목차"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “목차”</span></a></div>
+<ol>
+<li><a href="#1-mlops%EA%B0%80-%ED%95%B4%EA%B2%B0%ED%95%98%EB%8A%94-%EC%8B%A4%EC%A0%9C-%EB%AC%B8%EC%A0%9C">MLOps가 해결하는 실제 문제</a></li>
+<li><a href="#2-%EC%88%98%EB%AA%85%EC%A3%BC%EA%B8%B0-%EC%84%A0%ED%98%95-%ED%8C%8C%EC%9D%B4%ED%94%84%EB%9D%BC%EC%9D%B8%EC%9D%B4-%EC%95%84%EB%8B%88%EB%9D%BC-%ED%8F%90%EB%A3%A8%ED%94%84-%EC%A0%9C%EC%96%B4">수명주기: 선형 파이프라인이 아니라 폐루프 제어</a></li>
+<li><a href="#3-data-%EB%8D%B0%EC%9D%B4%ED%84%B0-%EA%B3%84%EC%95%BD%EA%B3%BC-%EC%8B%9C%EC%A0%90-%EC%A0%95%ED%95%A9%EC%84%B1">Data: 데이터 계약과 시점 정합성</a></li>
+<li><a href="#4-develop-%EC%9E%AC%ED%98%84-%EA%B0%80%EB%8A%A5%ED%95%9C-%EC%8B%A4%ED%97%98%EC%9D%98-%EC%A1%B0%EA%B1%B4">Develop: 재현 가능한 실험의 조건</a></li>
+<li><a href="#5-build-%EB%AA%A8%EB%8D%B8-%ED%8C%8C%EC%9D%BC%EC%9D%84-%EB%A6%B4%EB%A6%AC%EC%8A%A4-%EB%8B%A8%EC%9C%84%EB%A1%9C-%EB%B0%94%EA%BE%B8%EA%B8%B0">Build: 모델 파일을 릴리스 단위로 바꾸기</a></li>
+<li><a href="#6-ci-cd-ct%EB%A5%BC-%EB%B6%84%EB%A6%AC%ED%95%B4%EC%84%9C-%EC%84%A4%EA%B3%84%ED%95%98%EA%B8%B0">CI, CD, CT를 분리해서 설계하기</a></li>
+<li><a href="#7-%EB%AA%A8%EB%8D%B8-%EB%A0%88%EC%A7%80%EC%8A%A4%ED%8A%B8%EB%A6%AC%EC%99%80-%EA%B3%84%EB%B3%B4">모델 레지스트리와 계보</a></li>
+<li><a href="#8-feature-store-%ED%94%BC%EC%B2%98%EC%9D%98-%EC%8B%9C%EA%B0%84-%EC%9D%98%EB%AF%B8%EB%A5%BC-%EB%B3%B4%EC%A1%B4%ED%95%98%EA%B8%B0">Feature Store: 피처의 시간 의미를 보존하기</a></li>
+<li><a href="#9-deploy-%EB%B0%B0%ED%8F%AC-%EC%A0%84%EB%9E%B5%EC%9D%80-%EC%8B%A4%ED%97%98-%EC%A0%84%EB%9E%B5%EA%B3%BC-%EB%8B%A4%EB%A5%B4%EB%8B%A4">Deploy: 배포 전략은 실험 전략과 다르다</a></li>
+<li><a href="#10-operate-%EB%84%A4-%EC%B8%B5%EC%9D%98-%EA%B4%80%EC%B8%A1%EC%84%B1%EC%9D%84-%ED%95%A8%EA%BB%98-%EB%B3%B4%EA%B8%B0">Operate: 네 층의 관측성을 함께 보기</a></li>
+<li><a href="#11-improve-%EC%9E%AC%ED%95%99%EC%8A%B5%EC%9D%80-%EC%9E%90%EB%8F%99%ED%99%94%EB%B3%B4%EB%8B%A4-%EC%A0%9C%EC%96%B4%EA%B0%80-%EB%A8%BC%EC%A0%80%EB%8B%A4">Improve: 재학습은 자동화보다 제어가 먼저다</a></li>
+<li><a href="#12-%EC%B0%B8%EC%A1%B0-%EC%95%84%ED%82%A4%ED%85%8D%EC%B2%98%EC%99%80-%EB%8F%84%EA%B5%AC-%EC%84%A0%ED%83%9D">참조 아키텍처와 도구 선택</a></li>
+<li><a href="#13-%EC%9E%90%EC%A3%BC-%EC%8B%A4%ED%8C%A8%ED%95%98%EB%8A%94-%EC%84%A4%EA%B3%84%EC%99%80-%EC%B2%AB-%EC%A0%90%EA%B2%80-%ED%95%AD%EB%AA%A9">자주 실패하는 설계와 첫 점검 항목</a></li>
+<li><a href="#14-%ED%94%84%EB%A1%9C%EB%8D%95%EC%85%98-%EC%A4%80%EB%B9%84-%EC%B2%B4%ED%81%AC%EB%A6%AC%EC%8A%A4%ED%8A%B8">프로덕션 준비 체크리스트</a></li>
+<li><a href="#15-llmops%EB%A1%9C-%ED%99%95%EC%9E%A5%ED%95%A0-%EB%95%8C-%EB%8B%AC%EB%9D%BC%EC%A7%80%EB%8A%94-%EA%B2%83">LLMOps로 확장할 때 달라지는 것</a></li>
+<li><a href="#16-%EA%B2%B0%EB%A1%A0">결론</a></li>
+<li><a href="#17-%EC%B0%B8%EA%B3%A0-%EC%9E%90%EB%A3%8C">참고 자료</a></li>
+</ol>
+<div class="sl-heading-wrapper level-h2"><h2 id="1-mlops가-해결하는-실제-문제">1. MLOps가 해결하는 실제 문제</h2><a class="sl-anchor-link" href="#1-mlops가-해결하는-실제-문제"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “1. MLOps가 해결하는 실제 문제”</span></a></div>
+<p>MLOps를 “머신러닝을 위한 DevOps”라고만 정의하면 핵심 차이를 놓치기 쉽다. 일반 소프트웨어는 동일한 코드와 입력에 대해 기대 동작을 비교적 명확히 테스트할 수 있다. 반면 ML 시스템의 동작은 코드뿐 아니라 데이터, 학습 알고리즘, 확률적 실행, 모델 파라미터, 서빙 시점의 입력 분포에 의해 결정된다.</p>
+<p>프로덕션 예측을 단순화하면 다음과 같이 쓸 수 있다.</p>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mover accent="true"><mi>y</mi><mo>^</mo></mover><mo>=</mo><msub><mi>f</mi><mi>θ</mi></msub><mo stretchy="false">(</mo><mi>T</mi><mo stretchy="false">(</mo><mi>x</mi><mo separator="true">;</mo><mi>ϕ</mi><mo stretchy="false">)</mo><mo separator="true">,</mo><mi>c</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\hat{y} = f_{\theta}(T(x; \phi), c)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord accent"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1944em;"><span class="mord">^</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1944em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1076em;">f</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.1076em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0278em;">θ</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.1389em;">T</span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mpunct">;</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">ϕ</span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">c</span><span class="mclose">)</span></span></span></span></span>
+<ul>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span>: 원시 입력</li>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi></mrow><annotation encoding="application/x-tex">T</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">T</span></span></span></span>: 전처리 및 피처 변환</li>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ϕ</mi></mrow><annotation encoding="application/x-tex">\phi</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">ϕ</span></span></span></span>: 피처 정의와 변환 파라미터</li>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>θ</mi></mrow><annotation encoding="application/x-tex">\theta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">θ</span></span></span></span>: 학습된 모델 파라미터</li>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>c</mi></mrow><annotation encoding="application/x-tex">c</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">c</span></span></span></span>: 런타임 설정, 임계값, 라우팅 정책 같은 운영 컨텍스트</li>
+</ul>
+<p>여기서 코드가 같아도 학습 데이터 스냅샷, 피처 계산 시점, 라이브러리 버전, 랜덤 시드, 하드웨어 커널이 달라지면 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>θ</mi></mrow><annotation encoding="application/x-tex">\theta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">θ</span></span></span></span>가 달라질 수 있다. 모델이 같아도 임계값이나 전처리 정의가 달라지면 비즈니스 동작이 달라진다. 따라서 프로덕션 릴리스의 단위는 <code dir="auto">model.pkl</code>이나 checkpoint 하나가 아니다.</p>
+<div class="expressive-code"><link rel="stylesheet" href="/_astro/ec.v4551.css"><script type="module" src="/_astro/ec.0vx5m.js"></script><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">ML release</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">= code revision</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">+ data snapshot</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">+ feature definitions</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">+ training configuration</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">+ model artifact</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">+ runtime environment</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">+ serving configuration</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">+ validation evidence</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="ML release= code revision+ data snapshot+ feature definitions+ training configuration+ model artifact+ runtime environment+ serving configuration+ validation evidence"><div></div></button></div></figure></div>
+<p>MLOps의 첫 번째 목적은 이 복합 릴리스를 <strong>식별 가능하고 재현 가능하며 롤백 가능하게 만드는 것</strong>이다. 두 번째 목적은 새 릴리스가 오프라인 점수뿐 아니라 온라인 시스템과 비즈니스 목표에서도 안전한지 검증하는 것이다. 세 번째 목적은 운영에서 얻은 신호를 다음 데이터와 실험으로 되돌리되, 잘못된 피드백이 모델을 증폭시키지 않도록 제어하는 것이다.</p>
+<p>Google의 <em>Hidden Technical Debt in Machine Learning Systems</em>가 지적했듯이 실제 ML 시스템에서는 모델 코드보다 데이터 의존성, 피드백 루프, 설정, 외부 세계의 변화가 더 큰 운영 부채를 만들 수 있다. 좋은 MLOps는 모델 학습을 빠르게 만드는 데서 끝나지 않고 이 숨은 결합을 드러낸다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="2-수명주기-선형-파이프라인이-아니라-폐루프-제어">2. 수명주기: 선형 파이프라인이 아니라 폐루프 제어</h2><a class="sl-anchor-link" href="#2-수명주기-선형-파이프라인이-아니라-폐루프-제어"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “2. 수명주기: 선형 파이프라인이 아니라 폐루프 제어”</span></a></div>
+<p>인포그래픽의 여섯 단계는 다음처럼 읽는 것이 좋다.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "fontFamily": "Inter, Arial, sans-serif", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    A["Data&#x3C;br/>수집·검증"] --> B["Develop&#x3C;br/>실험·평가"]
+    B --> C["Build&#x3C;br/>패키징·등록"]
+    C --> D["Deploy&#x3C;br/>점진적 전달"]
+    D --> E["Operate&#x3C;br/>관측·대응"]
+    E --> F["Improve&#x3C;br/>분석·재학습"]
+    F -. "새 증거" .-> A
+    E -. "운영 피드백" .-> B
+
+    classDef primary fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef secondary fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef note fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef accent fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    class A,B primary
+    class C,D secondary
+    class E accent
+    class F note</pre>
+<p>이 흐름에서 가장 중요한 단계는 <code dir="auto">Operate → Improve → Data</code>로 돌아오는 점선이다. 이 선이 없으면 자동화된 모델 전달 파이프라인일 뿐이고, 선을 아무 통제 없이 연결하면 위험한 자동 재학습 루프가 된다.</p>
+<p>각 단계는 파일을 다음 단계로 넘기는 작업이 아니라 <strong>검증된 상태 전이</strong>여야 한다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>현재 상태</th><th>전이 조건</th><th>생성해야 하는 증거</th></tr></thead><tbody><tr><td>Raw data → Validated data</td><td>스키마, 범위, 완전성, 중복, 시점 검사 통과</td><td>데이터 품질 보고서, 스냅샷 ID</td></tr><tr><td>Experiment → Candidate</td><td>기준 모델 대비 오프라인 평가 통과</td><td>실행 ID, 평가 결과, slice별 성능</td></tr><tr><td>Candidate → Registered</td><td>패키지 및 보안 검사 통과</td><td>artifact digest, SBOM, model signature</td></tr><tr><td>Registered → Staging</td><td>통합, 부하, 호환성 검사 통과</td><td>테스트 로그, 용량 계획</td></tr><tr><td>Staging → Canary</td><td>승인 정책 및 배포 전 검사 통과</td><td>승인 기록, 변경 요청, rollback target</td></tr><tr><td>Canary → Champion</td><td>온라인 guardrail과 목표 지표 통과</td><td>비교 대시보드, 통계적 판단</td></tr><tr><td>Champion → Retired</td><td>대체 모델 안정화 및 보존 정책 충족</td><td>종료 사유, 보존 및 삭제 기록</td></tr></tbody></table>
+<p>파이프라인의 성숙도는 박스 수나 사용하는 제품 수로 측정하기 어렵다. 더 유용한 질문은 “각 상태 전이가 기계가 읽을 수 있는 정책과 증거로 남는가?”이다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="3-data-데이터-계약과-시점-정합성">3. Data: 데이터 계약과 시점 정합성</h2><a class="sl-anchor-link" href="#3-data-데이터-계약과-시점-정합성"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3. Data: 데이터 계약과 시점 정합성”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="데이터-버전은-파일-이름이-아니다">데이터 버전은 파일 이름이 아니다</h3><a class="sl-anchor-link" href="#데이터-버전은-파일-이름이-아니다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “데이터 버전은 파일 이름이 아니다”</span></a></div>
+<p><code dir="auto">dataset_final_v7.csv</code> 같은 이름은 재현성에 충분하지 않다. 학습 실행이 참조하는 데이터 버전은 최소한 다음 정보를 가져야 한다.</p>
+<ul>
+<li>저장 위치와 immutable snapshot 또는 content digest</li>
+<li>추출 쿼리와 원본 테이블 버전</li>
+<li>event time과 processing time의 정의</li>
+<li>학습/검증/테스트 분할 규칙</li>
+<li>라벨 생성 로직과 관측 가능한 지연 시간</li>
+<li>제외, 샘플링, 비식별화 정책</li>
+<li>데이터 소유자, 보존 기간, 접근 정책</li>
+</ul>
+<p>소규모 파일 기반 프로젝트에서는 DVC 같은 도구가 Git revision과 외부 artifact storage를 연결할 수 있다. 데이터 레이크 규모에서는 table snapshot, object version, catalog metadata를 조합하는 편이 일반적이다. 중요한 것은 특정 도구가 아니라 <strong>같은 데이터 논리 버전을 다시 해석할 수 있는가</strong>이다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="데이터-계약은-파이프라인의-타입-시스템이다">데이터 계약은 파이프라인의 타입 시스템이다</h3><a class="sl-anchor-link" href="#데이터-계약은-파이프라인의-타입-시스템이다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “데이터 계약은 파이프라인의 타입 시스템이다”</span></a></div>
+<p>스키마 검사만으로는 데이터 품질을 보장할 수 없다. <code dir="auto">age</code> 열이 정수형이어도 단위가 년에서 개월로 바뀌면 모델은 정상적으로 잘못된 예측을 낸다. 데이터 계약에는 구문적 조건과 의미적 조건이 함께 필요하다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>계약 범주</th><th>예시</th></tr></thead><tbody><tr><td>Schema</td><td>열 이름, 타입, null 허용 여부</td></tr><tr><td>Domain</td><td>값의 범위, 단위, enum 집합</td></tr><tr><td>Distribution</td><td>평균, 분위수, 범주 비율, 희소도</td></tr><tr><td>Freshness</td><td>event time 기준 최대 지연</td></tr><tr><td>Volume</td><td>시간당 row 수, 결측/중복률</td></tr><tr><td>Referential integrity</td><td>entity key 존재와 유일성</td></tr><tr><td>Privacy</td><td>민감정보 분류, 마스킹, retention</td></tr><tr><td>Ownership</td><td>producer, consumer, 장애 연락 경로</td></tr></tbody></table>
+<p>임계값은 모두 동일하게 hard fail로 처리하지 않는다. 스키마 파손이나 필수 키 누락은 파이프라인을 중단해야 하지만, 계절성 때문에 예상 가능한 분포 변화는 경고와 검토 대상으로 둘 수 있다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="시간-누수와-point-in-time-correctness">시간 누수와 point-in-time correctness</h3><a class="sl-anchor-link" href="#시간-누수와-point-in-time-correctness"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “시간 누수와 point-in-time correctness”</span></a></div>
+<p>오프라인 학습 데이터는 예측 시점에 알 수 있었던 정보만 포함해야 한다. 고객이 10시 00분에 이탈할지를 예측했다면, 10시 05분에 생성된 고객지원 상태를 학습 피처에 포함해서는 안 된다. 이 원칙이 point-in-time correctness다.</p>
+<p>피처 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi></mrow><annotation encoding="application/x-tex">j</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.854em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0572em;">j</span></span></span></span>의 event time을 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>t</mi><mi>j</mi></msub></mrow><annotation encoding="application/x-tex">t_j</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9012em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0572em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span>라고 할 때 예측 시점 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>t</mi><mi>p</mi></msub></mrow><annotation encoding="application/x-tex">t_p</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9012em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">p</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span>에 사용할 수 있는 피처는 기본적으로 다음 조건을 만족해야 한다.</p>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>t</mi><mi>j</mi></msub><mo>≤</mo><msub><mi>t</mi><mi>p</mi></msub></mrow><annotation encoding="application/x-tex">t_j \leq t_p</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9221em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0572em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.9012em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">p</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span></span>
+<p>실제로는 late-arriving event, backfill, window aggregation 때문에 단순 비교보다 복잡해진다. 학습 데이터 생성기가 현재의 최신 테이블 상태만 읽으면 미래 정보가 과거 샘플에 섞이는 label leakage가 발생할 수 있다. Feast의 point-in-time join 같은 기능은 entity와 timestamp를 기준으로 당시 이용 가능했던 피처를 결합하기 위한 장치다.</p>
+<aside aria-label="Caution" class="starlight-aside starlight-aside--caution"><p class="starlight-aside__title" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="starlight-aside__icon"><path d="M12 16C11.8022 16 11.6089 16.0587 11.4444 16.1686C11.28 16.2784 11.1518 16.4346 11.0761 16.6173C11.0004 16.8001 10.9806 17.0011 11.0192 17.1951C11.0578 17.3891 11.153 17.5673 11.2929 17.7071C11.4327 17.847 11.6109 17.9422 11.8049 17.9808C11.9989 18.0194 12.2 17.9996 12.3827 17.9239C12.5654 17.8482 12.7216 17.72 12.8315 17.5556C12.9413 17.3911 13 17.1978 13 17C13 16.7348 12.8946 16.4805 12.7071 16.2929C12.5196 16.1054 12.2652 16 12 16ZM22.67 17.47L14.62 3.47003C14.3598 3.00354 13.9798 2.61498 13.5192 2.3445C13.0586 2.07401 12.5341 1.9314 12 1.9314C11.4659 1.9314 10.9414 2.07401 10.4808 2.3445C10.0202 2.61498 9.64019 3.00354 9.38 3.47003L1.38 17.47C1.11079 17.924 0.966141 18.441 0.960643 18.9688C0.955144 19.4966 1.089 20.0166 1.34868 20.4761C1.60837 20.9356 1.9847 21.3185 2.43968 21.5861C2.89466 21.8536 3.41218 21.9964 3.94 22H20.06C20.5921 22.0053 21.1159 21.8689 21.5779 21.6049C22.0399 21.341 22.4234 20.9589 22.689 20.4978C22.9546 20.0368 23.0928 19.5134 23.0895 18.9814C23.0862 18.4493 22.9414 17.9277 22.67 17.47ZM20.94 19.47C20.8523 19.626 20.7245 19.7556 20.5697 19.8453C20.4149 19.935 20.2389 19.9815 20.06 19.98H3.94C3.76111 19.9815 3.5851 19.935 3.43032 19.8453C3.27553 19.7556 3.14765 19.626 3.06 19.47C2.97223 19.318 2.92602 19.1456 2.92602 18.97C2.92602 18.7945 2.97223 18.622 3.06 18.47L11.06 4.47003C11.1439 4.30623 11.2714 4.16876 11.4284 4.07277C11.5855 3.97678 11.766 3.92599 11.95 3.92599C12.134 3.92599 12.3145 3.97678 12.4716 4.07277C12.6286 4.16876 12.7561 4.30623 12.84 4.47003L20.89 18.47C20.9892 18.6199 21.0462 18.7937 21.055 18.9732C21.0638 19.1527 21.0241 19.3312 20.94 19.49V19.47ZM12 8.00003C11.7348 8.00003 11.4804 8.10538 11.2929 8.29292C11.1054 8.48046 11 8.73481 11 9.00003V13C11 13.2652 11.1054 13.5196 11.2929 13.7071C11.4804 13.8947 11.7348 14 12 14C12.2652 14 12.5196 13.8947 12.7071 13.7071C12.8946 13.5196 13 13.2652 13 13V9.00003C13 8.73481 12.8946 8.48046 12.7071 8.29292C12.5196 8.10538 12.2652 8.00003 12 8.00003Z"></path></svg>Caution</p><div class="starlight-aside__content"><p>랜덤 train/test split은 시간에 따라 동작이 변하는 서비스에서 낙관적인 결과를 만들 수 있다. 온라인 예측 문제라면 시간 순서 분할과 backtest를 기본 후보로 검토해야 한다.</p></div></aside>
+<div class="sl-heading-wrapper level-h3"><h3 id="데이터-품질과-데이터-유용성을-구분한다">데이터 품질과 데이터 유용성을 구분한다</h3><a class="sl-anchor-link" href="#데이터-품질과-데이터-유용성을-구분한다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “데이터 품질과 데이터 유용성을 구분한다”</span></a></div>
+<p>데이터가 계약을 통과했다고 해서 모델에 유용한 것은 아니다.</p>
+<ul>
+<li>데이터 품질: 형식과 의미가 계약을 만족하는가?</li>
+<li>데이터 대표성: 배포 환경의 모집단을 충분히 반영하는가?</li>
+<li>라벨 품질: 정답 정의와 측정 과정이 일관적인가?</li>
+<li>피처 유용성: 타깃을 예측하는 신호가 있으며 안정적인가?</li>
+<li>운영 가능성: 동일 피처를 요구 지연 시간과 비용 안에서 제공할 수 있는가?</li>
+</ul>
+<p>이 구분이 없으면 data validation 단계가 통과한 뒤에도 모델 품질이 지속적으로 하락하는 이유를 설명하기 어렵다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="4-develop-재현-가능한-실험의-조건">4. Develop: 재현 가능한 실험의 조건</h2><a class="sl-anchor-link" href="#4-develop-재현-가능한-실험의-조건"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “4. Develop: 재현 가능한 실험의 조건”</span></a></div>
+<p>실험 추적 도구는 metric 표를 저장하는 UI가 아니다. 특정 결과가 어떤 입력과 실행 환경에서 나왔는지 설명하는 실험 장부다.</p>
+<p>한 실행은 적어도 다음 튜플로 식별해야 한다.</p>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>R</mi><mi>u</mi><mi>n</mi><mo>=</mo><mo stretchy="false">(</mo><mi>C</mi><mo separator="true">,</mo><mi>D</mi><mo separator="true">,</mo><mi>F</mi><mo separator="true">,</mo><mi>H</mi><mo separator="true">,</mo><mi>E</mi><mo separator="true">,</mo><mi>S</mi><mo separator="true">,</mo><mi>P</mi><mo separator="true">,</mo><mi>M</mi><mo separator="true">,</mo><mi>A</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">Run = (C, D, F, H, E, S, P, M, A)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span><span class="mord mathnormal">u</span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0715em;">C</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">F</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0813em;">H</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0576em;">E</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0576em;">S</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">P</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">A</span><span class="mclose">)</span></span></span></span></span>
+<ul>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi></mrow><annotation encoding="application/x-tex">C</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0715em;">C</span></span></span></span>: code revision</li>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi></mrow><annotation encoding="application/x-tex">D</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span></span></span></span>: data snapshot</li>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>F</mi></mrow><annotation encoding="application/x-tex">F</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">F</span></span></span></span>: feature definition revision</li>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>H</mi></mrow><annotation encoding="application/x-tex">H</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0813em;">H</span></span></span></span>: hyperparameters와 학습 설정</li>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>E</mi></mrow><annotation encoding="application/x-tex">E</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0576em;">E</span></span></span></span>: container image, dependency lock, runtime environment</li>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi></mrow><annotation encoding="application/x-tex">S</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0576em;">S</span></span></span></span>: seed와 비결정적 연산 설정</li>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi></mrow><annotation encoding="application/x-tex">P</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">P</span></span></span></span>: hardware 및 parallelism topology</li>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi></mrow><annotation encoding="application/x-tex">M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span></span></span></span>: 평가 metric과 slice 결과</li>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal">A</span></span></span></span>: 생성된 artifact와 digest</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="재현성에도-수준이-있다">재현성에도 수준이 있다</h3><a class="sl-anchor-link" href="#재현성에도-수준이-있다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “재현성에도 수준이 있다”</span></a></div>
+<p>분산 GPU 학습이나 비결정적 커널이 포함된 환경에서는 bitwise identical 결과가 항상 현실적이지 않다. 팀은 필요한 재현성 수준을 명시해야 한다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>수준</th><th>의미</th><th>대표 용도</th></tr></thead><tbody><tr><td>Artifact reproducibility</td><td>동일 artifact를 다시 가져올 수 있음</td><td>배포, 롤백</td></tr><tr><td>Pipeline reproducibility</td><td>동일 입력으로 파이프라인을 다시 실행할 수 있음</td><td>감사, 장애 분석</td></tr><tr><td>Statistical reproducibility</td><td>결과가 허용 분포와 오차 범위 안에서 반복됨</td><td>대규모 학습</td></tr><tr><td>Bitwise reproducibility</td><td>출력이 비트 단위로 동일함</td><td>일부 규제·과학 계산</td></tr></tbody></table>
+<p>“seed를 기록했다”는 것만으로 재현 가능하다고 단정하면 안 된다. CUDA/cuDNN 알고리즘, collective 순서, 데이터 로더 병렬성, worker 수, compiler optimization, accelerator 세대까지 결과에 영향을 줄 수 있다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="실험-평가에서-평균-하나를-버린다">실험 평가에서 평균 하나를 버린다</h3><a class="sl-anchor-link" href="#실험-평가에서-평균-하나를-버린다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “실험 평가에서 평균 하나를 버린다”</span></a></div>
+<p>전체 accuracy나 RMSE 하나만 비교하면 중요한 회귀를 숨긴다. candidate model은 다음 축으로 비교하는 것이 좋다.</p>
+<ul>
+<li>기준 모델과의 paired comparison</li>
+<li>시간, 지역, 디바이스, 고객군 등 중요 slice별 품질</li>
+<li>calibration과 임계값 민감도</li>
+<li>robustness, out-of-distribution, missing feature 테스트</li>
+<li>학습 시간, peak memory, artifact size</li>
+<li>서빙 latency, throughput, accelerator memory</li>
+<li>요청당 compute 및 비용</li>
+</ul>
+<p>모델 선택은 단일 metric 최대화보다 제약식이 있는 최적화에 가깝다.</p>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>max</mi><mo>⁡</mo><mi>Q</mi><mo stretchy="false">(</mo><mi>m</mi><mo stretchy="false">)</mo><mspace width="1em"></mspace><mtext>subject to</mtext><mspace width="1em"></mspace><msub><mi>L</mi><mrow><mi>p</mi><mn>99</mn></mrow></msub><mo stretchy="false">(</mo><mi>m</mi><mo stretchy="false">)</mo><mo>≤</mo><msub><mi>L</mi><mrow><mi>S</mi><mi>L</mi><mi>O</mi></mrow></msub><mo separator="true">,</mo><mtext>  </mtext><mi>C</mi><mo stretchy="false">(</mo><mi>m</mi><mo stretchy="false">)</mo><mo>≤</mo><msub><mi>C</mi><mrow><mi>b</mi><mi>u</mi><mi>d</mi><mi>g</mi><mi>e</mi><mi>t</mi></mrow></msub><mo separator="true">,</mo><mtext>  </mtext><msub><mi>R</mi><mi>k</mi></msub><mo stretchy="false">(</mo><mi>m</mi><mo stretchy="false">)</mo><mo>≥</mo><msub><mi>R</mi><mrow><mi>m</mi><mi>i</mi><mi>n</mi><mo separator="true">,</mo><mi>k</mi></mrow></msub></mrow><annotation encoding="application/x-tex">\max Q(m)
+\quad \text{subject to} \quad
+L_{p99}(m) \leq L_{SLO},\;
+C(m) \leq C_{budget},\;
+R_k(m) \geq R_{min,k}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0361em;vertical-align:-0.2861em;"></span><span class="mop">max</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">Q</span><span class="mopen">(</span><span class="mord mathnormal">m</span><span class="mclose">)</span><span class="mspace" style="margin-right:1em;"></span><span class="mord text"><span class="mord">subject to</span></span><span class="mspace" style="margin-right:1em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">p</span><span class="mord mtight">99</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">m</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0576em;">S</span><span class="mord mathnormal mtight">L</span><span class="mord mathnormal mtight" style="margin-right:0.0278em;">O</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0715em;">C</span><span class="mopen">(</span><span class="mord mathnormal">m</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.0361em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0715em;">C</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0715em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">b</span><span class="mord mathnormal mtight">u</span><span class="mord mathnormal mtight">d</span><span class="mord mathnormal mtight" style="margin-right:0.0359em;">g</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0077em;">R</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0077em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0315em;">k</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">m</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≥</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.9694em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0077em;">R</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0077em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">min</span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight" style="margin-right:0.0315em;">k</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span></span>
+<p><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Q</mi></mrow><annotation encoding="application/x-tex">Q</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8778em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">Q</span></span></span></span>는 품질 목표, <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mrow><mi>p</mi><mn>99</mn></mrow></msub></mrow><annotation encoding="application/x-tex">L_{p99}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9694em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">p</span><span class="mord mtight">99</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span>는 tail latency, <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi></mrow><annotation encoding="application/x-tex">C</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0715em;">C</span></span></span></span>는 비용, <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>R</mi><mi>k</mi></msub></mrow><annotation encoding="application/x-tex">R_k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0077em;">R</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0077em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0315em;">k</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>는 중요 slice 또는 안전성 요구조건이다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="5-build-모델-파일을-릴리스-단위로-바꾸기">5. Build: 모델 파일을 릴리스 단위로 바꾸기</h2><a class="sl-anchor-link" href="#5-build-모델-파일을-릴리스-단위로-바꾸기"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “5. Build: 모델 파일을 릴리스 단위로 바꾸기”</span></a></div>
+<p>학습이 끝난 checkpoint를 바로 배포하면 학습 환경의 우연한 상태가 프로덕션 계약이 된다. Build 단계는 실험 결과를 검증 가능한 불변 릴리스로 바꾸는 과정이다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="릴리스-번들에-포함할-것">릴리스 번들에 포함할 것</h3><a class="sl-anchor-link" href="#릴리스-번들에-포함할-것"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “릴리스 번들에 포함할 것”</span></a></div>
+<ul>
+<li>가중치 또는 serialized model</li>
+<li>전처리와 후처리 코드</li>
+<li>입력·출력 schema와 model signature</li>
+<li>tokenizer, vocabulary, normalization statistics</li>
+<li>dependency lock과 container image digest</li>
+<li>기본 runtime configuration</li>
+<li>model card 또는 운영 설명</li>
+<li>평가 보고서와 승인 상태</li>
+<li>source run, data snapshot, code revision을 가리키는 lineage</li>
+<li>SBOM, 취약점 검사 결과, 서명 또는 provenance</li>
+</ul>
+<p>모델 artifact는 object storage에 저장하고 레지스트리는 metadata와 상태를 관리하는 식으로 역할을 분리하는 경우가 많다. 레지스트리에 수 GB 또는 수백 GB의 checkpoint 자체를 관계형 데이터베이스 blob으로 넣는 설계는 피하는 편이 좋다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="가변-태그-대신-digest로-배포한다">가변 태그 대신 digest로 배포한다</h3><a class="sl-anchor-link" href="#가변-태그-대신-digest로-배포한다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “가변 태그 대신 digest로 배포한다”</span></a></div>
+<p><code dir="auto">model:latest</code>, <code dir="auto">image:prod</code> 같은 가변 태그만 배포 명세에 남기면 같은 manifest가 시간에 따라 다른 artifact를 가리킬 수 있다. 사람이 읽기 쉬운 alias는 승격에 유용하지만 실제 배포 이력에는 immutable version과 digest를 함께 기록해야 한다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Human-facing pointer: fraud-model@champion</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Resolved model:       fraud-model version 42</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Artifact digest:      sha256:...</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Container digest:     sha256:...</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Feature view:         fraud_features revision 18</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Human-facing pointer: fraud-model@championResolved model:       fraud-model version 42Artifact digest:      sha256:...Container digest:     sha256:...Feature view:         fraud_features revision 18"><div></div></button></div></figure></div>
+<p>롤백도 alias를 과거 모델로 옮기는 작업만으로 끝나지 않을 수 있다. 새 모델이 새 피처 schema나 tokenizer를 요구한다면 모델, 전처리, 피처 정의, serving configuration을 하나의 호환 가능한 release bundle로 되돌려야 한다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="6-ci-cd-ct를-분리해서-설계하기">6. CI, CD, CT를 분리해서 설계하기</h2><a class="sl-anchor-link" href="#6-ci-cd-ct를-분리해서-설계하기"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “6. CI, CD, CT를 분리해서 설계하기”</span></a></div>
+<p>인포그래픽에서 CI/CD는 하나의 파이프라인처럼 보이지만 ML 시스템에서는 CI, CD, CT가 서로 다른 변경을 다룬다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>루프</th><th>주된 트리거</th><th>검증 대상</th><th>결과</th></tr></thead><tbody><tr><td>CI</td><td>코드, pipeline definition, feature logic 변경</td><td>unit, component, contract, security test</td><td>검증된 코드와 실행 이미지</td></tr><tr><td>CD</td><td>검증된 pipeline 또는 model release</td><td>integration, load, compatibility, rollout policy</td><td>staging/production 배포</td></tr><tr><td>CT</td><td>새 데이터, schedule, drift, 품질 저하</td><td>data/model validation, candidate comparison</td><td>새 model candidate</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h3"><h3 id="ci-모델-점수-이전에-파이프라인을-테스트한다">CI: 모델 점수 이전에 파이프라인을 테스트한다</h3><a class="sl-anchor-link" href="#ci-모델-점수-이전에-파이프라인을-테스트한다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “CI: 모델 점수 이전에 파이프라인을 테스트한다”</span></a></div>
+<p>ML용 CI에는 일반적인 lint, unit test 외에 다음 검사가 필요하다.</p>
+<ul>
+<li>데이터 schema 및 feature contract test</li>
+<li>전처리 transformation의 단위 테스트</li>
+<li>작은 고정 dataset을 사용한 pipeline smoke test</li>
+<li>train/serve preprocessing parity test</li>
+<li>model serialization/deserialization test</li>
+<li>model signature와 API schema 호환성 검사</li>
+<li>inference determinism 또는 허용 오차 검사</li>
+<li>training throughput, memory, serving latency 회귀 검사</li>
+<li>dependency, container, secret, license 검사</li>
+</ul>
+<p>전체 dataset과 GPU cluster를 매 pull request마다 사용하는 것은 비용 효율적이지 않다. 빠른 synthetic/sampled test, 주기적인 통합 학습, release 전 full-scale validation으로 테스트 피라미드를 나누는 편이 낫다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="cd-모델과-파이프라인을-모두-전달한다">CD: 모델과 파이프라인을 모두 전달한다</h3><a class="sl-anchor-link" href="#cd-모델과-파이프라인을-모두-전달한다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “CD: 모델과 파이프라인을 모두 전달한다”</span></a></div>
+<p>MLOps에서 배포 대상은 두 종류다.</p>
+<ol>
+<li>prediction service 또는 batch scoring job</li>
+<li>반복 실행될 training/validation pipeline</li>
+</ol>
+<p>모델만 자동 배포하고 학습 파이프라인은 notebook과 수동 명령에 남겨두면 운영자는 모델이 어떻게 생성됐는지 재구성하기 어렵다. 반대로 pipeline code를 자동 배포하더라도 model promotion이 무조건 자동이면 품질 회귀가 프로덕션으로 바로 전파될 수 있다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="ct-재학습과-자동-승격을-분리한다">CT: 재학습과 자동 승격을 분리한다</h3><a class="sl-anchor-link" href="#ct-재학습과-자동-승격을-분리한다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “CT: 재학습과 자동 승격을 분리한다”</span></a></div>
+<p>Continuous Training은 새 데이터나 성능 신호에 따라 학습 파이프라인을 반복 실행하는 것이다. 새 candidate 생성과 프로덕션 승격은 서로 다른 정책이어야 한다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">trigger → retrain → validate → register candidate</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">                                 </span></span><span style="--0:#d6deeb;--1:#403f53">↓</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">                         </span></span><span style="--0:#d6deeb;--1:#403f53">promotion decision</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">                     </span></span><span style="--0:#d6deeb;--1:#403f53">automatic or human-approved</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="trigger → retrain → validate → register candidate                                 ↓                         promotion decision                     automatic or human-approved"><div></div></button></div></figure></div>
+<p>고위험 서비스에서는 candidate 생성까지 자동화하고 승격에는 사람 승인을 요구할 수 있다. 충분한 온라인 검증과 rollback 자동화가 갖춰진 저위험 서비스는 정책 기반 자동 승격이 가능하다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="7-모델-레지스트리와-계보">7. 모델 레지스트리와 계보</h2><a class="sl-anchor-link" href="#7-모델-레지스트리와-계보"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “7. 모델 레지스트리와 계보”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="레지스트리는-모델-파일-창고가-아니다">레지스트리는 모델 파일 창고가 아니다</h3><a class="sl-anchor-link" href="#레지스트리는-모델-파일-창고가-아니다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “레지스트리는 모델 파일 창고가 아니다”</span></a></div>
+<p>모델 레지스트리가 관리해야 하는 핵심은 이름, 버전, 평가 증거, lineage, lifecycle state, alias, 승인 기록이다. MLflow Model Registry의 alias처럼 <code dir="auto">champion</code>, <code dir="auto">challenger</code> 같은 가변 포인터를 immutable model version과 분리하면 serving code를 바꾸지 않고 승격 대상을 교체할 수 있다.</p>
+<p>다만 <code dir="auto">Staging</code>, <code dir="auto">Production</code> 같은 상태 이름 자체가 거버넌스를 만들어주지는 않는다. 누가 어떤 검증 결과를 근거로 상태를 변경했는지 기록되어야 한다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="계보는-원인을-역추적하는-그래프다">계보는 원인을 역추적하는 그래프다</h3><a class="sl-anchor-link" href="#계보는-원인을-역추적하는-그래프다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “계보는 원인을 역추적하는 그래프다”</span></a></div>
+<pre class="mermaid">%%{init: {"theme": "base", "fontFamily": "Inter, Arial, sans-serif", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    A["Data&#x3C;br/>snapshot"] --> B["Features&#x3C;br/>revision"]
+    C["Code&#x3C;br/>commit"] --> D["Training&#x3C;br/>run"]
+    B --> D
+    E["Runtime&#x3C;br/>image digest"] --> D
+    D --> F["Model&#x3C;br/>version"]
+    F --> G["Evaluate&#x3C;br/>evidence"]
+    G --> H["Release&#x3C;br/>bundle"]
+    H --> I["Deploy&#x3C;br/>revision"]
+    I --> J["Predict&#x3C;br/>feedback"]
+
+    classDef primary fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef secondary fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef note fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef accent fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    class A,C,E primary
+    class B,D,F secondary
+    class G,H note
+    class I,J accent</pre>
+<p>이 그래프가 있으면 다음 질문에 답할 수 있다.</p>
+<ul>
+<li>특정 예측을 만든 model version과 serving revision은 무엇인가?</li>
+<li>그 모델은 어떤 data snapshot과 feature revision으로 학습됐는가?</li>
+<li>문제가 발생한 고객군이 어느 학습 slice에 포함됐는가?</li>
+<li>같은 source data를 사용한 다른 모델은 무엇인가?</li>
+<li>취약한 dependency가 포함된 모델과 배포는 무엇인가?</li>
+</ul>
+<p>OpenLineage는 run, job, dataset과 facet을 중심으로 데이터 작업의 lineage event를 표현한다. 모델 레지스트리와 데이터 lineage 시스템을 별개로 운용하더라도 공통 run ID, dataset ID, artifact URI를 사용해 그래프를 연결해야 한다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="감사-로그와-일반-로그를-구분한다">감사 로그와 일반 로그를 구분한다</h3><a class="sl-anchor-link" href="#감사-로그와-일반-로그를-구분한다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “감사 로그와 일반 로그를 구분한다”</span></a></div>
+<p>일반 애플리케이션 로그의 retention과 접근 정책은 모델 승인 및 정책 변경 기록에 충분하지 않을 수 있다. 최소한 다음 이벤트는 변경 불가능한 감사 대상으로 검토한다.</p>
+<ul>
+<li>데이터 접근 및 snapshot 생성</li>
+<li>모델 등록, 승인, 거절, alias 이동</li>
+<li>배포 시작, 중단, rollback</li>
+<li>임계값과 라우팅 정책 변경</li>
+<li>긴급 override와 권한 상승</li>
+<li>개인정보 포함 inference payload 접근</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="8-feature-store-피처의-시간-의미를-보존하기">8. Feature Store: 피처의 시간 의미를 보존하기</h2><a class="sl-anchor-link" href="#8-feature-store-피처의-시간-의미를-보존하기"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “8. Feature Store: 피처의 시간 의미를 보존하기”</span></a></div>
+<p>Feature Store의 본질은 “피처를 한곳에 모으는 데이터베이스”가 아니라 다음 계약을 제공하는 것이다.</p>
+<ol>
+<li>피처 정의를 발견하고 재사용할 수 있다.</li>
+<li>학습용 historical feature를 point-in-time correct하게 생성한다.</li>
+<li>온라인 예측에 필요한 최신 피처를 요구 지연 시간 안에 제공한다.</li>
+<li>학습과 서빙이 같은 변환 의미를 공유한다.</li>
+<li>freshness, ownership, lineage를 추적한다.</li>
+</ol>
+<p>일반적인 구조는 offline store와 online store로 나뉜다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>구성 요소</th><th>목적</th><th>중요 지표</th></tr></thead><tbody><tr><td>Offline store</td><td>대규모 historical feature와 학습 dataset 생성</td><td>scan throughput, backfill time, PIT correctness</td></tr><tr><td>Online store</td><td>entity별 최신 feature 저지연 조회</td><td>p99 latency, availability, freshness</td></tr><tr><td>Registry</td><td>feature definition, schema, owner, TTL</td><td>변경 이력, 호환성</td></tr><tr><td>Materialization</td><td>offline 결과를 online으로 반영</td><td>lag, failure rate, completeness</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h3"><h3 id="training-serving-skew의-세-유형">training-serving skew의 세 유형</h3><a class="sl-anchor-link" href="#training-serving-skew의-세-유형"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “training-serving skew의 세 유형”</span></a></div>
+<ul>
+<li>Transformation skew: 학습과 서빙이 서로 다른 변환 코드를 사용한다.</li>
+<li>Data skew: 동일 피처 이름이 서로 다른 source 또는 window를 사용한다.</li>
+<li>Time skew: 학습에서는 미래 정보를 보지만 서빙에서는 볼 수 없다.</li>
+</ul>
+<p>공통 transformation code와 feature registry는 첫 두 문제를 줄일 수 있지만, point-in-time join과 event-time 설계가 없으면 time skew는 남는다.</p>
+<aside aria-label="Tip" class="starlight-aside starlight-aside--tip"><p class="starlight-aside__title" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="starlight-aside__icon"><path fill-rule="evenodd" clip-rule="evenodd" d="M1.43909 8.85483L1.44039 8.85354L4.96668 5.33815C5.30653 4.99386 5.7685 4.79662 6.2524 4.78972L6.26553 4.78963L12.9014 4.78962L13.8479 3.84308C16.9187 0.772319 20.0546 0.770617 21.4678 0.975145C21.8617 1.02914 22.2271 1.21053 22.5083 1.4917C22.7894 1.77284 22.9708 2.13821 23.0248 2.53199C23.2294 3.94517 23.2278 7.08119 20.1569 10.1521L19.2107 11.0983V17.7338L19.2106 17.7469C19.2037 18.2308 19.0067 18.6933 18.6624 19.0331L15.1456 22.5608C14.9095 22.7966 14.6137 22.964 14.29 23.0449C13.9663 23.1259 13.6267 23.1174 13.3074 23.0204C12.9881 22.9235 12.7011 22.7417 12.4771 22.4944C12.2533 22.2473 12.1006 21.9441 12.0355 21.6171L11.1783 17.3417L6.65869 12.822L4.34847 12.3589L2.38351 11.965C2.05664 11.8998 1.75272 11.747 1.50564 11.5232C1.25835 11.2992 1.07653 11.0122 0.979561 10.6929C0.882595 10.3736 0.874125 10.034 0.955057 9.7103C1.03599 9.38659 1.20328 9.09092 1.43909 8.85483ZM6.8186 10.8724L2.94619 10.096L6.32006 6.73268H10.9583L6.8186 10.8724ZM15.2219 5.21703C17.681 2.75787 20.0783 2.75376 21.1124 2.8876C21.2462 3.92172 21.2421 6.31895 18.783 8.77812L12.0728 15.4883L8.51172 11.9272L15.2219 5.21703ZM13.9042 21.0538L13.1279 17.1811L17.2676 13.0414V17.68L13.9042 21.0538Z"></path><path d="M9.31827 18.3446C9.45046 17.8529 9.17864 17.3369 8.68945 17.1724C8.56178 17.1294 8.43145 17.1145 8.30512 17.1243C8.10513 17.1398 7.91519 17.2172 7.76181 17.3434C7.62613 17.455 7.51905 17.6048 7.45893 17.7835C6.97634 19.2186 5.77062 19.9878 4.52406 20.4029C4.08525 20.549 3.6605 20.644 3.29471 20.7053C3.35607 20.3395 3.45098 19.9148 3.59711 19.476C4.01221 18.2294 4.78141 17.0237 6.21648 16.5411C6.39528 16.481 6.54504 16.3739 6.65665 16.2382C6.85126 16.0016 6.92988 15.678 6.84417 15.3647C6.83922 15.3466 6.83373 15.3286 6.82767 15.3106C6.74106 15.053 6.55701 14.8557 6.33037 14.7459C6.10949 14.6389 5.84816 14.615 5.59715 14.6994C5.47743 14.7397 5.36103 14.7831 5.24786 14.8294C3.22626 15.6569 2.2347 17.4173 1.75357 18.8621C1.49662 19.6337 1.36993 20.3554 1.30679 20.8818C1.27505 21.1464 1.25893 21.3654 1.25072 21.5213C1.24662 21.5993 1.24448 21.6618 1.24337 21.7066L1.243 21.7226L1.24235 21.7605L1.2422 21.7771L1.24217 21.7827L1.24217 21.7856C1.24217 22.3221 1.67703 22.7579 2.2137 22.7579L2.2155 22.7579L2.22337 22.7578L2.23956 22.7577C2.25293 22.7575 2.27096 22.7572 2.29338 22.7567C2.33821 22.7555 2.40073 22.7534 2.47876 22.7493C2.63466 22.7411 2.85361 22.725 3.11822 22.6932C3.64462 22.6301 4.36636 22.5034 5.13797 22.2464C6.58274 21.7653 8.3431 20.7738 9.17063 18.7522C9.21696 18.639 9.26037 18.5226 9.30064 18.4029C9.30716 18.3835 9.31304 18.364 9.31827 18.3446Z"></path></svg>Tip</p><div class="starlight-aside__content"><p>모든 팀에 Feature Store가 필요한 것은 아니다. batch prediction만 사용하고 피처가 단순하며 재사용 요구가 적다면 versioned SQL, table snapshot, transformation test가 더 단순한 해법일 수 있다. Feature Store의 운영 비용은 online store 자체보다 backfill, freshness, ownership, schema evolution에서 발생한다.</p></div></aside>
+<div class="sl-heading-wrapper level-h2"><h2 id="9-deploy-배포-전략은-실험-전략과-다르다">9. Deploy: 배포 전략은 실험 전략과 다르다</h2><a class="sl-anchor-link" href="#9-deploy-배포-전략은-실험-전략과-다르다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “9. Deploy: 배포 전략은 실험 전략과 다르다”</span></a></div>
+<p>모델 서빙은 크게 batch, online API, streaming inference로 나눌 수 있다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>형태</th><th>최적화 목표</th><th>주요 실패 모드</th></tr></thead><tbody><tr><td>Batch prediction</td><td>완료 시간, 처리량, 재시작 가능성</td><td>partial output, 중복 처리, stale input</td></tr><tr><td>Online API</td><td>tail latency, 가용성, autoscaling</td><td>cold start, overload, dependency timeout</td></tr><tr><td>Streaming inference</td><td>event-time 처리, lag, 순서</td><td>replay, late event, state inconsistency</td></tr></tbody></table>
+<p>배포 전략은 새 릴리스의 blast radius를 통제하는 방법이고, 실험 전략은 사용자 행동에 대한 인과 효과를 추정하는 방법이다. 둘은 트래픽 분할을 사용하지만 목적이 다르다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>전략</th><th>주된 목적</th><th>트래픽 특성</th><th>성공 판단</th></tr></thead><tbody><tr><td>Rolling update</td><td>용량을 유지하며 교체</td><td>인스턴스를 점진 교체</td><td>readiness, error, latency</td></tr><tr><td>Blue/Green</td><td>빠른 전환과 rollback</td><td>두 환경 중 하나로 전환</td><td>사전 검증 후 switch</td></tr><tr><td>Canary</td><td>장애 범위 제한</td><td>새 버전에 작은 비율</td><td>guardrail과 SLO</td></tr><tr><td>Shadow</td><td>사용자 영향 없이 비교</td><td>요청 복제, 응답은 미사용</td><td>output, latency, cost 비교</td></tr><tr><td>A/B test</td><td>비즈니스 인과 효과 측정</td><td>무작위·고정 실험군</td><td>사전 정의된 통계 분석</td></tr></tbody></table>
+<p>Kubernetes Deployment의 rolling update는 Pod 교체와 가용성을 관리하지만, 새 모델의 예측 품질을 판정하지 않는다. KServe 같은 serving layer는 serverless deployment mode에서 model revision 간 canary traffic 분할을 제공할 수 있지만, 승격 조건과 통계적 검정은 별도 운영 정책으로 정의해야 한다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="canary에서-확인할-것">Canary에서 확인할 것</h3><a class="sl-anchor-link" href="#canary에서-확인할-것"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Canary에서 확인할 것”</span></a></div>
+<ul>
+<li>crash, readiness, dependency error</li>
+<li>p50/p95/p99 latency와 timeout</li>
+<li>GPU/CPU/memory 사용량과 saturation</li>
+<li>prediction distribution과 abstain rate</li>
+<li>중요 slice별 guardrail</li>
+<li>사용자 또는 비즈니스 지표</li>
+<li>요청당 비용과 capacity headroom</li>
+</ul>
+<p>Canary 표본이 작으면 희귀 실패와 tail latency를 놓칠 수 있다. 반대로 짧은 시간의 계절성 변화를 모델 회귀로 오판할 수도 있다. 최소 표본 수, 관측 시간, 시간대, rollback 조건을 rollout 전에 정의해야 한다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="shadow-deployment의-주의점">Shadow deployment의 주의점</h3><a class="sl-anchor-link" href="#shadow-deployment의-주의점"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Shadow deployment의 주의점”</span></a></div>
+<p>Shadow는 모델 응답을 사용자에게 반환하지 않으므로 안전한 비교에 유용하다. 그러나 쓰기 작업, 알림, 결제, 재고 차감처럼 side effect가 있는 downstream 호출까지 복제하면 안 된다. 개인정보가 포함된 payload의 복제와 저장도 별도 정책이 필요하다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="10-operate-네-층의-관측성을-함께-보기">10. Operate: 네 층의 관측성을 함께 보기</h2><a class="sl-anchor-link" href="#10-operate-네-층의-관측성을-함께-보기"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “10. Operate: 네 층의 관측성을 함께 보기”</span></a></div>
+<p>프로덕션 모델을 제대로 관측하려면 infrastructure, data, model, business 네 층을 연결해야 한다.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "fontFamily": "Inter, Arial, sans-serif", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TB
+    A["Business&#x3C;br/>conversion · loss&#x3C;br/>risk"]
+    B["Model&#x3C;br/>quality · calibration&#x3C;br/>drift"]
+    C["Data&#x3C;br/>schema · freshness&#x3C;br/>skew"]
+    D["Infrastructure&#x3C;br/>latency · errors&#x3C;br/>saturation"]
+    D --> C
+    C --> B
+    B --> A
+    A -. "목표와 비용" .-> D
+
+    classDef primary fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef secondary fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef note fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef accent fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    class D primary
+    class C secondary
+    class B note
+    class A accent</pre>
+<div class="sl-heading-wrapper level-h3"><h3 id="infrastructure와-serving-telemetry">Infrastructure와 serving telemetry</h3><a class="sl-anchor-link" href="#infrastructure와-serving-telemetry"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Infrastructure와 serving telemetry”</span></a></div>
+<ul>
+<li>request rate와 concurrency</li>
+<li>success/error/timeout rate</li>
+<li>queue time, preprocessing, inference, postprocessing의 구간별 latency</li>
+<li>p50, p95, p99 tail latency</li>
+<li>CPU, GPU, accelerator memory, host memory, disk, network</li>
+<li>batch size, cache hit rate, model load time, cold start</li>
+<li>autoscaler desired/current replica와 scale-up delay</li>
+<li>요청당 accelerator-second, energy, cloud cost</li>
+</ul>
+<p>평균 latency는 tail 문제를 숨긴다. 여러 replica에서 percentile을 집계해야 한다면 Prometheus summary의 client-side quantile보다 histogram 계열이 일반적으로 적합하다. bucket 설계가 SLO 경계를 충분히 표현하는지도 확인해야 한다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="데이터-상태-drift보다-먼저-schema와-freshness">데이터 상태: drift보다 먼저 schema와 freshness</h3><a class="sl-anchor-link" href="#데이터-상태-drift보다-먼저-schema와-freshness"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “데이터 상태: drift보다 먼저 schema와 freshness”</span></a></div>
+<p>현장에서 model drift로 신고되는 문제 상당수는 upstream schema 변경, timestamp 오류, null 급증, stale feature, join 누락이다. 따라서 탐지 순서는 다음처럼 두는 편이 효율적이다.</p>
+<ol>
+<li>schema와 타입</li>
+<li>volume, missing, duplicate</li>
+<li>freshness와 event-time lag</li>
+<li>categorical cardinality와 unseen value</li>
+<li>feature distribution</li>
+<li>prediction distribution</li>
+<li>실제 model quality</li>
+</ol>
+<div class="sl-heading-wrapper level-h3"><h3 id="drift-용어를-구분한다">drift 용어를 구분한다</h3><a class="sl-anchor-link" href="#drift-용어를-구분한다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “drift 용어를 구분한다”</span></a></div>
+<ul>
+<li>Covariate drift: <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false">(</mo><mi>X</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">P(X)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">P</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0785em;">X</span><span class="mclose">)</span></span></span></span>가 변한다.</li>
+<li>Label shift: <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false">(</mo><mi>Y</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">P(Y)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">P</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.2222em;">Y</span><span class="mclose">)</span></span></span></span>가 변한다.</li>
+<li>Concept drift: <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false">(</mo><mi>Y</mi><mo>∣</mo><mi>X</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">P(Y \mid X)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">P</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.2222em;">Y</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∣</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0785em;">X</span><span class="mclose">)</span></span></span></span>가 변한다.</li>
+<li>Training-serving skew: 학습과 서빙의 생성 과정 또는 구현이 다르다.</li>
+<li>Model quality degradation: 실제 업무 metric이 악화된다.</li>
+</ul>
+<p><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false">(</mo><mi>X</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">P(X)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">P</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0785em;">X</span><span class="mclose">)</span></span></span></span>가 바뀌어도 결정 경계와 무관한 영역이면 품질이 유지될 수 있다. 반대로 전체 분포 변화가 작아도 중요한 소수 slice에서 concept drift가 발생할 수 있다. 따라서 drift alarm은 품질 저하의 증거가 아니라 <strong>조사 또는 평가를 시작하는 신호</strong>로 다뤄야 한다.</p>
+<p>분포 차이를 요약하는 한 방법인 PSI는 bin별 reference 비율 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>p</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">p_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>와 current 비율 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>q</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">q_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>를 사용한다.</p>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>P</mi><mi>S</mi><mi>I</mi><mo>=</mo><munder><mo>∑</mo><mi>i</mi></munder><mo stretchy="false">(</mo><msub><mi>q</mi><mi>i</mi></msub><mo>−</mo><msub><mi>p</mi><mi>i</mi></msub><mo stretchy="false">)</mo><mi>ln</mi><mo>⁡</mo><mrow><mo fence="true">(</mo><mfrac><msub><mi>q</mi><mi>i</mi></msub><msub><mi>p</mi><mi>i</mi></msub></mfrac><mo fence="true">)</mo></mrow></mrow><annotation encoding="application/x-tex">PSI = \sum_i (q_i - p_i)\ln\left(\frac{q_i}{p_i}\right)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">P</span><span class="mord mathnormal" style="margin-right:0.0576em;">S</span><span class="mord mathnormal" style="margin-right:0.0785em;">I</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.3277em;vertical-align:-1.2777em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.05em;"><span style="top:-1.8723em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span><span style="top:-3.05em;"><span class="pstrut" style="height:3.05em;"></span><span><span class="mop op-symbol large-op">∑</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.2777em;"><span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:2.4em;vertical-align:-0.95em;"></span><span class="mord"><span class="mord mathnormal">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">ln</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;"><span class="delimsizing size3">(</span></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.1076em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.8804em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mclose delimcenter" style="top:0em;"><span class="delimsizing size3">)</span></span></span></span></span></span></span>
+<p>하지만 PSI 값은 binning, sample size, smoothing, 계절성에 민감하다. 고정된 “0.2 이상이면 재학습” 같은 임계값을 모든 피처에 적용하기보다 historical backtest로 정상 변동 범위를 정하고 slice와 업무 영향도를 함께 보는 편이 낫다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="정답-라벨이-늦게-오는-문제">정답 라벨이 늦게 오는 문제</h3><a class="sl-anchor-link" href="#정답-라벨이-늦게-오는-문제"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “정답 라벨이 늦게 오는 문제”</span></a></div>
+<p>사기 탐지의 chargeback, 추천의 장기 재방문, 유지보수의 실제 고장처럼 정답은 수일 또는 수개월 뒤 도착할 수 있다. 이때 즉시 관측 가능한 proxy와 지연된 ground truth를 분리한다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>시간 축</th><th>관측 신호</th><th>용도</th></tr></thead><tbody><tr><td>즉시</td><td>schema, freshness, score distribution, abstain rate</td><td>파이프라인 이상 탐지</td></tr><tr><td>단기</td><td>클릭, 수동 검토, 사용자 신고</td><td>조기 품질 proxy</td></tr><tr><td>장기</td><td>확정 라벨, 매출, 손실, 재방문</td><td>실제 성능과 재학습 판단</td></tr></tbody></table>
+<p>proxy가 실제 목표와 분리되면 Goodhart’s law 형태의 최적화 오류가 생긴다. proxy 개선만으로 자동 승격하지 말고 장기 label cohort를 이용해 정기적으로 proxy의 유효성을 재검증해야 한다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="로그-metric-trace-prediction-record">로그, metric, trace, prediction record</h3><a class="sl-anchor-link" href="#로그-metric-trace-prediction-record"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “로그, metric, trace, prediction record”</span></a></div>
+<ul>
+<li>로그: 개별 오류와 상태 변화의 상세 정보</li>
+<li>metric: 집계된 시계열과 SLO 판단</li>
+<li>trace: gateway, feature lookup, inference, downstream 호출의 경로</li>
+<li>prediction record: model version, feature reference, output, outcome을 연결하는 분석·감사 레코드</li>
+</ul>
+<p>prediction payload 전체를 무제한 보관하면 개인정보와 비용 문제가 발생한다. 원문 대신 허용된 feature, hash, sampling, redaction, encryption, retention 정책을 사용하고 접근을 감사해야 한다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="11-improve-재학습은-자동화보다-제어가-먼저다">11. Improve: 재학습은 자동화보다 제어가 먼저다</h2><a class="sl-anchor-link" href="#11-improve-재학습은-자동화보다-제어가-먼저다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “11. Improve: 재학습은 자동화보다 제어가 먼저다”</span></a></div>
+<p>재학습 트리거는 여러 종류가 있다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>트리거</th><th>장점</th><th>위험</th><th>필요한 guardrail</th></tr></thead><tbody><tr><td>Schedule</td><td>단순하고 예측 가능</td><td>변화가 없어도 비용 발생</td><td>freshness, 최소 신규 데이터</td></tr><tr><td>새 데이터 도착</td><td>데이터 흐름과 정렬</td><td>잘못된 batch가 즉시 전파</td><td>schema, quality, quarantine</td></tr><tr><td>Drift</td><td>변화에 빠르게 반응</td><td>false positive, label 부재</td><td>persistence, slice, manual review</td></tr><tr><td>품질 저하</td><td>목표에 직접 연결</td><td>label 지연</td><td>cohort 정합성, confidence interval</td></tr><tr><td>수동 요청</td><td>고위험 변경 통제</td><td>느린 대응</td><td>승인 SLA, runbook</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h3"><h3 id="자동-재학습-루프의-위험">자동 재학습 루프의 위험</h3><a class="sl-anchor-link" href="#자동-재학습-루프의-위험"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “자동 재학습 루프의 위험”</span></a></div>
+<p>프로덕션 모델의 결정이 다음 학습 데이터를 바꾸는 경우가 많다. 추천 모델이 노출한 상품만 클릭 데이터를 얻고, 사기 모델이 차단한 거래는 사후 결과를 관측하기 어렵다. 이를 그대로 재학습하면 selection bias가 강화된다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">model decision</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ user/environment response</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ observed data</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ retraining dataset</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ next model</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="model decision→ user/environment response→ observed data→ retraining dataset→ next model"><div></div></button></div></figure></div>
+<p>이 루프에는 exploration traffic, randomized holdout, counterfactual logging, propensity score, 별도 라벨 수집 같은 설계가 필요할 수 있다. “최신 데이터로 자주 학습”은 피드백 편향이 없다면 좋은 전략일 수 있지만, 편향된 데이터에서는 잘못된 확신을 더 빠르게 축적한다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="championchallenger-상태-기계">Champion/Challenger 상태 기계</h3><a class="sl-anchor-link" href="#championchallenger-상태-기계"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Champion/Challenger 상태 기계”</span></a></div>
+<pre class="mermaid">%%{init: {"theme": "base", "fontFamily": "Inter, Arial, sans-serif", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    A["Train&#x3C;br/>candidate"] --> B["Offline&#x3C;br/>gates"]
+    B -->|pass| C["Shadow or&#x3C;br/>canary"]
+    B -->|fail| D["Reject&#x3C;br/>with&#x3C;br/>evidence"]
+    C -->|pass| E["Promote&#x3C;br/>champion"]
+    C -->|regression| F["Rollback&#x3C;br/>and&#x3C;br/>investigate"]
+    E -. "monitor" .-> G["Retrain&#x3C;br/>trigger"]
+    G -.-> A
+
+    classDef primary fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef secondary fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef note fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef accent fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    class A primary
+    class B,C secondary
+    class E,G note
+    class D,F accent</pre>
+<p>모든 실패를 재학습으로 해결해서는 안 된다.</p>
+<ul>
+<li>schema 오류 → upstream 계약 또는 transformation 수정</li>
+<li>serving latency 증가 → runtime, batching, capacity 수정</li>
+<li>stale feature → materialization과 freshness 수정</li>
+<li>concept drift → 새 데이터와 feature/model 재검토</li>
+<li>비즈니스 정책 변경 → objective, label, threshold 수정</li>
+</ul>
+<p>원인 분류 없이 재학습부터 실행하면 새 모델도 같은 장애를 반복한다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="12-참조-아키텍처와-도구-선택">12. 참조 아키텍처와 도구 선택</h2><a class="sl-anchor-link" href="#12-참조-아키텍처와-도구-선택"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “12. 참조 아키텍처와 도구 선택”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="control-plane과-data-plane">Control plane과 data plane</h3><a class="sl-anchor-link" href="#control-plane과-data-plane"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Control plane과 data plane”</span></a></div>
+<p>MLOps 플랫폼을 두 평면으로 보면 책임 경계가 선명해진다.</p>
+<ul>
+<li>Control plane: pipeline 정의, scheduling, metadata, registry, 정책, 승인, 배포 상태</li>
+<li>Data plane: 데이터 처리, 학습 job, artifact 전송, online/batch inference, telemetry 생성</li>
+</ul>
+<p>Control plane 장애가 기존 prediction data plane을 즉시 중단시키지 않게 설계하는 것이 좋다. 반대로 data plane의 실패와 비용이 control plane에 정확한 상태와 lineage로 반영되어야 한다.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "fontFamily": "Inter, Arial, sans-serif", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TB
+    A["Sources&#x3C;br/>DB · files&#x3C;br/>streams"] --> B["Data platform&#x3C;br/>snapshot&#x3C;br/>quality"]
+    B --> C["Training&#x3C;br/>features · train&#x3C;br/>evaluate"]
+    C --> D["Metadata&#x3C;br/>tracking&#x3C;br/>lineage"]
+    C --> E["Artifact store&#x3C;br/>immutable&#x3C;br/>objects"]
+    D --> F["Model registry&#x3C;br/>gates&#x3C;br/>aliases"]
+    E --> F
+    F --> G["Delivery&#x3C;br/>staging&#x3C;br/>canary"]
+    G --> H["Serving&#x3C;br/>batch · API&#x3C;br/>stream"]
+    H --> I["Observability&#x3C;br/>system · data&#x3C;br/>model"]
+    I -. "feedback" .-> B
+    I -. "promotion policy" .-> F
+
+    classDef primary fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef secondary fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef note fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef accent fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    class A,B primary
+    class C,G secondary
+    class D,E,F note
+    class H,I accent</pre>
+<div class="sl-heading-wrapper level-h3"><h3 id="도구는-제품명이-아니라-capability로-비교한다">도구는 제품명이 아니라 capability로 비교한다</h3><a class="sl-anchor-link" href="#도구는-제품명이-아니라-capability로-비교한다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “도구는 제품명이 아니라 capability로 비교한다”</span></a></div>
+<p>인포그래픽에는 Git, DVC, MLflow, Docker, Kubernetes, Airflow, Prometheus, Grafana 같은 익숙한 이름이 나온다. 실제 플랫폼 설계에서는 제품 목록보다 다음 capability와 integration contract를 먼저 정의한다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Capability</th><th>핵심 질문</th><th>대표 구현 후보</th></tr></thead><tbody><tr><td>Source control</td><td>코드와 pipeline 정의를 어떻게 review하는가?</td><td>Git 기반 저장소</td></tr><tr><td>Data versioning</td><td>snapshot과 추출 논리를 재현할 수 있는가?</td><td>DVC, lakeFS, table snapshot/catalog</td></tr><tr><td>Orchestration</td><td>retry, cache, backfill, artifact 전달이 명시적인가?</td><td>Airflow, Argo Workflows, Kubeflow Pipelines, Prefect</td></tr><tr><td>Experiment tracking</td><td>run 입력·metric·artifact를 연결하는가?</td><td>MLflow, W&#x26;B 등</td></tr><tr><td>Artifact storage</td><td>immutable, 대용량, 수명주기 관리가 가능한가?</td><td>S3 호환 object storage, cloud object storage</td></tr><tr><td>Model registry</td><td>version, alias, lineage, 승인 상태가 있는가?</td><td>MLflow Registry, managed registries</td></tr><tr><td>Feature management</td><td>PIT join과 online freshness가 필요한가?</td><td>Feast, managed feature stores</td></tr><tr><td>Build and supply chain</td><td>image digest, SBOM, 서명을 남기는가?</td><td>OCI registry, CI system, signing/scanning tools</td></tr><tr><td>Serving</td><td>batch/online/streaming 요구와 rollout을 지원하는가?</td><td>Kubernetes, KServe, Seldon, managed serving</td></tr><tr><td>Observability</td><td>metric/log/trace와 model context를 연결하는가?</td><td>OpenTelemetry, Prometheus, Grafana, log backend</td></tr><tr><td>Lineage</td><td>dataset-run-model-deployment 그래프가 연결되는가?</td><td>OpenLineage/Marquez, data catalog</td></tr></tbody></table>
+<p>특정 행에 하나의 제품만 있어야 하는 것은 아니다. 반대로 여러 제품이 같은 metadata를 서로 다른 ID로 관리하면 운영자는 네 개의 UI를 열고도 하나의 장애를 설명하지 못한다. 다음 공통 식별자를 먼저 표준화하는 것이 효과적이다.</p>
+<ul>
+<li>correlation/request ID</li>
+<li>pipeline run ID</li>
+<li>experiment run ID</li>
+<li>dataset snapshot ID</li>
+<li>model name/version/digest</li>
+<li>deployment revision</li>
+<li>feature service/revision</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="작은-팀의-최소-구성">작은 팀의 최소 구성</h3><a class="sl-anchor-link" href="#작은-팀의-최소-구성"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “작은 팀의 최소 구성”</span></a></div>
+<p>모델 수와 배포 빈도가 낮다면 거대한 플랫폼을 먼저 구축할 필요가 없다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Git</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">+ versioned data snapshot</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">+ reproducible container</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">+ pipeline runner</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">+ experiment tracking</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">+ artifact store and registry</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">+ deployment manifest</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">+ service/data/model monitoring</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">+ rollback runbook</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Git+ versioned data snapshot+ reproducible container+ pipeline runner+ experiment tracking+ artifact store and registry+ deployment manifest+ service/data/model monitoring+ rollback runbook"><div></div></button></div></figure></div>
+<p>규모가 커질 때 feature store, 전사 catalog, policy engine, multi-tenant GPU scheduling, self-service portal을 추가한다. 플랫폼의 목표는 도구 도입률이 아니라 모델 팀이 표준 경로를 벗어나지 않고도 빠르게 릴리스할 수 있게 만드는 것이다.</p>
+<p>이 저장소의 다른 트랙은 이 참조 아키텍처의 data plane을 더 깊게 다룬다.</p>
+<ul>
+<li><a href="/training/">Training</a>: 분산 학습, MLPerf workload, checkpoint와 scaling 병목</li>
+<li><a href="/inference/efficient-llm-inference-systems/">Efficient LLM Inference Systems</a>: KV cache, batching, quantization, model serving 성능</li>
+<li><a href="/storage/">Storage</a>: dataset과 checkpoint의 storage data path</li>
+<li><a href="/network/">Network</a>: RDMA, InfiniBand, RoCE, Clos fabric</li>
+<li><a href="/systems-performance/">Systems Performance</a>: GPU, OS, container, CUDA, PyTorch 튜닝</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="13-자주-실패하는-설계와-첫-점검-항목">13. 자주 실패하는 설계와 첫 점검 항목</h2><a class="sl-anchor-link" href="#13-자주-실패하는-설계와-첫-점검-항목"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “13. 자주 실패하는 설계와 첫 점검 항목”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="notebook을-파이프라인으로-포장했지만-재실행할-수-없다">Notebook을 파이프라인으로 포장했지만 재실행할 수 없다</h3><a class="sl-anchor-link" href="#notebook을-파이프라인으로-포장했지만-재실행할-수-없다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Notebook을 파이프라인으로 포장했지만 재실행할 수 없다”</span></a></div>
+<p>증상:</p>
+<ul>
+<li>셀 실행 순서에 따라 결과가 달라진다.</li>
+<li>로컬 파일과 전역 상태를 암묵적으로 사용한다.</li>
+<li>수동으로 수정한 데이터가 학습에 포함된다.</li>
+</ul>
+<p>첫 점검:</p>
+<ul>
+<li>각 단계의 입력, 출력, parameter를 명시한다.</li>
+<li>실행 환경을 image와 lockfile로 고정한다.</li>
+<li>작은 데이터로 처음부터 끝까지 새 환경에서 재실행한다.</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="실험-추적은-있지만-데이터-lineage가-없다">실험 추적은 있지만 데이터 lineage가 없다</h3><a class="sl-anchor-link" href="#실험-추적은-있지만-데이터-lineage가-없다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “실험 추적은 있지만 데이터 lineage가 없다”</span></a></div>
+<p>증상:</p>
+<ul>
+<li>metric과 hyperparameter는 보이지만 dataset을 복구할 수 없다.</li>
+<li>같은 dataset name이 시간에 따라 내용을 바꾼다.</li>
+</ul>
+<p>첫 점검:</p>
+<ul>
+<li>run에 snapshot ID, query revision, feature revision을 필수 tag로 둔다.</li>
+<li>mutable path 대신 immutable snapshot을 참조한다.</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="모델-레지스트리가-수동-승인-게시판이-된다">모델 레지스트리가 수동 승인 게시판이 된다</h3><a class="sl-anchor-link" href="#모델-레지스트리가-수동-승인-게시판이-된다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “모델 레지스트리가 수동 승인 게시판이 된다”</span></a></div>
+<p>증상:</p>
+<ul>
+<li>Production 상태인데 평가 보고서와 승인 사유가 없다.</li>
+<li>alias가 언제 누구에 의해 변경됐는지 알 수 없다.</li>
+</ul>
+<p>첫 점검:</p>
+<ul>
+<li>promotion API가 필요한 evidence ID를 검사하게 한다.</li>
+<li>상태 변경과 긴급 override를 감사 로그로 남긴다.</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="drift-경보가-너무-많아-무시된다">Drift 경보가 너무 많아 무시된다</h3><a class="sl-anchor-link" href="#drift-경보가-너무-많아-무시된다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Drift 경보가 너무 많아 무시된다”</span></a></div>
+<p>증상:</p>
+<ul>
+<li>수십 개 피처가 매일 경보를 낸다.</li>
+<li>drift와 실제 품질 저하의 상관이 낮다.</li>
+</ul>
+<p>첫 점검:</p>
+<ul>
+<li>schema, freshness, pipeline 오류를 drift보다 먼저 분리한다.</li>
+<li>중요 피처와 slice에 우선순위를 둔다.</li>
+<li>seasonality와 표본 크기로 baseline을 재설계한다.</li>
+<li>경보에 owner, runbook, expected action을 연결한다.</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="평균-latency는-정상인데-사용자가-느리다">평균 latency는 정상인데 사용자가 느리다</h3><a class="sl-anchor-link" href="#평균-latency는-정상인데-사용자가-느리다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “평균 latency는 정상인데 사용자가 느리다”</span></a></div>
+<p>증상:</p>
+<ul>
+<li>평균은 SLO 이하지만 timeout과 불만이 증가한다.</li>
+<li>특정 model revision 또는 feature lookup에서만 tail이 길다.</li>
+</ul>
+<p>첫 점검:</p>
+<ul>
+<li>p95/p99와 queue, preprocessing, feature lookup, inference를 분리한다.</li>
+<li>replica, accelerator, model version, request shape별로 slice한다.</li>
+<li>histogram bucket과 timeout 경계를 확인한다.</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="자동-재학습-후-성능이-더-나빠진다">자동 재학습 후 성능이 더 나빠진다</h3><a class="sl-anchor-link" href="#자동-재학습-후-성능이-더-나빠진다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “자동 재학습 후 성능이 더 나빠진다”</span></a></div>
+<p>증상:</p>
+<ul>
+<li>최신 데이터인데 오프라인 및 온라인 성능이 하락한다.</li>
+<li>특정 사용자군이 학습 데이터에서 급감한다.</li>
+</ul>
+<p>첫 점검:</p>
+<ul>
+<li>모델 결정이 데이터 수집을 바꾸는 feedback loop를 찾는다.</li>
+<li>label maturity window와 sample selection을 비교한다.</li>
+<li>이전 champion dataset으로 pipeline regression을 재현한다.</li>
+<li>새 candidate 자동 생성과 자동 승격을 분리한다.</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="gpu는-할당됐지만-처리량이-나오지-않는다">GPU는 할당됐지만 처리량이 나오지 않는다</h3><a class="sl-anchor-link" href="#gpu는-할당됐지만-처리량이-나오지-않는다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “GPU는 할당됐지만 처리량이 나오지 않는다”</span></a></div>
+<p>증상:</p>
+<ul>
+<li>GPU utilization이 낮거나 주기적으로 떨어진다.</li>
+<li>dataloader, feature lookup, checkpoint, network에서 stall이 발생한다.</li>
+</ul>
+<p>첫 점검:</p>
+<ul>
+<li>할당량이 아니라 유효 처리량과 accelerator idle reason을 본다.</li>
+<li>CPU/NUMA, local NVMe, network fabric, batch shape를 함께 측정한다.</li>
+<li>training과 serving의 peak가 같은 자원을 경쟁하는지 확인한다.</li>
+</ul>
+<p>빠른 참조표:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>증상</th><th>먼저 볼 계층</th><th>첫 확인</th></tr></thead><tbody><tr><td>예측값이 갑자기 한쪽으로 몰림</td><td>Data/Model</td><td>schema, null, feature freshness, score distribution</td></tr><tr><td>정확도 저하, drift는 작음</td><td>Model/Business</td><td>중요 slice, concept drift, label pipeline</td></tr><tr><td>p99만 상승</td><td>Infrastructure</td><td>queue, cold start, replica/accelerator 편차</td></tr><tr><td>재학습마다 결과 변동 큼</td><td>Develop</td><td>seed, data order, runtime, hardware topology</td></tr><tr><td>rollback 후에도 오류 지속</td><td>Build/Deploy</td><td>preprocessing, feature, config 호환성</td></tr><tr><td>비용만 증가</td><td>System/Business</td><td>batch, autoscaling, idle capacity, 요청당 비용</td></tr><tr><td>경보가 행동으로 이어지지 않음</td><td>Operations</td><td>owner, severity, runbook, promotion linkage</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h2"><h2 id="14-프로덕션-준비-체크리스트">14. 프로덕션 준비 체크리스트</h2><a class="sl-anchor-link" href="#14-프로덕션-준비-체크리스트"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “14. 프로덕션 준비 체크리스트”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="데이터와-피처">데이터와 피처</h3><a class="sl-anchor-link" href="#데이터와-피처"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “데이터와 피처”</span></a></div>
+<ul class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled> immutable data snapshot 또는 재실행 가능한 추출 기준이 있다.</li>
+<li class="task-list-item"><input type="checkbox" disabled> schema, domain, freshness, volume 계약이 있다.</li>
+<li class="task-list-item"><input type="checkbox" disabled> label 정의와 maturity window가 문서화되어 있다.</li>
+<li class="task-list-item"><input type="checkbox" disabled> time-based validation과 leakage 검사가 있다.</li>
+<li class="task-list-item"><input type="checkbox" disabled> online feature가 있다면 PIT join과 freshness SLO를 검증했다.</li>
+<li class="task-list-item"><input type="checkbox" disabled> 개인정보의 수집, 접근, retention 정책이 있다.</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="학습과-평가">학습과 평가</h3><a class="sl-anchor-link" href="#학습과-평가"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “학습과 평가”</span></a></div>
+<ul class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled> code, data, feature, environment, seed, topology가 run에 기록된다.</li>
+<li class="task-list-item"><input type="checkbox" disabled> 기준 모델 대비 평가와 중요 slice별 guardrail이 있다.</li>
+<li class="task-list-item"><input type="checkbox" disabled> quality뿐 아니라 latency, throughput, memory, cost를 평가한다.</li>
+<li class="task-list-item"><input type="checkbox" disabled> pipeline smoke/integration/regression test가 자동화되어 있다.</li>
+<li class="task-list-item"><input type="checkbox" disabled> 비결정성이 있을 때 허용되는 통계적 변동 범위를 정의했다.</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="artifact와-공급망">Artifact와 공급망</h3><a class="sl-anchor-link" href="#artifact와-공급망"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Artifact와 공급망”</span></a></div>
+<ul class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled> model, preprocessing, tokenizer, signature가 하나의 호환 단위로 관리된다.</li>
+<li class="task-list-item"><input type="checkbox" disabled> artifact와 container가 immutable digest로 식별된다.</li>
+<li class="task-list-item"><input type="checkbox" disabled> dependency lock, SBOM, 취약점 또는 서명 정책이 있다.</li>
+<li class="task-list-item"><input type="checkbox" disabled> registry version에서 source run과 data snapshot을 추적할 수 있다.</li>
+<li class="task-list-item"><input type="checkbox" disabled> alias 변경과 승격 승인이 감사 로그에 남는다.</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="배포와-복구">배포와 복구</h3><a class="sl-anchor-link" href="#배포와-복구"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “배포와 복구”</span></a></div>
+<ul class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled> staging과 production의 runtime 차이를 알고 있다.</li>
+<li class="task-list-item"><input type="checkbox" disabled> canary/shadow/A/B의 목적과 성공 조건을 구분했다.</li>
+<li class="task-list-item"><input type="checkbox" disabled> rollout 전 최소 표본, 관측 시간, abort threshold를 정했다.</li>
+<li class="task-list-item"><input type="checkbox" disabled> model뿐 아니라 feature/config를 포함한 rollback target이 있다.</li>
+<li class="task-list-item"><input type="checkbox" disabled> rollback 명령과 담당자가 runbook에 있으며 정기적으로 연습한다.</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="관측과-운영">관측과 운영</h3><a class="sl-anchor-link" href="#관측과-운영"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “관측과 운영”</span></a></div>
+<ul class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled> system, data, model, business metric이 model version으로 연결된다.</li>
+<li class="task-list-item"><input type="checkbox" disabled> 평균이 아닌 tail latency와 saturation을 본다.</li>
+<li class="task-list-item"><input type="checkbox" disabled> schema/freshness 오류와 statistical drift를 구분한다.</li>
+<li class="task-list-item"><input type="checkbox" disabled> 즉시 proxy와 지연 ground truth를 따로 관리한다.</li>
+<li class="task-list-item"><input type="checkbox" disabled> alert마다 owner, severity, runbook, expected action이 있다.</li>
+<li class="task-list-item"><input type="checkbox" disabled> prediction logging은 sampling, redaction, retention 정책을 따른다.</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="지속-개선과-거버넌스">지속 개선과 거버넌스</h3><a class="sl-anchor-link" href="#지속-개선과-거버넌스"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “지속 개선과 거버넌스”</span></a></div>
+<ul class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled> retraining trigger와 promotion trigger가 분리되어 있다.</li>
+<li class="task-list-item"><input type="checkbox" disabled> feedback loop와 selection bias 위험을 분석했다.</li>
+<li class="task-list-item"><input type="checkbox" disabled> 고위험 변경에는 승인과 segregation of duties가 있다.</li>
+<li class="task-list-item"><input type="checkbox" disabled> 모델 폐기, 보존, 삭제 기준이 있다.</li>
+<li class="task-list-item"><input type="checkbox" disabled> 장애 후 code만이 아니라 data와 policy까지 회고한다.</li>
+</ul>
+<p>Google의 <em>ML Test Score</em>가 제안하는 방향처럼, 프로덕션 준비 상태는 모델 품질 테스트만으로 평가할 수 없다. 데이터, feature, infrastructure, monitoring 테스트가 함께 있어야 한다. 체크리스트의 목적은 모든 항목을 한 번에 도입하는 것이 아니라 현재 시스템에서 실패 비용이 큰 빈칸을 드러내는 것이다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="15-llmops로-확장할-때-달라지는-것">15. LLMOps로 확장할 때 달라지는 것</h2><a class="sl-anchor-link" href="#15-llmops로-확장할-때-달라지는-것"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “15. LLMOps로 확장할 때 달라지는 것”</span></a></div>
+<p>전통적인 예측 모델의 MLOps 원칙은 LLM 애플리케이션에도 그대로 적용된다. 다만 릴리스 단위와 평가·관측 대상이 넓어진다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">LLM application release</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">= base/fine-tuned model</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">+ prompt and system policy</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">+ tool definitions</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">+ retrieval corpus and index</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">+ embedding model</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">+ reranker</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">+ decoding configuration</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">+ safety policy</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">+ evaluation suite</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">+ application code and runtime</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="LLM application release= base/fine-tuned model+ prompt and system policy+ tool definitions+ retrieval corpus and index+ embedding model+ reranker+ decoding configuration+ safety policy+ evaluation suite+ application code and runtime"><div></div></button></div></figure></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="추가로-버전-관리할-대상">추가로 버전 관리할 대상</h3><a class="sl-anchor-link" href="#추가로-버전-관리할-대상"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “추가로 버전 관리할 대상”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>구성 요소</th><th>변경 시 발생할 수 있는 회귀</th></tr></thead><tbody><tr><td>System prompt / template</td><td>형식, 거절, 도구 선택 변화</td></tr><tr><td>Base model / endpoint</td><td>품질, latency, tokenization, 비용 변화</td></tr><tr><td>Retrieval corpus</td><td>최신성, 권한, 오염, 삭제 반영 문제</td></tr><tr><td>Chunking / embedding / index</td><td>recall과 context 구성 변화</td></tr><tr><td>Tool schema / MCP server</td><td>잘못된 호출, side effect, 권한 확대</td></tr><tr><td>Guardrail / policy</td><td>false accept/reject와 사용자 경험 변화</td></tr><tr><td>Decoding / context budget</td><td>품질, 결정성, latency, 비용 변화</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h3"><h3 id="평가를-한-숫자로-축소하지-않는다">평가를 한 숫자로 축소하지 않는다</h3><a class="sl-anchor-link" href="#평가를-한-숫자로-축소하지-않는다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “평가를 한 숫자로 축소하지 않는다”</span></a></div>
+<p>LLM 애플리케이션은 정답이 하나가 아니고 확률적이므로 다음 평가를 조합한다.</p>
+<ul>
+<li>고정 회귀 세트와 golden cases</li>
+<li>task success와 structured output validity</li>
+<li>retrieval recall, context precision, groundedness</li>
+<li>hallucination, citation correctness</li>
+<li>tool selection과 argument correctness</li>
+<li>safety, privacy, prompt injection 저항</li>
+<li>중요 사용자 journey에 대한 human review</li>
+<li>latency, time-to-first-token, tokens/sec</li>
+<li>input/output/cache token과 요청당 비용</li>
+</ul>
+<p>LLM-as-a-judge를 사용한다면 judge model, prompt, sampling, rubric도 평가 시스템의 versioned dependency다. 자동 평가 결과의 일부를 사람 평가와 주기적으로 보정하고, judge와 candidate가 공유하는 편향을 경계해야 한다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="관측성은-trace-중심으로-확장한다">관측성은 trace 중심으로 확장한다</h3><a class="sl-anchor-link" href="#관측성은-trace-중심으로-확장한다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “관측성은 trace 중심으로 확장한다”</span></a></div>
+<p>한 요청이 gateway, retrieval, reranking, 여러 model call, tool call을 통과하므로 최종 latency와 비용만으로는 원인을 알기 어렵다. trace에는 허용 범위 안에서 다음 context를 연결한다.</p>
+<ul>
+<li>application release와 prompt revision</li>
+<li>model/provider와 request configuration</li>
+<li>retrieval query, index revision, 문서 ID</li>
+<li>tool name, duration, result status</li>
+<li>input/output/cache token</li>
+<li>safety filter와 fallback 경로</li>
+<li>user feedback와 eventual outcome</li>
+</ul>
+<p>OpenTelemetry의 semantic convention과 같은 공통 명명 체계를 사용하면 provider 또는 framework가 달라도 trace를 비교하기 쉬워진다. 단, prompt와 response 원문에는 개인정보와 영업 정보가 포함될 수 있으므로 기본 수집이 아니라 명시적 sampling과 redaction 정책이 필요하다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="llm에서-rollback의-의미">LLM에서 rollback의 의미</h3><a class="sl-anchor-link" href="#llm에서-rollback의-의미"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “LLM에서 rollback의 의미”</span></a></div>
+<p>모델 endpoint만 과거 버전으로 돌려도 embedding space와 index가 새 버전이면 retrieval 품질이 복구되지 않을 수 있다. prompt가 새 tool schema를 기대하는데 tool server만 rollback되어도 장애가 난다. 따라서 LLMOps에서는 <strong>application graph 전체의 호환 가능한 revision</strong>을 배포와 rollback 단위로 관리해야 한다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="16-결론">16. 결론</h2><a class="sl-anchor-link" href="#16-결론"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “16. 결론”</span></a></div>
+<p>인포그래픽의 마지막 문구인 “Automate, Monitor, Improve, Repeat”는 방향은 맞지만, 운영 시스템으로 완성하려면 한 단어가 더 필요하다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Identify.</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Validate.</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Automate.</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Observe.</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Control.</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Improve.</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Identify.Validate.Automate.Observe.Control.Improve."><div></div></button></div></figure></div>
+<p>MLOps의 핵심은 모델을 자주 배포하는 것이 아니라 다음 다섯 가지 능력이다.</p>
+<ol>
+<li>프로덕션 동작을 만든 데이터·코드·모델·설정을 식별한다.</li>
+<li>각 상태 전이에 필요한 품질·성능·보안 증거를 검증한다.</li>
+<li>반복 가능한 실행과 전달을 자동화한다.</li>
+<li>시스템·데이터·모델·비즈니스 신호를 같은 release context에서 관측한다.</li>
+<li>피드백 루프의 편향과 blast radius를 통제하면서 개선한다.</li>
+</ol>
+<p>도구는 이 능력을 구현하는 수단이다. Git, DVC, MLflow, Feast, Kubernetes, KServe, Prometheus, OpenLineage 중 무엇을 선택하든 공통 식별자, immutable artifact, 명시적 gate, progressive delivery, rollback, actionable monitoring이 없다면 도구 사이의 빈칸은 결국 사람의 기억과 수동 작업으로 채워진다.</p>
+<p>반대로 작은 팀이라도 데이터 snapshot, 재현 가능한 실행, 모델 계보, 배포 gate, 네 층의 monitoring, 검증된 rollback을 갖추면 충분히 강한 MLOps 기반을 만들 수 있다. 성숙한 MLOps는 가장 많은 플랫폼을 가진 상태가 아니라, <strong>새로운 변경이 어떤 증거를 거쳐 사용자에게 도달했고 문제가 생겼을 때 무엇을 되돌려야 하는지 즉시 설명할 수 있는 상태</strong>다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="17-참고-자료">17. 참고 자료</h2><a class="sl-anchor-link" href="#17-참고-자료"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “17. 참고 자료”</span></a></div>
+<ul>
+<li>Google Cloud Architecture Center, <a href="https://docs.cloud.google.com/architecture/mlops-continuous-delivery-and-automation-pipelines-in-machine-learning">MLOps: Continuous delivery and automation pipelines in machine learning</a></li>
+<li>Google for Developers, <a href="https://developers.google.com/machine-learning/guides/rules-of-ml/">Rules of Machine Learning</a></li>
+<li>Google for Developers, <a href="https://developers.google.com/machine-learning/crash-course/production-ml-systems/monitoring">Production ML systems: Monitoring pipelines</a></li>
+<li>D. Sculley et al., <a href="https://research.google/pubs/hidden-technical-debt-in-machine-learning-systems/">Hidden Technical Debt in Machine Learning Systems</a></li>
+<li>Eric Breck et al., <a href="https://research.google/pubs/the-ml-test-score-a-rubric-for-ml-production-readiness-and-technical-debt-reduction/">The ML Test Score: A Rubric for ML Production Readiness and Technical Debt Reduction</a></li>
+<li>MLflow, <a href="https://mlflow.org/docs/latest/ml/model-registry/workflow/">Model Registry Workflows</a></li>
+<li>Feast, <a href="https://docs.feast.dev/getting-started/concepts/point-in-time-joins">Point-in-time joins</a></li>
+<li>OpenLineage, <a href="https://github.com/OpenLineage/OpenLineage/blob/main/spec/OpenLineage.md">OpenLineage specification</a></li>
+<li>Kubernetes, <a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/">Deployments</a></li>
+<li>KServe, <a href="https://kserve.github.io/website/docs/model-serving/predictive-inference/rollout-strategies/canary-example">Canary Rollout Example</a></li>
+<li>Prometheus, <a href="https://prometheus.io/docs/practices/histograms/">Histograms and summaries</a></li>
+<li>OpenTelemetry, <a href="https://opentelemetry.io/docs/specs/semconv/">Semantic Conventions</a></li>
+<li>NIST, <a href="https://www.nist.gov/itl/ai-risk-management-framework">AI Risk Management Framework</a></li>
+</ul> </div> <footer class="sl-flex astro-3yyafb3n"> <div class="meta sl-flex astro-3yyafb3n"> <a href="https://github.com/ziwon/ai-data-center-systems/edit/main/mlops/README.md" class="sl-flex print:hidden astro-eez2twj6"><svg aria-hidden="true" class="astro-eez2twj6 astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.2em;"><path d="M22 7.24a1 1 0 0 0-.29-.71l-4.24-4.24a1 1 0 0 0-1.1-.22 1 1 0 0 0-.32.22l-2.83 2.83L2.29 16.05a1 1 0 0 0-.29.71V21a1 1 0 0 0 1 1h4.24a1 1 0 0 0 .76-.29l10.87-10.93L21.71 8c.1-.1.17-.2.22-.33a1 1 0 0 0 0-.24v-.14l.07-.05ZM6.83 20H4v-2.83l9.93-9.93 2.83 2.83L6.83 20ZM18.17 8.66l-2.83-2.83 1.42-1.41 2.82 2.82-1.41 1.42Z"/></svg>Edit page</a> <p>Last updated: <time datetime="2026-07-26T08:06:10.000Z">Jul 26, 2026</time></p> </div> <div class="pagination-links print:hidden astro-u2l5gyhi" dir="ltr">   </div>  </footer> </div> </div>  </main> </div> </div> </div> <ask-docs-widget> <button class="ask-fab" type="button" data-open aria-label="Ask this docs"> <span class="ask-fab-icon" aria-hidden="true">?</span>
+Ask this docs
+</button> <div class="ask-panel" data-panel hidden> <div class="ask-resize-handle" data-resize aria-hidden="true"></div> <div class="ask-panel-inner"> <header class="ask-header"> <div> <p class="ask-eyebrow">AI Data Center Systems</p> <h2 class="ask-title">Ask this docs</h2> </div> <div class="ask-header-controls"> <button class="ask-mode-btn" data-mode-btn="right" title="오른쪽 패널" aria-label="오른쪽 패널"> <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="6" height="16" rx="1.5" opacity="0.35"></rect><rect x="8" y="0" width="8" height="16" rx="1.5"></rect></svg> </button> <button class="ask-mode-btn" data-mode-btn="bottom" title="하단 패널" aria-label="하단 패널"> <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="16" height="6" rx="1.5" opacity="0.35"></rect><rect x="0" y="8" width="16" height="8" rx="1.5"></rect></svg> </button> <button class="ask-mode-btn" data-mode-btn="expand" title="전체 확장" aria-label="전체 확장"> <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 5.5V1h4.5M10.5 1H15v4.5M15 10.5V15h-4.5M5.5 15H1v-4.5"></path></svg> </button> <button class="ask-close-btn" type="button" aria-label="닫기" data-close> <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13"></path></svg> </button> </div> </header> <div class="ask-body"> <label class="ask-field"> <span class="ask-field-row"> <span>Question</span> <span class="ask-char" data-char>0 / 800</span> </span> <textarea name="question" rows="3" maxlength="800" placeholder="이 문서에서 핵심 운영 체크포인트는 무엇인가요?" data-question></textarea> <span class="ask-hint">시간당 최대 20회 · 질문당 최대 800자</span> </label> <div class="ask-actions"> <button class="ask-submit" type="button" data-submit> <svg class="ask-spinner" viewBox="0 0 24 24" fill="none" aria-hidden="true" hidden> <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2.5" stroke-dasharray="56" stroke-dashoffset="14" stroke-linecap="round"></circle> </svg> <span data-submit-label>Ask</span> </button> <p class="ask-status" data-status></p> </div> <section class="ask-answer" data-answer hidden></section> <section class="ask-sources" data-sources hidden> <h3>Sources</h3> <ul class="ask-source-chips" data-source-list></ul> </section> </div> </div> </div> <div class="ask-backdrop" data-backdrop hidden></div> </ask-docs-widget> <script type="module" src="/_astro/AskDocs.astro_astro_type_script_index_0_lang.BbnAb04M.js"></script> </div> <script type="module">const r=document.documentElement,c=document.querySelector("#starlight__sidebar"),s=document.querySelector(".navigation-mode-toggle"),a=document.querySelector(".navigation-drawer-toggle"),u=window.matchMedia("(min-width: 50rem)");function d(){return r.dataset.navigationMode==="compact"}function o(){return r.dataset.navigationDrawer==="open"}function l(){const e=d(),t=e&&o();s?.setAttribute("aria-pressed",String(e)),s?.setAttribute("title",e?"Use normal navigation":"Use compact navigation"),a?.setAttribute("aria-expanded",String(t)),a?.setAttribute("title",t?"Close navigation":"Open navigation");const n=a?.querySelector(".navigation-drawer-label");n&&(n.textContent=t?"Close navigation":"Open navigation")}function i(e,t=!1){const n=!!(e&&d()&&u.matches);r.dataset.navigationDrawer=n?"open":"closed",l(),n?requestAnimationFrame(()=>{const g=c?.querySelector('a[aria-current="page"]'),m=c?.querySelector(".starlight-sidebar-topics-current");(g??m)?.focus()}):t&&a?.focus()}function p(e){r.dataset.navigationMode=e,i(!1);try{localStorage.setItem("adcs-navigation-mode",e)}catch{}l()}s?.addEventListener("click",()=>{p(d()?"normal":"compact")});a?.addEventListener("click",()=>{i(!o(),o())});document.addEventListener("keydown",e=>{e.key==="Escape"&&o()&&i(!1,!0)});document.addEventListener("pointerdown",e=>{!o()||!(e.target instanceof Node)||c?.contains(e.target)||i(!1)});u.addEventListener("change",()=>i(!1));r.dataset.navigationDrawer="closed";l();</script> </body></html>

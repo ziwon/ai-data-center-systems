@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="520" viewBox="0 0 980 520" role="img" aria-labelledby="title desc">
+  <title id="title">Positional encoding vector addition</title>
+  <desc id="desc">A word embedding vector for clear is added to a positional encoding vector to produce a final input embedding vector.</desc>
+  <defs>
+    <filter id="shadow" x="-8%" y="-12%" width="116%" height="135%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#0f172a" flood-opacity="0.10"/>
+    </filter>
+    <style>
+      text { font-family: Arial, sans-serif; }
+      .bg { fill: #ffffff; }
+      .label { font-size: 17px; font-weight: 700; fill: #0f172a; }
+      .small { font-size: 13px; font-weight: 400; fill: #475569; }
+      .num { font-size: 20px; font-weight: 700; fill: #0f172a; }
+      .caption { font-size: 13px; font-weight: 400; fill: #334155; }
+      .word { fill: #eef6ff; stroke: #2563eb; stroke-width: 1.5; }
+      .pos { fill: #f5f3ff; stroke: #7c3aed; stroke-width: 1.5; }
+      .compute { fill: #ecfdf5; stroke: #059669; stroke-width: 1.5; }
+      .final { fill: #fff7ed; stroke: #ea580c; stroke-width: 1.5; }
+      .note { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 1; }
+      .axis { stroke: #94a3b8; stroke-width: 1.3; }
+      .plus { font-size: 40px; font-weight: 700; fill: #475569; }
+      .eq { font-size: 40px; font-weight: 700; fill: #475569; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="980" height="520"/>
+
+  <g filter="url(#shadow)">
+    <rect class="word" x="55" y="86" width="240" height="132" rx="10"/>
+    <text class="label" x="92" y="122">Word Embedding</text>
+    <text class="small" x="105" y="148">token: clear</text>
+    <text class="num" x="101" y="185">[ +2.5, +1.0 ]</text>
+  </g>
+
+  <text class="plus" x="332" y="170">+</text>
+
+  <g filter="url(#shadow)">
+    <rect class="pos" x="390" y="86" width="240" height="132" rx="10"/>
+    <text class="label" x="425" y="122">Position Encoding</text>
+    <text class="small" x="446" y="148">position = 4</text>
+    <text class="num" x="438" y="185">[ -0.8, +1.0 ]</text>
+  </g>
+
+  <text class="eq" x="665" y="170">=</text>
+
+  <g filter="url(#shadow)">
+    <rect class="final" x="725" y="86" width="220" height="132" rx="10"/>
+    <text class="label" x="767" y="122">Final Embedding</text>
+    <text class="small" x="777" y="148">word + position</text>
+    <text class="num" x="775" y="185">[ +1.7, +2.0 ]</text>
+  </g>
+
+  <g>
+    <line class="axis" x1="145" y1="360" x2="265" y2="360"/>
+    <line class="axis" x1="205" y1="420" x2="205" y2="300"/>
+    <circle cx="255" cy="320" r="7" fill="#2563eb"/>
+    <text class="caption" x="222" y="295">word vector</text>
+
+    <line class="axis" x1="455" y1="360" x2="575" y2="360"/>
+    <line class="axis" x1="515" y1="420" x2="515" y2="300"/>
+    <circle cx="491" cy="320" r="7" fill="#7c3aed"/>
+    <text class="caption" x="471" y="295">position vector</text>
+
+    <line class="axis" x1="775" y1="360" x2="895" y2="360"/>
+    <line class="axis" x1="835" y1="420" x2="835" y2="300"/>
+    <circle cx="869" cy="286" r="7" fill="#ea580c"/>
+    <text class="caption" x="802" y="274">final representation</text>
+  </g>
+
+  <rect class="note" x="55" y="448" width="890" height="42" rx="8"/>
+  <text class="caption" x="80" y="474">The same token can receive a different final representation when it appears at a different position in the sequence.</text>
+</svg>

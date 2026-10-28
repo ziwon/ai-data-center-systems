@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="500" viewBox="0 0 1120 500" role="img" aria-labelledby="title desc">
+  <title id="title">Lossless transport and restart cost</title>
+  <desc id="desc">A diagram showing how packet loss during synchronization can create GPU idle time, longer step time, restart risk, and wasted training cost.</desc>
+  <defs>
+    <style>
+      text { font-family: Arial, sans-serif; }
+      .bg { fill: #F3EFE7; }
+      .title { font-size: 25px; font-weight: 700; fill: #050505; }
+      .subtitle { font-size: 14px; fill: #6F6A63; }
+      .label { font-size: 15px; font-weight: 700; fill: #050505; }
+      .small { font-size: 13px; fill: #6F6A63; }
+      .tiny { font-size: 11px; fill: #6F6A63; }
+      .box { fill: none; stroke: #111111; stroke-width: 1.5; }
+      .note { fill: none; stroke: #D8D1C7; stroke-width: 1.2; }
+      .line { stroke: #111111; stroke-width: 2.2; fill: none; }
+      .loss { stroke: #D9392E; stroke-width: 2.5; stroke-dasharray: 6 5; fill: none; }
+      .arrow { fill: #111111; }
+      .red { fill: #D9392E; font-weight: 700; }
+      .dark { fill: #050505; font-weight: 700; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1120" height="560"/>
+  <rect class="note" x="40" y="40" width="1040" height="292" rx="8"/>
+  <text class="label" x="70" y="73">Synchronization path</text>
+
+  <rect class="box" x="86" y="103" width="130" height="64" rx="8"/>
+  <text class="label" x="127" y="129">GPU A</text>
+  <text class="tiny" x="119" y="149">local grad</text>
+
+  <rect class="box" x="294" y="103" width="230" height="64" rx="8"/>
+  <text class="label" x="356" y="129">Backend Fabric</text>
+  <text class="tiny" x="335" y="149">RoCE / InfiniBand / Ethernet</text>
+
+  <rect class="box" x="602" y="103" width="130" height="64" rx="8"/>
+  <text class="label" x="643" y="129">GPU B</text>
+  <text class="tiny" x="635" y="149">remote grad</text>
+
+  <rect class="box" x="822" y="103" width="178" height="64" rx="8"/>
+  <text class="label" x="864" y="129">AllReduce</text>
+  <text class="tiny" x="854" y="149">averaged gradients</text>
+
+  <line class="line" x1="216" y1="135" x2="288" y2="135"/>
+  <polygon class="arrow" points="288,135 276,128 276,142"/>
+  <line class="line" x1="524" y1="135" x2="596" y2="135"/>
+  <polygon class="arrow" points="596,135 584,128 584,142"/>
+  <line class="line" x1="732" y1="135" x2="816" y2="135"/>
+  <polygon class="arrow" points="816,135 804,128 804,142"/>
+
+  <path class="loss" d="M 407 184 C 426 204, 452 204, 471 184"/>
+  <text class="red" x="382" y="220">packet loss or tail latency</text>
+
+  <rect class="box" x="44" y="372" width="290" height="82" rx="8"/>
+  <text class="label" x="68" y="402">GPU/NIC behavior</text>
+  <text class="small" x="68" y="426">NIC is quiet during compute, then sends</text>
+  <text class="small" x="68" y="444">gradient data at close to line rate.</text>
+
+  <rect class="note" x="370" y="372" width="380" height="82" rx="8"/>
+  <text class="label" x="400" y="396">Backend Network Utilization</text>
+  <line class="line" x1="400" y1="437" x2="710" y2="437"/>
+  <line class="line" x1="400" y1="408" x2="400" y2="437"/>
+  <rect x="420" y="420" width="70" height="17" rx="3" fill="#111111" opacity="0.25"/>
+  <rect x="510" y="422" width="70" height="15" rx="3" fill="#111111" opacity="0.25"/>
+  <rect x="600" y="410" width="70" height="27" rx="3" fill="#D9392E"/>
+  <text class="tiny" x="418" y="453">forward</text>
+  <text class="tiny" x="511" y="453">backward</text>
+  <text class="tiny" x="604" y="453">sync</text>
+  <text class="red" x="675" y="415">~100%</text>
+
+  <rect class="box" x="786" y="372" width="294" height="82" rx="8"/>
+  <text class="label" x="816" y="402">Fabric risk</text>
+  <text class="small" x="816" y="426">Congestion, loss, or tail latency makes</text>
+  <text class="small" x="816" y="444">all participating GPUs wait.</text>
+</svg>

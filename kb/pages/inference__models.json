@@ -1,0 +1,465 @@
+{
+  "version": 1,
+  "current": {
+    "id": "/inference/models/",
+    "title": "Model Architecture and Serving Profiles",
+    "route": "/inference/models/",
+    "group": "inference",
+    "keywords": [
+      "profiles",
+      "정리합니다",
+      "설계가",
+      "architecture",
+      "미치는",
+      "serving",
+      "model",
+      "시스템",
+      "llm별",
+      "영향에"
+    ],
+    "excerpt": "LLM별 핵심 아키텍처와 실제 추론·서빙 시스템에서 확인해야 할 메모리, 통신, 캐시, 병렬화 특성을 정리합니다. 시스템 최적화 기법 자체보다 모델 설계가 serving profile에 미치는 영향에 집중합니다."
+  },
+  "nodes": [
+    {
+      "id": "/inference/models/",
+      "title": "Model Architecture and Serving Profiles",
+      "route": "/inference/models/",
+      "group": "inference",
+      "keywords": [
+        "profiles",
+        "정리합니다",
+        "설계가",
+        "architecture",
+        "미치는",
+        "serving",
+        "model",
+        "시스템",
+        "llm별",
+        "영향에"
+      ],
+      "excerpt": "LLM별 핵심 아키텍처와 실제 추론·서빙 시스템에서 확인해야 할 메모리, 통신, 캐시, 병렬화 특성을 정리합니다. 시스템 최적화 기법 자체보다 모델 설계가 serving profile에 미치는 영향에 집중합니다."
+    },
+    {
+      "id": "/inference/",
+      "title": "Inference",
+      "route": "/inference/",
+      "group": "inference",
+      "keywords": [
+        "하드웨어",
+        "메모리",
+        "최적화",
+        "다룹니다",
+        "참고자료",
+        "살펴봅니다",
+        "주차별",
+        "세대별",
+        "아키텍처",
+        "추론의"
+      ],
+      "excerpt": "LLM inference notes covering KV cache, quantization, speculative decoding, FlashAttention, SGLang production serving, and model serving profiles."
+    },
+    {
+      "id": "/inference/efficient-llm-inference-systems/",
+      "title": "Efficient LLM Inference Systems",
+      "route": "/inference/efficient-llm-inference-systems/",
+      "group": "inference",
+      "keywords": [
+        "양자화",
+        "메모리",
+        "다룹니다",
+        "특성을",
+        "speculative",
+        "llm",
+        "decoding",
+        "부록을",
+        "안내하며",
+        "efficient"
+      ],
+      "excerpt": "LLM inference systems notes covering KV cache, batching, quantization, GPU profiling, model serving, and practical performance trade-offs."
+    },
+    {
+      "id": "/inference/models/kimi-k2-5-scaling/",
+      "title": "How We Scaled Kimi K2.5: 토큰 효율, 장문 컨텍스트, 에이전트 스웜",
+      "route": "/inference/models/kimi-k2-5-scaling/",
+      "group": "inference",
+      "keywords": [
+        "kimi",
+        "agent",
+        "attention",
+        "token",
+        "reward",
+        "vision",
+        "발표자",
+        "decay",
+        "residual",
+        "swarm"
+      ],
+      "excerpt": "Source: How We Scaled Kimi K2.5 Zhilin Yang's full GTC 2026 Keynote"
+    },
+    {
+      "id": "/inference/models/kimi-k3/",
+      "title": "Kimi K3 기술 해부: 2.8T MoE, KDA, Attention Residuals, 그리고 64-GPU 서빙",
+      "route": "/inference/models/kimi-k3/",
+      "group": "inference",
+      "keywords": [
+        "kimi",
+        "kda",
+        "레이어",
+        "mla",
+        "sglang",
+        "보고서",
+        "expert",
+        "attnres",
+        "moonshot",
+        "attention"
+      ],
+      "excerpt": "공개 전에는 Kimi K2의 수치를 대입한 비공식 아키텍처 초안이 유통되었다. 이 초안은 KDA, Gated MLA, Block AttnRes, LatentMoE와 vision pathway의 연결 구조를 한 장에 보여준다는 점에서 여전히 유용하다. 다만 hidden..."
+    },
+    {
+      "id": "/inference/sglang-production-practices/",
+      "title": "SGLang in 2026: Engineering a Production-Grade LLM Serving Stack",
+      "route": "/inference/sglang-production-practices/",
+      "group": "inference",
+      "keywords": [
+        "sglang",
+        "gateway",
+        "not",
+        "speculative",
+        "prefill",
+        "cache-aware",
+        "model",
+        "decode",
+        "dcp",
+        "graph"
+      ],
+      "excerpt": "Version scope: SGLang v0.5.18, released August 22, 2026. Commands and defaults should be revalidated when upgrading."
+    },
+    {
+      "id": "/inference/efficient-llm-inference-systems/appendix/hardware-architectures/domain-specific-architectures-for-ai-inference.ko/",
+      "title": "Domain-Specific Architectures for AI Inference",
+      "route": "/inference/efficient-llm-inference-systems/appendix/hardware-architectures/domain-specific-architectures-for-ai-inference.ko/",
+      "group": "inference",
+      "keywords": [
+        "dsa",
+        "cache",
+        "week",
+        "compute",
+        "hardware",
+        "tensor",
+        "inference",
+        "decode",
+        "sram",
+        "scratchpad"
+      ],
+      "excerpt": "저자는 이 질문에 답하기 위해 Transformer inference의 병목을 먼저 분석하고, 거기서 하드웨어 설계 원칙을 끌어낸다. 결론은 다음과 같다."
+    },
+    {
+      "id": "/inference/efficient-llm-inference-systems/appendix/hardware-architectures/",
+      "title": "Hardware Architectures for LLM Inference",
+      "route": "/inference/efficient-llm-inference-systems/appendix/hardware-architectures/",
+      "group": "inference",
+      "keywords": [
+        "week",
+        "how",
+        "think",
+        "hardware",
+        "architectures",
+        "inference",
+        "inference-first",
+        "npus",
+        "copied",
+        "1-4"
+      ],
+      "excerpt": "This appendix collects Korean study notes for hardware architecture articles that are useful across the inference course."
+    },
+    {
+      "id": "/inference/efficient-llm-inference-systems/appendix/hardware-architectures/gpus.ko/",
+      "title": "How to Think About GPUs",
+      "route": "/inference/efficient-llm-inference-systems/appendix/hardware-architectures/gpus.ko/",
+      "group": "inference",
+      "keywords": [
+        "gpu",
+        "tensor",
+        "b300",
+        "core",
+        "nvlink",
+        "dgx",
+        "blackwell",
+        "memory",
+        "scale-up",
+        "parallelism"
+      ],
+      "excerpt": "이 글은 NVIDIA GPU를 LLM scaling 관점에서 설명한다. 핵심은 GPU를 하나의 큰 계산기로 보지 않는 것이다."
+    },
+    {
+      "id": "/storage/mlperf-storage/",
+      "title": "MLPerf Storage Benchmark",
+      "route": "/storage/mlperf-storage/",
+      "group": "storage",
+      "keywords": [
+        "storage",
+        "object",
+        "vectordb",
+        "인덱스",
+        "benchmark",
+        "i/o",
+        "cache",
+        "체크포인트",
+        "s3-compatible",
+        "checkpointing"
+      ],
+      "excerpt": "MLCommons Storage는 ML 워크로드를 지원하는 스토리지 시스템의 성능을 측정하기 위한 MLPerf Storage Benchmark Suite입니다. 단순 파일시스템 벤치마크가 아니라 학습 데이터 로딩, 체크포인트 저장/복구, LLM KV cache offload,..."
+    },
+    {
+      "id": "/mlops/",
+      "title": "MLOps: 모델을 배포하는 기술이 아니라 변경을 통제하는 운영 시스템",
+      "route": "/mlops/",
+      "group": "mlops",
+      "keywords": [
+        "데이터",
+        "feature",
+        "schema",
+        "재학습",
+        "freshness",
+        "drift",
+        "snapshot",
+        "revision",
+        "artifact",
+        "mlops"
+      ],
+      "excerpt": "Production MLOps guide covering lifecycle control, reproducibility, lineage, CI/CD/CT, feature stores, progressive delivery, monitoring, and LLMOps."
+    }
+  ],
+  "edges": [
+    {
+      "source": "/inference/",
+      "target": "/inference/efficient-llm-inference-systems/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": [
+        "메모리",
+        "다룹니다"
+      ]
+    },
+    {
+      "source": "/inference/",
+      "target": "/inference/efficient-llm-inference-systems/appendix/hardware-architectures/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/inference/",
+      "target": "/inference/efficient-llm-inference-systems/appendix/hardware-architectures/domain-specific-architectures-for-ai-inference.ko/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/inference/",
+      "target": "/inference/efficient-llm-inference-systems/appendix/hardware-architectures/gpus.ko/",
+      "type": "link+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/inference/",
+      "target": "/inference/models/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/inference/",
+      "target": "/inference/models/kimi-k2-5-scaling/",
+      "type": "link+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/inference/",
+      "target": "/inference/models/kimi-k3/",
+      "type": "link+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/inference/",
+      "target": "/inference/sglang-production-practices/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/",
+      "target": "/inference/efficient-llm-inference-systems/appendix/hardware-architectures/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/",
+      "target": "/inference/models/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/",
+      "target": "/inference/sglang-production-practices/",
+      "type": "link+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/",
+      "target": "/mlops/",
+      "type": "link",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/appendix/hardware-architectures/",
+      "target": "/inference/efficient-llm-inference-systems/appendix/hardware-architectures/domain-specific-architectures-for-ai-inference.ko/",
+      "type": "link",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/appendix/hardware-architectures/",
+      "target": "/inference/efficient-llm-inference-systems/appendix/hardware-architectures/gpus.ko/",
+      "type": "link",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/inference/models/",
+      "target": "/inference/models/kimi-k2-5-scaling/",
+      "type": "link",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/inference/models/",
+      "target": "/inference/models/kimi-k3/",
+      "type": "link",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/inference/models/",
+      "target": "/inference/sglang-production-practices/",
+      "type": "link",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/inference/models/kimi-k2-5-scaling/",
+      "target": "/inference/models/kimi-k3/",
+      "type": "link+semantic",
+      "weight": 1,
+      "terms": [
+        "kimi",
+        "attention"
+      ]
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/appendix/hardware-architectures/domain-specific-architectures-for-ai-inference.ko/",
+      "target": "/inference/models/",
+      "type": "semantic",
+      "weight": 0.664,
+      "terms": []
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/",
+      "target": "/storage/mlperf-storage/",
+      "type": "semantic",
+      "weight": 0.649,
+      "terms": []
+    },
+    {
+      "source": "/inference/",
+      "target": "/storage/mlperf-storage/",
+      "type": "semantic",
+      "weight": 0.641,
+      "terms": []
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/appendix/hardware-architectures/",
+      "target": "/inference/models/",
+      "type": "semantic",
+      "weight": 0.639,
+      "terms": []
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/appendix/hardware-architectures/gpus.ko/",
+      "target": "/inference/models/",
+      "type": "semantic",
+      "weight": 0.63,
+      "terms": []
+    },
+    {
+      "source": "/inference/models/",
+      "target": "/storage/mlperf-storage/",
+      "type": "semantic",
+      "weight": 0.624,
+      "terms": []
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/appendix/hardware-architectures/gpus.ko/",
+      "target": "/inference/sglang-production-practices/",
+      "type": "semantic",
+      "weight": 0.608,
+      "terms": []
+    },
+    {
+      "source": "/inference/models/",
+      "target": "/mlops/",
+      "type": "semantic",
+      "weight": 0.594,
+      "terms": []
+    },
+    {
+      "source": "/mlops/",
+      "target": "/storage/mlperf-storage/",
+      "type": "semantic",
+      "weight": 0.589,
+      "terms": []
+    },
+    {
+      "source": "/inference/sglang-production-practices/",
+      "target": "/mlops/",
+      "type": "semantic",
+      "weight": 0.572,
+      "terms": []
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/",
+      "target": "/inference/efficient-llm-inference-systems/appendix/hardware-architectures/domain-specific-architectures-for-ai-inference.ko/",
+      "type": "section",
+      "weight": 0.18,
+      "terms": []
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/",
+      "target": "/inference/efficient-llm-inference-systems/appendix/hardware-architectures/gpus.ko/",
+      "type": "section",
+      "weight": 0.18,
+      "terms": []
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/",
+      "target": "/inference/models/kimi-k2-5-scaling/",
+      "type": "section",
+      "weight": 0.18,
+      "terms": []
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/",
+      "target": "/inference/models/kimi-k3/",
+      "type": "section",
+      "weight": 0.18,
+      "terms": []
+    }
+  ]
+}
