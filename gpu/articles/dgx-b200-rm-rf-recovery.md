@@ -10,7 +10,7 @@ In the end, I booted a DGX OS 7 image to get a separate recovery environment. I 
 
 Looking back, the environment each command ran in largely determined the outcome. **To repair a system, you first need an environment in which your recovery commands and tools run reliably.** The surviving SSH connection, the healthy node’s files, the recovery image, and the target disk each played a different role.
 
-This post is based on my incident records from that time and the recovery retrospective I wrote back then. I keep the date the retrospective was written separate from the date the recovery was actually completed. The commands and observations follow the records made at the time; examples that explain the underlying mechanisms, and the operational improvements I would make going forward, are identified as such where they appear.
+This post is based on the messages I exchanged while working at the time and the retrospective I wrote after the recovery. The commands and observations follow the records made at the time; examples that explain the underlying mechanisms, and the operational improvements I would make going forward, are identified as such where they appear.
 
 ## Contents
 
@@ -117,7 +117,7 @@ In the first round of recovery, I restored the following files, using healthy no
 
 These files hold the information needed for user accounts, groups, and local hostname resolution. `/etc/passwd` contains each account’s UID and GID, home directory, login shell, and so on. The three files don’t replace SSH keys or the full authentication configuration, but they are basic building blocks of a working userspace environment. [passwd(5)](https://man7.org/linux/man-pages/man5/passwd.5.html), [group(5)](https://man7.org/linux/man-pages/man5/group.5.html), [hosts(5)](https://man7.org/linux/man-pages/man5/hosts.5.html)
 
-Around 13:03 on April 13, 2025, I noted the following in the chat at the time:
+Around 13:03 on April N, I wrote the following in my working notes:
 
 > SSH between the nodes works both ways now.
 
@@ -125,18 +125,18 @@ That was the first solid progress. I had gone from depending on a single existin
 
 That didn’t mean the whole system was back, though. SSH access is one feature that works only when many dependencies line up. Even with that feature restored, other services’ configuration and executables, and the files needed for the next boot, could still be damaged. So I went on to pull more system files over from the healthy node.
 
-The table below lists the times of the updates in that chat, in Korea Standard Time (KST).
+The table below lists the times recorded in those notes, in Korea Standard Time (KST).
 
 | Approx. time (KST) | Action or observation |
 |---|---|
-| April N, 12:36 | Reported the incident command and the deletion output on 04 |
+| April N, 12:36 | Recorded the incident command and the deletion output on 04 |
 | 12:48 | 05 reachable; new SSH logins to 04 failing |
 | 12:59 | `nano` still works; plan to restore the account files first |
-| 13:03 | Three files restored; SSH reported working in both directions |
+| 13:03 | Three files restored; SSH confirmed working in both directions |
 | 13:39 | Nested `/etc/etc` path discovered |
 | 13:49–13:55 | Connection problems after copying `/lib`; `ls` and `rsync` hit segmentation faults |
-| 16:27 | Reported that loading a roughly 3.2 GB OS image through the BMC was extremely slow |
-| April N+3 | Per the retrospective, booted successfully after restoring files and boot configuration from recovery mode |
+| 16:27 | Found loading a roughly 3.2 GB OS image through the BMC extremely slow |
+| April N+3 | Booted successfully after restoring files and boot configuration from recovery mode |
 
 ## 5. A second failure during recovery
 
@@ -163,7 +163,7 @@ I ran the following command to copy the files in `/lib/lib` into `/lib`. This, t
 cp -a /lib/lib/* /lib/
 ```
 
-Right after it ran, I reported that a connection had dropped. In the session that was still open, `ls` failed with this error:
+Right after it ran, the connection dropped. In the session that was still open, `ls` failed with this error:
 
 ```text
 Segmentation fault (core dumped)
@@ -278,7 +278,7 @@ Copying another node’s OS contents file by file doesn’t make the target file
 
 This step shows the difference between “the necessary files are present” and “this machine references those files and devices correctly.” A configuration with mismatched UUIDs is wrong for that node, even if the file itself is perfectly intact. Other boot references, such as the root device specified to the bootloader, also need to be checked separately depending on the environment.
 
-The retrospective I wrote on April 26 ends like this:
+The retrospective I wrote on April N+3 ends like this:
 
 > I chrooted in and initialized grub and the kernel on that system. Fixed /etc/fstab to match blkid, too. And then it booted.
 
@@ -286,7 +286,7 @@ The system on the original disk booting again confirmed that this recovery path 
 
 ## 9. A successful boot is not a return to service
 
-The last outcome the records confirm is a normal boot and a report that the recovery succeeded. No follow-up verification commands or output for GPU, RDMA, or Kubernetes were preserved. The recovery result in this post is therefore limited to restoring the OS boot.
+The last outcome the records confirm is a normal boot and a record that the recovery succeeded. No follow-up verification commands or output for GPU, RDMA, or Kubernetes were preserved. The recovery result in this post is therefore limited to restoring the OS boot.
 
 If you are designing the criteria for putting a GPU node back into service, you need role-specific verification beyond the boot itself. The table below is not a record of checks I performed this time; it lists checks to include in the return-to-service procedure after this type of failure.
 
