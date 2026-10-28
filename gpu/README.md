@@ -16,6 +16,7 @@ GPU 아키텍처와 CUDA 프로그래밍부터 Kubernetes GPU 플랫폼 운영�
 GPU 자원 공유와 격리, 장애 분석, 반복 가능한 플랫폼 운영을 다룹니다. [아티클 모아보기](articles/README.md)
 
 - [GPU 인프라 운영과 플랫폼 설계: 하드웨어 장애 분석부터 멀티테넌시까지](articles/gpu-infrastructure-operations-and-platform-design.ko.md)
+- [rm -rf 사고로 손상된 DGX B200 노드 복구기](articles/dgx-b200-rm-rf-recovery.ko.md) · [English](articles/dgx-b200-rm-rf-recovery.md)
 - [DRA와 HAMi로 보는 Kubernetes GPU 분할](articles/hami-dra-gpu-sharing.ko.md)
 - [HAMi-core Deep Dive: `libvgpu.so`는 GPU를 어떻게 나누는가](articles/hami-core-deep-dive.ko.md)
 
