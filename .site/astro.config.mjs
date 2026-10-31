@@ -97,6 +97,14 @@ export default defineConfig({
   markdown: {
     remarkPlugins: [remarkMath],
     rehypePlugins: [rehypeKatex],
+    // GFM footnotes: Korean screen-reader labels. The hidden label is a <p>, not an <h2>,
+    // so it stays out of the "On this page" list; articles add their own visible heading.
+    remarkRehype: {
+      footnoteLabel: '참고 자료',
+      footnoteLabelTagName: 'p',
+      footnoteBackLabel: (referenceIndex, rereferenceIndex) =>
+        `본문으로 돌아가기 (${referenceIndex + 1}${rereferenceIndex > 1 ? `-${rereferenceIndex}` : ''})`,
+    },
   },
   vite: {
     optimizeDeps: {
