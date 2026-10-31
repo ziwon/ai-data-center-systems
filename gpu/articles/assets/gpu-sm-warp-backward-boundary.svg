@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 554.386 722.2" width="554.386" height="722.2" style="background:#ffffff" role="img" aria-labelledby="title desc"><title id="title">cuDNN 역전파의 관측 경계</title><desc id="desc">9.10에서 dX 완료 후 후속 GPU activity가 누락되고 동기화가 끝나지 않았다. 9.27은 다른 커널 경로로 같은 연산을 완료했다.</desc>
+<style>
+  text { font-family: 'Malgun Gothic', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+
+
+
+
+
+
+
+
+
+
+
+
+  }</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="#0969da" stroke="#0969da" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="#0969da" stroke="#0969da" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<polyline class="edge" data-from="A" data-to="B" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="282.7505,118.7 282.7505,143.7 157.154,143.7 157.154,222.10000000000002" fill="none" stroke="#d1d9e0" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="A" data-to="C" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="282.7505,118.7 282.7505,143.7 408.347,143.7 408.347,168.7" fill="none" stroke="#d1d9e0" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="B" data-to="D" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="157.154,259.00000000000006 157.154,309.00000000000006" fill="none" stroke="#d1d9e0" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="C" data-to="E" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="408.347,205.60000000000002 408.347,255.60000000000002" fill="none" stroke="#d1d9e0" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="D" data-to="F" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="157.154,362.80000000000007 157.154,412.80000000000007" fill="none" stroke="#d1d9e0" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="E" data-to="G" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="408.347,309.40000000000003 408.347,359.40000000000003" fill="none" stroke="#d1d9e0" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="F" data-to="H" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="157.154,466.6000000000001 157.154,516.6" fill="none" stroke="#d1d9e0" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="G" data-to="I" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="408.347,413.20000000000005 408.347,463.20000000000005" fill="none" stroke="#d1d9e0" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="H" data-to="J" data-style="dotted" data-arrow-start="false" data-arrow-end="true" points="157.154,570.4000000000001 157.154,608.4000000000001 233.15133333333333,608.4000000000001 233.15133333333333,620.4000000000001" fill="none" stroke="#d1d9e0" stroke-width="1" stroke-dasharray="4 4" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="I" data-to="J" data-style="dotted" data-arrow-start="false" data-arrow-end="true" data-label="경로 비교" points="408.347,500.1 408.347,608.4000000000001 332.3496666666666,608.4000000000001 332.3496666666666,620.4000000000001" fill="none" stroke="#d1d9e0" stroke-width="1" stroke-dasharray="4 4" marker-end="url(#arrowhead)" />
+<g class="edge-label" data-from="I" data-to="J" data-label="경로 비교">
+  <rect x="374.847" y="545.1" width="66.952" height="30.3" rx="2" ry="2" fill="#ffffff" stroke="#e4e5e5" stroke-width="1" />
+  <text x="408.323" y="560.25" text-anchor="middle" font-size="11" font-weight="400" fill="#59636e" dy="3.8499999999999996">경로 비교</text>
+</g>
+<g class="node" data-id="A" data-label="같은 1×1 convolution 역전파
+BF16 · channels-last
+X 256×160×4×4 · W 1280×160×1×1" data-shape="rectangle">
+  <rect x="147.75" y="48" width="270" height="70.7" rx="0" ry="0" fill="#eff6ff" stroke="#2563eb" stroke-width="0.75" />
+  <text x="282.7505" y="83.35" text-anchor="middle" font-size="13" font-weight="500" fill="#1e3a8a"><tspan x="282.7505" dy="-12.350000000000001">같은 1×1 convolution 역전파</tspan><tspan x="282.7505" dy="16.900000000000002">BF16 · channels-last</tspan><tspan x="282.7505" dy="16.900000000000002">X 256×160×4×4 · W 1280×160×1×1</tspan></text>
+</g>
+<g class="node" data-id="B" data-label="cuDNN 9.10" data-shape="rectangle">
+  <rect x="103.9455" y="222.10000000000002" width="106.417" height="36.900000000000006" rx="0" ry="0" fill="#eff6ff" stroke="#2563eb" stroke-width="0.75" />
+  <text x="157.154" y="240.55" text-anchor="middle" font-size="13" font-weight="500" fill="#1e3a8a" dy="4.55">cuDNN 9.10</text>
+</g>
+<g class="node" data-id="C" data-label="cuDNN 9.27" data-shape="rectangle">
+  <rect x="352.91549999999995" y="168.7" width="110.863" height="36.900000000000006" rx="0" ry="0" fill="#eff6ff" stroke="#2563eb" stroke-width="0.75" />
+  <text x="408.347" y="187.14999999999998" text-anchor="middle" font-size="13" font-weight="500" fill="#1e3a8a" dy="4.55">cuDNN 9.27</text>
+</g>
+<g class="node" data-id="D" data-label="dX 커널 완료
+GPU 시작·종료 기록 있음" data-shape="rectangle">
+  <rect x="56.5215" y="309.00000000000006" width="201.265" height="53.800000000000004" rx="0" ry="0" fill="#ecfdf5" stroke="#087f5b" stroke-width="0.75" />
+  <text x="157.154" y="335.90000000000003" text-anchor="middle" font-size="13" font-weight="500" fill="#064e3b"><tspan x="157.154" dy="-3.9000000000000012">dX 커널 완료</tspan><tspan x="157.154" dy="16.900000000000002">GPU 시작·종료 기록 있음</tspan></text>
+</g>
+<g class="node" data-id="E" data-label="dX 커널 완료
+다른 dX 커널 선택" data-shape="rectangle">
+  <rect x="331.4264999999999" y="255.60000000000002" width="153.841" height="53.800000000000004" rx="0" ry="0" fill="#ecfdf5" stroke="#087f5b" stroke-width="0.75" />
+  <text x="408.3469999999999" y="282.5" text-anchor="middle" font-size="13" font-weight="500" fill="#064e3b"><tspan x="408.3469999999999" dy="-3.9000000000000012">dX 커널 완료</tspan><tspan x="408.3469999999999" dy="16.900000000000002">다른 dX 커널 선택</tspan></text>
+</g>
+<g class="node" data-id="F" data-label="후속 kernel launch 호출 반환
+대응 GPU activity 없음" data-shape="rectangle">
+  <rect x="48" y="412.80000000000007" width="218.308" height="53.800000000000004" rx="0" ry="0" fill="#fff7ed" stroke="#c2410c" stroke-width="0.75" />
+  <text x="157.154" y="439.70000000000005" text-anchor="middle" font-size="13" font-weight="500" fill="#7c2d12"><tspan x="157.154" dy="-3.9000000000000012">후속 kernel launch 호출 반환</tspan><tspan x="157.154" dy="16.900000000000002">대응 GPU activity 없음</tspan></text>
+</g>
+<g class="node" data-id="G" data-label="GEMM + split-K reduction
+GPU 실행 완료 기록 있음" data-shape="rectangle">
+  <rect x="310.308" y="359.40000000000003" width="196.078" height="53.800000000000004" rx="0" ry="0" fill="#ecfdf5" stroke="#087f5b" stroke-width="0.75" />
+  <text x="408.347" y="386.3" text-anchor="middle" font-size="13" font-weight="500" fill="#064e3b"><tspan x="408.347" dy="-3.9000000000000012">GEMM + split-K reduction</tspan><tspan x="408.347" dy="16.900000000000002">GPU 실행 완료 기록 있음</tspan></text>
+</g>
+<g class="node" data-id="H" data-label="연산 후 동기화 미완료
+같은 실행에서 Xid 13 → 109" data-shape="rectangle">
+  <rect x="58.74450000000001" y="516.6" width="196.819" height="53.800000000000004" rx="0" ry="0" fill="#fff7ed" stroke="#c2410c" stroke-width="0.75" />
+  <text x="157.154" y="543.5" text-anchor="middle" font-size="13" font-weight="500" fill="#7c2d12"><tspan x="157.154" dy="-3.9000000000000012">연산 후 동기화 미완료</tspan><tspan x="157.154" dy="16.900000000000002">같은 실행에서 Xid 13 → 109</tspan></text>
+</g>
+<g class="node" data-id="I" data-label="연산 후 동기화 완료" data-shape="rectangle">
+  <rect x="324.75749999999994" y="463.20000000000005" width="167.17899999999997" height="36.900000000000006" rx="0" ry="0" fill="#ecfdf5" stroke="#087f5b" stroke-width="0.75" />
+  <text x="408.3469999999999" y="481.65000000000003" text-anchor="middle" font-size="13" font-weight="500" fill="#064e3b" dy="4.55">연산 후 동기화 완료</text>
+</g>
+<g class="node" data-id="J" data-label="추론: dW 경로가 유력한 실패 후보
+실패 커널·명령을 직접 식별한 것은 아님" data-shape="rectangle">
+  <rect x="133.953" y="620.4000000000001" width="297.59499999999997" height="53.800000000000004" rx="0" ry="0" fill="#fff7ed" stroke="#c2410c" stroke-width="0.75" />
+  <text x="282.7505" y="647.3000000000001" text-anchor="middle" font-size="13" font-weight="500" fill="#7c2d12"><tspan x="282.7505" dy="-3.9000000000000012">추론: dW 경로가 유력한 실패 후보</tspan><tspan x="282.7505" dy="16.900000000000002">실패 커널·명령을 직접 식별한 것은 아님</tspan></text>
+</g>
+</svg>

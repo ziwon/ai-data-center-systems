@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 588.932 501" width="1140" height="969.79" style="background:#ffffff" role="img" aria-labelledby="title desc"><title id="title">cuDNN 버전에 따른 실행 계획</title><desc id="desc">같은 최소 BF16 합성곱에서 9.10과 9.26 및 9.27이 선택한 forward와 dX 커널 및 자원 구성.</desc>
+<style>
+  text { font-family: 'Malgun Gothic', 'Noto Sans CJK KR', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+
+
+
+
+
+
+
+
+
+
+
+
+  }</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="#0969da" stroke="#0969da" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="#0969da" stroke="#0969da" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<polyline class="edge" data-from="INPUT" data-to="OLD" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="295.207,85.80000000000001 295.207,106.80000000000001 155.974,106.80000000000001 155.974,127.80000000000001" fill="none" stroke="#d1d9e0" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="INPUT" data-to="NEW" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="295.207,85.80000000000001 295.207,106.80000000000001 434.43999999999994,106.80000000000001 434.43999999999994,127.80000000000001" fill="none" stroke="#d1d9e0" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="OLD" data-to="OF" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="155.974,164.70000000000002 155.974,206.70000000000002" fill="none" stroke="#d1d9e0" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="NEW" data-to="NF" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="434.43999999999994,164.70000000000002 434.43999999999994,206.70000000000002" fill="none" stroke="#d1d9e0" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="OF" data-to="OD" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="155.974,260.5 155.974,302.5" fill="none" stroke="#d1d9e0" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="NF" data-to="ND" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="434.43999999999994,260.5 434.43999999999994,302.5" fill="none" stroke="#d1d9e0" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="OD" data-to="LIMIT" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="155.974,373.2 155.974,394.2 295.207,394.2 295.207,415.2" fill="none" stroke="#d1d9e0" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="ND" data-to="LIMIT" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="434.44,373.2 434.44,394.2 295.207,394.2 295.207,415.2" fill="none" stroke="#d1d9e0" stroke-width="1" marker-end="url(#arrowhead)" />
+<g class="node" data-id="INPUT" data-label="동일한 BF16 1×1 Conv2d + backward
+X: 4096×288×8×8 / W: 48×288×1×1" data-shape="rectangle">
+  <rect x="169.38049999999998" y="32" width="251.653" height="53.800000000000004" rx="0" ry="0" fill="#f8f8f9" stroke="#d2d3d4" stroke-width="0.75" />
+  <text x="295.207" y="58.900000000000006" text-anchor="middle" font-size="13" font-weight="500" fill="#1f2328"><tspan x="295.207" dy="-3.9000000000000012">동일한 BF16 1×1 Conv2d + backward</tspan><tspan x="295.207" dy="16.900000000000002">X: 4096×288×8×8 / W: 48×288×1×1</tspan></text>
+</g>
+<g class="node" data-id="OLD" data-label="cuDNN 9.10.2.21" data-shape="rectangle">
+  <rect x="90.90949999999998" y="127.80000000000001" width="130.12900000000002" height="36.900000000000006" rx="0" ry="0" fill="#fff7ed" stroke="#c2410c" stroke-width="0.75" />
+  <text x="155.974" y="146.25" text-anchor="middle" font-size="13" font-weight="500" fill="#7c2d12" dy="4.55">cuDNN 9.10.2.21</text>
+</g>
+<g class="node" data-id="NEW" data-label="cuDNN 9.26.0.51 / 9.27.0.42" data-shape="rectangle">
+  <rect x="336.40099999999995" y="127.80000000000001" width="196.078" height="36.900000000000006" rx="0" ry="0" fill="#eff6ff" stroke="#2563eb" stroke-width="0.75" />
+  <text x="434.43999999999994" y="146.25" text-anchor="middle" font-size="13" font-weight="500" fill="#173469" dy="4.55">cuDNN 9.26.0.51 / 9.27.0.42</text>
+</g>
+<g class="node" data-id="OF" data-label="Forward: engine 22
+XMMA / 128×32×32 타일" data-shape="rectangle">
+  <rect x="63.863" y="206.70000000000002" width="184.22199999999998" height="53.800000000000004" rx="0" ry="0" fill="#fff7ed" stroke="#c2410c" stroke-width="0.75" />
+  <text x="155.974" y="233.60000000000002" text-anchor="middle" font-size="13" font-weight="500" fill="#7c2d12"><tspan x="155.974" dy="-3.9000000000000012">Forward: engine 22</tspan><tspan x="155.974" dy="16.900000000000002">XMMA / 128×32×32 타일</tspan></text>
+</g>
+<g class="node" data-id="NF" data-label="Forward: engine 58
+CUTLASS WMMA / 32×32 타일" data-shape="rectangle">
+  <rect x="321.581" y="206.70000000000002" width="225.718" height="53.800000000000004" rx="0" ry="0" fill="#eff6ff" stroke="#2563eb" stroke-width="0.75" />
+  <text x="434.44" y="233.60000000000002" text-anchor="middle" font-size="13" font-weight="500" fill="#173469"><tspan x="434.44" dy="-3.9000000000000012">Forward: engine 58</tspan><tspan x="434.44" dy="16.900000000000002">CUTLASS WMMA / 32×32 타일</tspan></text>
+</g>
+<g class="node" data-id="OD" data-label="dX: engine 63, k25=0
+256×128 타일 / 256 threads
+218 registers/thread / 72KiB shared" data-shape="rectangle">
+  <rect x="32" y="302.5" width="247.94799999999998" height="70.7" rx="0" ry="0" fill="#fff7ed" stroke="#c2410c" stroke-width="0.75" />
+  <text x="155.974" y="337.85" text-anchor="middle" font-size="13" font-weight="500" fill="#7c2d12"><tspan x="155.974" dy="-12.350000000000001">dX: engine 63, k25=0</tspan><tspan x="155.974" dy="16.900000000000002">256×128 타일 / 256 threads</tspan><tspan x="155.974" dy="16.900000000000002">218 registers/thread / 72KiB shared</tspan></text>
+</g>
+<g class="node" data-id="ND" data-label="dX: engine 63, k25=2
+64×64 타일 / 128 threads
+96 registers/thread / 48KiB shared" data-shape="rectangle">
+  <rect x="311.948" y="302.5" width="244.984" height="70.7" rx="0" ry="0" fill="#eff6ff" stroke="#2563eb" stroke-width="0.75" />
+  <text x="434.44" y="337.85" text-anchor="middle" font-size="13" font-weight="500" fill="#173469"><tspan x="434.44" dy="-12.350000000000001">dX: engine 63, k25=2</tspan><tspan x="434.44" dy="16.900000000000002">64×64 타일 / 128 threads</tspan><tspan x="434.44" dy="16.900000000000002">96 registers/thread / 48KiB shared</tspan></text>
+</g>
+<g class="node" data-id="LIMIT" data-label="관측: 실행 경로와 자원 구성이 달라짐
+미확정: 결함 수정인가, 취약 조건 회피인가" data-shape="rectangle">
+  <rect x="139.74050000000003" y="415.2" width="310.93299999999994" height="53.800000000000004" rx="0" ry="0" fill="#f8fafc" stroke="#64748b" stroke-width="0.75" />
+  <text x="295.207" y="442.09999999999997" text-anchor="middle" font-size="13" font-weight="500" fill="#334155"><tspan x="295.207" dy="-3.9000000000000012">관측: 실행 경로와 자원 구성이 달라짐</tspan><tspan x="295.207" dy="16.900000000000002">미확정: 결함 수정인가, 취약 조건 회피인가</tspan></text>
+</g>
+</svg>
