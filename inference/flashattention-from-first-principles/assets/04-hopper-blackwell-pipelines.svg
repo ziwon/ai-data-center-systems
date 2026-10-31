@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="860" viewBox="0 0 1500 860" role="img" aria-labelledby="title desc">
+  <title id="title">Conceptual Hopper and Blackwell FlashAttention pipelines</title>
+  <desc id="desc">The top panel illustrates Hopper producer-consumer TMA and WGMMA overlap with ping-pong softmax. The bottom panel illustrates Blackwell tensor memory and specialized softmax, correction, and tensor-core roles.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f8fafc"/>
+      <stop offset="1" stop-color="#f5f3ff"/>
+    </linearGradient>
+    <style>
+      .title{font:700 30px Inter,Segoe UI,Arial,sans-serif;fill:#0f172a}
+      .panel{font:700 22px Inter,Segoe UI,Arial,sans-serif;fill:#0f172a}
+      .lane{font:600 15px Inter,Segoe UI,Arial,sans-serif;fill:#334155}
+      .cell{font:600 13px Inter,Segoe UI,Arial,sans-serif;fill:#0f172a}
+      .note{font:500 13px Inter,Segoe UI,Arial,sans-serif;fill:#64748b}
+      .grid{stroke:#cbd5e1;stroke-width:1}
+    </style>
+  </defs>
+  <rect width="1500" height="860" fill="url(#bg)"/>
+  <text x="750" y="48" text-anchor="middle" class="title">From “do each step” to “keep every hardware engine busy”</text>
+
+  <!-- Hopper -->
+  <rect x="45" y="82" width="1410" height="330" rx="22" fill="#ffffff" stroke="#99f6e4" stroke-width="2"/>
+  <text x="75" y="122" class="panel">FlashAttention-3 on Hopper: producer–consumer + ping-pong</text>
+  <text x="75" y="150" class="note">Conceptual schedule, not cycle-accurate. Colors indicate work categories rather than exact instructions.</text>
+
+  <text x="80" y="205" class="lane">TMA producer</text>
+  <text x="80" y="260" class="lane">Consumer WG A</text>
+  <text x="80" y="315" class="lane">Consumer WG B</text>
+  <text x="80" y="370" class="lane">MUFU / CUDA cores</text>
+
+  <g transform="translate(250,175)">
+    <line x1="0" y1="0" x2="1160" y2="0" class="grid"/>
+    <line x1="0" y1="55" x2="1160" y2="55" class="grid"/>
+    <line x1="0" y1="110" x2="1160" y2="110" class="grid"/>
+    <line x1="0" y1="165" x2="1160" y2="165" class="grid"/>
+    <line x1="0" y1="220" x2="1160" y2="220" class="grid"/>
+    <g class="grid">
+      <line x1="0" y1="0" x2="0" y2="220"/><line x1="145" y1="0" x2="145" y2="220"/>
+      <line x1="290" y1="0" x2="290" y2="220"/><line x1="435" y1="0" x2="435" y2="220"/>
+      <line x1="580" y1="0" x2="580" y2="220"/><line x1="725" y1="0" x2="725" y2="220"/>
+      <line x1="870" y1="0" x2="870" y2="220"/><line x1="1015" y1="0" x2="1015" y2="220"/>
+      <line x1="1160" y1="0" x2="1160" y2="220"/>
+    </g>
+
+    <rect x="0" y="8" width="140" height="39" rx="8" fill="#cffafe"/><text x="70" y="33" text-anchor="middle" class="cell">load K₀,V₀</text>
+    <rect x="145" y="8" width="140" height="39" rx="8" fill="#cffafe"/><text x="215" y="33" text-anchor="middle" class="cell">load K₁,V₁</text>
+    <rect x="290" y="8" width="140" height="39" rx="8" fill="#cffafe"/><text x="360" y="33" text-anchor="middle" class="cell">load K₂,V₂</text>
+    <rect x="435" y="8" width="140" height="39" rx="8" fill="#cffafe"/><text x="505" y="33" text-anchor="middle" class="cell">load K₃,V₃</text>
+    <rect x="580" y="8" width="140" height="39" rx="8" fill="#cffafe"/><text x="650" y="33" text-anchor="middle" class="cell">load K₄,V₄</text>
+
+    <rect x="145" y="63" width="140" height="39" rx="8" fill="#ddd6fe"/><text x="215" y="88" text-anchor="middle" class="cell">WGMMA tile 0</text>
+    <rect x="290" y="118" width="140" height="39" rx="8" fill="#ddd6fe"/><text x="360" y="143" text-anchor="middle" class="cell">WGMMA tile 1</text>
+    <rect x="435" y="63" width="140" height="39" rx="8" fill="#ddd6fe"/><text x="505" y="88" text-anchor="middle" class="cell">WGMMA tile 2</text>
+    <rect x="580" y="118" width="140" height="39" rx="8" fill="#ddd6fe"/><text x="650" y="143" text-anchor="middle" class="cell">WGMMA tile 3</text>
+    <rect x="725" y="63" width="140" height="39" rx="8" fill="#ddd6fe"/><text x="795" y="88" text-anchor="middle" class="cell">WGMMA tile 4</text>
+
+    <rect x="290" y="173" width="140" height="39" rx="8" fill="#fef3c7"/><text x="360" y="198" text-anchor="middle" class="cell">softmax A₀</text>
+    <rect x="435" y="173" width="140" height="39" rx="8" fill="#fef3c7"/><text x="505" y="198" text-anchor="middle" class="cell">softmax B₁</text>
+    <rect x="580" y="173" width="140" height="39" rx="8" fill="#fef3c7"/><text x="650" y="198" text-anchor="middle" class="cell">softmax A₂</text>
+    <rect x="725" y="173" width="140" height="39" rx="8" fill="#fef3c7"/><text x="795" y="198" text-anchor="middle" class="cell">softmax B₃</text>
+
+    <text x="70" y="244" text-anchor="middle" class="note">time →</text>
+  </g>
+
+  <!-- Blackwell -->
+  <rect x="45" y="445" width="1410" height="365" rx="22" fill="#ffffff" stroke="#fdba74" stroke-width="2"/>
+  <text x="75" y="485" class="panel">FlashAttention-4 on Blackwell: TMEM-centered role specialization</text>
+  <text x="75" y="513" class="note">Tensor Core results land in TMEM; softmax and correction roles consume or modify those tiles while MMA continues asynchronously.</text>
+
+  <text x="80" y="565" class="lane">Tensor/TMA WG</text>
+  <text x="80" y="620" class="lane">Softmax WG A</text>
+  <text x="80" y="675" class="lane">Softmax WG B</text>
+  <text x="80" y="730" class="lane">Correction WG</text>
+  <text x="80" y="785" class="lane">TMEM state</text>
+
+  <g transform="translate(250,535)">
+    <line x1="0" y1="0" x2="1160" y2="0" class="grid"/>
+    <line x1="0" y1="55" x2="1160" y2="55" class="grid"/>
+    <line x1="0" y1="110" x2="1160" y2="110" class="grid"/>
+    <line x1="0" y1="165" x2="1160" y2="165" class="grid"/>
+    <line x1="0" y1="220" x2="1160" y2="220" class="grid"/>
+    <line x1="0" y1="275" x2="1160" y2="275" class="grid"/>
+    <g class="grid">
+      <line x1="0" y1="0" x2="0" y2="275"/><line x1="145" y1="0" x2="145" y2="275"/>
+      <line x1="290" y1="0" x2="290" y2="275"/><line x1="435" y1="0" x2="435" y2="275"/>
+      <line x1="580" y1="0" x2="580" y2="275"/><line x1="725" y1="0" x2="725" y2="275"/>
+      <line x1="870" y1="0" x2="870" y2="275"/><line x1="1015" y1="0" x2="1015" y2="275"/>
+      <line x1="1160" y1="0" x2="1160" y2="275"/>
+    </g>
+
+    <rect x="0" y="8" width="140" height="39" rx="8" fill="#ffedd5"/><text x="70" y="33" text-anchor="middle" class="cell">MMA Sᴴ₀ → TMEM</text>
+    <rect x="145" y="8" width="140" height="39" rx="8" fill="#ffedd5"/><text x="215" y="33" text-anchor="middle" class="cell">MMA Sᴸ₀ → TMEM</text>
+    <rect x="290" y="8" width="140" height="39" rx="8" fill="#ffedd5"/><text x="360" y="33" text-anchor="middle" class="cell">MMA Pᴴ₀V</text>
+    <rect x="435" y="8" width="140" height="39" rx="8" fill="#ffedd5"/><text x="505" y="33" text-anchor="middle" class="cell">MMA Pᴸ₀V</text>
+    <rect x="580" y="8" width="140" height="39" rx="8" fill="#ffedd5"/><text x="650" y="33" text-anchor="middle" class="cell">MMA Sᴴ₁ → TMEM</text>
+    <rect x="725" y="8" width="140" height="39" rx="8" fill="#ffedd5"/><text x="795" y="33" text-anchor="middle" class="cell">MMA Sᴸ₁ → TMEM</text>
+
+    <rect x="145" y="63" width="140" height="39" rx="8" fill="#fef3c7"/><text x="215" y="88" text-anchor="middle" class="cell">softmax high</text>
+    <rect x="435" y="63" width="140" height="39" rx="8" fill="#fef3c7"/><text x="505" y="88" text-anchor="middle" class="cell">softmax high</text>
+    <rect x="725" y="63" width="140" height="39" rx="8" fill="#fef3c7"/><text x="795" y="88" text-anchor="middle" class="cell">softmax high</text>
+
+    <rect x="290" y="118" width="140" height="39" rx="8" fill="#fde68a"/><text x="360" y="143" text-anchor="middle" class="cell">softmax low</text>
+    <rect x="580" y="118" width="140" height="39" rx="8" fill="#fde68a"/><text x="650" y="143" text-anchor="middle" class="cell">softmax low</text>
+    <rect x="870" y="118" width="140" height="39" rx="8" fill="#fde68a"/><text x="940" y="143" text-anchor="middle" class="cell">softmax low</text>
+
+    <rect x="290" y="173" width="140" height="39" rx="8" fill="#dcfce7"/><text x="360" y="198" text-anchor="middle" class="cell">rescale Uᴴ</text>
+    <rect x="435" y="173" width="140" height="39" rx="8" fill="#dcfce7"/><text x="505" y="198" text-anchor="middle" class="cell">rescale Uᴸ</text>
+    <rect x="725" y="173" width="140" height="39" rx="8" fill="#dcfce7"/><text x="795" y="198" text-anchor="middle" class="cell">rescale Uᴴ</text>
+
+    <rect x="0" y="228" width="285" height="39" rx="8" fill="#e0e7ff"/><text x="142" y="253" text-anchor="middle" class="cell">S tiles + output accumulators</text>
+    <rect x="290" y="228" width="285" height="39" rx="8" fill="#e0e7ff"/><text x="432" y="253" text-anchor="middle" class="cell">P tiles + updated U</text>
+    <rect x="580" y="228" width="285" height="39" rx="8" fill="#e0e7ff"/><text x="722" y="253" text-anchor="middle" class="cell">next S tiles + U</text>
+
+    <text x="1080" y="248" text-anchor="middle" class="note">time →</text>
+  </g>
+</svg>

@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="600" viewBox="0 0 980 600" role="img" aria-labelledby="title desc">
+  <title id="title">Autoregressive decoder loop</title>
+  <desc id="desc">A decoder-only model predicts a next token, appends it to the context, and repeats the decoder step.</desc>
+  <defs>
+    <filter id="shadow" x="-8%" y="-12%" width="116%" height="135%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#0f172a" flood-opacity="0.10"/>
+    </filter>
+    <style>
+      text { font-family: Arial, sans-serif; }
+      .bg { fill: #ffffff; }
+      .label { font-size: 16px; font-weight: 700; fill: #0f172a; }
+      .small { font-size: 13px; font-weight: 400; fill: #475569; }
+      .mono { font-size: 14px; font-weight: 700; fill: #334155; }
+      .context { fill: #eef6ff; stroke: #2563eb; stroke-width: 1.5; }
+      .compute { fill: #ecfdf5; stroke: #059669; stroke-width: 1.5; }
+      .output { fill: #fff7ed; stroke: #ea580c; stroke-width: 1.5; }
+      .param { fill: #f5f3ff; stroke: #7c3aed; stroke-width: 1.5; }
+      .note { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 1; }
+      .line { stroke: #475569; stroke-width: 2.2; fill: none; }
+      .arrow { fill: #475569; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="980" height="600"/>
+
+  <g filter="url(#shadow)">
+    <rect class="context" x="70" y="78" width="260" height="92" rx="10"/>
+    <text class="label" x="126" y="112">Current Context</text>
+    <text class="mono" x="104" y="142">The sky is clear</text>
+
+    <rect class="compute" x="390" y="78" width="220" height="92" rx="10"/>
+    <text class="label" x="448" y="112">Decoder Stack</text>
+    <text class="small" x="428" y="142">attention + FFNN</text>
+
+    <rect class="param" x="670" y="78" width="240" height="92" rx="10"/>
+    <text class="label" x="716" y="112">Vocabulary SoftMax</text>
+    <text class="small" x="715" y="142">probability over tokens</text>
+  </g>
+
+  <line class="line" x1="332" y1="124" x2="382" y2="124"/>
+  <polygon class="arrow" points="382,124 370,116 370,132"/>
+  <line class="line" x1="612" y1="124" x2="662" y2="124"/>
+  <polygon class="arrow" points="662,124 650,116 650,132"/>
+
+  <g filter="url(#shadow)">
+    <rect class="output" x="670" y="230" width="240" height="110" rx="10"/>
+    <text class="label" x="726" y="264">Selected Token</text>
+    <text class="mono" x="774" y="294">the</text>
+    <text class="small" x="720" y="320">highest probability token</text>
+
+    <rect class="context" x="70" y="380" width="300" height="96" rx="10"/>
+    <text class="label" x="128" y="414">Next Context</text>
+    <text class="mono" x="104" y="444">The sky is clear the</text>
+  </g>
+
+  <path class="line" d="M790 172 C790 198 790 204 790 222"/>
+  <polygon class="arrow" points="790,222 782,210 798,210"/>
+  <path class="line" d="M670 286 C545 286 505 356 378 428"/>
+  <polygon class="arrow" points="378,428 392,422 390,438"/>
+  <path class="line" d="M220 380 C220 328 180 250 180 180"/>
+  <polygon class="arrow" points="180,180 172,192 188,192"/>
+
+  <g>
+    <rect class="note" x="70" y="510" width="840" height="58" rx="8"/>
+    <text class="small" x="205" y="535">Decoder-only LLM inference repeats this loop token by token.</text>
+    <text class="small" x="162" y="556">Training processes many token positions in parallel, but learns the same next-token objective over long context windows.</text>
+  </g>
+</svg>

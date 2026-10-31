@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="330" viewBox="0 0 1000 330" role="img" aria-labelledby="title desc">
+  <title id="title">Softmax Attention과 Kimi Delta Attention의 상태 저장 방식 비교</title>
+  <desc id="desc">Softmax Attention은 전체 Key와 Value를 저장해 시퀀스 길이에 따라 KV cache가 증가하지만, Kimi Delta Attention은 정보를 선택적으로 감쇠하고 수정해 고정 크기의 recurrent state를 유지한다.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#111111"/>
+    </marker>
+  </defs>
+  <style>
+    .background { fill: #F3EFE7; }
+    .node { fill: #F5F1EA; stroke: #111111; stroke-width: 2; }
+    .state { fill: #F5F1EA; stroke: #6F6A63; stroke-width: 2; }
+    .critical { fill: #D9392E; stroke: #111111; stroke-width: 2; }
+    .line { fill: none; stroke: #111111; stroke-width: 2; marker-end: url(#arrow); }
+    .label { fill: #050505; font: 600 20px Inter, Pretendard, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; text-anchor: middle; }
+    .critical-label { fill: #F5F1EA; font: 700 20px Inter, Pretendard, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; text-anchor: middle; }
+  </style>
+
+  <rect class="background" x="1" y="1" width="998" height="328" rx="8"/>
+
+  <rect class="node" x="34" y="121" width="150" height="88" rx="4"/>
+  <text class="label" x="109" y="172">과거 토큰</text>
+
+  <path class="line" d="M184 143 C224 143 232 80 276 80"/>
+  <rect class="node" x="276" y="36" width="220" height="88" rx="4"/>
+  <text class="label" x="386" y="87">전체 K/V 저장</text>
+  <path class="line" d="M496 80 H570"/>
+  <rect class="critical" x="570" y="36" width="240" height="88" rx="4"/>
+  <text class="critical-label" x="690" y="73">
+    <tspan x="690" dy="0">시퀀스 길이에 따라</tspan>
+    <tspan x="690" dy="28">KV cache 증가</tspan>
+  </text>
+
+  <path class="line" d="M184 187 C224 187 232 250 276 250"/>
+  <rect class="node" x="276" y="206" width="220" height="88" rx="4"/>
+  <text class="label" x="386" y="257">선택적 감쇠·수정</text>
+  <path class="line" d="M496 250 H570"/>
+  <rect class="state" x="570" y="206" width="190" height="88" rx="4"/>
+  <text class="label" x="665" y="243">
+    <tspan x="665" dy="0">고정 크기</tspan>
+    <tspan x="665" dy="28">state S<tspan baseline-shift="sub" font-size="14">t</tspan></tspan>
+  </text>
+  <path class="line" d="M760 250 H816"/>
+  <rect class="node" x="816" y="206" width="150" height="88" rx="4"/>
+  <text class="label" x="891" y="257">다음 토큰</text>
+</svg>

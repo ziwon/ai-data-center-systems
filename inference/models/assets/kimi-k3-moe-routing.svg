@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 520" role="img" aria-labelledby="title desc">
+  <title id="title">Kimi K3 expert routing across a 64-GPU supernode</title>
+  <desc id="desc">A token batch is routed to sixteen of 896 resident experts. All-to-all communication dispatches the tokens to experts distributed across 64 GPUs.</desc>
+  <style>
+    .bg { fill: #F3EFE7; }
+    .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.5; }
+    .group { fill: none; stroke: #111111; stroke-width: 1.5; stroke-dasharray: 7 6; }
+    .gpu { fill: none; stroke: #D8D1C7; stroke-width: 1.5; }
+    .critical { fill: #D9392E; stroke: #D9392E; stroke-width: 1.5; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.8; marker-end: url(#arrow); }
+    .critical-line { fill: none; stroke: #D9392E; stroke-width: 2.4; marker-end: url(#arrow-red); }
+    .guide { fill: none; stroke: #D8D1C7; stroke-width: 1.3; stroke-dasharray: 4 5; }
+    .label { fill: #050505; font-family: Inter, Pretendard, Arial, sans-serif; font-size: 18px; font-weight: 600; }
+    .small { fill: #6F6A63; font-family: Inter, Pretendard, Arial, sans-serif; font-size: 14px; font-weight: 400; }
+    .metric { fill: #050505; font-family: Inter, Pretendard, Arial, sans-serif; font-size: 24px; font-weight: 700; }
+    .critical-text { fill: #FFFFFF; font-family: Inter, Pretendard, Arial, sans-serif; font-size: 18px; font-weight: 700; }
+    .critical-note { fill: #FFFFFF; font-family: Inter, Pretendard, Arial, sans-serif; font-size: 14px; font-weight: 400; }
+    .expert { fill: #F5F1EA; stroke: #111111; stroke-width: 1.2; }
+    .expert-selected { fill: #D9392E; stroke: #D9392E; stroke-width: 1.2; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#111111"/>
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#D9392E"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1200" height="520"/>
+
+  <rect class="box" x="42" y="178" width="160" height="104" rx="4"/>
+  <text class="label" x="122" y="219" text-anchor="middle">Token batch</text>
+  <text class="small" x="122" y="246" text-anchor="middle">hidden states</text>
+
+  <path class="line" d="M202 230 H250"/>
+
+  <rect class="box" x="252" y="178" width="160" height="104" rx="4"/>
+  <text class="label" x="332" y="219" text-anchor="middle">Router</text>
+  <text class="small" x="332" y="246" text-anchor="middle">expert scores</text>
+
+  <path class="line" d="M412 230 H460"/>
+
+  <rect class="box" x="462" y="164" width="174" height="132" rx="4"/>
+  <text class="metric" x="549" y="210" text-anchor="middle">Top-16</text>
+  <text class="label" x="549" y="240" text-anchor="middle">expert selection</text>
+  <text class="small" x="549" y="267" text-anchor="middle">16 / 896 = 1.79%</text>
+
+  <path class="critical-line" d="M636 230 H682"/>
+
+  <rect class="critical" x="684" y="164" width="160" height="132" rx="4"/>
+  <text class="critical-text" x="764" y="214" text-anchor="middle">All-to-All</text>
+  <text class="critical-text" x="764" y="241" text-anchor="middle">dispatch</text>
+  <text class="critical-note" x="764" y="269" text-anchor="middle">critical network path</text>
+
+  <path class="critical-line" d="M844 230 H892"/>
+
+  <rect class="group" x="894" y="42" width="266" height="430" rx="4"/>
+  <text class="label" x="1027" y="78" text-anchor="middle">64-GPU expert domain</text>
+
+  <rect class="gpu" x="918" y="98" width="218" height="64" rx="3"/>
+  <text class="label" x="940" y="136">GPU 0</text>
+  <rect class="expert-selected" x="1032" y="117" width="18" height="18" rx="2"/>
+  <rect class="expert" x="1058" y="117" width="18" height="18" rx="2"/>
+  <rect class="expert" x="1084" y="117" width="18" height="18" rx="2"/>
+  <text class="small" x="1118" y="136" text-anchor="middle">14</text>
+
+  <rect class="gpu" x="918" y="178" width="218" height="64" rx="3"/>
+  <text class="label" x="940" y="216">GPU 1</text>
+  <rect class="expert" x="1032" y="197" width="18" height="18" rx="2"/>
+  <rect class="expert-selected" x="1058" y="197" width="18" height="18" rx="2"/>
+  <rect class="expert" x="1084" y="197" width="18" height="18" rx="2"/>
+  <text class="small" x="1118" y="216" text-anchor="middle">14</text>
+
+  <text class="metric" x="1027" y="282" text-anchor="middle">⋮</text>
+
+  <rect class="gpu" x="918" y="302" width="218" height="64" rx="3"/>
+  <text class="label" x="940" y="340">GPU 63</text>
+  <rect class="expert" x="1032" y="321" width="18" height="18" rx="2"/>
+  <rect class="expert" x="1058" y="321" width="18" height="18" rx="2"/>
+  <rect class="expert-selected" x="1084" y="321" width="18" height="18" rx="2"/>
+  <text class="small" x="1118" y="340" text-anchor="middle">14</text>
+
+  <path class="guide" d="M918 394 H1136"/>
+  <text class="metric" x="1027" y="428" text-anchor="middle">896 experts</text>
+  <text class="small" x="1027" y="452" text-anchor="middle">all expert weights stay resident</text>
+
+  <path class="guide" d="M122 282 V352 H1027 V472"/>
+  <text class="small" x="122" y="382" text-anchor="middle">input</text>
+  <text class="small" x="549" y="382" text-anchor="middle">sparse compute</text>
+  <text class="small" x="764" y="382" text-anchor="middle">network bandwidth</text>
+  <text class="small" x="1027" y="500" text-anchor="middle">memory capacity</text>
+</svg>

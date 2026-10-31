@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="620" viewBox="0 0 1120 620" role="img" aria-labelledby="title desc">
+  <title id="title">CPU-centric to distributed and disaggregated data center computing</title>
+  <desc id="desc">A transition from CPU-centric application and I/O processing to GPU, DPU, NIC, and NVMe devices participating directly in distributed data paths.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .panel { fill: #F5F1EA; stroke: #D8D1C7; stroke-width: 1.2; }
+    .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.4; }
+    .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; }
+    .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.6; }
+    .redline { fill: none; stroke: #D9392E; stroke-width: 2.2; }
+    .text { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #050505; font-size: 16px; }
+    .small { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #6F6A63; font-size: 13px; }
+    .label { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #050505; font-size: 14px; font-weight: 700; }
+    .red { fill: #D9392E; font-weight: 700; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#111111"/>
+    </marker>
+    <marker id="arrow-red" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#D9392E"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1120" height="620"/>
+  <rect class="panel" x="64" y="70" width="450" height="440"/>
+  <rect class="panel" x="606" y="70" width="450" height="440"/>
+
+  <text class="label" x="96" y="112">CPU-centric server</text>
+  <text class="small" x="96" y="136">Application and I/O processing compete for the same CPU budget.</text>
+
+  <rect class="box" x="160" y="174" width="250" height="270"/>
+  <rect class="soft" x="198" y="206" width="174" height="46"/>
+  <rect class="soft" x="198" y="270" width="174" height="46"/>
+  <rect class="soft" x="198" y="334" width="174" height="46"/>
+  <text class="text" x="285" y="235" text-anchor="middle">App / tenant code</text>
+  <text class="text" x="285" y="299" text-anchor="middle">I/O process</text>
+  <text class="text" x="285" y="363" text-anchor="middle">Network stack</text>
+  <text class="label" x="285" y="414" text-anchor="middle">CPU</text>
+  <rect class="accent" x="198" y="458" width="174" height="38"/>
+  <text class="text" x="285" y="483" text-anchor="middle">NIC</text>
+  <path class="redline" d="M285 380 L285 458" marker-end="url(#arrow-red)"/>
+  <text class="small" x="112" y="548"><tspan class="red">Pressure:</tspan> data movement steals cycles from tenant compute.</text>
+
+  <text class="label" x="638" y="112">Distributed and disaggregated server</text>
+  <text class="small" x="638" y="136">Accelerators and offload devices become network endpoints.</text>
+
+  <rect class="box" x="660" y="184" width="138" height="92"/>
+  <text class="label" x="729" y="214" text-anchor="middle">CPU</text>
+  <text class="small" x="729" y="238" text-anchor="middle">app control</text>
+  <rect class="accent" x="842" y="164" width="142" height="68"/>
+  <text class="text" x="913" y="205" text-anchor="middle">GPU</text>
+  <rect class="accent" x="842" y="260" width="142" height="68"/>
+  <text class="text" x="913" y="301" text-anchor="middle">DPU / IPU</text>
+  <rect class="box" x="842" y="356" width="142" height="68"/>
+  <text class="text" x="913" y="397" text-anchor="middle">NVMe</text>
+  <rect class="soft" x="706" y="456" width="232" height="46"/>
+  <text class="text" x="822" y="485" text-anchor="middle">RDMA / backend network</text>
+
+  <path class="line" d="M798 230 C828 222, 822 202, 842 198" marker-end="url(#arrow)"/>
+  <path class="line" d="M798 230 C826 246, 820 284, 842 294" marker-end="url(#arrow)"/>
+  <path class="line" d="M913 232 L913 260" marker-end="url(#arrow)"/>
+  <path class="line" d="M913 328 L913 356" marker-end="url(#arrow)"/>
+  <path class="redline" d="M913 424 L850 456" marker-end="url(#arrow-red)"/>
+  <path class="redline" d="M913 328 L850 456" marker-end="url(#arrow-red)"/>
+  <path class="redline" d="M913 232 L850 456" marker-end="url(#arrow-red)"/>
+
+  <text class="small" x="642" y="548">Network design becomes part of compute architecture, not just connectivity.</text>
+</svg>

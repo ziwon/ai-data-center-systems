@@ -1,0 +1,927 @@
+<!DOCTYPE html><html lang="en" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-bguv2lll"> <head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Lecture 4: LLM Training, Fine-Tuning, and Efficient Adaptation | AI Data Center Systems</title><link rel="canonical" href="https://adcs.restack.tech/courses/cme295/lec-04/"/><link rel="sitemap" href="/sitemap-index.xml"/><script async src="https://www.googletagmanager.com/gtag/js?id=G-76LFZJVBTE"></script><script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-76LFZJVBTE');
+      </script><script async crossorigin="anonymous" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8128231647578658"></script><link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v6.4.8"/><meta name="generator" content="Starlight v0.40.0"/><meta property="og:title" content="Lecture 4: LLM Training, Fine-Tuning, and Efficient Adaptation"/><meta property="og:url" content="https://adcs.restack.tech/courses/cme295/lec-04/"/><meta property="og:locale" content="en"/><meta property="og:description" content="이번 강의의 목표는 LLM이 어떻게 학습되는지, 그리고 왜 pre-training 이후 fine-tuning과 alignment 단계가 필요한지 이해하는 것이다."/><meta property="og:site_name" content="AI Data Center Systems"/><meta name="description" content="이번 강의의 목표는 LLM이 어떻게 학습되는지, 그리고 왜 pre-training 이후 fine-tuning과 alignment 단계가 필요한지 이해하는 것이다."/><meta property="og:type" content="article"/><meta property="og:image" content="https://adcs.restack.tech/og/courses/cme295/lec-04.png?v=2"/><meta property="og:image:width" content="1200"/><meta property="og:image:height" content="630"/><meta name="twitter:image" content="https://adcs.restack.tech/og/courses/cme295/lec-04.png?v=2"/><meta name="twitter:card" content="summary_large_image"/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/_astro/print.DNXP8c50.css" media="print"><link rel="stylesheet" href="/_astro/common.DYbqSTpl.css"><script type="module" src="/_astro/page.CtJXHRyR.js"></script></head> <body class="astro-bguv2lll"> <a href="#_top" class="astro-7q3lir66">Skip to content</a> <script>
+  (() => {
+    try {
+      const savedMode = localStorage.getItem('adcs-navigation-mode');
+      document.documentElement.dataset.navigationMode = savedMode === 'compact' ? 'compact' : 'normal';
+    } catch {
+      document.documentElement.dataset.navigationMode = 'normal';
+    }
+  })();
+</script> <div class="page sl-flex astro-4toy2ex6"> <header class="header astro-4toy2ex6"><div class="header astro-3ef6ksr2"> <div class="title-wrapper sl-flex astro-3ef6ksr2"> <a href="/" class="site-title sl-flex astro-m46x6ez3">  <span class="astro-m46x6ez3" translate="no"> AI Data Center Systems </span> </a> <button class="navigation-mode-toggle print:hidden astro-3ef6ksr2" type="button" aria-label="Compact navigation" aria-pressed="false" title="Use compact navigation"> <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" class="astro-3ef6ksr2"> <rect x="3" y="4" width="18" height="16" rx="2" class="astro-3ef6ksr2"></rect> <path d="M9 4v16M6.5 10 4.5 12l2 2" class="astro-3ef6ksr2"></path> </svg> </button> </div> <div class="sl-flex print:hidden astro-3ef6ksr2"> <site-search class="astro-3ef6ksr2 astro-v37mnknz" data-translations="{&quot;placeholder&quot;:&quot;Search&quot;}"> <button data-open-modal disabled aria-label="Search" aria-keyshortcuts="Control+K" class="astro-v37mnknz"> <svg aria-hidden="true" class="astro-v37mnknz astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg> <span class="sl-hidden md:sl-block astro-v37mnknz" aria-hidden="true">Search</span> <kbd class="sl-hidden md:sl-flex astro-v37mnknz" style="display: none;"> <kbd class="astro-v37mnknz">Ctrl</kbd><kbd class="astro-v37mnknz">K</kbd> </kbd> </button> <dialog style="padding:0" aria-label="Search" class="astro-v37mnknz"> <div class="dialog-frame sl-flex astro-v37mnknz">  <button data-close-modal class="sl-flex md:sl-hidden astro-v37mnknz"> Cancel </button> <div class="search-container astro-v37mnknz"> <div id="starlight__search" class="astro-v37mnknz"></div> </div> </div> </dialog> </site-search>  <script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script> <script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.D1WXcfCt.js"></script>  </div> <div class="sl-hidden md:sl-flex print:hidden right-group astro-3ef6ksr2"> <div class="sl-flex social-icons astro-3ef6ksr2"> <a href="https://github.com/ziwon/ai-data-center-systems" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">GitHub</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script> <script type="module">const r="starlight-theme",o=e=>e==="auto"||e==="dark"||e==="light"?e:"auto",c=()=>o(typeof localStorage<"u"&&localStorage.getItem(r));function n(e){typeof localStorage<"u"&&localStorage.setItem(r,e==="light"||e==="dark"?e:"")}const l=()=>matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";function t(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e==="auto"?l():e,n(e)}matchMedia("(prefers-color-scheme: light)").addEventListener("change",()=>{c()==="auto"&&t("auto")});class s extends HTMLElement{constructor(){super(),t(c()),this.querySelector("select")?.addEventListener("change",a=>{a.currentTarget instanceof HTMLSelectElement&&t(o(a.currentTarget.value))})}}customElements.define("starlight-theme-select",s);</script> <script type="module">class s extends HTMLElement{constructor(){super();const e=this.querySelector("select");e&&(e.addEventListener("change",t=>{t.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=t.currentTarget.value)}),window.addEventListener("pageshow",t=>{if(!t.persisted)return;const n=e.querySelector("option[selected]")?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}}customElements.define("starlight-lang-select",s);</script> </div> </div></header> <nav class="sidebar print:hidden astro-4toy2ex6" aria-label="Main"> <starlight-menu-button class="print:hidden astro-jif73yzw"> <button aria-expanded="false" aria-label="Menu" aria-controls="starlight__sidebar" class="sl-flex md:sl-hidden astro-jif73yzw"> <svg aria-hidden="true" class="open-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg> <svg aria-hidden="true" class="close-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg> </button> </starlight-menu-button> <script type="module">class s extends HTMLElement{constructor(){super(),this.btn=this.querySelector("button"),this.btn.addEventListener("click",()=>this.toggleExpanded());const t=this.closest("nav");t&&t.addEventListener("keyup",e=>this.closeOnEscape(e))}setExpanded(t){this.setAttribute("aria-expanded",String(t)),document.body.toggleAttribute("data-mobile-menu-expanded",t)}toggleExpanded(){this.setExpanded(this.getAttribute("aria-expanded")!=="true")}closeOnEscape(t){t.code==="Escape"&&(this.setExpanded(!1),this.btn.focus())}}customElements.define("starlight-menu-button",s);</script>  <div id="starlight__sidebar" class="sidebar-pane astro-4toy2ex6"> <div class="navigation-controls astro-4toy2ex6"> <button class="navigation-drawer-toggle astro-4toy2ex6" type="button" aria-controls="starlight__sidebar-content" aria-expanded="false" title="Open navigation"> <svg class="navigation-menu-icon astro-4toy2ex6" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"> <path d="M4 6h16M4 12h16M4 18h16" class="astro-4toy2ex6"></path> </svg> <svg class="navigation-close-icon astro-4toy2ex6" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"> <path d="m6 6 12 12M18 6 6 18" class="astro-4toy2ex6"></path> </svg> <span class="navigation-drawer-label astro-4toy2ex6">Open navigation</span> </button> </div> <div id="starlight__sidebar-content" class="sidebar-content sl-flex astro-4toy2ex6"> <ul class="starlight-sidebar-topics astro-2fh6iaza"> <li class="astro-2fh6iaza"> <a aria-label="Network" title="Network" href="/network/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8.7 10a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-6.27-6.3a1 1 0 0 0-1.42 1.42ZM21 14a1 1 0 0 0-1 1v3.59L15.44 14A1 1 0 0 0 14 15.44L18.59 20H15a1 1 0 0 0 0 2h6a1 1 0 0 0 .38-.08 1 1 0 0 0 .54-.54A1 1 0 0 0 22 21v-6a1 1 0 0 0-1-1Zm.92-11.38a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-6a1 1 0 0 0 0 2h3.59L2.29 20.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V9a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z"/></svg> </div> <div class="astro-2fh6iaza"> Network  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="GPU &amp; Accelerator Systems" title="GPU &amp; Accelerator Systems" href="/gpu/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> </div> <div class="astro-2fh6iaza"> GPU &amp; Accelerator Systems  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Storage" title="Storage" href="/storage/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8 16.5a1 1 0 1 0 1 1 1 1 0 0 0-1-1M12 2C8 2 4 3.37 4 6v12c0 2.63 4 4 8 4s8-1.37 8-4V6c0-2.63-4-4-8-4m6 16c0 .71-2.28 2-6 2s-6-1.29-6-2v-3.27A13 13 0 0 0 12 16a13 13 0 0 0 6-1.27Zm0-6c0 .71-2.28 2-6 2s-6-1.29-6-2V8.73A13 13 0 0 0 12 10a13 13 0 0 0 6-1.27Zm-6-4C8.28 8 6 6.71 6 6s2.28-2 6-2 6 1.29 6 2-2.28 2-6 2m-4 2.5a1 1 0 1 0 1 1 1 1 0 0 0-1-1"/></svg> </div> <div class="astro-2fh6iaza"> Storage  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Training" title="Training" href="/training/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1 1v8a1 1 0 0 0 2 0v-8a1 1 0 0 0-1-1m5-10a1 1 0 0 0-1 1v18a1 1 0 0 0 2 0V3a1 1 0 0 0-1-1m10 14a1 1 0 0 0-1 1v4a1 1 0 0 0 2 0v-4a1 1 0 0 0-1-1m-5-8a1 1 0 0 0-1 1v12a1 1 0 0 0 2 0V9a1 1 0 0 0-1-1"/></svg> </div> <div class="astro-2fh6iaza"> Training  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Inference" title="Inference" data-topic-icon="brain" href="/inference/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 22H5a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3h1a4 4 0 0 1 7.3-2.18c.448.64.692 1.4.7 2.18h3a1 1 0 0 1 1 1v3a4 4 0 0 1 2.18 7.3A3.86 3.86 0 0 1 18 18v3a1 1 0 0 1-1 1ZM5 8a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11v-3.18a1 1 0 0 1 1.33-.95 1.77 1.77 0 0 0 1.74-.23 2 2 0 0 0 .93-1.37 2 2 0 0 0-.48-1.59 1.89 1.89 0 0 0-2.17-.55 1 1 0 0 1-1.33-.95V8h-3.2a1 1 0 0 1-1-1.33 1.77 1.77 0 0 0-.23-1.74 1.939 1.939 0 0 0-3-.43A2 2 0 0 0 8 6c.002.23.046.456.13.67A1 1 0 0 1 7.18 8H5Z"/></svg> </div> <div class="astro-2fh6iaza"> Inference  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="MLOps" title="MLOps" data-topic-icon="cycle" href="/mlops/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8.7 10a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-6.27-6.3a1 1 0 0 0-1.42 1.42ZM21 14a1 1 0 0 0-1 1v3.59L15.44 14A1 1 0 0 0 14 15.44L18.59 20H15a1 1 0 0 0 0 2h6a1 1 0 0 0 .38-.08 1 1 0 0 0 .54-.54A1 1 0 0 0 22 21v-6a1 1 0 0 0-1-1Zm.92-11.38a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-6a1 1 0 0 0 0 2h3.59L2.29 20.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V9a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z"/></svg> </div> <div class="astro-2fh6iaza"> MLOps  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Systems Performance" title="Systems Performance" href="/systems-performance/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path fill-rule="evenodd" d="M1.44 8.855v-.001l3.527-3.516c.34-.344.802-.541 1.285-.548h6.649l.947-.947c3.07-3.07 6.207-3.072 7.62-2.868a1.821 1.821 0 0 1 1.557 1.557c.204 1.413.203 4.55-2.868 7.62l-.946.946v6.649a1.845 1.845 0 0 1-.549 1.286l-3.516 3.528a1.844 1.844 0 0 1-3.11-.944l-.858-4.275-4.52-4.52-2.31-.463-1.964-.394A1.847 1.847 0 0 1 .98 10.693a1.843 1.843 0 0 1 .46-1.838Zm5.379 2.017-3.873-.776L6.32 6.733h4.638l-4.14 4.14Zm8.403-5.655c2.459-2.46 4.856-2.463 5.89-2.33.134 1.035.13 3.432-2.329 5.891l-6.71 6.71-3.561-3.56 6.71-6.711Zm-1.318 15.837-.776-3.873 4.14-4.14v4.639l-3.364 3.374Z" clip-rule="evenodd"/><path d="M9.318 18.345a.972.972 0 0 0-1.86-.561c-.482 1.435-1.687 2.204-2.934 2.619a8.22 8.22 0 0 1-1.23.302c.062-.365.157-.79.303-1.229.415-1.247 1.184-2.452 2.62-2.935a.971.971 0 1 0-.62-1.842c-.12.04-.236.084-.35.13-2.02.828-3.012 2.588-3.493 4.033a10.383 10.383 0 0 0-.51 2.845l-.001.016v.063c0 .536.434.972.97.972H2.24a7.21 7.21 0 0 0 .878-.065c.527-.063 1.248-.19 2.02-.447 1.445-.48 3.205-1.472 4.033-3.494a5.828 5.828 0 0 0 .147-.407Z"/></svg> </div> <div class="astro-2fh6iaza"> Systems Performance  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Courses" title="Courses" href="/courses/" class="starlight-sidebar-topics-current astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.17 2.06A13.1 13.1 0 0 0 19 1.87a12.94 12.94 0 0 0-7 2.05 12.94 12.94 0 0 0-7-2 13.1 13.1 0 0 0-2.17.19 1 1 0 0 0-.83 1v12a1 1 0 0 0 1.17 1 10.9 10.9 0 0 1 8.25 1.91l.12.07h.11a.91.91 0 0 0 .7 0h.11l.12-.07A10.899 10.899 0 0 1 20.83 16 1 1 0 0 0 22 15V3a1 1 0 0 0-.83-.94ZM11 15.35a12.87 12.87 0 0 0-6-1.48H4v-10c.333-.02.667-.02 1 0a10.86 10.86 0 0 1 6 1.8v9.68Zm9-1.44h-1a12.87 12.87 0 0 0-6 1.48V5.67a10.86 10.86 0 0 1 6-1.8c.333-.02.667-.02 1 0v10.04Zm1.17 4.15a13.098 13.098 0 0 0-2.17-.19 12.94 12.94 0 0 0-7 2.05 12.94 12.94 0 0 0-7-2.05c-.727.003-1.453.066-2.17.19A1 1 0 0 0 2 19.21a1 1 0 0 0 1.17.79 10.9 10.9 0 0 1 8.25 1.91 1 1 0 0 0 1.16 0A10.9 10.9 0 0 1 20.83 20a1 1 0 0 0 1.17-.79 1 1 0 0 0-.83-1.15Z"/></svg> </div> <div class="astro-2fh6iaza"> Courses  </div> </a> </li> </ul> <sl-sidebar-state-persist data-hash="147ldbs" class="astro-kku4brbg"> <script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script>  <ul class="top-level astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">Courses</span>  </a> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">cme295</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="0"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/cme295/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">CME295 Lecture Notes</span>  </a> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">lec-01</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="1"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/cme295/lec-01/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 1: Transformer</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">lec-02</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="2"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/cme295/lec-02/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 2: Transformer-Based Models &amp; Tricks</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">lec-03</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="3"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/cme295/lec-03/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 3: Large Language Models, Decoding, Prompting, and Inference</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">lec-04</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="4"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/cme295/lec-04/" aria-current="page" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 4: LLM Training, Fine-Tuning, and Efficient Adaptation</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">lec-05</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="5"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/cme295/lec-05/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 5: LLM Tuning and Human Preferences</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">lec-06</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="6"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/cme295/lec-06/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 6: LLM Reasoning and GRPO</span>  </a> </li> </ul> </details> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">cs336</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="7"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/cs336/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Stanford CS336: Language Modeling from Scratch</span>  </a> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">lec-01</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="8"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/cs336/lec-01/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 1: Overview and Tokenization</span>  </a> </li> </ul> </details> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">deep-learning-for-network-engineers</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="9"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/deep-learning-for-network-engineers/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Deep Learning for Network Engineers</span>  </a> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">week01</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="10"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/deep-learning-for-network-engineers/week01/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 1: From Artificial Neuron to AI Training Fabric</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">week02</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="11"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/deep-learning-for-network-engineers/week02/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 2: Large Language Model, LLM</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">week03</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="12"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/deep-learning-for-network-engineers/week03/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 3: Parallelism Strategies in Deep Learning</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">week04</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="13"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/deep-learning-for-network-engineers/week04/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 4: RDMA and GPU Cluster Communication</span>  </a> </li> </ul> </details> </li> </ul> </details> </li> </ul>  <script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script> </sl-sidebar-state-persist> <div class="md:sl-hidden"> <div class="mobile-preferences sl-flex astro-wu23bvmt"> <div class="social-icons astro-wu23bvmt"> <a href="https://github.com/ziwon/ai-data-center-systems" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">GitHub</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script>   </div> </div> </div> </div> </nav> <div class="main-frame astro-4toy2ex6">  <script type="module">const a=document.getElementById("starlight__sidebar"),n=a?.querySelector("sl-sidebar-state-persist"),o="sl-sidebar-state",i=()=>{let t=[];const e=n?.dataset.hash||"";try{const s=sessionStorage.getItem(o),r=JSON.parse(s||"{}");Array.isArray(r.open)&&r.hash===e&&(t=r.open)}catch{}return{hash:e,open:t,scroll:a?.scrollTop||0}},c=t=>{try{sessionStorage.setItem(o,JSON.stringify(t))}catch{}},d=()=>c(i()),l=(t,e)=>{const s=i();s.open[e]=t,c(s)};n?.addEventListener("click",t=>{if(!(t.target instanceof Element))return;const e=t.target.closest("summary")?.closest("details");if(!e)return;const s=e.querySelector("sl-sidebar-restore"),r=parseInt(s?.dataset.index||"");isNaN(r)||l(!e.open,r)});addEventListener("visibilitychange",()=>{document.visibilityState==="hidden"&&d()});addEventListener("pageHide",d);</script> <div class="lg:sl-flex astro-67yu43on"> <aside class="right-sidebar-container print:hidden astro-67yu43on"> <div class="right-sidebar astro-67yu43on"> <div class="lg:sl-hidden astro-rl4sue7z"><mobile-starlight-toc data-min-h="2" data-max-h="2" class="astro-doynk5tl"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-doynk5tl"><details id="starlight__mobile-toc" class="astro-doynk5tl"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-doynk5tl"><span class="toggle sl-flex astro-doynk5tl">On this page<svg aria-hidden="true" class="caret astro-doynk5tl astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-doynk5tl"></span></summary><div class="dropdown astro-doynk5tl"><ul class="isMobile astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#table-of-contents" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Table of Contents</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#goal" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Goal</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#lecture-overview" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Lecture Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#training-paradigm-from-task-specific-models-to-transfer-learning" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Training Paradigm: From Task-Specific Models to Transfer Learning</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#pre-training" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Pre-Training</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#training-data-and-scale" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Training Data and Scale</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#flops-and-flops" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">FLOPs and FLOP/s</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#scaling-laws-and-chinchilla" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Scaling Laws and Chinchilla</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#pre-training-challenges" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Pre-Training Challenges</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#training-loop-and-memory-footprint" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Training Loop and Memory Footprint</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#data-parallelism-and-zero" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Data Parallelism and ZeRO</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#model-parallelism" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Model Parallelism</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#flashattention" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">FlashAttention</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#quantization-and-mixed-precision-training" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Quantization and Mixed Precision Training</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#supervised-fine-tuning" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Supervised Fine-Tuning</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#instruction-tuning-data" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Instruction Tuning Data</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#sft-challenges-and-evaluation" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">SFT Challenges and Evaluation</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#alignment-and-mid-training" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Alignment and Mid-Training</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#lora" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">LoRA</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#qlora" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">QLoRA</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#practical-tips-and-notes" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Practical Tips and Notes</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#lecture-summary" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Lecture Summary</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#key-terms" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Key Terms</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#questions" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Questions</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#answers" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Answers</span> </a>  </li> </ul></div></details></nav></mobile-starlight-toc><script type="module" src="/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.hwBsy0Mo.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-rl4sue7z"><div class="sl-container astro-rl4sue7z"><kb-graph-card> <button class="kb-graph-card" type="button" data-open aria-haspopup="dialog"> <span class="kb-graph-copy"> <span class="kb-graph-title">Knowledge graph</span> <span class="kb-graph-subtitle" data-count>Loading related docs</span> </span> <span class="kb-graph-thumb" aria-hidden="true" data-map></span> <span class="kb-graph-expand" aria-hidden="true">Expand</span> </button> <dialog class="kb-graph-dialog" aria-label="Knowledge graph" data-dialog> <div class="kb-graph-panel"> <div class="kb-graph-panel-header"> <div> <p>Knowledge graph</p> <h2 data-heading>Related documents</h2> </div> <div class="kb-graph-tabs" role="tablist" aria-label="Knowledge graph views"> <button type="button" role="tab" aria-selected="true" data-tab="page">This page</button> <button type="button" role="tab" aria-selected="false" data-tab="global">Full graph</button> </div> <button type="button" data-close aria-label="Close knowledge graph">×</button> </div> <div class="kb-graph-stage" data-stage data-view="page"> <div data-page-stage></div> <div data-global-stage hidden></div> </div> </div> </dialog> </kb-graph-card> <script type="module" src="/_astro/KnowledgeGraphCard.astro_astro_type_script_index_0_lang.C475L69c.js"></script><starlight-toc data-min-h="2" data-max-h="2"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">On this page</h2><ul class="astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#table-of-contents" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Table of Contents</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#goal" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Goal</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#lecture-overview" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Lecture Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#training-paradigm-from-task-specific-models-to-transfer-learning" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Training Paradigm: From Task-Specific Models to Transfer Learning</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#pre-training" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Pre-Training</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#training-data-and-scale" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Training Data and Scale</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#flops-and-flops" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">FLOPs and FLOP/s</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#scaling-laws-and-chinchilla" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Scaling Laws and Chinchilla</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#pre-training-challenges" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Pre-Training Challenges</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#training-loop-and-memory-footprint" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Training Loop and Memory Footprint</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#data-parallelism-and-zero" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Data Parallelism and ZeRO</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#model-parallelism" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Model Parallelism</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#flashattention" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">FlashAttention</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#quantization-and-mixed-precision-training" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Quantization and Mixed Precision Training</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#supervised-fine-tuning" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Supervised Fine-Tuning</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#instruction-tuning-data" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Instruction Tuning Data</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#sft-challenges-and-evaluation" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">SFT Challenges and Evaluation</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#alignment-and-mid-training" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Alignment and Mid-Training</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#lora" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">LoRA</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#qlora" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">QLoRA</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#practical-tips-and-notes" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Practical Tips and Notes</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#lecture-summary" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Lecture Summary</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#key-terms" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Key Terms</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#questions" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Questions</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#answers" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Answers</span> </a>  </li> </ul></nav></starlight-toc><script type="module" src="/_astro/TableOfContents.astro_astro_type_script_index_0_lang.FuRcXuRY.js"></script></div></div> </div> </aside> <div class="main-pane astro-67yu43on">  <main data-pagefind-body class="astro-bguv2lll" lang="en" dir="ltr">    <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <h1 id="_top" class="astro-j6tvhyss">Lecture 4: LLM Training, Fine-Tuning, and Efficient Adaptation</h1> </div> </div> <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <starlight-image-zoom> <template class="astro-vjux6bgf"> <dialog class="starlight-image-zoom-dialog astro-vjux6bgf"> <button aria-label="Unzoom image" class="starlight-image-zoom-control astro-vjux6bgf"> <svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" class="astro-vjux6bgf"> <use href="#starlight-image-zoom-icon-unzoom" class="astro-vjux6bgf"></use> </svg> </button> <figure class="astro-vjux6bgf"></figure> </dialog> </template> <svg xmlns="http://www.w3.org/2000/svg" style="display:none" class="astro-vjux6bgf"> <symbol id="starlight-image-zoom-icon-zoom" viewBox="0 0 24 24" class="astro-vjux6bgf"> <path d="M9.79 12.79 4 18.59V17a1 1 0 0 0-2 0v4a1 1 0 0 0 .08.38 1 1 0 0 0 .54.54A1 1 0 0 0 3 22h4a1 1 0 0 0 0-2H5.41l5.8-5.79a1 1 0 0 0-1.42-1.42ZM21.92 2.62a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-4a1 1 0 0 0 0 2h1.59l-5.8 5.79a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V7a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z" class="astro-vjux6bgf"></path> </symbol> <symbol id="starlight-image-zoom-icon-unzoom" viewBox="0 0 24 24" class="astro-vjux6bgf"> <path d="M21.71 2.29a1 1 0 0 0-1.42 0l-5.79 5.8V6.5a1 1 0 0 0-2 0v4a1 1 0 0 0 .08.38 1 1 0 0 0 .54.54 1 1 0 0 0 .38.08h4a1 1 0 0 0 0-2h-1.59l5.8-5.79a1 1 0 0 0 0-1.42ZM10.88 12.58a1 1 0 0 0-.38-.08h-4a1 1 0 0 0 0 2h1.59l-5.8 5.79a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l5.79-5.8v1.59a1 1 0 0 0 2 0v-4a1 1 0 0 0-.08-.38 1 1 0 0 0-.54-.54Z" class="astro-vjux6bgf"></path> </symbol> </svg> </starlight-image-zoom>   <script type="module" src="/_astro/ImageZoom.astro_astro_type_script_index_0_lang.CZmBqK-T.js"></script> <div class="sl-markdown-content"> <p>Source: <a href="https://www.youtube.com/watch?v=VlA_jt_3Qc4">CME295 Lecture 4</a></p>
+<div class="sl-heading-wrapper level-h2"><h2 id="table-of-contents">Table of Contents</h2><a class="sl-anchor-link" href="#table-of-contents"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Table of Contents”</span></a></div>
+<ul>
+<li><a href="#goal">Goal</a></li>
+<li><a href="#lecture-overview">Lecture Overview</a></li>
+<li><a href="#training-paradigm-from-task-specific-models-to-transfer-learning">Training Paradigm: From Task-Specific Models to Transfer Learning</a></li>
+<li><a href="#pre-training">Pre-Training</a></li>
+<li><a href="#training-data-and-scale">Training Data and Scale</a></li>
+<li><a href="#flops-and-flops">FLOPs and FLOP/s</a></li>
+<li><a href="#scaling-laws-and-chinchilla">Scaling Laws and Chinchilla</a></li>
+<li><a href="#pre-training-challenges">Pre-Training Challenges</a></li>
+<li><a href="#training-loop-and-memory-footprint">Training Loop and Memory Footprint</a></li>
+<li><a href="#data-parallelism-and-zero">Data Parallelism and ZeRO</a></li>
+<li><a href="#model-parallelism">Model Parallelism</a></li>
+<li><a href="#flashattention">FlashAttention</a></li>
+<li><a href="#quantization-and-mixed-precision-training">Quantization and Mixed Precision Training</a></li>
+<li><a href="#supervised-fine-tuning">Supervised Fine-Tuning</a></li>
+<li><a href="#instruction-tuning-data">Instruction Tuning Data</a></li>
+<li><a href="#sft-challenges-and-evaluation">SFT Challenges and Evaluation</a></li>
+<li><a href="#alignment-and-mid-training">Alignment and Mid-Training</a></li>
+<li><a href="#lora">LoRA</a></li>
+<li><a href="#qlora">QLoRA</a></li>
+<li><a href="#practical-tips-and-notes">Practical Tips and Notes</a></li>
+<li><a href="#lecture-summary">Lecture Summary</a></li>
+<li><a href="#key-terms">Key Terms</a></li>
+<li><a href="#questions">Questions</a></li>
+<li><a href="#answers">Answers</a></li>
+</ul>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="goal">Goal</h2><a class="sl-anchor-link" href="#goal"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Goal”</span></a></div>
+<p>이번 강의의 목표는 LLM이 어떻게 학습되는지, 그리고 왜 pre-training 이후 fine-tuning과 alignment 단계가 필요한지 이해하는 것이다.</p>
+<p>핵심 메시지는 다음과 같다.</p>
+<blockquote>
+<p>LLM training은 하나의 거대한 학습 절차가 아니라, pre-training으로 language/code distribution을 학습하고, SFT와 alignment로 useful assistant behavior를 만들며, distributed training과 memory optimization으로 물리적 한계를 넘는 multi-stage system이다.</p>
+</blockquote>
+<p>이 강의는 다음을 다룬다.</p>
+<ul>
+<li>task-specific training에서 transfer learning으로의 전환</li>
+<li>pre-training objective와 data scale</li>
+<li>FLOPs와 FLOP/s의 차이</li>
+<li>scaling laws와 Chinchilla-style compute optimality</li>
+<li>GPU memory가 부족한 이유: parameters, activations, gradients, optimizer states</li>
+<li>data parallelism, ZeRO, model parallelism</li>
+<li>FlashAttention의 IO-aware exact attention</li>
+<li>quantization과 mixed precision training</li>
+<li>supervised fine-tuning, instruction tuning, safety data</li>
+<li>benchmark와 human preference evaluation의 한계</li>
+<li>alignment, mid-training</li>
+<li>LoRA와 QLoRA</li>
+</ul>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="lecture-overview">Lecture Overview</h2><a class="sl-anchor-link" href="#lecture-overview"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Lecture Overview”</span></a></div>
+<p>Lecture 4는 LLM training을 다룬다. 이전 강의에서는 LLM을 decoder-only Transformer로 정의하고, inference-time decoding과 prompting, KV cache 같은 기법을 배웠다. 이번 강의는 그 model이 처음부터 어떻게 만들어지는지에 초점을 둔다.</p>
+<p>강의 전반부는 pre-training이다. LLM은 internet-scale text와 code를 사용해 next-token prediction을 학습한다. 이 단계는 매우 비싸며, model parameter 수, training token 수, compute budget이 성능에 어떤 관계를 갖는지 scaling laws로 설명한다.</p>
+<p>중반부는 training infrastructure다. LLM 학습은 single GPU memory에 맞지 않기 때문에 여러 GPU에 data, optimizer state, gradients, parameters, model layers, experts, tensor operations를 나누어야 한다. 또한 FlashAttention과 mixed precision training처럼 GPU memory hierarchy와 numeric precision을 활용한 최적화가 필요하다.</p>
+<p>후반부는 post-training이다. Pre-trained model은 language distribution은 잘 배웠지만 assistant로 행동하도록 학습된 것은 아니다. Supervised fine-tuning, instruction tuning, safety data, evaluation, LoRA/QLoRA를 통해 model을 실제 task와 product behavior에 맞춘다.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="training-paradigm-from-task-specific-models-to-transfer-learning">Training Paradigm: From Task-Specific Models to Transfer Learning</h2><a class="sl-anchor-link" href="#training-paradigm-from-task-specific-models-to-transfer-learning"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Training Paradigm: From Task-Specific Models to Transfer Learning”</span></a></div>
+<p>전통적인 ML workflow에서는 task마다 model을 따로 학습했다.</p>
+<div class="expressive-code"><link rel="stylesheet" href="/_astro/ec.v4551.css"><script type="module" src="/_astro/ec.0vx5m.js"></script><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">spam detection task -> train spam model</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">sentiment task      -> train sentiment model</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">NER task            -> train NER model</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="spam detection task -> train spam modelsentiment task      -> train sentiment modelNER task            -> train NER model"><div></div></button></div></figure></div>
+<p>하지만 NLP task들은 완전히 독립적이지 않다. 모두 language understanding을 필요로 한다. 따라서 하나의 큰 model이 language와 code의 일반 구조를 먼저 학습하고, 이후 특정 task에 맞게 조정하는 방식이 자연스럽다.</p>
+<p>이것이 transfer learning이다.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    A[Large raw corpus] --> B[Pre-training&#x3C;br/>next-token prediction]
+    B --> C[Base model]
+    C --> D[SFT / instruction tuning]
+    C --> E[Task fine-tuning]
+    C --> F[Preference tuning]
+    D --> G[Helpful assistant]
+    E --> H[Task-specialized model]
+    F --> I[Aligned model]
+
+    classDef primary fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef secondary fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef note fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef accent fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    class A,C primary
+    class B,D,E,F secondary
+    class G,H note
+    class I accent</pre>
+<p>LLM training은 이 transfer learning paradigm 위에 있다. 먼저 큰 corpus로 base model을 만들고, 이후 fine-tuning과 alignment로 user-facing behavior를 만든다.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="pre-training">Pre-Training</h2><a class="sl-anchor-link" href="#pre-training"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Pre-Training”</span></a></div>
+<p>Pre-training은 LLM training에서 가장 비싼 단계다. 목표는 거대한 text/code corpus에서 next token을 예측하도록 model을 학습하는 것이다.</p>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi mathvariant="script">L</mi><mo>=</mo><mo>−</mo><munder><mo>∑</mo><mi>t</mi></munder><mi>log</mi><mo>⁡</mo><mi>P</mi><mo stretchy="false">(</mo><msub><mi>x</mi><mi>t</mi></msub><mo>∣</mo><msub><mi>x</mi><mrow><mo>&#x3C;</mo><mi>t</mi></mrow></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\mathcal{L} = - \sum_t \log P(x_t \mid x_{\lt t})
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathcal">L</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.3em;vertical-align:-1.25em;"></span><span class="mord">−</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.05em;"><span style="top:-1.9em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span><span style="top:-3.05em;"><span class="pstrut" style="height:3.05em;"></span><span><span class="mop op-symbol large-op">∑</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.25em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">P</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∣</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mrel mtight">&#x3C;</span><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1774em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></span>
+<p>Decoder-only LLM은 context token들을 보고 다음 token probability distribution을 출력한다. Pre-training에서는 이 objective를 internet-scale corpus 전체에 반복 적용한다.</p>
+<p>Pre-training이 학습하는 것은 특정 instruction-following behavior가 아니다. 더 근본적으로 language, code, factual patterns, style, syntax, common reasoning traces, document structure 등을 next-token prediction을 통해 압축한다.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="training-data-and-scale">Training Data and Scale</h2><a class="sl-anchor-link" href="#training-data-and-scale"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Training Data and Scale”</span></a></div>
+<p>Pre-training data는 가능한 넓은 text/code distribution을 포함한다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Data source</th><th>Role</th></tr></thead><tbody><tr><td>Common Crawl</td><td>web-scale raw text</td></tr><tr><td>Wikipedia</td><td>factual encyclopedic text</td></tr><tr><td>Reddit / social media</td><td>dialogue, informal language</td></tr><tr><td>GitHub</td><td>code and software patterns</td></tr><tr><td>Stack Overflow / forums</td><td>technical Q&#x26;A</td></tr><tr><td>Multilingual text</td><td>non-English language capability</td></tr></tbody></table>
+<p>Scale은 token 수로 측정한다. 강의에서 언급한 order of magnitude는 다음과 같다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Model / example</th><th>Training tokens</th></tr></thead><tbody><tr><td>GPT-3</td><td>about 300B tokens</td></tr><tr><td>Llama 3</td><td>about 15T tokens</td></tr><tr><td>Modern frontier scale</td><td>hundreds of billions to tens of trillions</td></tr></tbody></table>
+<p>Pre-training data는 cutoff date를 갖는다. Model은 그 날짜 이후의 사건을 pre-training만으로는 알 수 없다. 이 날짜를 knowledge cutoff date라고 한다.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="flops-and-flops">FLOPs and FLOP/s</h2><a class="sl-anchor-link" href="#flops-and-flops"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “FLOPs and FLOP/s”</span></a></div>
+<p>강의에서는 혼동하기 쉬운 두 표기를 구분한다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Term</th><th>Meaning</th><th>Measures</th></tr></thead><tbody><tr><td>FLOPs</td><td>floating point operations</td><td>총 연산량</td></tr><tr><td>FLOP/s</td><td>floating point operations per second</td><td>hardware compute speed</td></tr></tbody></table>
+<p>LLM training의 총 연산량은 대략 model parameter 수와 training token 수의 함수로 볼 수 있다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">training FLOPs roughly scales with:</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">number_of_parameters x number_of_training_tokens</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="training FLOPs roughly scales with:number_of_parameters x number_of_training_tokens"><div></div></button></div></figure></div>
+<p>정확한 formula는 architecture와 implementation에 따라 달라진다. 예를 들어 sparse MoE model은 total parameter가 커도 active parameter가 제한되므로 dense model과 compute profile이 다르다.</p>
+<p>GPU spec에서 보이는 TFLOP/s, PFLOP/s는 hardware가 초당 처리할 수 있는 floating-point operation 속도다. 같은 GPU라도 FP64, FP32, FP16, BF16, tensor core 사용 여부에 따라 throughput이 다르다.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="scaling-laws-and-chinchilla">Scaling Laws and Chinchilla</h2><a class="sl-anchor-link" href="#scaling-laws-and-chinchilla"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Scaling Laws and Chinchilla”</span></a></div>
+<p>Scaling laws는 model size, data size, compute budget이 language model loss와 어떤 관계를 갖는지 실험적으로 설명한다.</p>
+<p>2020년 scaling law 연구는 대체로 다음 경향을 보였다.</p>
+<ul>
+<li>model이 클수록 성능이 좋아진다.</li>
+<li>training data가 많을수록 성능이 좋아진다.</li>
+<li>compute가 많을수록 loss가 낮아진다.</li>
+<li>큰 model은 같은 token 수에서도 더 sample efficient할 수 있다.</li>
+</ul>
+<p>하지만 compute는 무한하지 않다. 따라서 같은 compute budget 안에서 model parameter 수와 training token 수를 어떻게 배분할지가 중요하다.</p>
+<p>Chinchilla-style result는 compute-optimal training에서 training token 수가 model parameter 수보다 훨씬 커야 함을 보여주었다. 강의에서는 대략 다음 mental model을 제시한다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">training tokens ~= 20 x model parameters</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="training tokens ~= 20 x model parameters"><div></div></button></div></figure></div>
+<p>이 관점에서 GPT-3는 parameter 수에 비해 token 수가 적어 undertrained로 볼 수 있다. 이후 model들은 더 많은 token으로 더 오래 학습하는 방향으로 이동했다.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    A[Fixed compute budget] --> B{Allocate compute}
+    B --> C[More parameters&#x3C;br/>larger model]
+    B --> D[More tokens&#x3C;br/>longer training]
+    C --> E[Sample efficiency]
+    D --> F[Better coverage]
+    E --> G[Compute-optimal point]
+    F --> G
+    H[Too few tokens] --> I[Undertrained model]
+    I -. Chinchilla correction .-> D
+
+    classDef primary fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef secondary fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef note fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef accent fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    class A,G primary
+    class B,C,D,E,F secondary
+    class H note
+    class I accent</pre>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="pre-training-challenges">Pre-Training Challenges</h2><a class="sl-anchor-link" href="#pre-training-challenges"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Pre-Training Challenges”</span></a></div>
+<p>Pre-training의 어려움은 여러 층위에 있다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Challenge</th><th>Explanation</th></tr></thead><tbody><tr><td>Cost</td><td>millions to hundreds of millions of dollars scale 가능</td></tr><tr><td>Time</td><td>large clusters에서 장기간 학습 필요</td></tr><tr><td>Environmental impact</td><td>energy consumption과 carbon footprint</td></tr><tr><td>Knowledge cutoff</td><td>cutoff 이후 지식은 base model에 없음</td></tr><tr><td>Knowledge editing</td><td>새 지식 주입 시 다른 능력 regression 위험</td></tr><tr><td>Memorization / plagiarism</td><td>training data를 그대로 생성할 위험</td></tr><tr><td>Data quality</td><td>web-scale data에는 noise, bias, harmful text 포함</td></tr></tbody></table>
+<p>특히 knowledge editing은 어렵다. Model weight 안에 특정 사실을 넣거나 수정하면서 다른 domain 능력을 해치지 않는 것은 아직 쉬운 문제가 아니다.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="training-loop-and-memory-footprint">Training Loop and Memory Footprint</h2><a class="sl-anchor-link" href="#training-loop-and-memory-footprint"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Training Loop and Memory Footprint”</span></a></div>
+<p>LLM training loop는 일반적인 neural network training과 같지만, scale 때문에 memory 문제가 훨씬 크다.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    A[Batch tokens] --> B[Forward pass]
+    B --> C[Activations]
+    C --> D[Loss]
+    D --> E[Backward pass]
+    E --> F[Gradients]
+    F --> G[Optimizer update]
+    G --> H[Updated weights]
+    H -. next step .-> B
+
+    classDef primary fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef secondary fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef note fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef accent fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    class A,H primary
+    class B,D,E,G secondary
+    class C,F accent</pre>
+<p>Training 중 GPU memory에는 다음이 필요하다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Memory item</th><th>Why needed</th></tr></thead><tbody><tr><td>Parameters</td><td>model weights</td></tr><tr><td>Activations</td><td>backward pass에서 gradient 계산에 필요</td></tr><tr><td>Gradients</td><td>loss를 줄이는 방향 계산</td></tr><tr><td>Optimizer states</td><td>Adam의 first/second moment 등</td></tr><tr><td>Batch data</td><td>input/output token tensors</td></tr></tbody></table>
+<p>Activation memory는 model size, batch size, context length에 영향을 받는다. Attention은 sequence length에 대해 <code dir="auto">O(n^2)</code> 성격을 갖기 때문에 긴 context는 memory 부담을 키운다.</p>
+<p>예를 들어 H100 GPU의 memory가 80GB라고 해도, billion-scale model의 parameters, gradients, optimizer states, activations를 모두 담기에는 부족하다. 따라서 distributed training이 필수다.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="data-parallelism-and-zero">Data Parallelism and ZeRO</h2><a class="sl-anchor-link" href="#data-parallelism-and-zero"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Data Parallelism and ZeRO”</span></a></div>
+<p>Data parallelism은 batch를 여러 GPU에 나누어 각 GPU가 독립적으로 forward/backward를 수행하게 한다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">global batch</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> GPU 1: microbatch 1 + full model copy</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> GPU 2: microbatch 2 + full model copy</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> GPU 3: microbatch 3 + full model copy</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> aggregate gradients</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="global batch  -> GPU 1: microbatch 1 + full model copy  -> GPU 2: microbatch 2 + full model copy  -> GPU 3: microbatch 3 + full model copy  -> aggregate gradients"><div></div></button></div></figure></div>
+<p>장점은 batch-related memory와 compute를 분산할 수 있다는 것이다. 단점은 각 GPU가 full model copy를 가져야 하고, step마다 gradient synchronization communication cost가 발생한다는 점이다.</p>
+<p>ZeRO, Zero Redundancy Optimizer는 data parallelism에서 중복 저장되는 optimizer states, gradients, parameters를 shard한다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>ZeRO stage</th><th>What is sharded</th><th>Effect</th></tr></thead><tbody><tr><td>ZeRO-1</td><td>optimizer states</td><td>optimizer memory 감소</td></tr><tr><td>ZeRO-2</td><td>optimizer states + gradients</td><td>gradient memory도 감소</td></tr><tr><td>ZeRO-3</td><td>optimizer states + gradients + parameters</td><td>parameter redundancy 제거</td></tr></tbody></table>
+<p>ZeRO는 per-GPU memory를 크게 줄이지만, 필요한 시점에 parameter나 optimizer state를 모으기 위한 communication cost가 증가한다.</p>
+<p><starlight-image-zoom-zoomable><img src="/courses/cme295/lec-04/assets/zero-sharding.svg" alt="Data parallel training and ZeRO sharding"><button aria-label="Zoom image: Data parallel training and ZeRO sharding" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="model-parallelism">Model Parallelism</h2><a class="sl-anchor-link" href="#model-parallelism"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Model Parallelism”</span></a></div>
+<p>Model parallelism은 model 자체의 계산과 parameter를 여러 GPU에 나누는 방법이다. Data parallelism이 batch를 나눈다면, model parallelism은 model operation을 나눈다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Method</th><th>Idea</th></tr></thead><tbody><tr><td>Tensor parallelism</td><td>큰 matrix multiplication을 여러 GPU에 나눔</td></tr><tr><td>Pipeline parallelism</td><td>layer range를 GPU별로 나눔</td></tr><tr><td>Expert parallelism</td><td>MoE expert를 GPU별로 배치</td></tr></tbody></table>
+<p>Pipeline parallelism에서는 예를 들어 GPU 1이 layer 1-3, GPU 2가 layer 4-6을 담당할 수 있다. Tensor parallelism은 attention/FFN의 큰 matrix multiplication을 shard한다. Expert parallelism은 MoE expert를 서로 다른 device에 두고 router가 token을 해당 expert로 보낸다.</p>
+<p>실제 대규모 training은 data parallelism, ZeRO, tensor parallelism, pipeline parallelism, expert parallelism을 조합한다.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="flashattention">FlashAttention</h2><a class="sl-anchor-link" href="#flashattention"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “FlashAttention”</span></a></div>
+<p>FlashAttention은 attention computation을 근사하지 않고 exact하게 계산하면서도 GPU memory hierarchy를 더 잘 활용해 빠르게 만드는 기법이다.</p>
+<p>GPU에는 대체로 두 종류의 memory가 있다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Memory</th><th>Size</th><th>Speed</th><th>Role</th></tr></thead><tbody><tr><td>HBM</td><td>large, tens of GB</td><td>slower</td><td>main GPU memory</td></tr><tr><td>SRAM</td><td>small, MB scale</td><td>much faster</td><td>on-chip memory near compute</td></tr></tbody></table>
+<p>Vanilla attention은 <code dir="auto">QK^T</code>, softmax, multiply by <code dir="auto">V</code> 사이에 큰 intermediate matrix를 HBM에 반복적으로 read/write한다. 이 IO가 bottleneck이 된다.</p>
+<p>FlashAttention의 핵심은 tiling이다. <code dir="auto">Q</code>, <code dir="auto">K</code>, <code dir="auto">V</code>를 작은 block으로 나누어 SRAM에 올리고, 가능한 많은 연산을 SRAM 안에서 끝낸 뒤 HBM write를 최소화한다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">vanilla:</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">HBM -> compute QK^T -> HBM</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">HBM -> softmax      -> HBM</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">HBM -> multiply V   -> HBM</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">flash attention:</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">HBM -> tile to SRAM -> fused attention block -> HBM</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="vanilla:HBM -> compute QK^T -> HBMHBM -> softmax      -> HBMHBM -> multiply V   -> HBMflash attention:HBM -> tile to SRAM -> fused attention block -> HBM"><div></div></button></div></figure></div>
+<p>어려운 부분은 softmax가 row-wise normalization이라 전체 row 정보가 필요한 것처럼 보인다는 점이다. FlashAttention은 block-wise softmax를 누적하면서 exact result를 재구성하는 scaling trick을 사용한다.</p>
+<p>또 다른 아이디어는 recomputation이다. Attention computation이 빨라졌기 때문에 forward pass의 모든 activation을 저장하지 않고, backward pass에서 일부 activation을 다시 계산한다. 일반적으로 recomputation은 memory를 아끼는 대신 runtime을 늘리지만, FlashAttention에서는 HBM IO 감소 덕분에 memory와 runtime 모두 좋아질 수 있다.</p>
+<p><starlight-image-zoom-zoomable><img src="/courses/cme295/lec-04/assets/flashattention-io.svg" alt="FlashAttention IO-aware attention"><button aria-label="Zoom image: FlashAttention IO-aware attention" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="quantization-and-mixed-precision-training">Quantization and Mixed Precision Training</h2><a class="sl-anchor-link" href="#quantization-and-mixed-precision-training"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Quantization and Mixed Precision Training”</span></a></div>
+<p>Quantization은 숫자의 precision을 낮추어 memory와 compute를 절약하는 방법이다. Floating-point number는 sign, exponent, mantissa bit로 표현되며, format마다 precision과 range가 다르다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Format</th><th>Typical use</th><th>Trade-off</th></tr></thead><tbody><tr><td>FP64</td><td>scientific high precision</td><td>slow, memory heavy</td></tr><tr><td>FP32</td><td>stable master weights</td><td>more memory</td></tr><tr><td>FP16</td><td>fast training/inference operations</td><td>less range/precision</td></tr><tr><td>BF16</td><td>wider exponent than FP16</td><td>common in modern training</td></tr></tbody></table>
+<p>Mixed precision training은 model weight의 master copy는 high precision으로 유지하고, forward/backward computation은 lower precision으로 수행하는 방식이다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">master weights: FP32</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">forward/backward activations: FP16 or BF16</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">weight update: FP32 master weights</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="master weights: FP32forward/backward activations: FP16 or BF16weight update: FP32 master weights"><div></div></button></div></figure></div>
+<p>이렇게 하면 memory와 runtime을 줄이면서도 training stability를 유지할 수 있다. 직관적으로 activation과 gradient는 batch noise를 포함하므로 어느 정도 낮은 precision을 써도 괜찮지만, weights는 update가 누적되므로 더 높은 precision으로 유지하는 것이 유리하다.</p>
+<p><starlight-image-zoom-zoomable><img src="/courses/cme295/lec-04/assets/mixed-precision-training.svg" alt="Mixed precision training flow"><button aria-label="Zoom image: Mixed precision training flow" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="supervised-fine-tuning">Supervised Fine-Tuning</h2><a class="sl-anchor-link" href="#supervised-fine-tuning"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Supervised Fine-Tuning”</span></a></div>
+<p>Pre-trained model은 next-token prediction으로 language distribution을 배웠지만, user에게 helpful assistant로 답하도록 직접 학습된 것은 아니다.</p>
+<p>예를 들어 사용자가 “내 teddy bear를 세탁기에 넣어도 되나요?”라고 물었을 때, base model은 다음 문장을 자연스럽게 이어갈 뿐이다. 사용자의 의도를 이해하고 안전하고 유용한 답을 주려면 추가 학습이 필요하다.</p>
+<p>Supervised fine-tuning, SFT는 input-output pair로 model을 더 학습하는 단계다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">input: Can I put my teddy bear in the washer?</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">output: You should check the care label. In many cases, hand washing is safer...</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="input: Can I put my teddy bear in the washer?output: You should check the care label. In many cases, hand washing is safer..."><div></div></button></div></figure></div>
+<p>Pre-training과 SFT 모두 next-token prediction objective를 사용하지만, loss를 거는 위치가 다르다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">pre-training:</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">BOS + raw text</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">loss over all next tokens</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">SFT:</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">instruction/input + target answer</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">loss mainly over target answer tokens</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="pre-training:BOS + raw textloss over all next tokensSFT:instruction/input + target answerloss mainly over target answer tokens"><div></div></button></div></figure></div>
+<p>즉 SFT에서는 prompt/input을 parroting하게 만들고 싶은 것이 아니라, 그 input에 conditioned된 helpful answer를 생성하도록 학습한다.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    A[Instruction tokens] --> B[Assistant answer tokens]
+    A --> C[Conditioning context]
+    B --> D[Loss applied]
+    C -. no target loss .-> E[Do not train prompt echoing]
+    D --> F[Helpful response behavior]
+
+    classDef primary fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef secondary fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef note fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef accent fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    class A,C note
+    class B,F primary
+    class D accent
+    class E secondary</pre>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="instruction-tuning-data">Instruction Tuning Data</h2><a class="sl-anchor-link" href="#instruction-tuning-data"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Instruction Tuning Data”</span></a></div>
+<p>Instruction tuning은 SFT의 한 종류로, model이 user instruction을 따르도록 학습한다.</p>
+<p>Instruction tuning data는 보통 다음과 같은 task를 포함한다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Data category</th><th>Example</th></tr></thead><tbody><tr><td>Assistant dialogue</td><td>Q&#x26;A, helpful answers</td></tr><tr><td>Story writing</td><td>story generation from prompt</td></tr><tr><td>Poem creation</td><td>style-constrained creative writing</td></tr><tr><td>List generation</td><td>structured bullet/list output</td></tr><tr><td>Explanation</td><td>concept explanation</td></tr><tr><td>Math / reasoning</td><td>stepwise problem solving</td></tr><tr><td>Code</td><td>code generation, debugging</td></tr><tr><td>Safety</td><td>refusal, hedging, harmless behavior</td></tr></tbody></table>
+<p>초기에는 사람이 instruction과 ideal answer를 많이 작성했다. 최근에는 이미 강한 LLM을 사용해 synthetic SFT data를 만들고, 사람이 검수하거나 다른 LLM이 quality review를 하는 방식도 사용된다.</p>
+<p>Pre-training data와 비교하면 SFT data는 훨씬 작지만 품질이 중요하다. 강의에서는 GPT-3 계열의 instruction tuning data가 약 13K examples, Llama 3 계열은 약 10M examples 규모로 언급된다. Token 수로 환산하면 pre-training의 trillions of tokens보다 훨씬 작다.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="sft-challenges-and-evaluation">SFT Challenges and Evaluation</h2><a class="sl-anchor-link" href="#sft-challenges-and-evaluation"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “SFT Challenges and Evaluation”</span></a></div>
+<p>SFT의 어려움은 data quality와 evaluation이다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Challenge</th><th>Explanation</th></tr></thead><tbody><tr><td>High-quality data</td><td>human annotation, guideline, review 비용이 큼</td></tr><tr><td>Distribution mismatch</td><td>SFT prompt distribution과 실제 user prompt가 다를 수 있음</td></tr><tr><td>Generalization</td><td>특정 example에 과하게 맞으면 새로운 request에 약함</td></tr><tr><td>Safety balance</td><td>helpfulness와 harmlessness 사이 trade-off</td></tr><tr><td>Subjective quality</td><td>user preference가 사람마다 다름</td></tr></tbody></table>
+<p>Evaluation도 쉽지 않다. Benchmark score는 유용하지만 하나의 숫자로 model quality를 완전히 설명하지 못한다.</p>
+<p>대표 benchmark 예시는 다음과 같다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Area</th><th>Benchmark examples</th></tr></thead><tbody><tr><td>General language</td><td>MMLU</td></tr><tr><td>Math reasoning</td><td>GSM8K</td></tr><tr><td>Code generation</td><td>HumanEval 등</td></tr><tr><td>Reasoning</td><td>여러 domain-specific benchmark</td></tr></tbody></table>
+<p>주의할 점은 <strong>training on the test task</strong>다. Model이 test set 자체를 본 것이 아니더라도, benchmark와 같은 task distribution의 auxiliary training data를 많이 봤다면 score가 크게 올라갈 수 있다. 따라서 model을 비교할 때 training mixture가 benchmark task에 얼마나 맞춰져 있는지 봐야 한다.</p>
+<p>Human preference evaluation의 예로 Chatbot Arena가 있다. 두 model의 anonymous responses를 user가 비교하고, pairwise preference로 leaderboard를 만든다. 하지만 이것도 완벽하지 않다.</p>
+<ul>
+<li>초기 ranking은 비교 pair noise에 민감할 수 있다.</li>
+<li>“Who are you?” 같은 질문으로 model identity가 드러나면 조작 가능성이 생긴다.</li>
+<li>user는 factual correctness를 모를 수 있다.</li>
+<li>emoji, verbosity, tone 같은 취향 차이가 ranking에 영향을 준다.</li>
+<li>safety refusal은 user preference에서 불리할 수 있다.</li>
+</ul>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="alignment-and-mid-training">Alignment and Mid-Training</h2><a class="sl-anchor-link" href="#alignment-and-mid-training"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Alignment and Mid-Training”</span></a></div>
+<p>강의에서는 alignment를 pre-training 이후의 fine-tuning과 preference tuning을 포함하는 넓은 과정으로 설명한다.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    A[Pre-training&#x3C;br/>broad distribution] --> B[Mid-training&#x3C;br/>domain/task mix]
+    B --> C[SFT&#x3C;br/>instruction-output pairs]
+    C --> D[Preference tuning&#x3C;br/>chosen over rejected]
+    D --> E[Aligned assistant&#x3C;br/>useful + safer behavior]
+    C --> F[Evaluation&#x3C;br/>benchmarks + humans]
+    F -. feedback .-> B
+    F -. feedback .-> C
+
+    classDef primary fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef secondary fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef note fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef accent fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    class A,E primary
+    class B,C,D secondary
+    class F accent</pre>
+<p>Preference tuning은 다음 강의에서 더 자세히 다루는 단계다. Human preference나 reward signal을 사용해 model behavior를 더 user intent와 safety policy에 맞춘다.</p>
+<p>Mid-training은 최근 등장한 중간 단계로, pre-training objective는 유지하되 data distribution을 관심 task/domain에 더 맞추는 방식이다. 예를 들어 code, math, reasoning, domain-specific corpus를 강화할 수 있다.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="lora">LoRA</h2><a class="sl-anchor-link" href="#lora"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “LoRA”</span></a></div>
+<p>LoRA, Low-Rank Adaptation은 full fine-tuning보다 훨씬 적은 parameter만 학습하는 효율적 adaptation 방법이다.</p>
+<p>기본 아이디어는 pre-trained weight <code dir="auto">W_0</code>를 freeze하고, update를 low-rank matrix product로 표현하는 것이다.</p>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>W</mi><mo>=</mo><msub><mi>W</mi><mn>0</mn></msub><mo>+</mo><mi mathvariant="normal">Δ</mi><mi>W</mi></mrow><annotation encoding="application/x-tex">W = W_0 + \Delta W
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">W</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em;">W</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord">Δ</span><span class="mord mathnormal" style="margin-right:0.1389em;">W</span></span></span></span></span>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi mathvariant="normal">Δ</mi><mi>W</mi><mo>=</mo><mi>B</mi><mi>A</mi></mrow><annotation encoding="application/x-tex">\Delta W = BA
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord">Δ</span><span class="mord mathnormal" style="margin-right:0.1389em;">W</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span><span class="mord mathnormal">A</span></span></span></span></span>
+<p>여기서 <code dir="auto">B</code>와 <code dir="auto">A</code>만 학습하고 <code dir="auto">W_0</code>는 고정한다. Rank <code dir="auto">r</code>은 작게 둔다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">W_0: d x d matrix, frozen</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">B: d x r trainable</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">A: r x d trainable</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">r &#x3C;&#x3C; d</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="W_0: d x d matrix, frozenB: d x r trainableA: r x d trainabler << d"><div></div></button></div></figure></div>
+<p>이렇게 하면 task-specific adaptation parameter 수가 크게 줄어든다. 예를 들어 spam detection용 LoRA adapter, sentiment extraction용 LoRA adapter를 따로 저장하고 같은 base model 위에 갈아 끼울 수 있다.</p>
+<p>원래 LoRA 논문은 attention projection matrix에 적용했지만, 최근 관찰로는 FFN block에 LoRA를 넣는 것이 성능에 더 중요할 수 있다. 실제 구현에서는 attention과 FFN 모두에 LoRA를 적용하는 경우가 많다.</p>
+<p>강의에서 언급한 empirical note:</p>
+<ul>
+<li>LoRA는 full fine-tuning보다 높은 learning rate가 필요할 수 있다.</li>
+<li>큰 batch size에서 항상 잘 작동하지 않을 수 있다.</li>
+<li>rank <code dir="auto">r</code>은 design choice이며, common value를 쓰거나 grid search할 수 있다.</li>
+</ul>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="qlora">QLoRA</h2><a class="sl-anchor-link" href="#qlora"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “QLoRA”</span></a></div>
+<p>QLoRA는 quantized LoRA다. Frozen base model weight <code dir="auto">W_0</code>를 quantize해 memory footprint를 줄이고, LoRA matrices <code dir="auto">A</code>, <code dir="auto">B</code>는 더 높은 precision으로 학습한다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">base weights W_0: quantized, frozen</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">LoRA weights A/B: trainable, BF16 or similar</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="base weights W_0: quantized, frozenLoRA weights A/B: trainable, BF16 or similar"><div></div></button></div></figure></div>
+<p>강의에서는 NF4, NormalFloat 4-bit quantization을 소개한다. NF4는 weight가 roughly normal distribution을 따른다고 보고, fixed-width bucket 대신 quantile 기반으로 value space를 나누어 4-bit representation을 더 효율적으로 사용한다.</p>
+<p>또한 double quantization은 quantization constants 자체도 다시 quantize해 추가 memory saving을 얻는 방법이다.</p>
+<p>QLoRA의 목적은 큰 base model을 훨씬 작은 VRAM으로 fine-tuning할 수 있게 하는 것이다. 강의에서는 약 16x VRAM saving이 언급된다.</p>
+<p><starlight-image-zoom-zoomable><img src="/courses/cme295/lec-04/assets/lora-qlora-adaptation.svg" alt="LoRA and QLoRA adaptation"><button aria-label="Zoom image: LoRA and QLoRA adaptation" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="practical-tips-and-notes">Practical Tips and Notes</h2><a class="sl-anchor-link" href="#practical-tips-and-notes"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Practical Tips and Notes”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="pre-training과-fine-tuning을-역할로-구분하기">Pre-Training과 Fine-Tuning을 역할로 구분하기</h3><a class="sl-anchor-link" href="#pre-training과-fine-tuning을-역할로-구분하기"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Pre-Training과 Fine-Tuning을 역할로 구분하기”</span></a></div>
+<p>Pre-training은 language/code distribution을 학습한다. SFT는 user instruction에 대한 useful behavior를 학습한다. Preference tuning은 어떤 답을 더 선호할지 조정한다. 이 세 단계를 혼동하면 model failure를 잘못 진단하기 쉽다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="flops와-flops를-혼동하지-않기">FLOPs와 FLOP/s를 혼동하지 않기</h3><a class="sl-anchor-link" href="#flops와-flops를-혼동하지-않기"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “FLOPs와 FLOP/s를 혼동하지 않기”</span></a></div>
+<p>FLOPs는 총 일의 양이고, FLOP/s는 hardware 속도다. Training cost estimate에는 둘 다 필요하다. 총 FLOPs가 같아도 memory bandwidth, communication, utilization 때문에 실제 wall-clock time은 달라진다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="benchmark-score만으로-model을-고르지-않기">Benchmark Score만으로 Model을 고르지 않기</h3><a class="sl-anchor-link" href="#benchmark-score만으로-model을-고르지-않기"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Benchmark Score만으로 Model을 고르지 않기”</span></a></div>
+<p>MMLU, GSM8K, coding benchmark는 유용하지만 product quality를 완전히 대표하지 않는다. 실제 use case에서는 domain eval, human review, safety eval, latency/cost, refusal behavior를 함께 봐야 한다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="gpu-memory는-parameters만의-문제가-아니다">GPU Memory는 Parameters만의 문제가 아니다</h3><a class="sl-anchor-link" href="#gpu-memory는-parameters만의-문제가-아니다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “GPU Memory는 Parameters만의 문제가 아니다”</span></a></div>
+<p>Training memory에는 parameters, gradients, optimizer states, activations가 모두 들어간다. Adam은 optimizer state가 커서 parameter memory보다 훨씬 많은 memory가 필요할 수 있다. ZeRO, activation checkpointing, FlashAttention, mixed precision을 함께 봐야 한다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="flashattention은-approximation이-아니다">FlashAttention은 Approximation이 아니다</h3><a class="sl-anchor-link" href="#flashattention은-approximation이-아니다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “FlashAttention은 Approximation이 아니다”</span></a></div>
+<p>FlashAttention은 attention을 approximate하는 방법이 아니라 exact attention을 IO-aware 방식으로 계산하는 방법이다. 품질 trade-off라기보다 memory hierarchy를 활용한 implementation optimization이다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="lora-adapter는-task-artifact로-관리하기">LoRA Adapter는 Task Artifact로 관리하기</h3><a class="sl-anchor-link" href="#lora-adapter는-task-artifact로-관리하기"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “LoRA Adapter는 Task Artifact로 관리하기”</span></a></div>
+<p>LoRA를 쓰면 base model은 공유하고 task별 adapter만 따로 관리할 수 있다. 운영에서는 adapter version, base model version, rank, target modules, training data lineage를 함께 기록해야 재현성과 rollback이 가능하다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="quick-reference">Quick Reference</h3><a class="sl-anchor-link" href="#quick-reference"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Quick Reference”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Symptom</th><th>First Check</th></tr></thead><tbody><tr><td>Training OOM</td><td>activation memory, optimizer states, sequence length, ZeRO stage</td></tr><tr><td>Scaling이 안 좋다</td><td>GPU communication, data parallel sync, tensor parallel efficiency</td></tr><tr><td>Fine-tuned model이 helpful하지 않다</td><td>SFT data quality, instruction distribution, loss masking</td></tr><tr><td>Benchmark는 좋은데 제품 품질이 낮다</td><td>benchmark contamination/task training, domain eval mismatch</td></tr><tr><td>LoRA 성능이 낮다</td><td>target modules, rank, learning rate, SFT data coverage</td></tr><tr><td>비용이 너무 높다</td><td>mixed precision, FlashAttention, ZeRO, LoRA/QLoRA</td></tr></tbody></table>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="lecture-summary">Lecture Summary</h2><a class="sl-anchor-link" href="#lecture-summary"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Lecture Summary”</span></a></div>
+<p>Lecture 4는 LLM training pipeline을 pre-training, infrastructure optimization, supervised fine-tuning, efficient adaptation으로 나누어 설명한다.</p>
+<p>Pre-training은 web-scale text와 code로 next-token prediction을 학습하는 가장 비싼 단계다. Model size, training token 수, compute budget은 scaling laws로 연결되며, Chinchilla-style result는 compute-optimal training에서 parameter 수뿐 아니라 충분한 token 수가 중요함을 보여준다.</p>
+<p>LLM training은 GPU memory 한계 때문에 distributed training이 필수다. Data parallelism은 batch를 나누고 gradient를 aggregate한다. ZeRO는 optimizer states, gradients, parameters를 shard해 redundancy를 줄인다. Model parallelism은 tensor, pipeline, expert parallelism으로 model computation 자체를 나눈다.</p>
+<p>FlashAttention은 HBM과 SRAM의 차이를 활용해 attention을 exact하게 더 빠르고 memory-efficient하게 계산한다. Mixed precision training은 FP32 master weights와 FP16/BF16 computation을 조합해 memory와 throughput을 개선한다.</p>
+<p>Pre-trained base model은 helpful assistant가 아니다. SFT와 instruction tuning은 input-output pair로 model이 user instruction에 답하도록 학습한다. SFT data는 pre-training보다 작지만 고품질이어야 하며, safety, refusal, hedging 같은 product behavior도 포함된다. Evaluation은 MMLU, GSM8K 같은 benchmark뿐 아니라 human preference와 domain-specific eval을 함께 봐야 한다.</p>
+<p>LoRA는 frozen base weight에 low-rank trainable update를 추가해 fine-tuning 비용을 줄인다. QLoRA는 frozen base weights를 quantize하고 LoRA weights만 학습해 VRAM 요구량을 더 낮춘다.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="key-terms">Key Terms</h2><a class="sl-anchor-link" href="#key-terms"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Key Terms”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Term</th><th>Meaning</th></tr></thead><tbody><tr><td>Transfer learning</td><td>pre-trained model을 새 task에 맞게 조정하는 학습 방식</td></tr><tr><td>Pre-training</td><td>대규모 corpus에서 next-token prediction으로 base model을 학습하는 단계</td></tr><tr><td>SFT</td><td>supervised fine-tuning, input-output pair로 model behavior를 조정하는 단계</td></tr><tr><td>Instruction tuning</td><td>instruction-following assistant behavior를 학습하는 SFT</td></tr><tr><td>FLOPs</td><td>총 floating point operation 수</td></tr><tr><td>FLOP/s</td><td>초당 floating point operation 처리량</td></tr><tr><td>Scaling law</td><td>model size, data size, compute와 loss의 empirical relationship</td></tr><tr><td>Chinchilla</td><td>compute-optimal parameter/token allocation 관점의 scaling result</td></tr><tr><td>Knowledge cutoff</td><td>pre-training data가 포함하는 지식의 시간적 한계</td></tr><tr><td>Activation</td><td>layer output, backward pass에 필요한 intermediate value</td></tr><tr><td>Gradient</td><td>loss를 줄이기 위한 parameter별 방향</td></tr><tr><td>Optimizer state</td><td>Adam moment처럼 optimizer가 저장하는 추가 state</td></tr><tr><td>Data parallelism</td><td>batch를 여러 GPU에 나누어 학습하는 방식</td></tr><tr><td>ZeRO</td><td>optimizer state, gradient, parameter redundancy를 줄이는 sharding 방법</td></tr><tr><td>Tensor parallelism</td><td>matrix operation을 여러 GPU에 나누는 model parallelism</td></tr><tr><td>Pipeline parallelism</td><td>layer를 여러 GPU에 나누는 model parallelism</td></tr><tr><td>Expert parallelism</td><td>MoE expert를 GPU별로 나누는 방식</td></tr><tr><td>FlashAttention</td><td>IO-aware exact attention implementation</td></tr><tr><td>Quantization</td><td>numeric precision을 낮춰 memory/compute를 줄이는 방법</td></tr><tr><td>Mixed precision training</td><td>high/low precision을 조합해 학습하는 방법</td></tr><tr><td>Alignment</td><td>SFT와 preference tuning 등으로 model behavior를 user intent/safety에 맞추는 과정</td></tr><tr><td>Mid-training</td><td>pre-training 이후, SFT 이전에 target domain data로 objective를 이어가는 단계</td></tr><tr><td>LoRA</td><td>low-rank trainable update로 efficient fine-tuning하는 방법</td></tr><tr><td>QLoRA</td><td>quantized base model과 LoRA adapter를 결합한 fine-tuning 방법</td></tr></tbody></table>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="questions">Questions</h2><a class="sl-anchor-link" href="#questions"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Questions”</span></a></div>
+<ol>
+<li>LLM training에서 transfer learning paradigm이 중요한 이유는 무엇인가?</li>
+<li>Pre-training과 SFT의 objective는 어떻게 같고, loss 적용 위치는 어떻게 다른가?</li>
+<li>FLOPs와 FLOP/s는 각각 무엇을 의미하는가?</li>
+<li>Chinchilla-style scaling law가 GPT-3를 undertrained라고 보는 이유는 무엇인가?</li>
+<li>Knowledge cutoff가 model behavior에 주는 한계는 무엇인가?</li>
+<li>Training 중 GPU memory에 저장해야 하는 주요 항목은 무엇인가?</li>
+<li>Data parallelism은 무엇을 나누며, 어떤 communication cost가 생기는가?</li>
+<li>ZeRO-1, ZeRO-2, ZeRO-3는 각각 무엇을 shard하는가?</li>
+<li>Tensor parallelism, pipeline parallelism, expert parallelism은 어떻게 다른가?</li>
+<li>FlashAttention은 왜 exact attention이면서도 더 빠를 수 있는가?</li>
+<li>Mixed precision training에서 master weights를 high precision으로 유지하는 이유는 무엇인가?</li>
+<li>Instruction tuning data에는 어떤 종류의 example이 포함되는가?</li>
+<li>Benchmark score만으로 model quality를 판단하기 어려운 이유는 무엇인가?</li>
+<li>Alignment는 어떤 training stages를 포함하는가?</li>
+<li>LoRA가 full fine-tuning보다 memory-efficient한 이유는 무엇인가?</li>
+<li>QLoRA에서 NF4와 double quantization은 어떤 목적을 갖는가?</li>
+</ol>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="answers">Answers</h2><a class="sl-anchor-link" href="#answers"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Answers”</span></a></div>
+<ol>
+<li>NLP task들은 모두 language understanding을 공유한다. 매 task마다 처음부터 학습하기보다, 큰 corpus로 일반 language representation을 학습한 뒤 task별로 조정하는 것이 data와 compute를 더 효율적으로 쓴다.</li>
+<li>둘 다 next-token prediction을 사용한다. Pre-training은 raw text 전체에 loss를 걸지만, SFT는 instruction/input을 조건으로 두고 target answer token에 주로 loss를 건다.</li>
+<li>FLOPs는 총 floating point operation 수로 계산량을 뜻한다. FLOP/s는 초당 처리할 수 있는 floating point operation 수로 hardware 속도를 뜻한다.</li>
+<li>GPT-3는 약 175B parameters에 300B tokens로 학습됐다. Chinchilla 관점에서는 parameter 수 대비 training token 수가 적어 compute-optimal보다 data가 부족한 편이다.</li>
+<li>Model은 cutoff 이후의 사건이나 지식을 pre-training만으로 알 수 없다. 최신 정보가 필요하면 retrieval, tool use, continued training, fine-tuning 등이 필요하다.</li>
+<li>Parameters, activations, gradients, optimizer states, batch data가 필요하다.</li>
+<li>Data parallelism은 batch를 여러 GPU에 나누고 각 GPU가 full model copy로 forward/backward를 수행한다. 이후 gradient를 평균/동기화해야 하므로 GPU 간 communication cost가 생긴다.</li>
+<li>ZeRO-1은 optimizer states, ZeRO-2는 optimizer states와 gradients, ZeRO-3는 optimizer states, gradients, parameters까지 shard한다.</li>
+<li>Tensor parallelism은 matrix operation을 나누고, pipeline parallelism은 layer 구간을 나누며, expert parallelism은 MoE experts를 여러 device에 나눈다.</li>
+<li>HBM read/write를 줄이고 SRAM에서 tile 단위로 fused computation을 수행하기 때문이다. Softmax를 block-wise로 exact하게 누적하는 trick을 사용해 approximation 없이 IO bottleneck을 줄인다.</li>
+<li>Weight update는 반복적으로 누적되므로 quantization error가 누적될 수 있다. Master weights를 high precision으로 유지하면 stability를 확보하면서 forward/backward는 낮은 precision으로 빠르게 수행할 수 있다.</li>
+<li>Assistant dialogue, story writing, poem creation, list generation, explanation, math/reasoning, code, safety/refusal/hedging examples가 포함될 수 있다.</li>
+<li>Benchmark와 유사한 task data로 training되었을 수 있고, benchmark가 user preference, factuality, safety, domain needs를 모두 반영하지 못하기 때문이다.</li>
+<li>강의에서는 pre-training 이후의 supervised fine-tuning과 preference tuning을 alignment로 묶어 설명한다. 최근에는 pre-training과 SFT 사이의 mid-training도 별도 단계로 언급된다.</li>
+<li>Base weight를 freeze하고 작은 rank의 <code dir="auto">A</code>, <code dir="auto">B</code> matrices만 학습하기 때문이다. 학습 parameter 수와 optimizer state memory가 크게 줄어든다.</li>
+<li>NF4는 normal-distributed weights에 맞춰 4-bit quantile representation을 사용해 base weights를 효율적으로 저장한다. Double quantization은 quantization constants까지 quantize해 추가 memory saving을 얻는다.</li>
+</ol> </div> <footer class="sl-flex astro-3yyafb3n"> <div class="meta sl-flex astro-3yyafb3n"> <a href="https://github.com/ziwon/ai-data-center-systems/edit/main/courses/cme295/lec-04/README.md" class="sl-flex print:hidden astro-eez2twj6"><svg aria-hidden="true" class="astro-eez2twj6 astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.2em;"><path d="M22 7.24a1 1 0 0 0-.29-.71l-4.24-4.24a1 1 0 0 0-1.1-.22 1 1 0 0 0-.32.22l-2.83 2.83L2.29 16.05a1 1 0 0 0-.29.71V21a1 1 0 0 0 1 1h4.24a1 1 0 0 0 .76-.29l10.87-10.93L21.71 8c.1-.1.17-.2.22-.33a1 1 0 0 0 0-.24v-.14l.07-.05ZM6.83 20H4v-2.83l9.93-9.93 2.83 2.83L6.83 20ZM18.17 8.66l-2.83-2.83 1.42-1.41 2.82 2.82-1.41 1.42Z"/></svg>Edit page</a> <p>Last updated: <time datetime="2026-07-22T12:47:10.000Z">Jul 22, 2026</time></p> </div> <div class="pagination-links print:hidden astro-u2l5gyhi" dir="ltr"> <a href="/courses/cme295/lec-03/" rel="prev" class="astro-u2l5gyhi"> <svg aria-hidden="true" class="astro-u2l5gyhi astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17 11H9.41l3.3-3.29a1.004 1.004 0 1 0-1.42-1.42l-5 5a1 1 0 0 0-.21.33 1 1 0 0 0 0 .76 1 1 0 0 0 .21.33l5 5a1.002 1.002 0 0 0 1.639-.325 1 1 0 0 0-.219-1.095L9.41 13H17a1 1 0 0 0 0-2Z"/></svg> <span class="astro-u2l5gyhi"> Previous <br class="astro-u2l5gyhi"> <span class="link-title astro-u2l5gyhi">Lecture 3: Large Language Models, Decoding, Prompting, and Inference</span> </span> </a> <a href="/courses/cme295/lec-05/" rel="next" class="astro-u2l5gyhi"> <svg aria-hidden="true" class="astro-u2l5gyhi astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17.92 11.62a1.001 1.001 0 0 0-.21-.33l-5-5a1.003 1.003 0 1 0-1.42 1.42l3.3 3.29H7a1 1 0 0 0 0 2h7.59l-3.3 3.29a1.002 1.002 0 0 0 .325 1.639 1 1 0 0 0 1.095-.219l5-5a1 1 0 0 0 .21-.33 1 1 0 0 0 0-.76Z"/></svg> <span class="astro-u2l5gyhi"> Next <br class="astro-u2l5gyhi"> <span class="link-title astro-u2l5gyhi">Lecture 5: LLM Tuning and Human Preferences</span> </span> </a> </div>  </footer> </div> </div>  </main> </div> </div> </div> <ask-docs-widget> <button class="ask-fab" type="button" data-open aria-label="Ask this docs"> <span class="ask-fab-icon" aria-hidden="true">?</span>
+Ask this docs
+</button> <div class="ask-panel" data-panel hidden> <div class="ask-resize-handle" data-resize aria-hidden="true"></div> <div class="ask-panel-inner"> <header class="ask-header"> <div> <p class="ask-eyebrow">AI Data Center Systems</p> <h2 class="ask-title">Ask this docs</h2> </div> <div class="ask-header-controls"> <button class="ask-mode-btn" data-mode-btn="right" title="오른쪽 패널" aria-label="오른쪽 패널"> <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="6" height="16" rx="1.5" opacity="0.35"></rect><rect x="8" y="0" width="8" height="16" rx="1.5"></rect></svg> </button> <button class="ask-mode-btn" data-mode-btn="bottom" title="하단 패널" aria-label="하단 패널"> <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="16" height="6" rx="1.5" opacity="0.35"></rect><rect x="0" y="8" width="16" height="8" rx="1.5"></rect></svg> </button> <button class="ask-mode-btn" data-mode-btn="expand" title="전체 확장" aria-label="전체 확장"> <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 5.5V1h4.5M10.5 1H15v4.5M15 10.5V15h-4.5M5.5 15H1v-4.5"></path></svg> </button> <button class="ask-close-btn" type="button" aria-label="닫기" data-close> <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13"></path></svg> </button> </div> </header> <div class="ask-body"> <label class="ask-field"> <span class="ask-field-row"> <span>Question</span> <span class="ask-char" data-char>0 / 800</span> </span> <textarea name="question" rows="3" maxlength="800" placeholder="이 문서에서 핵심 운영 체크포인트는 무엇인가요?" data-question></textarea> <span class="ask-hint">시간당 최대 20회 · 질문당 최대 800자</span> </label> <div class="ask-actions"> <button class="ask-submit" type="button" data-submit> <svg class="ask-spinner" viewBox="0 0 24 24" fill="none" aria-hidden="true" hidden> <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2.5" stroke-dasharray="56" stroke-dashoffset="14" stroke-linecap="round"></circle> </svg> <span data-submit-label>Ask</span> </button> <p class="ask-status" data-status></p> </div> <section class="ask-answer" data-answer hidden></section> <section class="ask-sources" data-sources hidden> <h3>Sources</h3> <ul class="ask-source-chips" data-source-list></ul> </section> </div> </div> </div> <div class="ask-backdrop" data-backdrop hidden></div> </ask-docs-widget> <script type="module" src="/_astro/AskDocs.astro_astro_type_script_index_0_lang.BbnAb04M.js"></script> </div> <script type="module">const r=document.documentElement,c=document.querySelector("#starlight__sidebar"),s=document.querySelector(".navigation-mode-toggle"),a=document.querySelector(".navigation-drawer-toggle"),u=window.matchMedia("(min-width: 50rem)");function d(){return r.dataset.navigationMode==="compact"}function o(){return r.dataset.navigationDrawer==="open"}function l(){const e=d(),t=e&&o();s?.setAttribute("aria-pressed",String(e)),s?.setAttribute("title",e?"Use normal navigation":"Use compact navigation"),a?.setAttribute("aria-expanded",String(t)),a?.setAttribute("title",t?"Close navigation":"Open navigation");const n=a?.querySelector(".navigation-drawer-label");n&&(n.textContent=t?"Close navigation":"Open navigation")}function i(e,t=!1){const n=!!(e&&d()&&u.matches);r.dataset.navigationDrawer=n?"open":"closed",l(),n?requestAnimationFrame(()=>{const g=c?.querySelector('a[aria-current="page"]'),m=c?.querySelector(".starlight-sidebar-topics-current");(g??m)?.focus()}):t&&a?.focus()}function p(e){r.dataset.navigationMode=e,i(!1);try{localStorage.setItem("adcs-navigation-mode",e)}catch{}l()}s?.addEventListener("click",()=>{p(d()?"normal":"compact")});a?.addEventListener("click",()=>{i(!o(),o())});document.addEventListener("keydown",e=>{e.key==="Escape"&&o()&&i(!1,!0)});document.addEventListener("pointerdown",e=>{!o()||!(e.target instanceof Node)||c?.contains(e.target)||i(!1)});u.addEventListener("change",()=>i(!1));r.dataset.navigationDrawer="closed";l();</script> </body></html>

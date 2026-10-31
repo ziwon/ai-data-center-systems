@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="560" viewBox="0 0 1120 560" role="img" aria-labelledby="title desc">
+  <title id="title">Gradient synchronization network burst</title>
+  <desc id="desc">A training step alternates between GPU-local compute phases with low network utilization and an AllReduce synchronization burst with near line-rate NIC utilization.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+    </marker>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#0f172a" flood-opacity="0.10"/>
+    </filter>
+    <style>
+      .bg { fill: #ffffff; }
+      text { font-family: Arial, sans-serif; }
+      .title { font-size: 24px; font-weight: 700; fill: #0f172a; }
+      .subtitle { font-size: 14px; font-weight: 400; fill: #475569; }
+      .label { font-size: 15px; font-weight: 700; fill: #0f172a; }
+      .small { font-size: 13px; font-weight: 400; fill: #334155; }
+      .tiny { font-size: 11px; font-weight: 400; fill: #64748b; }
+      .num { font-size: 14px; font-weight: 700; fill: #7c2d12; }
+      .compute { fill: #ecfdf5; stroke: #059669; stroke-width: 1.5; }
+      .sync { fill: #fff7ed; stroke: #ea580c; stroke-width: 1.5; }
+      .gpu { fill: #eef6ff; stroke: #2563eb; stroke-width: 1.5; }
+      .risk { fill: #fff1f2; stroke: #e11d48; stroke-width: 1.5; }
+      .note { fill: #f8fafc; stroke: #64748b; stroke-width: 1.2; stroke-dasharray: 5 4; }
+      .axis { stroke: #94a3b8; stroke-width: 1.2; }
+      .line { stroke: #475569; stroke-width: 2; fill: none; marker-end: url(#arrow); }
+      .thin { stroke: #cbd5e1; stroke-width: 1; }
+      .util-low { fill: #059669; opacity: 0.45; }
+      .util-high { fill: #ea580c; opacity: 0.9; }
+      .wait { fill: #7c3aed; opacity: 0.85; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1120" height="560"/>
+  <text class="title" x="40" y="46">Gradient Synchronization Creates a Backend Network Burst</text>
+  <text class="subtitle" x="40" y="72">Forward and backward passes are mostly GPU-local; AllReduce pushes the backend fabric toward line rate.</text>
+
+  <g filter="url(#shadow)">
+    <rect class="note" x="40" y="115" width="1040" height="300" rx="8"/>
+    <text class="label" x="70" y="148">One Training Step</text>
+
+    <rect class="compute" x="180" y="130" width="260" height="58" rx="8"/>
+    <text class="label" x="250" y="154">Forward Pass</text>
+    <text class="small" x="237" y="174">GPU compute / HBM</text>
+
+    <rect class="compute" x="460" y="130" width="260" height="58" rx="8"/>
+    <text class="label" x="535" y="154">Backward Pass</text>
+    <text class="small" x="522" y="174">local gradients</text>
+
+    <rect class="sync" x="740" y="130" width="210" height="58" rx="8"/>
+    <text class="label" x="798" y="154">AllReduce</text>
+    <text class="small" x="778" y="174">gradient exchange</text>
+
+    <line class="line" x1="440" y1="159" x2="455" y2="159"/>
+    <line class="line" x1="720" y1="159" x2="735" y2="159"/>
+
+    <g transform="translate(85 230)">
+      <text class="small" x="0" y="20">GPU-0</text>
+      <text class="small" x="0" y="63">GPU-1</text>
+      <text class="small" x="0" y="106">GPU-2</text>
+      <text class="small" x="0" y="149">GPU-3</text>
+      <line class="thin" x1="70" y1="15" x2="910" y2="15"/>
+      <line class="thin" x1="70" y1="58" x2="910" y2="58"/>
+      <line class="thin" x1="70" y1="101" x2="910" y2="101"/>
+      <line class="thin" x1="70" y1="144" x2="910" y2="144"/>
+
+      <rect class="compute" x="95" y="0" width="245" height="30" rx="5"/>
+      <rect class="compute" x="95" y="43" width="245" height="30" rx="5"/>
+      <rect class="compute" x="95" y="86" width="245" height="30" rx="5"/>
+      <rect class="compute" x="95" y="129" width="245" height="30" rx="5"/>
+
+      <rect class="compute" x="365" y="0" width="245" height="30" rx="5"/>
+      <rect class="compute" x="365" y="43" width="245" height="30" rx="5"/>
+      <rect class="compute" x="365" y="86" width="245" height="30" rx="5"/>
+      <rect class="compute" x="365" y="129" width="245" height="30" rx="5"/>
+
+      <rect class="sync" x="640" y="0" width="180" height="30" rx="5"/>
+      <rect class="sync" x="640" y="43" width="180" height="30" rx="5"/>
+      <rect class="sync" x="640" y="86" width="180" height="30" rx="5"/>
+      <rect class="sync" x="640" y="129" width="180" height="30" rx="5"/>
+
+      <rect class="wait" x="820" y="0" width="55" height="30" rx="5"/>
+      <rect class="wait" x="820" y="43" width="55" height="30" rx="5"/>
+      <rect class="wait" x="820" y="86" width="55" height="30" rx="5"/>
+      <rect class="wait" x="820" y="129" width="55" height="30" rx="5"/>
+
+      <text class="tiny" x="165" y="20">compute</text>
+      <text class="tiny" x="442" y="20">compute</text>
+      <text class="tiny" x="692" y="20">sync burst</text>
+      <text class="tiny" x="831" y="20">wait</text>
+    </g>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect class="gpu" x="40" y="440" width="290" height="82" rx="8"/>
+    <text class="label" x="68" y="470">GPU/NIC behavior</text>
+    <text class="small" x="68" y="494">NIC is quiet during compute, then sends</text>
+    <text class="small" x="68" y="512">gradient data at close to line rate.</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect class="note" x="360" y="440" width="380" height="82" rx="8"/>
+    <text class="label" x="390" y="470">Backend Network Utilization</text>
+    <line class="axis" x1="390" y1="505" x2="700" y2="505"/>
+    <line class="axis" x1="390" y1="462" x2="390" y2="505"/>
+    <rect class="util-low" x="410" y="488" width="70" height="17" rx="3"/>
+    <rect class="util-low" x="500" y="490" width="70" height="15" rx="3"/>
+    <rect class="util-high" x="590" y="464" width="70" height="41" rx="3"/>
+    <text class="tiny" x="408" y="521">forward</text>
+    <text class="tiny" x="501" y="521">backward</text>
+    <text class="tiny" x="594" y="521">sync</text>
+    <text class="num" x="665" y="469">~100%</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect class="risk" x="770" y="440" width="310" height="82" rx="8"/>
+    <text class="label" x="800" y="470">Fabric risk</text>
+    <text class="small" x="800" y="494">Congestion, loss, or tail latency makes</text>
+    <text class="small" x="800" y="512">all participating GPUs wait.</text>
+  </g>
+</svg>

@@ -1,0 +1,987 @@
+<!DOCTYPE html><html lang="en" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-bguv2lll"> <head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Week 3 — Transformer Inference and the KV Cache | AI Data Center Systems</title><link rel="canonical" href="https://adcs.restack.tech/inference/efficient-llm-inference-systems/week03/"/><link rel="sitemap" href="/sitemap-index.xml"/><script async src="https://www.googletagmanager.com/gtag/js?id=G-76LFZJVBTE"></script><script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-76LFZJVBTE');
+      </script><script async crossorigin="anonymous" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8128231647578658"></script><link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v6.4.8"/><meta name="generator" content="Starlight v0.40.0"/><meta property="og:title" content="Week 3 — Transformer Inference and the KV Cache"/><meta property="og:url" content="https://adcs.restack.tech/inference/efficient-llm-inference-systems/week03/"/><meta property="og:locale" content="en"/><meta property="og:description" content="If the Transformer attention flow is not fresh, review the Transformer appendix first. For the full input-to-output generation path, see the LLM inference..."/><meta property="og:site_name" content="AI Data Center Systems"/><meta name="description" content="If the Transformer attention flow is not fresh, review the Transformer appendix first. For the full input-to-output generation path, see the LLM inference..."/><meta property="og:type" content="article"/><meta property="og:image" content="https://adcs.restack.tech/og/inference/efficient-llm-inference-systems/week03.png?v=2"/><meta property="og:image:width" content="1200"/><meta property="og:image:height" content="630"/><meta name="twitter:image" content="https://adcs.restack.tech/og/inference/efficient-llm-inference-systems/week03.png?v=2"/><meta name="twitter:card" content="summary_large_image"/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/_astro/print.DNXP8c50.css" media="print"><link rel="stylesheet" href="/_astro/common.DYbqSTpl.css"><script type="module" src="/_astro/page.CtJXHRyR.js"></script></head> <body class="astro-bguv2lll"> <a href="#_top" class="astro-7q3lir66">Skip to content</a> <script>
+  (() => {
+    try {
+      const savedMode = localStorage.getItem('adcs-navigation-mode');
+      document.documentElement.dataset.navigationMode = savedMode === 'compact' ? 'compact' : 'normal';
+    } catch {
+      document.documentElement.dataset.navigationMode = 'normal';
+    }
+  })();
+</script> <div class="page sl-flex astro-4toy2ex6"> <header class="header astro-4toy2ex6"><div class="header astro-3ef6ksr2"> <div class="title-wrapper sl-flex astro-3ef6ksr2"> <a href="/" class="site-title sl-flex astro-m46x6ez3">  <span class="astro-m46x6ez3" translate="no"> AI Data Center Systems </span> </a> <button class="navigation-mode-toggle print:hidden astro-3ef6ksr2" type="button" aria-label="Compact navigation" aria-pressed="false" title="Use compact navigation"> <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" class="astro-3ef6ksr2"> <rect x="3" y="4" width="18" height="16" rx="2" class="astro-3ef6ksr2"></rect> <path d="M9 4v16M6.5 10 4.5 12l2 2" class="astro-3ef6ksr2"></path> </svg> </button> </div> <div class="sl-flex print:hidden astro-3ef6ksr2"> <site-search class="astro-3ef6ksr2 astro-v37mnknz" data-translations="{&quot;placeholder&quot;:&quot;Search&quot;}"> <button data-open-modal disabled aria-label="Search" aria-keyshortcuts="Control+K" class="astro-v37mnknz"> <svg aria-hidden="true" class="astro-v37mnknz astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg> <span class="sl-hidden md:sl-block astro-v37mnknz" aria-hidden="true">Search</span> <kbd class="sl-hidden md:sl-flex astro-v37mnknz" style="display: none;"> <kbd class="astro-v37mnknz">Ctrl</kbd><kbd class="astro-v37mnknz">K</kbd> </kbd> </button> <dialog style="padding:0" aria-label="Search" class="astro-v37mnknz"> <div class="dialog-frame sl-flex astro-v37mnknz">  <button data-close-modal class="sl-flex md:sl-hidden astro-v37mnknz"> Cancel </button> <div class="search-container astro-v37mnknz"> <div id="starlight__search" class="astro-v37mnknz"></div> </div> </div> </dialog> </site-search>  <script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script> <script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.D1WXcfCt.js"></script>  </div> <div class="sl-hidden md:sl-flex print:hidden right-group astro-3ef6ksr2"> <div class="sl-flex social-icons astro-3ef6ksr2"> <a href="https://github.com/ziwon/ai-data-center-systems" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">GitHub</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script> <script type="module">const r="starlight-theme",o=e=>e==="auto"||e==="dark"||e==="light"?e:"auto",c=()=>o(typeof localStorage<"u"&&localStorage.getItem(r));function n(e){typeof localStorage<"u"&&localStorage.setItem(r,e==="light"||e==="dark"?e:"")}const l=()=>matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";function t(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e==="auto"?l():e,n(e)}matchMedia("(prefers-color-scheme: light)").addEventListener("change",()=>{c()==="auto"&&t("auto")});class s extends HTMLElement{constructor(){super(),t(c()),this.querySelector("select")?.addEventListener("change",a=>{a.currentTarget instanceof HTMLSelectElement&&t(o(a.currentTarget.value))})}}customElements.define("starlight-theme-select",s);</script> <script type="module">class s extends HTMLElement{constructor(){super();const e=this.querySelector("select");e&&(e.addEventListener("change",t=>{t.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=t.currentTarget.value)}),window.addEventListener("pageshow",t=>{if(!t.persisted)return;const n=e.querySelector("option[selected]")?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}}customElements.define("starlight-lang-select",s);</script> </div> </div></header> <nav class="sidebar print:hidden astro-4toy2ex6" aria-label="Main"> <starlight-menu-button class="print:hidden astro-jif73yzw"> <button aria-expanded="false" aria-label="Menu" aria-controls="starlight__sidebar" class="sl-flex md:sl-hidden astro-jif73yzw"> <svg aria-hidden="true" class="open-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg> <svg aria-hidden="true" class="close-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg> </button> </starlight-menu-button> <script type="module">class s extends HTMLElement{constructor(){super(),this.btn=this.querySelector("button"),this.btn.addEventListener("click",()=>this.toggleExpanded());const t=this.closest("nav");t&&t.addEventListener("keyup",e=>this.closeOnEscape(e))}setExpanded(t){this.setAttribute("aria-expanded",String(t)),document.body.toggleAttribute("data-mobile-menu-expanded",t)}toggleExpanded(){this.setExpanded(this.getAttribute("aria-expanded")!=="true")}closeOnEscape(t){t.code==="Escape"&&(this.setExpanded(!1),this.btn.focus())}}customElements.define("starlight-menu-button",s);</script>  <div id="starlight__sidebar" class="sidebar-pane astro-4toy2ex6"> <div class="navigation-controls astro-4toy2ex6"> <button class="navigation-drawer-toggle astro-4toy2ex6" type="button" aria-controls="starlight__sidebar-content" aria-expanded="false" title="Open navigation"> <svg class="navigation-menu-icon astro-4toy2ex6" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"> <path d="M4 6h16M4 12h16M4 18h16" class="astro-4toy2ex6"></path> </svg> <svg class="navigation-close-icon astro-4toy2ex6" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"> <path d="m6 6 12 12M18 6 6 18" class="astro-4toy2ex6"></path> </svg> <span class="navigation-drawer-label astro-4toy2ex6">Open navigation</span> </button> </div> <div id="starlight__sidebar-content" class="sidebar-content sl-flex astro-4toy2ex6"> <ul class="starlight-sidebar-topics astro-2fh6iaza"> <li class="astro-2fh6iaza"> <a aria-label="Network" title="Network" href="/network/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8.7 10a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-6.27-6.3a1 1 0 0 0-1.42 1.42ZM21 14a1 1 0 0 0-1 1v3.59L15.44 14A1 1 0 0 0 14 15.44L18.59 20H15a1 1 0 0 0 0 2h6a1 1 0 0 0 .38-.08 1 1 0 0 0 .54-.54A1 1 0 0 0 22 21v-6a1 1 0 0 0-1-1Zm.92-11.38a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-6a1 1 0 0 0 0 2h3.59L2.29 20.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V9a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z"/></svg> </div> <div class="astro-2fh6iaza"> Network  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="GPU &amp; Accelerator Systems" title="GPU &amp; Accelerator Systems" href="/gpu/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> </div> <div class="astro-2fh6iaza"> GPU &amp; Accelerator Systems  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Storage" title="Storage" href="/storage/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8 16.5a1 1 0 1 0 1 1 1 1 0 0 0-1-1M12 2C8 2 4 3.37 4 6v12c0 2.63 4 4 8 4s8-1.37 8-4V6c0-2.63-4-4-8-4m6 16c0 .71-2.28 2-6 2s-6-1.29-6-2v-3.27A13 13 0 0 0 12 16a13 13 0 0 0 6-1.27Zm0-6c0 .71-2.28 2-6 2s-6-1.29-6-2V8.73A13 13 0 0 0 12 10a13 13 0 0 0 6-1.27Zm-6-4C8.28 8 6 6.71 6 6s2.28-2 6-2 6 1.29 6 2-2.28 2-6 2m-4 2.5a1 1 0 1 0 1 1 1 1 0 0 0-1-1"/></svg> </div> <div class="astro-2fh6iaza"> Storage  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Training" title="Training" href="/training/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1 1v8a1 1 0 0 0 2 0v-8a1 1 0 0 0-1-1m5-10a1 1 0 0 0-1 1v18a1 1 0 0 0 2 0V3a1 1 0 0 0-1-1m10 14a1 1 0 0 0-1 1v4a1 1 0 0 0 2 0v-4a1 1 0 0 0-1-1m-5-8a1 1 0 0 0-1 1v12a1 1 0 0 0 2 0V9a1 1 0 0 0-1-1"/></svg> </div> <div class="astro-2fh6iaza"> Training  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Inference" title="Inference" data-topic-icon="brain" href="/inference/" class="starlight-sidebar-topics-current astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 22H5a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3h1a4 4 0 0 1 7.3-2.18c.448.64.692 1.4.7 2.18h3a1 1 0 0 1 1 1v3a4 4 0 0 1 2.18 7.3A3.86 3.86 0 0 1 18 18v3a1 1 0 0 1-1 1ZM5 8a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11v-3.18a1 1 0 0 1 1.33-.95 1.77 1.77 0 0 0 1.74-.23 2 2 0 0 0 .93-1.37 2 2 0 0 0-.48-1.59 1.89 1.89 0 0 0-2.17-.55 1 1 0 0 1-1.33-.95V8h-3.2a1 1 0 0 1-1-1.33 1.77 1.77 0 0 0-.23-1.74 1.939 1.939 0 0 0-3-.43A2 2 0 0 0 8 6c.002.23.046.456.13.67A1 1 0 0 1 7.18 8H5Z"/></svg> </div> <div class="astro-2fh6iaza"> Inference  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="MLOps" title="MLOps" data-topic-icon="cycle" href="/mlops/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8.7 10a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-6.27-6.3a1 1 0 0 0-1.42 1.42ZM21 14a1 1 0 0 0-1 1v3.59L15.44 14A1 1 0 0 0 14 15.44L18.59 20H15a1 1 0 0 0 0 2h6a1 1 0 0 0 .38-.08 1 1 0 0 0 .54-.54A1 1 0 0 0 22 21v-6a1 1 0 0 0-1-1Zm.92-11.38a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-6a1 1 0 0 0 0 2h3.59L2.29 20.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V9a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z"/></svg> </div> <div class="astro-2fh6iaza"> MLOps  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Systems Performance" title="Systems Performance" href="/systems-performance/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path fill-rule="evenodd" d="M1.44 8.855v-.001l3.527-3.516c.34-.344.802-.541 1.285-.548h6.649l.947-.947c3.07-3.07 6.207-3.072 7.62-2.868a1.821 1.821 0 0 1 1.557 1.557c.204 1.413.203 4.55-2.868 7.62l-.946.946v6.649a1.845 1.845 0 0 1-.549 1.286l-3.516 3.528a1.844 1.844 0 0 1-3.11-.944l-.858-4.275-4.52-4.52-2.31-.463-1.964-.394A1.847 1.847 0 0 1 .98 10.693a1.843 1.843 0 0 1 .46-1.838Zm5.379 2.017-3.873-.776L6.32 6.733h4.638l-4.14 4.14Zm8.403-5.655c2.459-2.46 4.856-2.463 5.89-2.33.134 1.035.13 3.432-2.329 5.891l-6.71 6.71-3.561-3.56 6.71-6.711Zm-1.318 15.837-.776-3.873 4.14-4.14v4.639l-3.364 3.374Z" clip-rule="evenodd"/><path d="M9.318 18.345a.972.972 0 0 0-1.86-.561c-.482 1.435-1.687 2.204-2.934 2.619a8.22 8.22 0 0 1-1.23.302c.062-.365.157-.79.303-1.229.415-1.247 1.184-2.452 2.62-2.935a.971.971 0 1 0-.62-1.842c-.12.04-.236.084-.35.13-2.02.828-3.012 2.588-3.493 4.033a10.383 10.383 0 0 0-.51 2.845l-.001.016v.063c0 .536.434.972.97.972H2.24a7.21 7.21 0 0 0 .878-.065c.527-.063 1.248-.19 2.02-.447 1.445-.48 3.205-1.472 4.033-3.494a5.828 5.828 0 0 0 .147-.407Z"/></svg> </div> <div class="astro-2fh6iaza"> Systems Performance  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Courses" title="Courses" href="/courses/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.17 2.06A13.1 13.1 0 0 0 19 1.87a12.94 12.94 0 0 0-7 2.05 12.94 12.94 0 0 0-7-2 13.1 13.1 0 0 0-2.17.19 1 1 0 0 0-.83 1v12a1 1 0 0 0 1.17 1 10.9 10.9 0 0 1 8.25 1.91l.12.07h.11a.91.91 0 0 0 .7 0h.11l.12-.07A10.899 10.899 0 0 1 20.83 16 1 1 0 0 0 22 15V3a1 1 0 0 0-.83-.94ZM11 15.35a12.87 12.87 0 0 0-6-1.48H4v-10c.333-.02.667-.02 1 0a10.86 10.86 0 0 1 6 1.8v9.68Zm9-1.44h-1a12.87 12.87 0 0 0-6 1.48V5.67a10.86 10.86 0 0 1 6-1.8c.333-.02.667-.02 1 0v10.04Zm1.17 4.15a13.098 13.098 0 0 0-2.17-.19 12.94 12.94 0 0 0-7 2.05 12.94 12.94 0 0 0-7-2.05c-.727.003-1.453.066-2.17.19A1 1 0 0 0 2 19.21a1 1 0 0 0 1.17.79 10.9 10.9 0 0 1 8.25 1.91 1 1 0 0 0 1.16 0A10.9 10.9 0 0 1 20.83 20a1 1 0 0 0 1.17-.79 1 1 0 0 0-.83-1.15Z"/></svg> </div> <div class="astro-2fh6iaza"> Courses  </div> </a> </li> </ul>  <doc-sidebar-controls hidden="true" class="astro-v3kklmrl"> <div class="tree-controls astro-v3kklmrl" role="group" aria-label="문서 목록 펼침 설정"> <button type="button" data-action="expand" aria-controls="document-tree" aria-label="모든 문서 분류 펼치기" class="astro-v3kklmrl">펼치기</button> <span aria-hidden="true" class="astro-v3kklmrl">/</span> <button type="button" data-action="collapse" aria-controls="document-tree" aria-label="모든 문서 분류 접기" class="astro-v3kklmrl">접기</button> </div> </doc-sidebar-controls> <script type="module">class d extends HTMLElement{connectedCallback(){const n=document.getElementById("document-tree");if(!n||this.dataset.initialized)return;this.dataset.initialized="true",this.hidden=!1;const e=Array.from(n.querySelectorAll("details")),r=this.querySelector('[data-action="expand"]'),i=this.querySelector('[data-action="collapse"]');for(const t of e)t.open=!1;let o=n.querySelector('[aria-current="page"]')?.closest("details");for(;o&&n.contains(o);)o.open=!0,o=o.parentElement?.closest("details")??null;const a=()=>{r?.setAttribute("aria-disabled",String(e.every(t=>t.open))),i?.setAttribute("aria-disabled",String(e.every(t=>!t.open)))};this.addEventListener("click",t=>{const s=t.target instanceof Element?t.target.closest("button[data-action]"):null;if(!s||s.getAttribute("aria-disabled")==="true")return;const l=s.dataset.action==="expand";for(const c of e)c.open=l;a()});for(const t of e)t.addEventListener("toggle",a);a()}}customElements.get("doc-sidebar-controls")||customElements.define("doc-sidebar-controls",d);</script> <div id="document-tree"> <sl-sidebar-state-persist data-hash="15y10hp" class="astro-kku4brbg"> <script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script>  <ul class="top-level astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/inference/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">Inference 목록</span>  </a> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">추론 시스템 강좌 · 6</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="0"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">강좌 안내</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/week01/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 1 — Understanding Performance Metrics</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/week02/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 2 — Hardware Foundations for Inference</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/week03/" aria-current="page" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 3 — Transformer Inference and the KV Cache</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/week04/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 4 — Quantization</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/week04/results/results/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 4 Lab Results</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/week05/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 5 — Speculative Decoding</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">FlashAttention · 2</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="1"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/inference/flashattention-from-first-principles/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">FlashAttention from First Principles · English</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/flashattention-from-first-principles/readme.ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">원리로 이해하는 FlashAttention · 한국어</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <a href="/inference/sglang-production-practices/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">SGLang in 2026: Engineering a Production-Grade LLM Serving Stack</span>  </a> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">기초 참고자료 · 2</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="2"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">참고자료 모아보기</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/llm-inference/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">LLM Inference</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/transformer/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Transformer</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">하드웨어 아키텍처 · 5</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="3"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/hardware-architectures/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">하드웨어 읽기 안내</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/hardware-architectures/domain-specific-architectures-for-ai-inference.ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Domain-Specific Architectures for AI Inference</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/hardware-architectures/gpus.ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">How to Think About GPUs</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/hardware-architectures/npus.ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">How to Think About NPUs</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/hardware-architectures/roofline.ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">All About Rooflines</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/hardware-architectures/tpus.ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">How to Think About TPUs</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">모델 아키텍처 · 2</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="4"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/inference/models/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">모델 문서 모아보기</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/models/kimi-k2-5-scaling/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">How We Scaled Kimi K2.5: 토큰 효율, 장문 컨텍스트, 에이전트 스웜</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/models/kimi-k3/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Kimi K3 기술 해부: 2.8T MoE, KDA, Attention Residuals, 그리고 64-GPU 서빙</span>  </a> </li> </ul> </details> </li> </ul>  <script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script> </sl-sidebar-state-persist> <div class="md:sl-hidden"> <div class="mobile-preferences sl-flex astro-wu23bvmt"> <div class="social-icons astro-wu23bvmt"> <a href="https://github.com/ziwon/ai-data-center-systems" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">GitHub</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script>   </div> </div> </div>  </div> </div> </nav> <div class="main-frame astro-4toy2ex6">  <script type="module">const a=document.getElementById("starlight__sidebar"),n=a?.querySelector("sl-sidebar-state-persist"),o="sl-sidebar-state",i=()=>{let t=[];const e=n?.dataset.hash||"";try{const s=sessionStorage.getItem(o),r=JSON.parse(s||"{}");Array.isArray(r.open)&&r.hash===e&&(t=r.open)}catch{}return{hash:e,open:t,scroll:a?.scrollTop||0}},c=t=>{try{sessionStorage.setItem(o,JSON.stringify(t))}catch{}},d=()=>c(i()),l=(t,e)=>{const s=i();s.open[e]=t,c(s)};n?.addEventListener("click",t=>{if(!(t.target instanceof Element))return;const e=t.target.closest("summary")?.closest("details");if(!e)return;const s=e.querySelector("sl-sidebar-restore"),r=parseInt(s?.dataset.index||"");isNaN(r)||l(!e.open,r)});addEventListener("visibilitychange",()=>{document.visibilityState==="hidden"&&d()});addEventListener("pageHide",d);</script> <div class="lg:sl-flex astro-67yu43on"> <aside class="right-sidebar-container print:hidden astro-67yu43on"> <div class="right-sidebar astro-67yu43on"> <div class="lg:sl-hidden astro-rl4sue7z"><mobile-starlight-toc data-min-h="2" data-max-h="2" class="astro-doynk5tl"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-doynk5tl"><details id="starlight__mobile-toc" class="astro-doynk5tl"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-doynk5tl"><span class="toggle sl-flex astro-doynk5tl">On this page<svg aria-hidden="true" class="caret astro-doynk5tl astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-doynk5tl"></span></summary><div class="dropdown astro-doynk5tl"><ul class="isMobile astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#31-learning-goals" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">3.1 Learning Goals</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#32-prerequisite-check" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">3.2 Prerequisite Check</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#33-core-concept-quantitative-kv-cache-accounting" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">3.3 Core Concept: Quantitative KV Cache Accounting</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#34-evolution-of-attention-variants" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">3.4 Evolution of Attention Variants</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#35-long-context-attention-matrix-and-rope" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">3.5 Long Context: Attention Matrix and RoPE</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#36-reading" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">3.6 Reading</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#37-results-and-artifacts" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">3.7 Results and Artifacts</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#38-self-assessment-questions" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">3.8 Self-Assessment Questions</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#39-vssvrs-reflection" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">3.9 VSS/VRS Reflection</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#310-deliverables" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">3.10 Deliverables</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#311-week-6-connection-how-do-we-operate-the-kv-cache" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">3.11 Week 6 Connection: How Do We Operate the KV Cache?</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#312-week-4-preview" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">3.12 Week 4 Preview</span> </a>  </li> </ul></div></details></nav></mobile-starlight-toc><script type="module" src="/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.hwBsy0Mo.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-rl4sue7z"><div class="sl-container astro-rl4sue7z"><kb-graph-card> <button class="kb-graph-card" type="button" data-open aria-haspopup="dialog"> <span class="kb-graph-copy"> <span class="kb-graph-title">Knowledge graph</span> <span class="kb-graph-subtitle" data-count>Loading related docs</span> </span> <span class="kb-graph-thumb" aria-hidden="true" data-map></span> <span class="kb-graph-expand" aria-hidden="true">Expand</span> </button> <dialog class="kb-graph-dialog" aria-label="Knowledge graph" data-dialog> <div class="kb-graph-panel"> <div class="kb-graph-panel-header"> <div> <p>Knowledge graph</p> <h2 data-heading>Related documents</h2> </div> <div class="kb-graph-tabs" role="tablist" aria-label="Knowledge graph views"> <button type="button" role="tab" aria-selected="true" data-tab="page">This page</button> <button type="button" role="tab" aria-selected="false" data-tab="global">Full graph</button> </div> <button type="button" data-close aria-label="Close knowledge graph">×</button> </div> <div class="kb-graph-stage" data-stage data-view="page"> <div data-page-stage></div> <div data-global-stage hidden></div> </div> </div> </dialog> </kb-graph-card> <script type="module" src="/_astro/KnowledgeGraphCard.astro_astro_type_script_index_0_lang.C475L69c.js"></script><starlight-toc data-min-h="2" data-max-h="2"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">On this page</h2><ul class="astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#31-learning-goals" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">3.1 Learning Goals</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#32-prerequisite-check" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">3.2 Prerequisite Check</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#33-core-concept-quantitative-kv-cache-accounting" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">3.3 Core Concept: Quantitative KV Cache Accounting</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#34-evolution-of-attention-variants" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">3.4 Evolution of Attention Variants</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#35-long-context-attention-matrix-and-rope" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">3.5 Long Context: Attention Matrix and RoPE</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#36-reading" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">3.6 Reading</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#37-results-and-artifacts" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">3.7 Results and Artifacts</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#38-self-assessment-questions" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">3.8 Self-Assessment Questions</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#39-vssvrs-reflection" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">3.9 VSS/VRS Reflection</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#310-deliverables" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">3.10 Deliverables</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#311-week-6-connection-how-do-we-operate-the-kv-cache" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">3.11 Week 6 Connection: How Do We Operate the KV Cache?</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#312-week-4-preview" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">3.12 Week 4 Preview</span> </a>  </li> </ul></nav></starlight-toc><script type="module" src="/_astro/TableOfContents.astro_astro_type_script_index_0_lang.FuRcXuRY.js"></script></div></div> </div> </aside> <div class="main-pane astro-67yu43on">  <main data-pagefind-body class="astro-bguv2lll" lang="en" dir="ltr">    <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <h1 id="_top" class="astro-j6tvhyss">Week 3 — Transformer Inference and the KV Cache</h1> </div> </div> <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <starlight-image-zoom> <template class="astro-vjux6bgf"> <dialog class="starlight-image-zoom-dialog astro-vjux6bgf"> <button aria-label="Unzoom image" class="starlight-image-zoom-control astro-vjux6bgf"> <svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" class="astro-vjux6bgf"> <use href="#starlight-image-zoom-icon-unzoom" class="astro-vjux6bgf"></use> </svg> </button> <figure class="astro-vjux6bgf"></figure> </dialog> </template> <svg xmlns="http://www.w3.org/2000/svg" style="display:none" class="astro-vjux6bgf"> <symbol id="starlight-image-zoom-icon-zoom" viewBox="0 0 24 24" class="astro-vjux6bgf"> <path d="M9.79 12.79 4 18.59V17a1 1 0 0 0-2 0v4a1 1 0 0 0 .08.38 1 1 0 0 0 .54.54A1 1 0 0 0 3 22h4a1 1 0 0 0 0-2H5.41l5.8-5.79a1 1 0 0 0-1.42-1.42ZM21.92 2.62a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-4a1 1 0 0 0 0 2h1.59l-5.8 5.79a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V7a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z" class="astro-vjux6bgf"></path> </symbol> <symbol id="starlight-image-zoom-icon-unzoom" viewBox="0 0 24 24" class="astro-vjux6bgf"> <path d="M21.71 2.29a1 1 0 0 0-1.42 0l-5.79 5.8V6.5a1 1 0 0 0-2 0v4a1 1 0 0 0 .08.38 1 1 0 0 0 .54.54 1 1 0 0 0 .38.08h4a1 1 0 0 0 0-2h-1.59l5.8-5.79a1 1 0 0 0 0-1.42ZM10.88 12.58a1 1 0 0 0-.38-.08h-4a1 1 0 0 0 0 2h1.59l-5.8 5.79a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l5.79-5.8v1.59a1 1 0 0 0 2 0v-4a1 1 0 0 0-.08-.38 1 1 0 0 0-.54-.54Z" class="astro-vjux6bgf"></path> </symbol> </svg> </starlight-image-zoom>   <script type="module" src="/_astro/ImageZoom.astro_astro_type_script_index_0_lang.CZmBqK-T.js"></script> <div class="sl-markdown-content"> <div class="sl-heading-wrapper level-h2"><h2 id="31-learning-goals">3.1 Learning Goals</h2><a class="sl-anchor-link" href="#31-learning-goals"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3.1 Learning Goals”</span></a></div>
+<p>By the end of this week, you should be able to:</p>
+<ol>
+<li>Memorize the KV cache memory formula and estimate memory for an arbitrary model, sequence length, and batch size in under 5 seconds.</li>
+<li>Explain the evolution from MHA to MQA to GQA to MLA from a <strong>memory-bound inference</strong> perspective, not just as “memory savings.”</li>
+<li>Compute the point where <strong>KV cache memory becomes larger than model weight memory</strong> in 70B serving.</li>
+<li>Explain how RoPE works and what breaks when context is extended with NTK-aware scaling or YaRN.</li>
+<li>Estimate how many VSS/VRS camera streams an <strong>AGX Orin 64GB</strong> can process concurrently using KV cache accounting.</li>
+</ol>
+<div class="sl-heading-wrapper level-h2"><h2 id="32-prerequisite-check">3.2 Prerequisite Check</h2><a class="sl-anchor-link" href="#32-prerequisite-check"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3.2 Prerequisite Check”</span></a></div>
+<p>You should already know:</p>
+<ul>
+<li>What Q/K/V projections are in a Transformer, at least conceptually.</li>
+<li>Why prompt length had little effect on TPOT in the Week 1 data: KV grows, but weight loading dominated this setup.</li>
+<li>Why the Week 2 NCU measurement showed <strong>L2 hit rate dropping from 77% at batch=1 to 37% at batch=32</strong>: the KV working set spilled out of L2 and into device memory.</li>
+</ul>
+<p>If the Transformer attention flow is not fresh, review the <a href="/inference/efficient-llm-inference-systems/appendix/transformer/">Transformer appendix</a> first. For the full input-to-output generation path, see the <a href="/inference/efficient-llm-inference-systems/appendix/llm-inference/">LLM inference appendix</a>.</p>
+<p>This week combines those observations. <strong>KV cache size scales with both batch size and sequence length, which makes it a hard constraint in multi-tenant serving.</strong></p>
+<p>However, as Week 2 showed, the attention kernel was not the latency bottleneck for the Qwen2.5-3B + RTX 5080 experiment. Read this week’s KV optimization primarily as <strong>capacity and concurrency optimization</strong>, not as a direct latency optimization for that specific workload.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="33-core-concept-quantitative-kv-cache-accounting">3.3 Core Concept: Quantitative KV Cache Accounting</h2><a class="sl-anchor-link" href="#33-core-concept-quantitative-kv-cache-accounting"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3.3 Core Concept: Quantitative KV Cache Accounting”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="331-formula">3.3.1 Formula</h3><a class="sl-anchor-link" href="#331-formula"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3.3.1 Formula”</span></a></div>
+<div class="expressive-code"><link rel="stylesheet" href="/_astro/ec.v4551.css"><script type="module" src="/_astro/ec.0vx5m.js"></script><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="plaintext"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">KV Cache memory (per sequence) = 2 × L × n_kv_heads × d_head × seq_len × bytes</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">                                 </span></span><span style="--0:#d6deeb;--1:#403f53">│   │       │            │         │       │</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">                                 </span></span><span style="--0:#d6deeb;--1:#403f53">K+V layers  groups   head dim   tokens   precision</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="KV Cache memory (per sequence) = 2 × L × n_kv_heads × d_head × seq_len × bytes                                 │   │       │            │         │       │                                 K+V layers  groups   head dim   tokens   precision"><div></div></button></div></figure></div>
+<p><strong>Five key variables</strong>:</p>
+<ul>
+<li><code dir="auto">L</code>: number of layers (Qwen2.5-3B = 36, Llama-3-70B = 80)</li>
+<li><code dir="auto">n_kv_heads</code>: number of KV heads (same as query heads for MHA, smaller for GQA)</li>
+<li><code dir="auto">d_head</code>: head dimension, usually 128</li>
+<li><code dir="auto">seq_len</code>: accumulated prefill + decode length</li>
+<li><code dir="auto">bytes</code>: precision (BF16=2, FP8/INT8=1, INT4=0.5)</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="332-kv-cache-lifecycle">3.3.2 KV cache lifecycle</h3><a class="sl-anchor-link" href="#332-kv-cache-lifecycle"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3.3.2 KV cache lifecycle”</span></a></div>
+<p>The KV cache is not a static buffer created once. It is per-request state that grows as decoding progresses.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="plaintext"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">prefill:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">process N prompt tokens in parallel</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> store K,V for every layer</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> KV length = N</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">decode step 1:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">compute the query for one new token</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">read all K,V for the existing N tokens</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">append the new token's K,V</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> KV length = N + 1</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">decode step t:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">read all K,V for the existing N+t-1 tokens</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">append the new token's K,V</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> KV length = N + t</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="prefill:  process N prompt tokens in parallel  -> store K,V for every layer  -> KV length = Ndecode step 1:  compute the query for one new token  read all K,V for the existing N tokens  append the new token&#x27;s K,V  -> KV length = N + 1decode step t:  read all K,V for the existing N+t-1 tokens  append the new token&#x27;s K,V  -> KV length = N + t"><div></div></button></div></figure></div>
+<p>So the KV cache has two costs at the same time:</p>
+<ol>
+<li><strong>Capacity cost</strong>: it occupies GPU memory proportional to <code dir="auto">batch × current_seq_len</code>.</li>
+<li><strong>Read traffic cost</strong>: each decode step reads the accumulated KV cache in the attention kernel.</li>
+</ol>
+<p>In the Week 2 Qwen2.5-3B + RTX 5080 experiment, attention was not the latency bottleneck. But from a serving perspective, the capacity cost alone strongly constrains batch size and concurrent requests.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    P["Prompt tokens&#x3C;br/>x1 ... xN"] --> A["Prefill&#x3C;br/>compute K,V for all prompt tokens"]
+    A --> C0[("KV cache&#x3C;br/>K,V for x1 ... xN&#x3C;br/>per layer")]
+
+    T["New token xt"] --> B["Decode step&#x3C;br/>Q is computed from xt"]
+    C0 --> R["Read cached K,V&#x3C;br/>x1 ... xN"]
+    B --> ATT["Attention&#x3C;br/>Q(xt) attends to cached K,V"]
+    R --> ATT
+    ATT --> OUT["Next token prediction"]
+    B --> APP["Append new K,V&#x3C;br/>for xt"]
+    C0 --> APP
+    APP --> C1[("KV cache grows&#x3C;br/>x1 ... xN, xt")]</pre>
+<p>The cache stores past <code dir="auto">K,V</code>, not past <code dir="auto">Q</code>. In a new decode step, only the current token’s <code dir="auto">Q</code> is needed. That query attends to the cached past <code dir="auto">K,V</code>.</p>
+<p style="text-align: center; background-color: #FFFFFF;">
+    <starlight-image-zoom-zoomable><img src="https://upload.wikimedia.org/wikipedia/commons/7/72/Decoder_self-attention_with_causal_masking%2C_detailed_diagram.png" alt="Decoder self-attention with causal masking" style="width:100%; max-width:600px;"><button aria-label="Zoom image: Decoder self-attention with causal masking" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable>
+</p>
+<p>In the diagram, each token’s hidden state is projected into <code dir="auto">Q</code>, <code dir="auto">K</code>, and <code dir="auto">V</code>. During autoregressive decode, only the new token’s <code dir="auto">Q</code> must be computed at each step. Past tokens’ <code dir="auto">K,V</code> do not change because of causal masking, so they can be stored per layer as the KV cache.<br>
+Source: dvgodoy, <a href="https://commons.wikimedia.org/wiki/File:Decoder_self-attention_with_causal_masking,_detailed_diagram.png">Decoder self-attention with causal masking, detailed diagram</a>, Wikimedia Commons, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Used without modification.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="333-per-token-kv-size-by-model">3.3.3 Per-Token KV Size by Model</h3><a class="sl-anchor-link" href="#333-per-token-kv-size-by-model"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3.3.3 Per-Token KV Size by Model”</span></a></div>
+<p>The numbers below use binary units: KiB, MiB, GiB.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Model</th><th>L</th><th>n_kv_heads</th><th>d_head</th><th>KV/token (BF16)</th></tr></thead><tbody><tr><td>Qwen2.5-3B</td><td>36</td><td>2 (GQA)</td><td>128</td><td><strong>36 KiB</strong></td></tr><tr><td>Qwen2.5-7B</td><td>28</td><td>4 (GQA)</td><td>128</td><td><strong>56 KiB</strong></td></tr><tr><td>Llama-3-8B</td><td>32</td><td>8 (GQA)</td><td>128</td><td><strong>128 KiB</strong></td></tr><tr><td>Llama-3-70B</td><td>80</td><td>8 (GQA)</td><td>128</td><td><strong>320 KiB</strong></td></tr><tr><td>Llama-2-70B</td><td>80</td><td>64 (MHA)</td><td>128</td><td><strong>2,560 KiB (2.5 MiB)</strong></td></tr><tr><td>DeepSeek-V2-236B</td><td>60</td><td>latent c=512</td><td>—</td><td>~70 KiB (MLA)</td></tr></tbody></table>
+<p>The move from MHA to GQA reduces KV cache size by 8x for Llama-70B-class models. Llama-2-70B uses MHA, while Llama-3-70B uses GQA with far fewer KV heads.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="334-re-reading-the-week-1-data">3.3.4 Re-Reading the Week 1 Data</h3><a class="sl-anchor-link" href="#334-re-reading-the-week-1-data"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3.3.4 Re-Reading the Week 1 Data”</span></a></div>
+<p>The Week 1 batch sweep ran up to <code dir="auto">batch=128</code> with prompt length 256 and decode length 512, so the final sequence length was roughly 768 tokens.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="plaintext"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Qwen2.5-3B, BF16, RTX 5080 16GB</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">- Weights: about 6 GiB</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">- Runtime overhead: CUDA context, PyTorch reserved memory, temporary tensors</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">- KV/token: 36 KiB</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">batch=128, seq_len=768:</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">KV = 36 KiB × 128 batch × 768 tokens = 3.375 GiB</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">-> large, but not enough by itself to explain OOM on a 16GB GPU</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">batch=256, seq_len=768:</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">KV = 36 KiB × 256 × 768 tokens = 6.75 GiB</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">-> potentially possible by KV alone, but risky once temporary buffers and reserved memory are included</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">batch=128, seq_len=2048:</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">KV = 36 KiB × 128 × 2048 = 9.0 GiB</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">-> very tight on a 16GB GPU even before other allocations</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Qwen2.5-3B, BF16, RTX 5080 16GB- Weights: about 6 GiB- Runtime overhead: CUDA context, PyTorch reserved memory, temporary tensors- KV/token: 36 KiBbatch=128, seq_len=768:KV = 36 KiB × 128 batch × 768 tokens = 3.375 GiB-> large, but not enough by itself to explain OOM on a 16GB GPUbatch=256, seq_len=768:KV = 36 KiB × 256 × 768 tokens = 6.75 GiB-> potentially possible by KV alone, but risky once temporary buffers and reserved memory are includedbatch=128, seq_len=2048:KV = 36 KiB × 128 × 2048 = 9.0 GiB-> very tight on a 16GB GPU even before other allocations"><div></div></button></div></figure></div>
+<p>Important pitfall: the Week 1 experiment used <code dir="auto">logits_to_keep=1</code>, so it did not allocate full prompt logits. If prefill returns logits for every prompt position:</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="plaintext"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">batch 128 × prompt 256 × vocab 151,936 × 2 bytes = 9.27 GiB</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="batch 128 × prompt 256 × vocab 151,936 × 2 bytes = 9.27 GiB"><div></div></button></div></figure></div>
+<p>In that case, OOM can happen because of the logits tensor before the KV cache becomes the true limiting allocation. Therefore, the Week 1 knee around batch 64-128 should be interpreted as a <strong>practical saturation region</strong>, not a pure KV capacity boundary.</p>
+<p>The core rule still holds: <strong>the OOM boundary is governed by batch × sequence length, not batch size alone</strong>. To measure the boundary cleanly, you need to control logits and temporary allocations.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="335-70b-model-weight-vs-kv-cross-over">3.3.5 70B Model: Weight vs. KV Cross-Over</h3><a class="sl-anchor-link" href="#335-70b-model-weight-vs-kv-cross-over"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3.3.5 70B Model: Weight vs. KV Cross-Over”</span></a></div>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="plaintext"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Llama-3-70B BF16 (GQA):</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">- Weights: about 140 GB, fixed</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">- KV/token: 320 KiB</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">batch=1, seq_len=4K: KV = 1.25 GiB (about 1% of weights)</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">batch=32, seq_len=4K: KV = 40 GiB (about 30% of weights)</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">batch=128, seq_len=8K: KV = 320 GiB, more than 2x the weight size</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">batch=256, seq_len=32K: KV = 2.5 TiB, completely impractical</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Llama-3-70B BF16 (GQA):- Weights: about 140 GB, fixed- KV/token: 320 KiBbatch=1, seq_len=4K: KV = 1.25 GiB (about 1% of weights)batch=32, seq_len=4K: KV = 40 GiB (about 30% of weights)batch=128, seq_len=8K: KV = 320 GiB, more than 2x the weight sizebatch=256, seq_len=32K: KV = 2.5 TiB, completely impractical"><div></div></button></div></figure></div>
+<p>The cross-over occurs around <code dir="auto">batch × seq_len ~= 4.3e5-4.6e5</code> token positions. Decimal GB vs. binary GiB changes the exact number slightly, but the mental model is enough: at batch 128, sequence lengths around 3.3K-3.6K make KV memory larger than BF16 weight memory.</p>
+<p>This matters because <strong>KV cache memory constrains batch size when serving 70B models</strong>. Weights are fixed and often sharded across 8 H100s, but KV grows with concurrent users. This is why PagedAttention in Week 6 is decisive for production serving.</p>
+<p>If this were Llama-2-70B with MHA, all KV numbers above would be 8x larger. At <code dir="auto">batch=16, seq_len=4K</code>, KV would already be larger than weights. GQA increases the practical serving batch by roughly 8x.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="34-evolution-of-attention-variants">3.4 Evolution of Attention Variants</h2><a class="sl-anchor-link" href="#34-evolution-of-attention-variants"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3.4 Evolution of Attention Variants”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="341-four-attention-variants">3.4.1 Four Attention Variants</h3><a class="sl-anchor-link" href="#341-four-attention-variants"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3.4.1 Four Attention Variants”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Variant</th><th>KV cache ratio</th><th>Quality</th><th>Representative models</th></tr></thead><tbody><tr><td>MHA (Multi-Head)</td><td>1x baseline</td><td>highest</td><td>GPT-3, Llama-2, BERT</td></tr><tr><td>MQA (Multi-Query)</td><td>1/H</td><td>slight drop</td><td>PaLM, Falcon-7B</td></tr><tr><td>GQA (Grouped-Query)</td><td>1/G, often G=4-8</td><td>close to MHA</td><td>Llama-3, Mistral, Qwen</td></tr><tr><td>MLA (Multi-head Latent)</td><td>~1/8 effective</td><td>MHA-level or better</td><td>DeepSeek-V2/V3</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h3"><h3 id="342-mqa-the-first-aggressive-attempt">3.4.2 MQA: The First Aggressive Attempt</h3><a class="sl-anchor-link" href="#342-mqa-the-first-aggressive-attempt"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3.4.2 MQA: The First Aggressive Attempt”</span></a></div>
+<p>MQA makes <strong>all query heads share a single K,V pair</strong>. This reduces KV cache size by <code dir="auto">H</code>, but it can reduce representation diversity and cause quality loss. For that reason, it is less common in recent production-grade models.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="343-gqa-the-practical-sweet-spot">3.4.3 GQA: The Practical Sweet Spot</h3><a class="sl-anchor-link" href="#343-gqa-the-practical-sweet-spot"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3.4.3 GQA: The Practical Sweet Spot”</span></a></div>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="plaintext"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">H=64 query heads, G=8 KV groups</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">-> 64 query heads are split into 8 groups</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">-> each group of 8 query heads shares K,V</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">-> KV cache is reduced by 8x</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">-> quality remains close to MHA</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="H=64 query heads, G=8 KV groups-> 64 query heads are split into 8 groups-> each group of 8 query heads shares K,V-> KV cache is reduced by 8x-> quality remains close to MHA"><div></div></button></div></figure></div>
+<p><strong>Llama-3, Mistral, Qwen, and Gemma all use GQA.</strong> It is now the default architecture choice for modern decoder-only LLMs.</p>
+<p>GQA works because similar query heads often attend to similar K,V information. Even when several query heads share the same K,V, the queries differ, so their attention patterns can still differ.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="344-mla-the-deepseek-v2-trick">3.4.4 MLA: The DeepSeek-V2 Trick</h3><a class="sl-anchor-link" href="#344-mla-the-deepseek-v2-trick"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3.4.4 MLA: The DeepSeek-V2 Trick”</span></a></div>
+<p>MLA stores K,V in a <strong>low-dimensional latent space</strong> and reconstructs them when needed:</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="plaintext"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">store:   c = X · W_DKV  (shape: seq_len × c_kv, usually c_kv around 512)</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">compute: K = c · W_UK, V = c · W_UV  (expanded only when needed)</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="store:   c = X · W_DKV  (shape: seq_len × c_kv, usually c_kv around 512)compute: K = c · W_UK, V = c · W_UV  (expanded only when needed)"><div></div></button></div></figure></div>
+<p>The cache stores only <code dir="auto">seq_len × c_kv</code>. Quality can remain at or above MHA because <code dir="auto">W_UK</code> and <code dir="auto">W_UV</code> are learned projections, so the model learns how to reconstruct useful K,V representations.</p>
+<p>For DeepSeek-V2 (236B MoE):</p>
+<ul>
+<li>If it used MHA: <code dir="auto">KV/token = 2 × 60 × 128 × 128 × 2 = 3.9 MB</code></li>
+<li>With MLA: <code dir="auto">KV/token ~= 70 KiB</code></li>
+<li>Roughly <strong>56x compression</strong> with no meaningful quality loss reported</li>
+</ul>
+<p>This is one reason DeepSeek-V2 can serve much longer contexts and larger batches on the same hardware.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="345-decision-frame">3.4.5 Decision Frame</h3><a class="sl-anchor-link" href="#345-decision-frame"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3.4.5 Decision Frame”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Situation</th><th>Choice</th></tr></thead><tbody><tr><td>Training a new model from scratch</td><td>GQA with around 8 groups, the validated standard</td></tr><tr><td>Fine-tuning an existing MHA model</td><td>Keep MHA; changing attention structure is expensive</td></tr><tr><td>Using DeepSeek-style models</td><td>Use MLA</td></tr><tr><td>Edge or extreme memory constraint</td><td>MLA or KV cache quantization</td></tr></tbody></table>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="35-long-context-attention-matrix-and-rope">3.5 Long Context: Attention Matrix and RoPE</h2><a class="sl-anchor-link" href="#35-long-context-attention-matrix-and-rope"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3.5 Long Context: Attention Matrix and RoPE”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="351-two-different-memory-problems">3.5.1 Two Different Memory Problems</h3><a class="sl-anchor-link" href="#351-two-different-memory-problems"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3.5.1 Two Different Memory Problems”</span></a></div>
+<p>Long context creates two different memory problems. Keep them separate.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Problem</th><th>Where it matters</th><th>Complexity</th><th>Typical solutions</th></tr></thead><tbody><tr><td>Attention score matrix</td><td>prefill / full attention</td><td><code dir="auto">O(seq_len^2)</code></td><td>FlashAttention, sparse attention, ring attention</td></tr><tr><td>KV cache</td><td>serving / decode state</td><td><code dir="auto">O(batch × seq_len)</code></td><td>GQA/MQA/MLA, PagedAttention, KV quantization</td></tr></tbody></table>
+<p>For example, materializing a standard BF16 attention matrix at 128K context requires:</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="plaintext"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">128,000 × 128,000 × 2 bytes ~= 32 GiB</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="128,000 × 128,000 × 2 bytes ~= 32 GiB"><div></div></button></div></figure></div>
+<p>That is only the prefill attention score matrix for a single request. FlashAttention solves this by computing softmax tile by tile without materializing the <code dir="auto">n × n</code> matrix in HBM.</p>
+<p>The KV cache is a different <code dir="auto">O(n)</code> memory problem: it stores K,V state for each token at each layer. FlashAttention does not remove the KV cache. Long-context serving needs both <strong>attention kernel optimization</strong> and <strong>KV cache accounting and management</strong>.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="352-rope-basics">3.5.2 RoPE Basics</h3><a class="sl-anchor-link" href="#352-rope-basics"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3.5.2 RoPE Basics”</span></a></div>
+<p>Older positional encodings, such as sinusoidal or learned embeddings, are added to the input embeddings. RoPE is different:</p>
+<p><strong>It rotates Q and K</strong> by a position-dependent angle.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="plaintext"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">token at position m: q_m = q · R(m·theta)</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">token at position n: k_n = k · R(n·theta)</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">dot product q_m · k_n depends on (m-n)</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">-> relative position information appears naturally</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="token at position m: q_m = q · R(m·theta)token at position n: k_n = k · R(n·theta)dot product q_m · k_n depends on (m-n)-> relative position information appears naturally"><div></div></button></div></figure></div>
+<p>Why this matters:</p>
+<ul>
+<li><strong>Relative position is built in</strong>, which gives some context length generalization.</li>
+<li><strong>K in the KV cache already has position applied</strong>, simplifying decode attention.</li>
+<li><strong>No extra parameters</strong> are needed, which is why RoPE is used by most LLMs.</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="353-context-extension-pitfalls">3.5.3 Context Extension Pitfalls</h3><a class="sl-anchor-link" href="#353-context-extension-pitfalls"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3.5.3 Context Extension Pitfalls”</span></a></div>
+<p>What happens if a model trained on 4K context is run at 32K context? The model sees rotation angles outside the training distribution. That creates unfamiliar <code dir="auto">q·k</code> patterns and can cause a large quality drop.</p>
+<p>Two common fixes:</p>
+<p><strong>NTK-aware scaling</strong>: reduce the rotation frequencies so positions spread across a longer sequence.</p>
+<p><strong>YaRN</strong>: NTK-style scaling plus additional calibration, often working well with limited fine-tuning.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="354-practical-guide">3.5.4 Practical Guide</h3><a class="sl-anchor-link" href="#354-practical-guide"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3.5.4 Practical Guide”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Original context</th><th>Target context</th><th>Recommended method</th></tr></thead><tbody><tr><td>4K</td><td>8K-16K</td><td>NTK-aware scaling, often no fine-tuning</td></tr><tr><td>4K</td><td>32K-128K</td><td>YaRN plus short fine-tuning</td></tr><tr><td>32K</td><td>128K+</td><td>dataset retraining or long-context LoRA</td></tr><tr><td>128K</td><td>1M+</td><td>Ring Attention plus specialized training</td></tr></tbody></table>
+<p>The main trap: increasing context length increases KV cache linearly. Going from 4K to 128K makes KV 32x larger. If you extend context without solving the memory problem, you end up with batch=1 single-user serving.</p>
+<p>Long-context work must be paired with KV optimization.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="36-reading">3.6 Reading</h2><a class="sl-anchor-link" href="#36-reading"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3.6 Reading”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="required">Required</h3><a class="sl-anchor-link" href="#required"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Required”</span></a></div>
+<ul>
+<li>Original book, Chapter 3</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="recommended-papers">Recommended Papers</h3><a class="sl-anchor-link" href="#recommended-papers"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Recommended Papers”</span></a></div>
+<ol>
+<li><strong>Shazeer 2019, <a href="https://arxiv.org/abs/1911.02150">“Fast Transformer Decoding: One Write-Head is All You Need”</a></strong> — the original MQA paper; short and direct.</li>
+<li><strong>Ainslie et al. 2023, <a href="https://arxiv.org/abs/2305.13245">“GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints”</a></strong> — the core GQA paper, including how to convert MHA checkpoints to GQA.</li>
+<li><strong><a href="https://arxiv.org/abs/2405.04434">DeepSeek-V2 paper</a> (DeepSeek-AI 2024)</strong> — read the MLA section; the architecture diagram is the key.</li>
+<li><strong>Su et al. 2021, <a href="https://arxiv.org/abs/2104.09864">“RoFormer: Enhanced Transformer with Rotary Position Embedding”</a></strong> — the original RoPE paper.</li>
+<li><strong>Peng et al. 2023, <a href="https://arxiv.org/abs/2309.00071">“YaRN: Efficient Context Window Extension of Large Language Models”</a></strong> — a practical guide to context extension.</li>
+</ol>
+<p>The GQA paper is the highest-value reading for this week. It is short and directly relevant to serving practice.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="37-results-and-artifacts">3.7 Results and Artifacts</h2><a class="sl-anchor-link" href="#37-results-and-artifacts"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3.7 Results and Artifacts”</span></a></div>
+<p>The implementation is complete and lives in the week 3 Python scripts. The README focuses on the results and the interpretation rather than embedding the lab code.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Artifact</th><th>Purpose</th></tr></thead><tbody><tr><td><code dir="auto">week03/kv_cache_size.py</code></td><td>Computes KV cache size from model configuration and validates against actual cache tensors where practical</td></tr><tr><td><code dir="auto">week03/gqa_vs_mha.py</code></td><td>Compares MHA and GQA KV cache growth using config-based accounting</td></tr><tr><td><code dir="auto">week03/oom_boundary.py</code></td><td>Measures the OOM boundary across the batch x sequence-length plane</td></tr><tr><td><code dir="auto">week03/results/kv_cache_sizes.csv</code></td><td>KV/token results for Qwen2.5 models</td></tr><tr><td><code dir="auto">week03/results/gqa_vs_mha.csv</code></td><td>GQA vs. MHA comparison table</td></tr><tr><td><code dir="auto">week03/results/oom_boundary.csv</code></td><td>Batch x sequence-length OOM boundary data</td></tr><tr><td><code dir="auto">week03/results/oom_boundary.svg</code></td><td>OOM boundary plot</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h3"><h3 id="result-1-kv-per-token">Result 1: KV Per Token</h3><a class="sl-anchor-link" href="#result-1-kv-per-token"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Result 1: KV Per Token”</span></a></div>
+<p>The measured/config-derived KV sizes match the hand calculation. For Qwen2.5, GQA keeps the per-token KV footprint small enough that capacity is not the immediate bottleneck at short contexts.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Model</th><th align="right">Layers</th><th align="right">Q heads</th><th align="right">KV heads</th><th align="right">GQA ratio</th><th align="right">Head dim</th><th align="right">BF16 KV/token</th><th align="right">INT8 KV/token</th><th align="right">INT4 KV/token</th></tr></thead><tbody><tr><td>Qwen/Qwen2.5-3B-Instruct</td><td align="right">36</td><td align="right">16</td><td align="right">2</td><td align="right">8.0</td><td align="right">128</td><td align="right">36 KiB</td><td align="right">18 KiB</td><td align="right">9 KiB</td></tr><tr><td>Qwen/Qwen2.5-7B-Instruct</td><td align="right">28</td><td align="right">28</td><td align="right">4</td><td align="right">7.0</td><td align="right">128</td><td align="right">56 KiB</td><td align="right">28 KiB</td><td align="right">14 KiB</td></tr></tbody></table>
+<p>The important observation is that KV cache scales with <code dir="auto">batch x sequence length</code>. A small per-token value can still become large under high concurrency or long-context serving.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="result-2-gqa-vs-mha">Result 2: GQA vs. MHA</h3><a class="sl-anchor-link" href="#result-2-gqa-vs-mha"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Result 2: GQA vs. MHA”</span></a></div>
+<p>This comparison uses config-based accounting. It does not require loading large model weights.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Model</th><th align="right">KV/token</th><th align="right">8K context</th><th align="right">128K context</th></tr></thead><tbody><tr><td>Llama-2-7B (MHA)</td><td align="right">512 KiB</td><td align="right">4,096 MiB</td><td align="right">65,536 MiB</td></tr><tr><td>Llama-3-8B (GQA-4)</td><td align="right">128 KiB</td><td align="right">1,024 MiB</td><td align="right">16,384 MiB</td></tr><tr><td>Llama-2-70B (MHA)</td><td align="right">2,560 KiB</td><td align="right">20,480 MiB</td><td align="right">327,680 MiB</td></tr><tr><td>Llama-3-70B (GQA-8)</td><td align="right">320 KiB</td><td align="right">2,560 MiB</td><td align="right">40,960 MiB</td></tr></tbody></table>
+<p>For a single 128K-context user, Llama-2-70B would need about 320 GiB of KV cache. With GQA, the same 70B-class KV cache shrinks to about 40 GiB. The 70B BF16 weights still require about 140 GB, so full serving still needs tensor parallelism or weight quantization. The point is that GQA changes the KV feasibility envelope.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="result-3-oom-boundary">Result 3: OOM Boundary</h3><a class="sl-anchor-link" href="#result-3-oom-boundary"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Result 3: OOM Boundary”</span></a></div>
+<p>The OOM boundary follows the expected <code dir="auto">batch x sequence length</code> shape. Cases with the same token-position product have the same theoretical KV size.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th align="right">Batch</th><th align="right">Seq Len</th><th align="right">Token Positions</th><th>Mode</th><th>Status</th><th align="right">Peak MiB</th><th align="right">KV MiB</th><th align="right">Theoretical KV MiB</th></tr></thead><tbody><tr><td align="right">128</td><td align="right">768</td><td align="right">98,304</td><td>allocate</td><td>OK</td><td align="right">3,456</td><td align="right">3,456</td><td align="right">3,456</td></tr><tr><td align="right">256</td><td align="right">768</td><td align="right">196,608</td><td>allocate</td><td>OK</td><td align="right">6,912</td><td align="right">6,912</td><td align="right">6,912</td></tr><tr><td align="right">128</td><td align="right">1,536</td><td align="right">196,608</td><td>allocate</td><td>OK</td><td align="right">6,912</td><td align="right">6,912</td><td align="right">6,912</td></tr><tr><td align="right">128</td><td align="right">2,048</td><td align="right">262,144</td><td>allocate</td><td>OK</td><td align="right">9,216</td><td align="right">9,216</td><td align="right">9,216</td></tr><tr><td align="right">64</td><td align="right">4,096</td><td align="right">262,144</td><td>allocate</td><td>OK</td><td align="right">9,216</td><td align="right">9,216</td><td align="right">9,216</td></tr><tr><td align="right">384</td><td align="right">1,024</td><td align="right">393,216</td><td>allocate</td><td>OOM</td><td align="right">0</td><td align="right">0</td><td align="right">13,824</td></tr><tr><td align="right">256</td><td align="right">2,048</td><td align="right">524,288</td><td>allocate</td><td>OOM</td><td align="right">0</td><td align="right">0</td><td align="right">18,432</td></tr></tbody></table>
+<p><starlight-image-zoom-zoomable><img src="/inference/efficient-llm-inference-systems/week03/results/oom_boundary.svg" alt="OOM boundary"><button aria-label="Zoom image: OOM boundary" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<p>The clean allocation experiment isolates KV memory capacity. Full model prefill can OOM earlier because attention buffers, logits, temporary allocations, and framework reservations are also present. To isolate the KV boundary, non-KV allocations must be controlled with settings such as <code dir="auto">logits_to_keep=1</code>.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="result-4-jetson-orin-empirical-report">Result 4: Jetson Orin Empirical Report</h3><a class="sl-anchor-link" href="#result-4-jetson-orin-empirical-report"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Result 4: Jetson Orin Empirical Report”</span></a></div>
+<p>This report connects the KV-cache accounting in this chapter to the AGX Orin 64GB edge target. It combines two related but different measurements:</p>
+<ol>
+<li>A <strong>2B VLM VRS smoke</strong> using <code dir="auto">Qwen/Qwen3-VL-2B-Instruct</code>, YOLOE-S, and an RTSP falldown stream. This validates the application slow path.</li>
+<li>A <strong>7B text-model feasibility and concurrency smoke</strong> using <code dir="auto">Qwen/Qwen2.5-7B-Instruct</code> BF16. This isolates the transformer inference and KV/concurrency behavior more directly.</li>
+</ol>
+<p>Do not compare the two rows as a pure model-size benchmark. The 2B run includes video frames, VLM processing, detector/candidate plumbing, and alert-verification prompts. The 7B run is a text-only proxy for transformer serving capacity.</p>
+<p><starlight-image-zoom-zoomable><img src="/inference/efficient-llm-inference-systems/week03/results/orin_empirical_latency.svg" alt="Jetson Orin empirical latency"><button aria-label="Zoom image: Jetson Orin empirical latency" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<div class="sl-heading-wrapper level-h4"><h4 id="environment">Environment</h4><a class="sl-anchor-link" href="#environment"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Environment”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Field</th><th>Value</th></tr></thead><tbody><tr><td>Host</td><td>Jetson AGX Orin 64GB</td></tr><tr><td>Jetson Linux</td><td>L4T R36.4.3</td></tr><tr><td>CUDA</td><td>12.6</td></tr><tr><td>Python</td><td>3.10.12</td></tr><tr><td>torch</td><td>2.7.0 CUDA</td></tr><tr><td>transformers</td><td>5.8.0</td></tr><tr><td>PyTorch visible memory</td><td>about 61.4 GiB</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h4"><h4 id="2b-vlm-vrs-smoke">2B VLM VRS Smoke</h4><a class="sl-anchor-link" href="#2b-vlm-vrs-smoke"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “2B VLM VRS Smoke”</span></a></div>
+<p>The VRS smoke used YOLOE-S as a detector and Qwen3-VL-2B as a local BF16 verifier. The optimized verifier profile used 2 keyframes, 448 px max frame width, and 128 max generated tokens.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Measurement</th><th align="right">Value</th></tr></thead><tbody><tr><td>Detector</td><td align="right">YOLOE-S segmentation, FP16</td></tr><tr><td>Verifier</td><td align="right"><code dir="auto">Qwen/Qwen3-VL-2B-Instruct</code>, BF16</td></tr><tr><td>RTSP frames processed in initial run</td><td align="right">30</td></tr><tr><td>Detector latency, median</td><td align="right">132.4 ms/frame</td></tr><tr><td>Best stable loaded-model verifier latency</td><td align="right">6.30s at 448 px, 2 keyframes, 128 tokens</td></tr><tr><td>End-to-end optimized verifier call</td><td align="right">8.07s</td></tr><tr><td>Final memory used</td><td align="right">12.12 GiB</td></tr><tr><td>4-bit bitsandbytes attempt</td><td align="right">failed on Jetson aarch64 CUDA symbol lookup</td></tr></tbody></table>
+<p>Interpretation: the 2B VLM path fits comfortably in memory, but it is too slow for per-frame use. It should be treated as a slow-path verifier behind detector persistence, cooldown, and candidate gating. This is consistent with the chapter’s theme: memory capacity alone does not determine practical concurrency.</p>
+<div class="sl-heading-wrapper level-h4"><h4 id="7b-bf16-text-feasibility">7B BF16 Text Feasibility</h4><a class="sl-anchor-link" href="#7b-bf16-text-feasibility"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “7B BF16 Text Feasibility”</span></a></div>
+<p>The 7B experiment loaded <code dir="auto">Qwen/Qwen2.5-7B-Instruct</code> in BF16 on CUDA and measured short prefill/decode runs.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Measurement</th><th align="right">Value</th></tr></thead><tbody><tr><td>Model load time</td><td align="right">12.41s</td></tr><tr><td>CUDA allocated after load</td><td align="right">14.19 GiB</td></tr><tr><td>Driver-used memory after load</td><td align="right">19.72 GiB</td></tr><tr><td>Single smoke prompt</td><td align="right">27 tokens</td></tr><tr><td>Single smoke decode</td><td align="right">32 tokens in 2.88s</td></tr><tr><td>Single-request decode throughput</td><td align="right">11.1 tok/s</td></tr><tr><td>Driver-used memory after single smoke</td><td align="right">20.2 GiB</td></tr></tbody></table>
+<p>The first useful result is simple: 7B BF16 is feasible on this Orin. Weight memory, not KV memory, dominates at batch 1 and short context.</p>
+<div class="sl-heading-wrapper level-h4"><h4 id="7b-concurrency-probe">7B Concurrency Probe</h4><a class="sl-anchor-link" href="#7b-concurrency-probe"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “7B Concurrency Probe”</span></a></div>
+<p>For a VSS/VRS-style proxy, the next sweep used about 1K prompt tokens and 16 generated tokens per request. That is closer to a camera-captioning or VLM-verifier request shape than a tiny chat prompt.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th align="right">Batch</th><th align="right">Prompt tokens/request</th><th align="right">Decode tokens/request</th><th>Status</th><th align="right">Prefill time</th><th align="right">Decode time</th><th align="right">Aggregate decode throughput</th><th align="right">KV after decode</th><th align="right">Driver-used memory</th></tr></thead><tbody><tr><td align="right">1</td><td align="right">1020</td><td align="right">16</td><td>OK</td><td align="right">1.21s</td><td align="right">1.51s</td><td align="right">10.6 tok/s</td><td align="right">56.7 MiB</td><td align="right">19.8 GiB</td></tr><tr><td align="right">2</td><td align="right">1020</td><td align="right">16</td><td>OK</td><td align="right">1.70s</td><td align="right">1.54s</td><td align="right">20.8 tok/s</td><td align="right">113.3 MiB</td><td align="right">19.8 GiB</td></tr><tr><td align="right">4</td><td align="right">1020</td><td align="right">16</td><td>OK</td><td align="right">3.32s</td><td align="right">1.60s</td><td align="right">39.9 tok/s</td><td align="right">226.6 MiB</td><td align="right">19.8 GiB</td></tr><tr><td align="right">8</td><td align="right">1020</td><td align="right">16</td><td>OK</td><td align="right">6.64s</td><td align="right">1.73s</td><td align="right">74.1 tok/s</td><td align="right">453.3 MiB</td><td align="right">19.8 GiB</td></tr><tr><td align="right">16</td><td align="right">1020</td><td align="right">16</td><td>OK</td><td align="right">13.38s</td><td align="right">1.99s</td><td align="right">128.4 tok/s</td><td align="right">906.5 MiB</td><td align="right">20.9 GiB</td></tr></tbody></table>
+<p>The measured KV size matches the formula: <code dir="auto">56 KiB/token x 16 x about 1036 tokens ~= 906 MiB</code>. This validates the KV accounting. It also shows why the memory-only estimate is misleading: batch 16 uses less than 1 GiB of KV, but prefill already takes 13.38s.</p>
+<div class="sl-heading-wrapper level-h4"><h4 id="kv-only-capacity-boundary">KV-Only Capacity Boundary</h4><a class="sl-anchor-link" href="#kv-only-capacity-boundary"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “KV-Only Capacity Boundary”</span></a></div>
+<p>A synthetic KV allocation sweep for Qwen2.5-7B BF16 reached:</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="plaintext"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">batch=1024, seq_len=1024</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">KV = 57,344 MiB</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">status = OK</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="batch=1024, seq_len=1024KV = 57,344 MiBstatus = OK"><div></div></button></div></figure></div>
+<p>That is a capacity ceiling, not a serving recommendation. It excludes model weights, attention temporaries, logits, scheduler overhead, vision encoders, and latency SLOs. The practical concurrency limit appears much earlier because prefill and decode time determine whether camera events can be served on schedule.</p>
+<div class="sl-heading-wrapper level-h4"><h4 id="jetson-runtime-note">Jetson Runtime Note</h4><a class="sl-anchor-link" href="#jetson-runtime-note"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Jetson Runtime Note”</span></a></div>
+<p>Do not set <code dir="auto">PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True</code> for this 7B load path. On this Orin run it caused <code dir="auto">CUDA driver error: out of memory</code> from PyTorch’s expandable segment allocator even when <code dir="auto">torch.cuda.mem_get_info()</code> still reported enough free memory. The default allocator loaded Qwen2.5-7B BF16 on CUDA successfully.</p>
+<div class="sl-heading-wrapper level-h4"><h4 id="conclusion">Conclusion</h4><a class="sl-anchor-link" href="#conclusion"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Conclusion”</span></a></div>
+<p>The Orin 64GB result supports the chapter’s claim:</p>
+<ul>
+<li><strong>KV capacity is large enough</strong> for modest 7B GQA concurrency at 1K context.</li>
+<li><strong>Latency is the binding constraint</strong> for real VSS/VRS use. Even when memory is comfortable, prefill and decode time make high camera counts impractical.</li>
+<li><strong>2B VLM and 7B text tests answer different questions</strong>. The 2B VLM smoke validates the VRS verifier path; the 7B text smoke validates transformer serving capacity. A production plan should keep those tracks separate and use the 7B results as a capacity proxy, not as an alert-quality result.</li>
+</ul>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="38-self-assessment-questions">3.8 Self-Assessment Questions</h2><a class="sl-anchor-link" href="#38-self-assessment-questions"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3.8 Self-Assessment Questions”</span></a></div>
+<p>Answer Q3.1-Q3.5 from the original Chapter 3 in your own words, then answer these:</p>
+<ol>
+<li>
+<p><strong>VSS/VRS scenario</strong>: Load a 7B GQA model in BF16 on an AGX Orin 64GB. Assume each camera caption request uses prompt length ~800 tokens including image tokens, plus ~200 decode tokens, for total sequence length ~1000. What is the upper bound on concurrently processed cameras? Subtract 14GB for weights and 4GB for framework overhead.</p>
+</li>
+<li>
+<p><strong>MLA trade-off</strong>: DeepSeek-V2 compresses KV by roughly 56x. Why doesn’t every model use MLA? What are the downsides or constraints?</p>
+</li>
+<li>
+<p><strong>Interaction with quantization</strong>: INT8 KV cache halves KV memory. Why is it often discussed less than weight quantization such as W4? Hint: look at the Week 2 NCU attention-vs-FFN time ratio.</p>
+</li>
+<li>
+<p><strong>OOM recovery strategy</strong>: In production serving, when KV memory is short, compare three options: request rejection, preempting an existing request, and swapping KV to CPU. Which is worst for SLOs? Which is best?</p>
+</li>
+<li>
+<p><strong>Asymmetric context cost</strong>: Compare prompt 32K + decode 1K vs. prompt 1K + decode 32K. Both have total length 33K. Which is more expensive, and why?</p>
+</li>
+</ol>
+<div class="sl-heading-wrapper level-h3"><h3 id="expected-answer-sketch">Expected Answer Sketch</h3><a class="sl-anchor-link" href="#expected-answer-sketch"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Expected Answer Sketch”</span></a></div>
+<ol>
+<li>
+<p><code dir="auto">56 KiB/token × 1000 tokens ~= 55 MiB/camera</code>. If <code dir="auto">64GB - 14GB - 4GB - OS reserve</code> leaves roughly 42GB for KV, the memory-only upper bound is about 760 cameras. The practical bound is much lower because of bandwidth and batching limits.</p>
+</li>
+<li>
+<p>MLA changes the model architecture, so it cannot be easily bolted onto existing MHA/GQA checkpoints. It also complicates implementation: RoPE handling, latent projections, and kernel optimization all need to fit together. It is attractive for new models trained from scratch, but GQA is the more conservative ecosystem choice.</p>
+</li>
+<li>
+<p>KV INT8 is mainly a <strong>capacity and concurrency</strong> optimization. It halves the KV cache, so the server can hold longer contexts or more concurrent requests before OOM. It also reduces the bytes read by the attention kernel during decode.</p>
+<p>However, in the Week 2 measurement, attention was not the main latency cost. The hot path was the FFN linear layers, which repeatedly read model weights during every decode step. W4 weight quantization attacks that hot path directly by reducing weight traffic, so it is often discussed first when the goal is lower decode latency. KV quantization becomes more important when the workload is long-context, high-concurrency, or KV-capacity-limited.</p>
+</li>
+<li>
+<p>CPU swap can create severe tail-latency spikes and is often the most dangerous SLO option. Preempting an existing request disrupts an active user. Rejecting a new request is explicit admission control. Real systems mix rejection, preemption, and swap by priority and SLO, but unbounded swap is a bad default.</p>
+</li>
+<li>
+<p>The two cases have different cost shapes. <code dir="auto">prompt 32K + decode 1K</code> has one large prefill burst plus 1K decode steps. <code dir="auto">prompt 1K + decode 32K</code> keeps reading and appending KV for a long decode-heavy period. Long decode is usually harder for scheduler occupancy and user-visible latency, while long prefill mainly increases TTFT and compute burst.</p>
+</li>
+</ol>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="39-vssvrs-reflection">3.9 VSS/VRS Reflection</h2><a class="sl-anchor-link" href="#39-vssvrs-reflection"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3.9 VSS/VRS Reflection”</span></a></div>
+<p>This week quantifies the key constraint in the multi-camera scenario.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="scenario-multi-camera-captioning-on-agx-orin-64gb">Scenario: Multi-Camera Captioning on AGX Orin 64GB</h3><a class="sl-anchor-link" href="#scenario-multi-camera-captioning-on-agx-orin-64gb"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Scenario: Multi-Camera Captioning on AGX Orin 64GB”</span></a></div>
+<p>Assumptions:</p>
+<ul>
+<li>Model: Qwen2.5-VL-7B, BF16 accounting, GQA</li>
+<li>Hardware: AGX Orin 64GB, roughly 200 GB/s bandwidth</li>
+<li>Per-camera inference: image encoding -> caption generation</li>
+<li>Use case: 1 fps captioning, one new frame per second</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="kv-accounting">KV Accounting</h3><a class="sl-anchor-link" href="#kv-accounting"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “KV Accounting”</span></a></div>
+<p>Assume Qwen2.5-VL-7B has the same transformer shape as Qwen2.5-7B for this estimate: 28 layers, 4 KV heads, head dim 128.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="plaintext"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Per-token KV: 56 KiB (BF16, 7B GQA-4 assumption)</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Prompt including image tokens: ~800 tokens</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Decode: ~200 tokens</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Total sequence: ~1000 tokens</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">KV per camera: 56 KiB × 1000 = 54.7 MiB</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Per-token KV: 56 KiB (BF16, 7B GQA-4 assumption)Prompt including image tokens: ~800 tokensDecode: ~200 tokensTotal sequence: ~1000 tokensKV per camera: 56 KiB × 1000 = 54.7 MiB"><div></div></button></div></figure></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="memory-budget-on-agx-orin-64gb">Memory Budget on AGX Orin 64GB</h3><a class="sl-anchor-link" href="#memory-budget-on-agx-orin-64gb"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Memory Budget on AGX Orin 64GB”</span></a></div>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="plaintext"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Total: 64 GB</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">- OS/baseline: 4 GB</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">- Model weights (7B BF16): 14 GB</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">- Framework overhead: 4 GB</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">- Available KV: about 42 GB</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">about 42 GB / about 55 MB per camera ~= 760 cameras theoretical</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Total: 64 GB- OS/baseline: 4 GB- Model weights (7B BF16): 14 GB- Framework overhead: 4 GB- Available KV: about 42 GBabout 42 GB / about 55 MB per camera ~= 760 cameras theoretical"><div></div></button></div></figure></div>
+<p><strong>760 cameras?</strong> That is obviously too high in practice. Why?</p>
+<ol>
+<li>
+<p><strong>Bandwidth constraint</strong>: AGX Orin has about 200 GB/s bandwidth. Reading 14GB of BF16 weights each decode step gives a theoretical 70 ms per token. A 200-token decode takes about 14 seconds. To hit 1 fps, all camera captions must complete within one second, so BF16 7B is bandwidth-limited before it is capacity-limited.</p>
+</li>
+<li>
+<p><strong>Batching efficiency</strong>: You cannot process 760 cameras as one batch. AGX Orin GEMM efficiency likely has a sweet spot around batch 64-128. Even with batch 128, 760 cameras require about 6 batches, which makes the latency completely incompatible with 1 fps.</p>
+</li>
+<li>
+<p><strong>Practical limit</strong>: Production would use INT4 weights rather than BF16 to reduce weight bandwidth. Even then, vision encoder cost, prefill cost, batching overhead, and SLO margin make <strong>8-16 concurrent cameras</strong> a more realistic starting point for AGX Orin 64GB.</p>
+</li>
+</ol>
+<div class="sl-heading-wrapper level-h3"><h3 id="tier-decision-frame">Tier Decision Frame</h3><a class="sl-anchor-link" href="#tier-decision-frame"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Tier Decision Frame”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Camera count</th><th>Tier</th><th>Model</th></tr></thead><tbody><tr><td>1-16</td><td>AGX Orin</td><td>7B GQA INT4</td></tr><tr><td>16-64</td><td>RTX 4090 / L4</td><td>7B BF16 or 13B INT4</td></tr><tr><td>64-256</td><td>single H100</td><td>13B-30B BF16</td></tr><tr><td>256+</td><td>H100 cluster</td><td>70B+</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h3"><h3 id="deliverable">Deliverable</h3><a class="sl-anchor-link" href="#deliverable"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Deliverable”</span></a></div>
+<p>Write a one-page note covering:</p>
+<ol>
+<li>The <strong>theoretical upper bound</strong> on concurrent cameras from KV memory on AGX Orin 64GB.</li>
+<li>The <strong>practical upper bound</strong> from bandwidth and batching efficiency.</li>
+<li>What the gap between the two numbers means.</li>
+<li>Which tier to escalate to as camera count increases.</li>
+</ol>
+<p>This feeds directly into the capstone design in Week 10.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="310-deliverables">3.10 Deliverables</h2><a class="sl-anchor-link" href="#310-deliverables"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3.10 Deliverables”</span></a></div>
+<p>By the end of the week, keep these in your notes:</p>
+<ol>
+<li><strong>Model KV accounting table</strong> — Result 1 plus additional models such as Llama, Mistral, DeepSeek.</li>
+<li><strong>OOM boundary plot</strong> — batch x sequence length chart from Result 3.</li>
+<li><strong>GQA vs. MHA comparison</strong> — Result 2 plus commentary.</li>
+<li><strong>VSS/VRS multi-camera accounting</strong> — the one-page analysis from Section 3.9.</li>
+</ol>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="311-week-6-connection-how-do-we-operate-the-kv-cache">3.11 Week 6 Connection: How Do We Operate the KV Cache?</h2><a class="sl-anchor-link" href="#311-week-6-connection-how-do-we-operate-the-kv-cache"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3.11 Week 6 Connection: How Do We Operate the KV Cache?”</span></a></div>
+<p>This week is about calculating KV cache size. Week 6 moves to production KV cache management.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Technique</th><th>Problem it solves</th></tr></thead><tbody><tr><td>PagedAttention</td><td>allocate KV in blocks/pages instead of contiguous max-length buffers per request</td></tr><tr><td>Prefix caching</td><td>reuse KV for common system prompts, documents, or few-shot prefixes</td></tr><tr><td>KV cache quantization</td><td>reduce KV memory and attention read traffic with INT8/FP8/INT4</td></tr><tr><td>StreamingLLM</td><td>keep sink tokens plus a recent window for bounded-memory streaming</td></tr></tbody></table>
+<p>This week’s <code dir="auto">batch × seq_len</code> accounting is the input to Week 6’s block allocator, eviction, and prefix reuse policies.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="312-week-4-preview">3.12 Week 4 Preview</h2><a class="sl-anchor-link" href="#312-week-4-preview"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3.12 Week 4 Preview”</span></a></div>
+<p>Quantization. Weight INT4 reduces memory bandwidth by 4x, which directly targets the FFN GEMV bottleneck observed in NCU. We will cover practical selection among GPTQ, AWQ, and SmoothQuant, the interaction with KV cache quantization, and the trade-off between quantization and security requirements such as TPM and fingerprint binding in model training and serving.</p> </div> <footer class="sl-flex astro-3yyafb3n"> <div class="meta sl-flex astro-3yyafb3n"> <a href="https://github.com/ziwon/ai-data-center-systems/edit/main/inference/efficient-llm-inference-systems/week03/README.md" class="sl-flex print:hidden astro-eez2twj6"><svg aria-hidden="true" class="astro-eez2twj6 astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.2em;"><path d="M22 7.24a1 1 0 0 0-.29-.71l-4.24-4.24a1 1 0 0 0-1.1-.22 1 1 0 0 0-.32.22l-2.83 2.83L2.29 16.05a1 1 0 0 0-.29.71V21a1 1 0 0 0 1 1h4.24a1 1 0 0 0 .76-.29l10.87-10.93L21.71 8c.1-.1.17-.2.22-.33a1 1 0 0 0 0-.24v-.14l.07-.05ZM6.83 20H4v-2.83l9.93-9.93 2.83 2.83L6.83 20ZM18.17 8.66l-2.83-2.83 1.42-1.41 2.82 2.82-1.41 1.42Z"/></svg>Edit page</a> <p>Last updated: <time datetime="2026-08-30T05:34:22.000Z">Aug 30, 2026</time></p> </div> <div class="pagination-links print:hidden astro-u2l5gyhi" dir="ltr"> <a href="/inference/efficient-llm-inference-systems/week02/" rel="prev" class="astro-u2l5gyhi"> <svg aria-hidden="true" class="astro-u2l5gyhi astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17 11H9.41l3.3-3.29a1.004 1.004 0 1 0-1.42-1.42l-5 5a1 1 0 0 0-.21.33 1 1 0 0 0 0 .76 1 1 0 0 0 .21.33l5 5a1.002 1.002 0 0 0 1.639-.325 1 1 0 0 0-.219-1.095L9.41 13H17a1 1 0 0 0 0-2Z"/></svg> <span class="astro-u2l5gyhi"> Previous <br class="astro-u2l5gyhi"> <span class="link-title astro-u2l5gyhi">Week 2 — Hardware Foundations for Inference</span> </span> </a> <a href="/inference/efficient-llm-inference-systems/week04/" rel="next" class="astro-u2l5gyhi"> <svg aria-hidden="true" class="astro-u2l5gyhi astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17.92 11.62a1.001 1.001 0 0 0-.21-.33l-5-5a1.003 1.003 0 1 0-1.42 1.42l3.3 3.29H7a1 1 0 0 0 0 2h7.59l-3.3 3.29a1.002 1.002 0 0 0 .325 1.639 1 1 0 0 0 1.095-.219l5-5a1 1 0 0 0 .21-.33 1 1 0 0 0 0-.76Z"/></svg> <span class="astro-u2l5gyhi"> Next <br class="astro-u2l5gyhi"> <span class="link-title astro-u2l5gyhi">Week 4 — Quantization</span> </span> </a> </div>  </footer> </div> </div>  </main> </div> </div> </div> <ask-docs-widget> <button class="ask-fab" type="button" data-open aria-label="Ask this docs"> <span class="ask-fab-icon" aria-hidden="true">?</span>
+Ask this docs
+</button> <div class="ask-panel" data-panel hidden> <div class="ask-resize-handle" data-resize aria-hidden="true"></div> <div class="ask-panel-inner"> <header class="ask-header"> <div> <p class="ask-eyebrow">AI Data Center Systems</p> <h2 class="ask-title">Ask this docs</h2> </div> <div class="ask-header-controls"> <button class="ask-mode-btn" data-mode-btn="right" title="오른쪽 패널" aria-label="오른쪽 패널"> <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="6" height="16" rx="1.5" opacity="0.35"></rect><rect x="8" y="0" width="8" height="16" rx="1.5"></rect></svg> </button> <button class="ask-mode-btn" data-mode-btn="bottom" title="하단 패널" aria-label="하단 패널"> <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="16" height="6" rx="1.5" opacity="0.35"></rect><rect x="0" y="8" width="16" height="8" rx="1.5"></rect></svg> </button> <button class="ask-mode-btn" data-mode-btn="expand" title="전체 확장" aria-label="전체 확장"> <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 5.5V1h4.5M10.5 1H15v4.5M15 10.5V15h-4.5M5.5 15H1v-4.5"></path></svg> </button> <button class="ask-close-btn" type="button" aria-label="닫기" data-close> <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13"></path></svg> </button> </div> </header> <div class="ask-body"> <label class="ask-field"> <span class="ask-field-row"> <span>Question</span> <span class="ask-char" data-char>0 / 800</span> </span> <textarea name="question" rows="3" maxlength="800" placeholder="이 문서에서 핵심 운영 체크포인트는 무엇인가요?" data-question></textarea> <span class="ask-hint">시간당 최대 20회 · 질문당 최대 800자</span> </label> <div class="ask-actions"> <button class="ask-submit" type="button" data-submit> <svg class="ask-spinner" viewBox="0 0 24 24" fill="none" aria-hidden="true" hidden> <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2.5" stroke-dasharray="56" stroke-dashoffset="14" stroke-linecap="round"></circle> </svg> <span data-submit-label>Ask</span> </button> <p class="ask-status" data-status></p> </div> <section class="ask-answer" data-answer hidden></section> <section class="ask-sources" data-sources hidden> <h3>Sources</h3> <ul class="ask-source-chips" data-source-list></ul> </section> </div> </div> </div> <div class="ask-backdrop" data-backdrop hidden></div> </ask-docs-widget> <script type="module" src="/_astro/AskDocs.astro_astro_type_script_index_0_lang.BbnAb04M.js"></script> </div> <script type="module">const r=document.documentElement,c=document.querySelector("#starlight__sidebar"),s=document.querySelector(".navigation-mode-toggle"),a=document.querySelector(".navigation-drawer-toggle"),u=window.matchMedia("(min-width: 50rem)");function d(){return r.dataset.navigationMode==="compact"}function o(){return r.dataset.navigationDrawer==="open"}function l(){const e=d(),t=e&&o();s?.setAttribute("aria-pressed",String(e)),s?.setAttribute("title",e?"Use normal navigation":"Use compact navigation"),a?.setAttribute("aria-expanded",String(t)),a?.setAttribute("title",t?"Close navigation":"Open navigation");const n=a?.querySelector(".navigation-drawer-label");n&&(n.textContent=t?"Close navigation":"Open navigation")}function i(e,t=!1){const n=!!(e&&d()&&u.matches);r.dataset.navigationDrawer=n?"open":"closed",l(),n?requestAnimationFrame(()=>{const g=c?.querySelector('a[aria-current="page"]'),m=c?.querySelector(".starlight-sidebar-topics-current");(g??m)?.focus()}):t&&a?.focus()}function p(e){r.dataset.navigationMode=e,i(!1);try{localStorage.setItem("adcs-navigation-mode",e)}catch{}l()}s?.addEventListener("click",()=>{p(d()?"normal":"compact")});a?.addEventListener("click",()=>{i(!o(),o())});document.addEventListener("keydown",e=>{e.key==="Escape"&&o()&&i(!1,!0)});document.addEventListener("pointerdown",e=>{!o()||!(e.target instanceof Node)||c?.contains(e.target)||i(!1)});u.addEventListener("change",()=>i(!1));r.dataset.navigationDrawer="closed";l();</script> </body></html>

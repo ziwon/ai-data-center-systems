@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1360" height="390" viewBox="0 0 1360 390" role="img" aria-labelledby="title desc">
+  <title id="title">SGLang production adoption ladder</title>
+  <desc id="desc">Four measurable stages progress from a correct single-worker baseline through locality, acceleration, and topology specialization, with each earlier stage retained as a rollback target.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#111111"/>
+    </marker>
+    <marker id="arrow-accent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#D9392E"/>
+    </marker>
+  </defs>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .section { fill: #6F6A63; font: 600 13px Inter, Arial, sans-serif; letter-spacing: 1.6px; }
+    .stage { fill: #F5F1EA; stroke: #111111; stroke-width: 1.7; rx: 8; }
+    .stage-final { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2.4; rx: 8; }
+    .stage-id { fill: #6F6A63; font: 600 12px Inter, Arial, sans-serif; letter-spacing: 1.2px; }
+    .stage-title { fill: #050505; font: 600 19px Inter, Arial, sans-serif; }
+    .detail { fill: #6F6A63; font: 14px Inter, Arial, sans-serif; }
+    .arrow { fill: none; stroke: #111111; stroke-width: 1.8; marker-end: url(#arrow); }
+    .rollback { fill: none; stroke: #D9392E; stroke-width: 1.8; stroke-dasharray: 7 6; marker-end: url(#arrow-accent); }
+    .gate { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+    .gate-text { fill: #D9392E; font: 700 12px Inter, Arial, sans-serif; text-anchor: middle; dominant-baseline: middle; }
+    .arrow-note { fill: #6F6A63; font: 12px Inter, Arial, sans-serif; text-anchor: middle; }
+    .rollback-note { fill: #D9392E; font: 600 13px Inter, Arial, sans-serif; text-anchor: middle; }
+  </style>
+
+  <rect class="bg" width="1360" height="390"/>
+  <text class="section" x="40" y="42">MEASURED PROGRESSION</text>
+
+  <rect class="stage" x="40" y="76" width="274" height="198"/>
+  <text class="stage-id" x="62" y="105">STAGE 0</text>
+  <text class="stage-title" x="62" y="140">Correct baseline</text>
+  <text class="detail" x="62" y="174">Single worker or smallest TP</text>
+  <text class="detail" x="62" y="202">Correctness and SLO metrics</text>
+  <text class="detail" x="62" y="230">Pinned model and runtime</text>
+
+  <rect class="stage" x="374" y="76" width="274" height="198"/>
+  <text class="stage-id" x="396" y="105">STAGE 1</text>
+  <text class="stage-title" x="396" y="140">Locality and scale</text>
+  <text class="detail" x="396" y="174">Canonical reusable prefixes</text>
+  <text class="detail" x="396" y="202">Cache-aware gateway routing</text>
+  <text class="detail" x="396" y="230">Session-aware reuse</text>
+
+  <rect class="stage" x="708" y="76" width="274" height="198"/>
+  <text class="stage-id" x="730" y="105">STAGE 2</text>
+  <text class="stage-title" x="730" y="140">Measured acceleration</text>
+  <text class="detail" x="730" y="174">Batch, graphs, chunked prefill</text>
+  <text class="detail" x="730" y="202">Speculation with acceptance</text>
+  <text class="detail" x="730" y="230">HiCache where reuse survives</text>
+
+  <rect class="stage-final" x="1042" y="76" width="274" height="198"/>
+  <text class="stage-id" x="1064" y="105">STAGE 3</text>
+  <text class="stage-title" x="1064" y="140">Topology specialization</text>
+  <text class="detail" x="1064" y="174">DPA / EP / DCP by model</text>
+  <text class="detail" x="1064" y="202">PD by phase interference</text>
+  <text class="detail" x="1064" y="230">Fabric-aware communication</text>
+
+  <path class="arrow" d="M314 175 H374"/>
+  <circle class="gate" cx="344" cy="175" r="14"/>
+  <text class="gate-text" x="344" y="175">1</text>
+  <text class="arrow-note" x="344" y="153">verify</text>
+
+  <path class="arrow" d="M648 175 H708"/>
+  <circle class="gate" cx="678" cy="175" r="14"/>
+  <text class="gate-text" x="678" y="175">2</text>
+  <text class="arrow-note" x="678" y="153">measure</text>
+
+  <path class="arrow" d="M982 175 H1042"/>
+  <circle class="gate" cx="1012" cy="175" r="14"/>
+  <text class="gate-text" x="1012" y="175">3</text>
+  <text class="arrow-note" x="1012" y="153">justify</text>
+
+  <path class="rollback" d="M1179 274 V330 H177 V274"/>
+  <text class="rollback-note" x="678" y="354">Retain every previous stage as a benchmarkable rollback topology</text>
+</svg>

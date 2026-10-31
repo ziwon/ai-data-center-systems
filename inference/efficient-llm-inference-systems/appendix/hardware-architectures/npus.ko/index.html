@@ -1,0 +1,1513 @@
+<!DOCTYPE html><html lang="en" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-bguv2lll"> <head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>How to Think About NPUs | AI Data Center Systems</title><link rel="canonical" href="https://adcs.restack.tech/inference/efficient-llm-inference-systems/appendix/hardware-architectures/npus.ko/"/><link rel="sitemap" href="/sitemap-index.xml"/><script async src="https://www.googletagmanager.com/gtag/js?id=G-76LFZJVBTE"></script><script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-76LFZJVBTE');
+      </script><script async crossorigin="anonymous" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8128231647578658"></script><link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v6.4.8"/><meta name="generator" content="Starlight v0.40.0"/><meta property="og:title" content="How to Think About NPUs"/><meta property="og:url" content="https://adcs.restack.tech/inference/efficient-llm-inference-systems/appendix/hardware-architectures/npus.ko/"/><meta property="og:locale" content="en"/><meta property="og:description" content="NPU라는 이름은 넓다. 모바일 SoC 안의 작은 neural engine도 NPU라고 부르고, datacenter용 inference accelerator도 NPU라고 부른다. 이 노트에서 말하는 NPU는 후자다."/><meta property="og:site_name" content="AI Data Center Systems"/><meta name="description" content="NPU라는 이름은 넓다. 모바일 SoC 안의 작은 neural engine도 NPU라고 부르고, datacenter용 inference accelerator도 NPU라고 부른다. 이 노트에서 말하는 NPU는 후자다."/><meta property="og:type" content="article"/><meta property="og:image" content="https://adcs.restack.tech/og/inference/efficient-llm-inference-systems/appendix/hardware-architectures/npus.ko.png?v=2"/><meta property="og:image:width" content="1200"/><meta property="og:image:height" content="630"/><meta name="twitter:image" content="https://adcs.restack.tech/og/inference/efficient-llm-inference-systems/appendix/hardware-architectures/npus.ko.png?v=2"/><meta name="twitter:card" content="summary_large_image"/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/_astro/print.DNXP8c50.css" media="print"><link rel="stylesheet" href="/_astro/common.DYbqSTpl.css"><script type="module" src="/_astro/page.CtJXHRyR.js"></script></head> <body class="astro-bguv2lll"> <a href="#_top" class="astro-7q3lir66">Skip to content</a> <script>
+  (() => {
+    try {
+      const savedMode = localStorage.getItem('adcs-navigation-mode');
+      document.documentElement.dataset.navigationMode = savedMode === 'compact' ? 'compact' : 'normal';
+    } catch {
+      document.documentElement.dataset.navigationMode = 'normal';
+    }
+  })();
+</script> <div class="page sl-flex astro-4toy2ex6"> <header class="header astro-4toy2ex6"><div class="header astro-3ef6ksr2"> <div class="title-wrapper sl-flex astro-3ef6ksr2"> <a href="/" class="site-title sl-flex astro-m46x6ez3">  <span class="astro-m46x6ez3" translate="no"> AI Data Center Systems </span> </a> <button class="navigation-mode-toggle print:hidden astro-3ef6ksr2" type="button" aria-label="Compact navigation" aria-pressed="false" title="Use compact navigation"> <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" class="astro-3ef6ksr2"> <rect x="3" y="4" width="18" height="16" rx="2" class="astro-3ef6ksr2"></rect> <path d="M9 4v16M6.5 10 4.5 12l2 2" class="astro-3ef6ksr2"></path> </svg> </button> </div> <div class="sl-flex print:hidden astro-3ef6ksr2"> <site-search class="astro-3ef6ksr2 astro-v37mnknz" data-translations="{&quot;placeholder&quot;:&quot;Search&quot;}"> <button data-open-modal disabled aria-label="Search" aria-keyshortcuts="Control+K" class="astro-v37mnknz"> <svg aria-hidden="true" class="astro-v37mnknz astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg> <span class="sl-hidden md:sl-block astro-v37mnknz" aria-hidden="true">Search</span> <kbd class="sl-hidden md:sl-flex astro-v37mnknz" style="display: none;"> <kbd class="astro-v37mnknz">Ctrl</kbd><kbd class="astro-v37mnknz">K</kbd> </kbd> </button> <dialog style="padding:0" aria-label="Search" class="astro-v37mnknz"> <div class="dialog-frame sl-flex astro-v37mnknz">  <button data-close-modal class="sl-flex md:sl-hidden astro-v37mnknz"> Cancel </button> <div class="search-container astro-v37mnknz"> <div id="starlight__search" class="astro-v37mnknz"></div> </div> </div> </dialog> </site-search>  <script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script> <script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.D1WXcfCt.js"></script>  </div> <div class="sl-hidden md:sl-flex print:hidden right-group astro-3ef6ksr2"> <div class="sl-flex social-icons astro-3ef6ksr2"> <a href="https://github.com/ziwon/ai-data-center-systems" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">GitHub</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script> <script type="module">const r="starlight-theme",o=e=>e==="auto"||e==="dark"||e==="light"?e:"auto",c=()=>o(typeof localStorage<"u"&&localStorage.getItem(r));function n(e){typeof localStorage<"u"&&localStorage.setItem(r,e==="light"||e==="dark"?e:"")}const l=()=>matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";function t(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e==="auto"?l():e,n(e)}matchMedia("(prefers-color-scheme: light)").addEventListener("change",()=>{c()==="auto"&&t("auto")});class s extends HTMLElement{constructor(){super(),t(c()),this.querySelector("select")?.addEventListener("change",a=>{a.currentTarget instanceof HTMLSelectElement&&t(o(a.currentTarget.value))})}}customElements.define("starlight-theme-select",s);</script> <script type="module">class s extends HTMLElement{constructor(){super();const e=this.querySelector("select");e&&(e.addEventListener("change",t=>{t.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=t.currentTarget.value)}),window.addEventListener("pageshow",t=>{if(!t.persisted)return;const n=e.querySelector("option[selected]")?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}}customElements.define("starlight-lang-select",s);</script> </div> </div></header> <nav class="sidebar print:hidden astro-4toy2ex6" aria-label="Main"> <starlight-menu-button class="print:hidden astro-jif73yzw"> <button aria-expanded="false" aria-label="Menu" aria-controls="starlight__sidebar" class="sl-flex md:sl-hidden astro-jif73yzw"> <svg aria-hidden="true" class="open-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg> <svg aria-hidden="true" class="close-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg> </button> </starlight-menu-button> <script type="module">class s extends HTMLElement{constructor(){super(),this.btn=this.querySelector("button"),this.btn.addEventListener("click",()=>this.toggleExpanded());const t=this.closest("nav");t&&t.addEventListener("keyup",e=>this.closeOnEscape(e))}setExpanded(t){this.setAttribute("aria-expanded",String(t)),document.body.toggleAttribute("data-mobile-menu-expanded",t)}toggleExpanded(){this.setExpanded(this.getAttribute("aria-expanded")!=="true")}closeOnEscape(t){t.code==="Escape"&&(this.setExpanded(!1),this.btn.focus())}}customElements.define("starlight-menu-button",s);</script>  <div id="starlight__sidebar" class="sidebar-pane astro-4toy2ex6"> <div class="navigation-controls astro-4toy2ex6"> <button class="navigation-drawer-toggle astro-4toy2ex6" type="button" aria-controls="starlight__sidebar-content" aria-expanded="false" title="Open navigation"> <svg class="navigation-menu-icon astro-4toy2ex6" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"> <path d="M4 6h16M4 12h16M4 18h16" class="astro-4toy2ex6"></path> </svg> <svg class="navigation-close-icon astro-4toy2ex6" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"> <path d="m6 6 12 12M18 6 6 18" class="astro-4toy2ex6"></path> </svg> <span class="navigation-drawer-label astro-4toy2ex6">Open navigation</span> </button> </div> <div id="starlight__sidebar-content" class="sidebar-content sl-flex astro-4toy2ex6"> <ul class="starlight-sidebar-topics astro-2fh6iaza"> <li class="astro-2fh6iaza"> <a aria-label="Network" title="Network" href="/network/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8.7 10a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-6.27-6.3a1 1 0 0 0-1.42 1.42ZM21 14a1 1 0 0 0-1 1v3.59L15.44 14A1 1 0 0 0 14 15.44L18.59 20H15a1 1 0 0 0 0 2h6a1 1 0 0 0 .38-.08 1 1 0 0 0 .54-.54A1 1 0 0 0 22 21v-6a1 1 0 0 0-1-1Zm.92-11.38a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-6a1 1 0 0 0 0 2h3.59L2.29 20.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V9a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z"/></svg> </div> <div class="astro-2fh6iaza"> Network  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="GPU &amp; Accelerator Systems" title="GPU &amp; Accelerator Systems" href="/gpu/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> </div> <div class="astro-2fh6iaza"> GPU &amp; Accelerator Systems  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Storage" title="Storage" href="/storage/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8 16.5a1 1 0 1 0 1 1 1 1 0 0 0-1-1M12 2C8 2 4 3.37 4 6v12c0 2.63 4 4 8 4s8-1.37 8-4V6c0-2.63-4-4-8-4m6 16c0 .71-2.28 2-6 2s-6-1.29-6-2v-3.27A13 13 0 0 0 12 16a13 13 0 0 0 6-1.27Zm0-6c0 .71-2.28 2-6 2s-6-1.29-6-2V8.73A13 13 0 0 0 12 10a13 13 0 0 0 6-1.27Zm-6-4C8.28 8 6 6.71 6 6s2.28-2 6-2 6 1.29 6 2-2.28 2-6 2m-4 2.5a1 1 0 1 0 1 1 1 1 0 0 0-1-1"/></svg> </div> <div class="astro-2fh6iaza"> Storage  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Training" title="Training" href="/training/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1 1v8a1 1 0 0 0 2 0v-8a1 1 0 0 0-1-1m5-10a1 1 0 0 0-1 1v18a1 1 0 0 0 2 0V3a1 1 0 0 0-1-1m10 14a1 1 0 0 0-1 1v4a1 1 0 0 0 2 0v-4a1 1 0 0 0-1-1m-5-8a1 1 0 0 0-1 1v12a1 1 0 0 0 2 0V9a1 1 0 0 0-1-1"/></svg> </div> <div class="astro-2fh6iaza"> Training  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Inference" title="Inference" data-topic-icon="brain" href="/inference/" class="starlight-sidebar-topics-current astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 22H5a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3h1a4 4 0 0 1 7.3-2.18c.448.64.692 1.4.7 2.18h3a1 1 0 0 1 1 1v3a4 4 0 0 1 2.18 7.3A3.86 3.86 0 0 1 18 18v3a1 1 0 0 1-1 1ZM5 8a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11v-3.18a1 1 0 0 1 1.33-.95 1.77 1.77 0 0 0 1.74-.23 2 2 0 0 0 .93-1.37 2 2 0 0 0-.48-1.59 1.89 1.89 0 0 0-2.17-.55 1 1 0 0 1-1.33-.95V8h-3.2a1 1 0 0 1-1-1.33 1.77 1.77 0 0 0-.23-1.74 1.939 1.939 0 0 0-3-.43A2 2 0 0 0 8 6c.002.23.046.456.13.67A1 1 0 0 1 7.18 8H5Z"/></svg> </div> <div class="astro-2fh6iaza"> Inference  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="MLOps" title="MLOps" data-topic-icon="cycle" href="/mlops/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8.7 10a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-6.27-6.3a1 1 0 0 0-1.42 1.42ZM21 14a1 1 0 0 0-1 1v3.59L15.44 14A1 1 0 0 0 14 15.44L18.59 20H15a1 1 0 0 0 0 2h6a1 1 0 0 0 .38-.08 1 1 0 0 0 .54-.54A1 1 0 0 0 22 21v-6a1 1 0 0 0-1-1Zm.92-11.38a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-6a1 1 0 0 0 0 2h3.59L2.29 20.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V9a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z"/></svg> </div> <div class="astro-2fh6iaza"> MLOps  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Systems Performance" title="Systems Performance" href="/systems-performance/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path fill-rule="evenodd" d="M1.44 8.855v-.001l3.527-3.516c.34-.344.802-.541 1.285-.548h6.649l.947-.947c3.07-3.07 6.207-3.072 7.62-2.868a1.821 1.821 0 0 1 1.557 1.557c.204 1.413.203 4.55-2.868 7.62l-.946.946v6.649a1.845 1.845 0 0 1-.549 1.286l-3.516 3.528a1.844 1.844 0 0 1-3.11-.944l-.858-4.275-4.52-4.52-2.31-.463-1.964-.394A1.847 1.847 0 0 1 .98 10.693a1.843 1.843 0 0 1 .46-1.838Zm5.379 2.017-3.873-.776L6.32 6.733h4.638l-4.14 4.14Zm8.403-5.655c2.459-2.46 4.856-2.463 5.89-2.33.134 1.035.13 3.432-2.329 5.891l-6.71 6.71-3.561-3.56 6.71-6.711Zm-1.318 15.837-.776-3.873 4.14-4.14v4.639l-3.364 3.374Z" clip-rule="evenodd"/><path d="M9.318 18.345a.972.972 0 0 0-1.86-.561c-.482 1.435-1.687 2.204-2.934 2.619a8.22 8.22 0 0 1-1.23.302c.062-.365.157-.79.303-1.229.415-1.247 1.184-2.452 2.62-2.935a.971.971 0 1 0-.62-1.842c-.12.04-.236.084-.35.13-2.02.828-3.012 2.588-3.493 4.033a10.383 10.383 0 0 0-.51 2.845l-.001.016v.063c0 .536.434.972.97.972H2.24a7.21 7.21 0 0 0 .878-.065c.527-.063 1.248-.19 2.02-.447 1.445-.48 3.205-1.472 4.033-3.494a5.828 5.828 0 0 0 .147-.407Z"/></svg> </div> <div class="astro-2fh6iaza"> Systems Performance  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Courses" title="Courses" href="/courses/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.17 2.06A13.1 13.1 0 0 0 19 1.87a12.94 12.94 0 0 0-7 2.05 12.94 12.94 0 0 0-7-2 13.1 13.1 0 0 0-2.17.19 1 1 0 0 0-.83 1v12a1 1 0 0 0 1.17 1 10.9 10.9 0 0 1 8.25 1.91l.12.07h.11a.91.91 0 0 0 .7 0h.11l.12-.07A10.899 10.899 0 0 1 20.83 16 1 1 0 0 0 22 15V3a1 1 0 0 0-.83-.94ZM11 15.35a12.87 12.87 0 0 0-6-1.48H4v-10c.333-.02.667-.02 1 0a10.86 10.86 0 0 1 6 1.8v9.68Zm9-1.44h-1a12.87 12.87 0 0 0-6 1.48V5.67a10.86 10.86 0 0 1 6-1.8c.333-.02.667-.02 1 0v10.04Zm1.17 4.15a13.098 13.098 0 0 0-2.17-.19 12.94 12.94 0 0 0-7 2.05 12.94 12.94 0 0 0-7-2.05c-.727.003-1.453.066-2.17.19A1 1 0 0 0 2 19.21a1 1 0 0 0 1.17.79 10.9 10.9 0 0 1 8.25 1.91 1 1 0 0 0 1.16 0A10.9 10.9 0 0 1 20.83 20a1 1 0 0 0 1.17-.79 1 1 0 0 0-.83-1.15Z"/></svg> </div> <div class="astro-2fh6iaza"> Courses  </div> </a> </li> </ul>  <doc-sidebar-controls hidden="true" class="astro-v3kklmrl"> <div class="tree-controls astro-v3kklmrl" role="group" aria-label="문서 목록 펼침 설정"> <button type="button" data-action="expand" aria-controls="document-tree" aria-label="모든 문서 분류 펼치기" class="astro-v3kklmrl">펼치기</button> <span aria-hidden="true" class="astro-v3kklmrl">/</span> <button type="button" data-action="collapse" aria-controls="document-tree" aria-label="모든 문서 분류 접기" class="astro-v3kklmrl">접기</button> </div> </doc-sidebar-controls> <script type="module">class d extends HTMLElement{connectedCallback(){const n=document.getElementById("document-tree");if(!n||this.dataset.initialized)return;this.dataset.initialized="true",this.hidden=!1;const e=Array.from(n.querySelectorAll("details")),r=this.querySelector('[data-action="expand"]'),i=this.querySelector('[data-action="collapse"]');for(const t of e)t.open=!1;let o=n.querySelector('[aria-current="page"]')?.closest("details");for(;o&&n.contains(o);)o.open=!0,o=o.parentElement?.closest("details")??null;const a=()=>{r?.setAttribute("aria-disabled",String(e.every(t=>t.open))),i?.setAttribute("aria-disabled",String(e.every(t=>!t.open)))};this.addEventListener("click",t=>{const s=t.target instanceof Element?t.target.closest("button[data-action]"):null;if(!s||s.getAttribute("aria-disabled")==="true")return;const l=s.dataset.action==="expand";for(const c of e)c.open=l;a()});for(const t of e)t.addEventListener("toggle",a);a()}}customElements.get("doc-sidebar-controls")||customElements.define("doc-sidebar-controls",d);</script> <div id="document-tree"> <sl-sidebar-state-persist data-hash="15y10hp" class="astro-kku4brbg"> <script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script>  <ul class="top-level astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/inference/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">Inference 목록</span>  </a> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">추론 시스템 강좌 · 6</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="0"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">강좌 안내</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/week01/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 1 — Understanding Performance Metrics</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/week02/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 2 — Hardware Foundations for Inference</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/week03/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 3 — Transformer Inference and the KV Cache</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/week04/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 4 — Quantization</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/week04/results/results/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 4 Lab Results</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/week05/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 5 — Speculative Decoding</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">FlashAttention · 2</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="1"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/inference/flashattention-from-first-principles/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">FlashAttention from First Principles · English</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/flashattention-from-first-principles/readme.ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">원리로 이해하는 FlashAttention · 한국어</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <a href="/inference/sglang-production-practices/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">SGLang in 2026: Engineering a Production-Grade LLM Serving Stack</span>  </a> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">기초 참고자료 · 2</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="2"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">참고자료 모아보기</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/llm-inference/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">LLM Inference</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/transformer/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Transformer</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">하드웨어 아키텍처 · 5</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="3"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/hardware-architectures/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">하드웨어 읽기 안내</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/hardware-architectures/domain-specific-architectures-for-ai-inference.ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Domain-Specific Architectures for AI Inference</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/hardware-architectures/gpus.ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">How to Think About GPUs</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/hardware-architectures/npus.ko/" aria-current="page" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">How to Think About NPUs</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/hardware-architectures/roofline.ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">All About Rooflines</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/hardware-architectures/tpus.ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">How to Think About TPUs</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">모델 아키텍처 · 2</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="4"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/inference/models/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">모델 문서 모아보기</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/models/kimi-k2-5-scaling/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">How We Scaled Kimi K2.5: 토큰 효율, 장문 컨텍스트, 에이전트 스웜</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/models/kimi-k3/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Kimi K3 기술 해부: 2.8T MoE, KDA, Attention Residuals, 그리고 64-GPU 서빙</span>  </a> </li> </ul> </details> </li> </ul>  <script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script> </sl-sidebar-state-persist> <div class="md:sl-hidden"> <div class="mobile-preferences sl-flex astro-wu23bvmt"> <div class="social-icons astro-wu23bvmt"> <a href="https://github.com/ziwon/ai-data-center-systems" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">GitHub</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script>   </div> </div> </div>  </div> </div> </nav> <div class="main-frame astro-4toy2ex6">  <script type="module">const a=document.getElementById("starlight__sidebar"),n=a?.querySelector("sl-sidebar-state-persist"),o="sl-sidebar-state",i=()=>{let t=[];const e=n?.dataset.hash||"";try{const s=sessionStorage.getItem(o),r=JSON.parse(s||"{}");Array.isArray(r.open)&&r.hash===e&&(t=r.open)}catch{}return{hash:e,open:t,scroll:a?.scrollTop||0}},c=t=>{try{sessionStorage.setItem(o,JSON.stringify(t))}catch{}},d=()=>c(i()),l=(t,e)=>{const s=i();s.open[e]=t,c(s)};n?.addEventListener("click",t=>{if(!(t.target instanceof Element))return;const e=t.target.closest("summary")?.closest("details");if(!e)return;const s=e.querySelector("sl-sidebar-restore"),r=parseInt(s?.dataset.index||"");isNaN(r)||l(!e.open,r)});addEventListener("visibilitychange",()=>{document.visibilityState==="hidden"&&d()});addEventListener("pageHide",d);</script> <div class="lg:sl-flex astro-67yu43on"> <aside class="right-sidebar-container print:hidden astro-67yu43on"> <div class="right-sidebar astro-67yu43on"> <div class="lg:sl-hidden astro-rl4sue7z"><mobile-starlight-toc data-min-h="2" data-max-h="2" class="astro-doynk5tl"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-doynk5tl"><details id="starlight__mobile-toc" class="astro-doynk5tl"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-doynk5tl"><span class="toggle sl-flex astro-doynk5tl">On this page<svg aria-hidden="true" class="caret astro-doynk5tl astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-doynk5tl"></span></summary><div class="dropdown astro-doynk5tl"><ul class="isMobile astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#reading-map" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Reading Map</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#1-npu를-gputpudsa-사이에-놓기" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">1. NPU를 GPU/TPU/DSA 사이에 놓기</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#2-npu가-겨냥하는-병목" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">2. NPU가 겨냥하는 병목</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#3-rebellions-atom-rsd-vllm-rbln" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">3. Rebellions: ATOM, RSD, vLLM RBLN</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#4-furiosaai-rngd-tcp-furiosa-llm" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">4. FuriosaAI: RNGD, TCP, Furiosa-LLM</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#5-rebellions와-furiosaai를-같은-질문으로-비교하기" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">5. Rebellions와 FuriosaAI를 같은 질문으로 비교하기</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#6-npu-benchmark를-읽는-법" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">6. NPU benchmark를 읽는 법</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#7-npu-도입-전-질문지" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">7. NPU 도입 전 질문지</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#8-이-레포와의-연결" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">8. 이 레포와의 연결</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#9-practical-tips-and-notes" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">9. Practical Tips and Notes</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#10-check-questions" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">10. Check Questions</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#references" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">References</span> </a>  </li> </ul></div></details></nav></mobile-starlight-toc><script type="module" src="/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.hwBsy0Mo.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-rl4sue7z"><div class="sl-container astro-rl4sue7z"><kb-graph-card> <button class="kb-graph-card" type="button" data-open aria-haspopup="dialog"> <span class="kb-graph-copy"> <span class="kb-graph-title">Knowledge graph</span> <span class="kb-graph-subtitle" data-count>Loading related docs</span> </span> <span class="kb-graph-thumb" aria-hidden="true" data-map></span> <span class="kb-graph-expand" aria-hidden="true">Expand</span> </button> <dialog class="kb-graph-dialog" aria-label="Knowledge graph" data-dialog> <div class="kb-graph-panel"> <div class="kb-graph-panel-header"> <div> <p>Knowledge graph</p> <h2 data-heading>Related documents</h2> </div> <div class="kb-graph-tabs" role="tablist" aria-label="Knowledge graph views"> <button type="button" role="tab" aria-selected="true" data-tab="page">This page</button> <button type="button" role="tab" aria-selected="false" data-tab="global">Full graph</button> </div> <button type="button" data-close aria-label="Close knowledge graph">×</button> </div> <div class="kb-graph-stage" data-stage data-view="page"> <div data-page-stage></div> <div data-global-stage hidden></div> </div> </div> </dialog> </kb-graph-card> <script type="module" src="/_astro/KnowledgeGraphCard.astro_astro_type_script_index_0_lang.C475L69c.js"></script><starlight-toc data-min-h="2" data-max-h="2"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">On this page</h2><ul class="astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#reading-map" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Reading Map</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#1-npu를-gputpudsa-사이에-놓기" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">1. NPU를 GPU/TPU/DSA 사이에 놓기</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#2-npu가-겨냥하는-병목" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">2. NPU가 겨냥하는 병목</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#3-rebellions-atom-rsd-vllm-rbln" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">3. Rebellions: ATOM, RSD, vLLM RBLN</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#4-furiosaai-rngd-tcp-furiosa-llm" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">4. FuriosaAI: RNGD, TCP, Furiosa-LLM</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#5-rebellions와-furiosaai를-같은-질문으로-비교하기" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">5. Rebellions와 FuriosaAI를 같은 질문으로 비교하기</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#6-npu-benchmark를-읽는-법" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">6. NPU benchmark를 읽는 법</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#7-npu-도입-전-질문지" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">7. NPU 도입 전 질문지</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#8-이-레포와의-연결" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">8. 이 레포와의 연결</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#9-practical-tips-and-notes" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">9. Practical Tips and Notes</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#10-check-questions" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">10. Check Questions</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#references" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">References</span> </a>  </li> </ul></nav></starlight-toc><script type="module" src="/_astro/TableOfContents.astro_astro_type_script_index_0_lang.FuRcXuRY.js"></script></div></div> </div> </aside> <div class="main-pane astro-67yu43on">  <main data-pagefind-body class="astro-bguv2lll" lang="en" dir="ltr">    <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <h1 id="_top" class="astro-j6tvhyss">How to Think About NPUs</h1> </div> </div> <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <starlight-image-zoom> <template class="astro-vjux6bgf"> <dialog class="starlight-image-zoom-dialog astro-vjux6bgf"> <button aria-label="Unzoom image" class="starlight-image-zoom-control astro-vjux6bgf"> <svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" class="astro-vjux6bgf"> <use href="#starlight-image-zoom-icon-unzoom" class="astro-vjux6bgf"></use> </svg> </button> <figure class="astro-vjux6bgf"></figure> </dialog> </template> <svg xmlns="http://www.w3.org/2000/svg" style="display:none" class="astro-vjux6bgf"> <symbol id="starlight-image-zoom-icon-zoom" viewBox="0 0 24 24" class="astro-vjux6bgf"> <path d="M9.79 12.79 4 18.59V17a1 1 0 0 0-2 0v4a1 1 0 0 0 .08.38 1 1 0 0 0 .54.54A1 1 0 0 0 3 22h4a1 1 0 0 0 0-2H5.41l5.8-5.79a1 1 0 0 0-1.42-1.42ZM21.92 2.62a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-4a1 1 0 0 0 0 2h1.59l-5.8 5.79a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V7a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z" class="astro-vjux6bgf"></path> </symbol> <symbol id="starlight-image-zoom-icon-unzoom" viewBox="0 0 24 24" class="astro-vjux6bgf"> <path d="M21.71 2.29a1 1 0 0 0-1.42 0l-5.79 5.8V6.5a1 1 0 0 0-2 0v4a1 1 0 0 0 .08.38 1 1 0 0 0 .54.54 1 1 0 0 0 .38.08h4a1 1 0 0 0 0-2h-1.59l5.8-5.79a1 1 0 0 0 0-1.42ZM10.88 12.58a1 1 0 0 0-.38-.08h-4a1 1 0 0 0 0 2h1.59l-5.8 5.79a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l5.79-5.8v1.59a1 1 0 0 0 2 0v-4a1 1 0 0 0-.08-.38 1 1 0 0 0-.54-.54Z" class="astro-vjux6bgf"></path> </symbol> </svg> </starlight-image-zoom>   <script type="module" src="/_astro/ImageZoom.astro_astro_type_script_index_0_lang.CZmBqK-T.js"></script> <div class="sl-markdown-content"> <blockquote>
+<p>Sources: Rebellions public docs and articles, FuriosaAI public docs and repositories, and public product pages listed in the References section.</p>
+<p>This is a Korean lecture-note adaptation and research note, not a vendor benchmark reproduction. The goal is to explain how NPUs fit into the LLM inference hardware landscape and how to evaluate claims from Rebellions, FuriosaAI, and similar inference accelerators.</p>
+<p>The NPU market changes quickly. Treat product numbers in this note as public-reference snapshots, and re-check official docs before using them for procurement or capacity planning.</p>
+</blockquote>
+<div class="sl-heading-wrapper level-h2"><h2 id="reading-map">Reading Map</h2><a class="sl-anchor-link" href="#reading-map"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Reading Map”</span></a></div>
+<p>이 글의 핵심 질문은 다음이다.</p>
+<blockquote>
+<p>LLM inference를 위해 GPU와 TPU가 아닌 NPU를 도입한다면, 무엇을 기대할 수 있고 무엇을 반드시 검증해야 하는가?</p>
+</blockquote>
+<p>NPU라는 이름은 넓다. 모바일 SoC 안의 작은 neural engine도 NPU라고 부르고, datacenter용 inference accelerator도 NPU라고 부른다. 이 노트에서 말하는 NPU는 후자다.</p>
+<div class="expressive-code"><link rel="stylesheet" href="/_astro/ec.v4551.css"><script type="module" src="/_astro/ec.0vx5m.js"></script><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">NPU in this note:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">datacenter or server-grade neural processing unit</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">optimized primarily for inference</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">exposed through compiler/runtime/serving stack</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">evaluated by latency, throughput, watts, memory, and software maturity</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="NPU in this note:  datacenter or server-grade neural processing unit  optimized primarily for inference  exposed through compiler/runtime/serving stack  evaluated by latency, throughput, watts, memory, and software maturity"><div></div></button></div></figure></div>
+<p>한국 AI accelerator 생태계에서는 Rebellions와 FuriosaAI가 좋은 case study다. 둘 다 “GPU보다 더 효율적인 inference”를 주장하지만, 접근 방식은 다르다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Vendor</th><th>Public product family</th><th>Architectural emphasis</th><th>Serving emphasis</th></tr></thead><tbody><tr><td>Rebellions</td><td>ATOM, REBEL family</td><td>multi-core NPU SoC, SRAM hierarchy, NoC, RSD scale-out</td><td>vLLM RBLN, Flash/custom attention, APC, dynamic batching, distributed serving</td></tr><tr><td>FuriosaAI</td><td>RNGD</td><td>Tensor Contraction Processor, HBM3, large SRAM, SR-IOV</td><td>Furiosa-LLM, PagedAttention, prefix caching, hybrid KV cache, llm-d</td></tr></tbody></table>
+<p>중요한 것은 “NPU가 GPU보다 빠른가?”라는 단순 질문이 아니다. 더 좋은 질문은 다음이다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">For this workload and SLO:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">does the NPU reduce the limiting cost?</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">does its software stack expose that advantage?</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">does the operating model fit our serving system?</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="For this workload and SLO:  does the NPU reduce the limiting cost?  does its software stack expose that advantage?  does the operating model fit our serving system?"><div></div></button></div></figure></div>
+<div class="sl-heading-wrapper level-h2"><h2 id="1-npu를-gputpudsa-사이에-놓기">1. NPU를 GPU/TPU/DSA 사이에 놓기</h2><a class="sl-anchor-link" href="#1-npu를-gputpudsa-사이에-놓기"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “1. NPU를 GPU/TPU/DSA 사이에 놓기”</span></a></div>
+<p>GPU, TPU, NPU, DSA는 완전히 분리된 범주가 아니다. 현대 GPU는 Tensor Core, FP8/FP4, TMA, NVLink로 AI workload에 매우 특화되어 있다. TPU는 Google의 compiler-managed DSA다. NPU는 보통 vendor가 neural network inference를 위해 설계한 specialized accelerator를 가리킨다.</p>
+<p>이 appendix의 관점에서는 다음처럼 읽는 것이 실용적이다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Category</th><th>Strong mental model</th><th>Main risk</th></tr></thead><tbody><tr><td>GPU</td><td>flexible throughput machine with mature ecosystem</td><td>power, cost, memory movement, CUDA dependence</td></tr><tr><td>TPU</td><td>compiler-managed matrix machine with topology-aware scaling</td><td>workload fit, ecosystem boundary</td></tr><tr><td>NPU</td><td>inference-first DSA with custom memory/runtime stack</td><td>software maturity, model coverage, portability</td></tr><tr><td>DSA</td><td>workload-specific hardware/software co-design</td><td>benchmark narrowness, adoption risk</td></tr></tbody></table>
+<p>NPU가 이기려면 보통 다음 중 하나 이상을 실제 workload에서 보여줘야 한다.</p>
+<ol>
+<li>같은 latency SLO에서 더 높은 tokens/sec/W.</li>
+<li>같은 rack power에서 더 많은 동시 요청.</li>
+<li>같은 모델에서 더 낮은 p99 latency.</li>
+<li>같은 memory budget에서 더 큰 모델 또는 더 긴 context.</li>
+<li>더 단순한 operational envelope: air cooling, lower power, better partitioning, easier multi-tenancy.</li>
+</ol>
+<p>반대로 다음 질문에 답하지 못하면 peak TOPS가 높아도 production value는 약하다.</p>
+<ol>
+<li>지원 모델과 operator coverage가 충분한가?</li>
+<li>graph break, CPU fallback, unsupported op가 latency tail을 만들지 않는가?</li>
+<li>vLLM, OpenAI-compatible server, Kubernetes, metrics, profiler가 실제로 쓸 수 있는가?</li>
+<li>PagedAttention, continuous batching, quantization, prefix cache 같은 serving primitive가 hardware에 맞게 구현되어 있는가?</li>
+<li>multi-device와 multi-node에서 collective, placement, failure handling이 검증되어 있는가?</li>
+</ol>
+<p>NPU는 chip 하나가 아니라 다음 stack 전체로 평가해야 한다.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TB
+    A[Model graph] --> B[Compiler]
+    B --> C[NPU executable]
+    C --> D[Runtime]
+    D --> E[Serving engine]
+    E --> F[Scheduler / KV cache]
+    F --> G[Kubernetes / observability]
+
+    B --> H[Operator fusion&#x3C;br/>layout / memory planning]
+    D --> I[Device memory&#x3C;br/>multi-NPU execution]
+    E --> J[vLLM-compatible API&#x3C;br/>OpenAI server]
+    F --> K[Prefix caching&#x3C;br/>paged / hybrid KV]
+    G --> L[DRA / metrics&#x3C;br/>SMI / host tuning]
+
+    classDef primary fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef secondary fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef note fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef accent fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    class A,G primary
+    class B,D,E,F accent
+    class C secondary
+    class H,I,J,K,L note</pre>
+<div class="sl-heading-wrapper level-h2"><h2 id="2-npu가-겨냥하는-병목">2. NPU가 겨냥하는 병목</h2><a class="sl-anchor-link" href="#2-npu가-겨냥하는-병목"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “2. NPU가 겨냥하는 병목”</span></a></div>
+<p>LLM inference의 병목은 보통 네 축으로 나타난다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Bottleneck</th><th>NPU design response</th></tr></thead><tbody><tr><td>Weight traffic</td><td>low precision, high memory bandwidth, better data movement</td></tr><tr><td>KV cache capacity</td><td>larger memory, paged cache, GQA/MLA-friendly layout, cache compaction</td></tr><tr><td>Kernel/runtime overhead</td><td>compiled graph, fused operators, specialized runtime</td></tr><tr><td>Power and TCO</td><td>lower TDP, better perf/W, server/rack density</td></tr></tbody></table>
+<p>GPU는 유연성이 강하다. 대신 broad workload를 지원하기 위해 silicon과 software가 범용성을 유지한다. NPU는 target workload가 inference로 좁아질수록 더 과감한 선택을 할 수 있다.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    A[LLM inference] --> B[Memory movement]
+    A --> C[Serving runtime]
+    A --> D[Power / TCO]
+    B --> E[SRAM / scratchpad]
+    B --> F[HBM or GDDR bandwidth]
+    B --> G[Low precision]
+    C --> H[Paged KV cache]
+    C --> I[Continuous batching]
+    C --> J[Compiled graph]
+    D --> K[Tokens per watt]
+    D --> L[Air-cooled density]
+    E --> M[NPU value proposition]
+    F --> M
+    G --> M
+    H --> M
+    I --> M
+    J --> M
+    K --> M
+    L --> M
+
+    classDef primary fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef secondary fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef note fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef accent fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    class A primary
+    class B,C,D accent
+    class E,F,G,H,I,J secondary
+    class K,L note
+    class M primary</pre>
+<p>이 그림에서 주의할 점은 NPU의 장점이 chip 하나의 datapath만으로 나오지 않는다는 것이다. LLM serving에서는 chip, compiler, runtime, attention kernel, KV cache manager, scheduler가 하나의 product surface다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="3-rebellions-atom-rsd-vllm-rbln">3. Rebellions: ATOM, RSD, vLLM RBLN</h2><a class="sl-anchor-link" href="#3-rebellions-atom-rsd-vllm-rbln"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3. Rebellions: ATOM, RSD, vLLM RBLN”</span></a></div>
+<p>Rebellions의 공개 자료에서 반복되는 메시지는 <strong>inference workload에 맞춘 SoC와 scale-out serving stack</strong>이다.</p>
+<p>공식 RBLN NPU architecture 문서는 ATOM을 multi-core SoC로 설명한다. 공개 문서 기준 ATOM은 Neural Engines, Command Processor, on-chip local/global scratchpad memory hierarchy, NoC bus fabric, PCIe 5.0, GDDR6 interface를 포함한다. ATOM white paper는 Samsung 5nm, FP16 32 TFLOPS, INT8 128 TOPS, 8 Neural Engines, 총 64MB on-chip SRAM을 제시한다. RBLN-CA12 card 기준으로는 16GB GDDR6, 256GB/s memory bandwidth, PCIe Gen5 x16, 60-130W TDP, 최대 16개 hardware-isolated multi-instance가 공개되어 있다.</p>
+<p>메모리 계층은 조금 세분해서 읽어야 한다. 각 Neural Engine에는 4MB scratchpad memory가 있고, L1 Neural Cache와 32MB L2 Shared Memory가 언급된다. 따라서 “64MB on-chip SRAM”이라는 product-level 숫자와 “4MB local scratchpad + 32MB shared memory”라는 architecture-level 설명을 함께 봐야 한다.</p>
+<p>이 구조는 GPU memory hierarchy와 닮았지만, 해석은 조금 다르다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>ATOM component</th><th>Inference interpretation</th></tr></thead><tbody><tr><td>Neural Engine</td><td>dense neural network compute를 실행하는 기본 compute tile</td></tr><tr><td>Local scratchpad</td><td>tile, activation, temporary state를 가까이 두는 per-engine SRAM</td></tr><tr><td>L1 Neural Cache</td><td>Neural Engine 가까이에서 data access latency를 줄이는 cache layer</td></tr><tr><td>L2 Shared Memory</td><td>engine 간 공유되는 32MB on-chip memory layer</td></tr><tr><td>NoC</td><td>engine과 memory 사이 data movement fabric</td></tr><tr><td>GDDR6 DRAM</td><td>model weights, activations, cache state의 off-chip backing store</td></tr><tr><td>Command Processor</td><td>compiled execution and scheduling control path</td></tr><tr><td>Task Manager</td><td>local dependency를 hardware level에서 풀어 parallel execution을 돕는 control block</td></tr><tr><td>Multi-Instance</td><td>하나의 card를 여러 isolated inference task에 나누어 배정하는 partitioning surface</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h3"><h3 id="31-atom의-roofline-관점">3.1 ATOM의 roofline 관점</h3><a class="sl-anchor-link" href="#31-atom의-roofline-관점"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3.1 ATOM의 roofline 관점”</span></a></div>
+<p>ATOM 같은 NPU를 볼 때도 roofline 질문은 같다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">critical intensity = peak ops/s / memory bandwidth bytes/s</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="critical intensity = peak ops/s / memory bandwidth bytes/s"><div></div></button></div></figure></div>
+<p>다만 NPU에서는 단일 HBM roofline만 보면 부족하다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Roofline</th><th>What to measure</th></tr></thead><tbody><tr><td>local SRAM roofline</td><td>tile reuse, local scratchpad occupancy, engine utilization</td></tr><tr><td>global SRAM roofline</td><td>cross-engine reuse and synchronization cost</td></tr><tr><td>off-chip DRAM roofline</td><td>weight streaming and KV cache bandwidth</td></tr><tr><td>inter-device roofline</td><td>model parallelism, tensor/expert traffic</td></tr><tr><td>host path roofline</td><td>pre/post-processing, graph breaks, CPU fallback</td></tr></tbody></table>
+<p>Rebellions 문서가 SRAM hierarchy와 NoC를 강조하는 이유는 이 때문이다. LLM inference에서는 off-chip memory access가 energy와 latency를 지배하기 쉽다. On-chip memory에 더 많은 reuse를 만들 수 있으면 tokens/sec/W가 좋아질 수 있다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="32-rbln-profiler로-보는-execution-surface">3.2 RBLN profiler로 보는 execution surface</h3><a class="sl-anchor-link" href="#32-rbln-profiler로-보는-execution-surface"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3.2 RBLN profiler로 보는 execution surface”</span></a></div>
+<p>RBLN v0.10.4 문서는 profiler가 기록하는 command taxonomy를 공개한다. 이 taxonomy는 NPU를 black box로 보지 않고, “어디에서 시간이 쓰이는가”를 묻는 데 중요하다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Profiler command</th><th>What it means</th><th>Inference bottleneck lens</th></tr></thead><tbody><tr><td><code dir="auto">Host</code></td><td>CPU에서 실행하는 것이 유리하거나 NPU가 지원하지 않아 host CPU로 offload된 작업</td><td>unsupported op, shape adjustment, CPU fallback</td></tr><tr><td><code dir="auto">Neural Engine Clusters</code></td><td>Neural Engine에서 실행되는 compute 작업</td><td>useful compute, engine utilization</td></tr><tr><td><code dir="auto">Neural DMA</code></td><td>device DRAM과 Neural Engine scratchpad 사이의 전송</td><td>weight/input/kernel tile movement</td></tr><tr><td><code dir="auto">Task DMA</code></td><td>device DRAM과 shared memory 사이의 전송</td><td>intermediate tensor and shared-memory traffic</td></tr><tr><td><code dir="auto">External HDMA</code></td><td>host DRAM과 device DRAM 사이의 전송</td><td>host-device bottleneck, graph boundary</td></tr><tr><td><code dir="auto">Device HDMA</code></td><td>RSD 구성에서 device DRAM 또는 shared memory 사이의 전송</td><td>inter-device tensor movement</td></tr><tr><td><code dir="auto">Device Sync</code></td><td>RSD 구성에서 서로 다른 device 사이의 synchronization</td><td>collective latency, dependency scheduling</td></tr></tbody></table>
+<p>이 표는 GPU profiler에서 SM throughput, DRAM throughput, kernel launch overhead를 나누는 것과 같은 역할을 한다. NPU에서도 단순히 end-to-end latency만 보면 원인을 알 수 없다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Good NPU profiling question:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">Is time spent in Neural Engine compute,</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">Neural DMA / Task DMA movement,</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">Host fallback,</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">Device HDMA,</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">or Device Sync?</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Good NPU profiling question:  Is time spent in Neural Engine compute,  Neural DMA / Task DMA movement,  Host fallback,  Device HDMA,  or Device Sync?"><div></div></button></div></figure></div>
+<p>RBLN v0.10.4의 vLLM profiling guide도 같은 방향이다. TTFT와 TPOT만으로는 부족하고, PyTorch-level profiler와 RBLN profiler를 함께 사용해 low-level behavior를 확인해야 한다고 설명한다. Online inference에서는 OpenAI-compatible server를 띄운 뒤 <code dir="auto">/start_profile</code>과 <code dir="auto">/stop_profile</code> endpoint로 profiling 구간을 제어할 수 있다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="33-rsd-single-chip이-아니라-scalable-design">3.3 RSD: single-chip이 아니라 scalable design</h3><a class="sl-anchor-link" href="#33-rsd-single-chip이-아니라-scalable-design"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3.3 RSD: single-chip이 아니라 scalable design”</span></a></div>
+<p>공개 자료에서 Rebellions는 RSD(Rebellions Scalable Design)를 scale-out architecture로 설명한다. LLM serving article에서는 RSD가 disaggregated prefill, multi-node execution, MoE support를 포함한다고 설명한다.</p>
+<p>이것은 중요한 방향이다. LLM inference는 단일 accelerator 성능만으로 끝나지 않는다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Serving feature</th><th>Why it matters</th></tr></thead><tbody><tr><td>Disaggregated prefill</td><td>prefill과 decode의 resource profile이 다르다. 분리하면 interference를 줄일 수 있다.</td></tr><tr><td>Multi-node execution</td><td>큰 모델 또는 높은 concurrency에서 memory capacity와 throughput을 확장한다.</td></tr><tr><td>MoE support</td><td>expert routing은 AllToAll, load balance, irregular dispatch를 만든다.</td></tr><tr><td>Cache-aware scheduling</td><td>KV cache locality와 memory compaction이 throughput/p99를 좌우한다.</td></tr></tbody></table>
+<p>RSD white paper에서 더 구체적으로 보이는 것은 compiler-managed tensor parallelism이다. Rebellions는 RBLN Compiler가 compile time에 model tensor를 여러 device로 나누고, Command Processor가 실행할 command stream 안에 inter-device data movement 정보를 포함한다고 설명한다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>RSD mechanism</th><th>Inference interpretation</th></tr></thead><tbody><tr><td>Automatic multi-device splitting</td><td>tensor parallelism을 developer가 수동으로 graph surgery하지 않도록 compiler가 splitting/reconnection을 담당한다.</td></tr><tr><td>Inter-device communication optimization</td><td>broadcast, reduce, partial sums 같은 collective pattern의 overhead와 memory footprint를 줄이는 방향이다.</td></tr><tr><td>Intra-device layer pipelining</td><td>device 내부 operation을 겹쳐 idle time과 communication stall을 줄이려는 시도다.</td></tr><tr><td>PCIe Gen5 x16 card-to-card path</td><td>host connectivity뿐 아니라 direct inter-card communication을 scale-out path의 일부로 사용한다.</td></tr><tr><td>vLLM + router server</td><td>여러 vLLM instance를 rack-level serving surface로 묶고 workload를 분산하는 운영 모델을 제시한다.</td></tr></tbody></table>
+<p>Week 1-4의 언어로 바꾸면, RSD는 다음 문제에 답하려는 시도다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">prefill:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">large GEMM, higher arithmetic intensity, compute-heavy</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">decode:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">weight/KV traffic, lower arithmetic intensity, latency-sensitive</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">serving:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">schedule both phases without wasting memory, fabric, or power</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="prefill:  large GEMM, higher arithmetic intensity, compute-heavydecode:  weight/KV traffic, lower arithmetic intensity, latency-sensitiveserving:  schedule both phases without wasting memory, fabric, or power"><div></div></button></div></figure></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="34-vllm-rbln의-의미">3.4 vLLM RBLN의 의미</h3><a class="sl-anchor-link" href="#34-vllm-rbln의-의미"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3.4 vLLM RBLN의 의미”</span></a></div>
+<p>NPU adoption에서 가장 큰 risk는 software이다. Rebellions는 <code dir="auto">vllm-rbln</code> plugin을 공개하고, vLLM entry point와 ecosystem에 붙는 방향을 택했다. 공식 vLLM RBLN 문서는 RBLN NPU에서 LLM inference and serving을 제공하는 vLLM hardware plugin으로 설명한다.</p>
+<p>이 접근의 장점은 명확하다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Integration layer</th><th>Adoption value</th></tr></thead><tbody><tr><td>vLLM API</td><td>기존 serving code 변경을 줄인다.</td></tr><tr><td>OpenAI-compatible serving path</td><td>application integration cost를 낮춘다.</td></tr><tr><td>model zoo</td><td>compile and deployment 예제를 제공한다.</td></tr><tr><td>attention support</td><td>Naive Attention, Flash Attention, custom attention kernels 같은 execution path를 제공한다.</td></tr><tr><td>profiling support</td><td>PyTorch-level profiler와 RBLN profiler를 통해 low-level bottleneck을 확인한다.</td></tr></tbody></table>
+<p>하지만 평가할 때는 “vLLM 이름이 붙었다”에서 멈추면 안 된다. 실제로는 다음을 재야 한다.</p>
+<ol>
+<li>지원 model architecture: Llama, Qwen, Mixtral, DeepSeek 계열이 필요한 shape로 동작하는가?</li>
+<li>attention variant: GQA, MLA, sliding window, long context에서 graph break가 없는가?</li>
+<li>quantization path: FP16, FP8, INT8, INT4 중 어떤 format이 native이고 어떤 format이 dequant overhead를 갖는가?</li>
+<li>continuous batching: arrival distribution이 바뀌어도 p99가 안정적인가?</li>
+<li>memory compaction: 긴 request와 짧은 request가 섞일 때 KV fragmentation이 관리되는가?</li>
+</ol>
+<p>RBLN v0.10.4 문서에서 특히 유용한 serving surface는 다음이다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>vLLM RBLN feature</th><th>Practical meaning</th></tr></thead><tbody><tr><td>Attention modes</td><td><code dir="auto">rbln_attn_impl</code>과 <code dir="auto">rbln_kvcache_partition_len</code>로 attention implementation과 KV partitioning을 조정한다.</td></tr><tr><td>Automatic Prefix Caching</td><td>공통 prefix의 KV cache를 재사용해 중복 prefill 계산을 줄인다. vLLM과 같은 방식으로 켜고 끌 수 있다.</td></tr><tr><td>Dynamic decoder batch sizes</td><td><code dir="auto">rbln_decoder_batch_sizes</code>로 여러 decoder batch size를 미리 컴파일하고 실제 요청 수에 가까운 decoder를 선택한다.</td></tr><tr><td>Custom kernel</td><td>Triton으로 kernel을 작성하고 RBLN IR을 거쳐 target binary로 컴파일하는 path를 제공한다.</td></tr><tr><td>OpenAI-compatible server</td><td>application-level integration과 profiling endpoint를 제공한다.</td></tr><tr><td>Disaggregated Encoder</td><td>multimodal serving에서 visual encoder와 language-model PD instance를 분리하는 beta feature다.</td></tr></tbody></table>
+<p><code dir="auto">rbln_decoder_batch_sizes</code>는 NPU serving의 중요한 힌트다. 일반 GPU serving은 dynamic shape를 runtime kernel selection이나 CUDA Graph capture size로 다루는 경우가 많다. RBLN은 여러 decoder shape를 compile-time에 준비하고 request count에 맞춰 선택하는 쪽에 가깝다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Example intuition:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">compile decoder batch sizes: [1, 2, 4, 8]</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">incoming active requests: 3</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">runtime selects batch-4 decoder instead of always using batch-8</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Example intuition:  compile decoder batch sizes: [1, 2, 4, 8]  incoming active requests: 3  runtime selects batch-4 decoder instead of always using batch-8"><div></div></button></div></figure></div>
+<p>이 방식은 작은 batch에서 padding waste를 줄일 수 있지만, compile matrix와 supported shape를 운영상 관리해야 한다. NPU runtime을 평가할 때는 “최대 batch throughput”뿐 아니라 traffic distribution에서 어떤 compiled decoder가 얼마나 자주 선택되는지 봐야 한다.</p>
+<p>Custom kernel support도 흥미롭다. v0.10.4 문서는 Triton kernel을 RBLN IR로 낮추고 <code dir="auto">rebel-compiler</code>가 target binary로 컴파일하는 pipeline을 설명한다. 예시로 flash attention, flash causal attention, sliding window attention kernel이 언급된다. 단, <code dir="auto">tl.static_range</code> 사용, <code dir="auto">tl.range</code> 미지원, reduction에서 <code dir="auto">keep_dims=True</code> 사용 같은 제약도 있으므로 CUDA/Triton kernel을 그대로 옮길 수 있다고 가정하면 안 된다.</p>
+<p>Disaggregated Encoder는 prefill/decode disaggregation과는 다른 축이다. 멀티모달 모델에서 visual encoder와 language model의 scheduling profile이 다르기 때문에, encoder instance와 PD(Prefill+Decode) instance를 별도 vLLM process로 분리한다. v0.10.4 문서는 이 기능을 beta로 표시하고 production 사용은 아직 권장하지 않는다고 설명한다. 따라서 이 기능은 “방향성은 중요하지만 안정성 검증이 필요한 surface”로 읽어야 한다.</p>
+<p>Rebellions white paper의 benchmark 수치는 조심해서 읽어야 한다. ATOM white paper의 T5-3B와 SDXL-Turbo 결과는 A100과의 power efficiency 비교를 제시하지만, ATOM 결과가 projected data로 표시되어 있다. RSD white paper의 Llama3-8B rack-level TPS/Watt, TPS/$ 비교도 internal testing 또는 public information 기반 추정이라는 전제가 붙는다. 따라서 이 숫자는 procurement-grade benchmark가 아니라 vendor가 강조하는 design target, 즉 “low-power inference와 scale-out efficiency”를 읽는 자료로 쓰는 것이 맞다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="35-rbln-공개-소프트웨어-스택을-읽는-순서">3.5 RBLN 공개 소프트웨어 스택을 읽는 순서</h3><a class="sl-anchor-link" href="#35-rbln-공개-소프트웨어-스택을-읽는-순서"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3.5 RBLN 공개 소프트웨어 스택을 읽는 순서”</span></a></div>
+<p>Rebellions의 공개 GitHub 조직에는 compiler 내부를 그대로 보여주는 repository가 있는 것은 아니다. <code dir="auto">rebel-compiler</code>는 별도 접근이 필요한 binary package로 배포된다. 따라서 공개 repository를 읽을 때는 “compiler가 내부에서 어떻게 최적화하는가”보다 “어떤 integration surface와 production path를 공개했는가”에 초점을 맞추는 편이 현실적이다.</p>
+<p>RBLN compiler API 문서는 이 integration surface를 더 직접적으로 보여준다. RBLN 컴파일러는 PyTorch와 TensorFlow graph를 입력으로 받아 compile할 수 있으며, 공개 문서 기준 PyTorch <code dir="auto">torch.nn.Module</code>, TensorFlow v2 <code dir="auto">tf.function</code>, TensorFlow v1 <code dir="auto">GraphDef</code>를 입력 surface로 제시한다. Compile pipeline은 Model Conversion, Graph Generation, Graph Optimization으로 설명되고, 결과는 RBLN Runtime에서 즉시 쓰거나 <code dir="auto">.rbln</code> file로 저장해 재사용할 수 있다. Runtime 실행 surface는 <code dir="auto">Runtime()</code> 또는 <code dir="auto">AsyncRuntime()</code> 생성 후 <code dir="auto">run()</code>을 호출하는 형태이며, 입출력 data type으로 <code dir="auto">torch.Tensor</code>와 <code dir="auto">numpy.ndarray</code>를 지원한다.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TB
+    A[PyTorch&#x3C;br/>torch.nn.Module] --> B[rebel.compile_from_torch&#x3C;br/>or torch.compile]
+    C[TensorFlow v2&#x3C;br/>tf.function] --> D[rebel.compile_from_tf_function]
+    E[TensorFlow v1&#x3C;br/>GraphDef] --> F[rebel.compile_from_tf_graph_def]
+
+    B --> G[Compilation&#x3C;br/>model conversion&#x3C;br/>graph generation&#x3C;br/>graph optimization]
+    D --> G
+    F --> G
+
+    G --> H[Direct use]
+    G --> I[save .rbln artifact]
+    I --> J[Disk]
+    H --> K[Runtime / AsyncRuntime]
+    J --> K
+    K --> L[runtime_module.run]
+    M[Input&#x3C;br/>torch.Tensor / numpy.ndarray] --> L
+    L --> N[Output&#x3C;br/>torch.Tensor / numpy.ndarray]
+    L --> O[RBLN driver and devices&#x3C;br/>ATOM / REBEL]
+
+    classDef primary fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef secondary fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef note fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef accent fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    class A,C,E,M primary
+    class B,D,F,K,L secondary
+    class G accent
+    class H,I,J,N,O note</pre>
+<p><em>Source: adapted from RBLN Compiler API overview.</em></p>
+<p>LLM inference 관점에서는 다음 네 repository가 가장 중요하다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Repository</th><th>Stack layer</th><th>What to inspect first</th><th>What it tells you</th></tr></thead><tbody><tr><td><code dir="auto">vllm-rbln</code></td><td>serving runtime integration</td><td><code dir="auto">vllm_rbln/</code>, <code dir="auto">docs/</code>, <code dir="auto">benchmarks/</code></td><td>vLLM plugin, OpenAI-compatible serving, batching, attention, prefix caching, benchmark surface</td></tr><tr><td><code dir="auto">rbln-model-zoo</code></td><td>validated examples and deployment recipes</td><td><code dir="auto">model_registry.yaml</code>, <code dir="auto">vllm/</code>, <code dir="auto">huggingface/</code>, <code dir="auto">serving/</code></td><td>실제로 어떤 모델과 framework path가 공개 예제로 제공되는지</td></tr><tr><td><code dir="auto">optimum-rbln</code></td><td>Hugging Face export and inference bridge</td><td><code dir="auto">src/optimum/rbln</code>, <code dir="auto">examples/</code>, <code dir="auto">tests/</code></td><td>Transformers/Diffusers 모델을 RBLN compile artifact로 바꾸는 경로</td></tr><tr><td><code dir="auto">torch-rbln</code></td><td>low-level PyTorch extension</td><td><code dir="auto">torch_rbln/</code>, <code dir="auto">docs/</code>, <code dir="auto">aten/</code>, <code dir="auto">c10/rbln/</code></td><td><code dir="auto">rbln</code> device, eager/debug workflow, <code dir="auto">torch.compile</code> integration, operator coverage 방향</td></tr></tbody></table>
+<p>실무적으로는 <code dir="auto">vllm-rbln</code>을 먼저 보는 것이 좋다. NPU의 adoption risk는 chip 자체보다 serving stack에서 드러나기 때문이다. <code dir="auto">vllm-rbln</code>은 RBLN NPU를 vLLM hardware plugin으로 노출하고, LLM serving에서 중요한 batching, attention implementation, prefix caching, profiling, benchmark 흐름을 보여준다. 특히 <code dir="auto">docs/bucketing.md</code>, <code dir="auto">docs/sub_block_prefix_caching.md</code>, <code dir="auto">benchmarks/benchmark_serving.py</code>, <code dir="auto">benchmarks/benchmark_throughput.py</code> 같은 파일은 peak benchmark보다 운영 surface를 이해하는 데 더 유용하다.</p>
+<p><code dir="auto">rbln-model-zoo</code>는 “무엇이 되는가”를 확인하는 지도로 읽어야 한다. README는 Hugging Face, PyTorch, TensorFlow, C/C++ API와 500개 이상의 model example을 강조한다. 이 repository의 가치는 architecture 설명보다 coverage와 recipe에 있다. <code dir="auto">vllm/decoder-only</code>, <code dir="auto">vllm/multimodal</code>, <code dir="auto">huggingface/transformers</code>, <code dir="auto">serving/triton_inference_server</code>, <code dir="auto">serving/rayserve</code>, <code dir="auto">serving/torchserve</code>를 보면 RBLN stack이 어떤 ecosystem 접점을 우선순위로 두는지 알 수 있다.</p>
+<p><code dir="auto">optimum-rbln</code>은 Hugging Face ecosystem과 NPU compiler/runtime 사이의 adapter다. 기존 <code dir="auto">transformers</code> 또는 <code dir="auto">diffusers</code> pipeline을 RBLN class로 바꾸고, export/compile된 artifact를 저장한 뒤 inference에 재사용하는 흐름을 제공한다. 따라서 model portability, compile-time shape 선택, Hugging Face API compatibility를 평가할 때 유용하다.</p>
+<p>Optimum RBLN의 Single NPU와 Multi-NPU 지원 목록은 단순한 superset/subset 관계로 읽으면 안 된다. Single NPU support는 대체로 local compile/inference coverage를 보여주고, Multi-NPU support는 model partitioning, inter-device communication, memory fit, RSD-specific validation이 함께 맞아야 하는 distributed execution contract에 가깝다.</p>
+<p>Qwen3-VL-2B-Instruct 예시는 이 차이를 잘 보여준다. 모델 이름의 2B parameter count만 보면 작아 보이지만, Qwen3-VL 튜토리얼은 이 모델을 top-level causal LM과 <code dir="auto">visual</code> Vision Transformer submodule로 나누고, 각 구성요소를 별도 graph로 compile하고 별도 runtime으로 실행한다고 설명한다. 공개 예제의 RBLN config도 visual encoder와 language model 양쪽에 <code dir="auto">tensor_parallel_size=8</code>을 사용하고, visual <code dir="auto">max_seq_len=16384</code>, language-model <code dir="auto">max_seq_len=262144</code>, <code dir="auto">kvcache_partition_len=16384</code> 같은 큰 serving envelope를 잡는다. 따라서 이것은 “2B model weight 때문에 무조건 8 NPU가 필요하다”라기보다, 긴 multimodal context, 큰 visual token budget, KV cache partitioning, tensor-parallel execution을 포함한 validated RSD configuration으로 읽어야 한다.</p>
+<p>튜토리얼은 이 large envelope의 낭비 가능성도 직접 다룬다. Qwen3-VL의 ViT는 이미지 또는 비디오 프레임 단위로 실행되고 graph shape가 compile time에 고정된다. <code dir="auto">visual.max_seq_len=16384</code>로 compile하면 실제 입력이 1,024 patches여도 16,384 patches 분량을 계산한다. 이를 줄이기 위해 <code dir="auto">visual.max_seq_len=[1024, 3136, 16384]</code>처럼 여러 ViT graph를 함께 compile하고, runtime에 실제 patch 수를 담을 수 있는 가장 작은 bucket을 선택하는 방식을 제시한다. 예를 들어 Qwen3-VL의 <code dir="auto">patch_size=16</code>, <code dir="auto">spatial_merge_size=2</code> 기준으로 1024x1024 image는 1,024 merged patches, 1792x1792는 3,136, 4096x4096는 16,384에 대응한다.</p>
+<p>디코더도 같은 문제가 있다. <code dir="auto">batch_size=8</code>로 compile된 decoder는 실제 active batch가 3이어도 8 slot 분량을 계산하므로, 튜토리얼은 <code dir="auto">decoder_batch_sizes=[1, 2, 4, 8]</code>처럼 여러 decoder graph를 함께 compile해 실제 batch에 맞는 graph를 선택하는 방식을 설명한다. 또한 16 device server에서는 <code dir="auto">visual</code>을 device 0-7에, LM을 device 8-15에 분리 배치하면 두 submodule이 같은 device memory를 동시에 점유하지 않아 큰 batch와 긴 context에서 memory pressure를 줄일 수 있다고 설명한다.</p>
+<p>그래도 GPU 대비 평가에서는 critical signal이다. 실제 workload가 작은 image, 짧은 prompt, 짧은 output이라면 한 장의 high-memory GPU로 충분할 수 있고, 8 NPU configuration은 cost, slot, operational complexity에서 불리할 수 있다. RBLN stack이 설득력을 가지려면 같은 workload/SLO에서 8 NPU 기준 tokens/sec/W, p99 latency, concurrency, server cost가 GPU baseline을 이겨야 한다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Qwen3-VL-2B RSD question</th><th>Why it matters</th></tr></thead><tbody><tr><td>더 작은 <code dir="auto">max_seq_len</code>으로 compile할 수 있는가?</td><td>target context가 짧으면 memory reservation과 compile envelope를 줄일 수 있다.</td></tr><tr><td>visual <code dir="auto">max_seq_len</code>을 실제 image/video resolution에 맞출 수 있는가?</td><td>patch/token budget이 visual encoder cost와 activation memory를 좌우한다.</td></tr><tr><td>ViT input-length bucket을 몇 개 둘 것인가?</td><td>bucket 수가 많으면 padding waste는 줄지만 compile time과 device memory 사용량이 늘어난다.</td></tr><tr><td><code dir="auto">decoder_batch_sizes</code>가 traffic의 active batch distribution과 맞는가?</td><td>decode 단계의 unused slot 계산을 줄일 수 있다.</td></tr><tr><td><code dir="auto">visual</code>과 LM을 같은 device pool에 둘 것인가, 분리할 것인가?</td><td>memory pressure와 available NPU count 사이의 trade-off다.</td></tr><tr><td><code dir="auto">tensor_parallel_size</code>를 1, 2, 4로 낮출 수 있는가?</td><td>minimum NPU count가 deployment economics를 결정한다.</td></tr><tr><td>8 NPU에서 GPU 1장 대비 p99와 tokens/sec/W가 어떤가?</td><td>지원 여부가 아니라 production value를 판단하는 기준이다.</td></tr><tr><td>compile-time shape가 traffic distribution과 맞는가?</td><td>너무 큰 envelope는 padding, memory, scheduling waste를 만들 수 있다.</td></tr></tbody></table>
+<p><code dir="auto">torch-rbln</code>은 가장 낮은 software layer를 보여준다. PyTorch out-of-tree extension으로 <code dir="auto">rbln</code> device, <code dir="auto">torch.rbln</code>, <code dir="auto">torch.compile</code> surface를 제공한다. README는 beta 상태와 API 변화 가능성을 명시하므로 production serving의 출발점으로 보기보다는, unsupported op, eager debugging, operator lowering, PyTorch integration 방향을 이해하는 자료로 보는 것이 맞다.</p>
+<p>C/C++ language binding은 Python runtime을 사용할 수 없거나 아주 낮은 latency를 요구하는 application을 위한 runtime API로 공개되어 있다. 설치 자체가 compiler 내부 분석에 큰 도움을 주지는 않지만, C/C++ service process에서 <code dir="auto">.rbln</code> artifact를 load하고 inference를 호출하는 deployment boundary를 이해하는 데는 유용하다. 따라서 목적이 LLM serving stack과 model coverage 분석이면 우선순위는 낮고, embedded service, custom C++ server, Python overhead 제거, non-Python production integration을 검토할 때 살펴볼 가치가 있다.</p>
+<p>이 네 repository를 하나의 stack으로 묶으면 다음 그림이 된다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">torch-rbln:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">PyTorch device and operator integration</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">optimum-rbln:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">Hugging Face model export, compile, and inference bridge</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">vllm-rbln:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">LLM serving engine integration and runtime features</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">rbln-model-zoo:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">validated model examples, deployment recipes, and coverage map</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="torch-rbln:  PyTorch device and operator integrationoptimum-rbln:  Hugging Face model export, compile, and inference bridgevllm-rbln:  LLM serving engine integration and runtime featuresrbln-model-zoo:  validated model examples, deployment recipes, and coverage map"><div></div></button></div></figure></div>
+<p>평가할 때의 핵심 질문은 다음이다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Question</th><th>Where to look</th></tr></thead><tbody><tr><td>우리 모델 architecture가 공개 예제에 있는가?</td><td><code dir="auto">rbln-model-zoo/model_registry.yaml</code>, <code dir="auto">vllm/</code>, <code dir="auto">huggingface/</code></td></tr><tr><td>serving SLO에 필요한 vLLM feature가 구현되어 있는가?</td><td><code dir="auto">vllm-rbln/docs/</code>, <code dir="auto">vllm_rbln/</code>, <code dir="auto">benchmarks/</code></td></tr><tr><td>compile artifact를 어떻게 만들고 재사용하는가?</td><td><code dir="auto">optimum-rbln/examples/</code>, <code dir="auto">src/optimum/rbln/</code></td></tr><tr><td>unsupported operator나 fallback을 어디서 확인할 수 있는가?</td><td><code dir="auto">torch-rbln/docs/</code>, <code dir="auto">torch_rbln/</code>, profiler output</td></tr><tr><td>public repository만으로 알 수 없는 것은 무엇인가?</td><td><code dir="auto">rebel-compiler</code> 내부 최적화, closed binary behavior, 실제 hardware capacity</td></tr></tbody></table>
+<p>따라서 RBLN 공개 자료를 읽는 좋은 순서는 <code dir="auto">rbln-model-zoo</code>로 model coverage를 확인하고, <code dir="auto">vllm-rbln</code>으로 serving behavior를 본 다음, <code dir="auto">optimum-rbln</code>으로 compile/export path를 확인하고, 필요할 때 <code dir="auto">torch-rbln</code>으로 lower-level PyTorch integration을 내려가는 것이다. 반대로 compiler 내부와 exact hardware scheduling을 공개 source만으로 추론하려고 하면 근거가 약해진다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="4-furiosaai-rngd-tcp-furiosa-llm">4. FuriosaAI: RNGD, TCP, Furiosa-LLM</h2><a class="sl-anchor-link" href="#4-furiosaai-rngd-tcp-furiosa-llm"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “4. FuriosaAI: RNGD, TCP, Furiosa-LLM”</span></a></div>
+<p>FuriosaAI의 공개 자료에서 핵심 키워드는 <strong>Tensor Contraction Processor(TCP), HBM3, large SRAM, low power, cloud-native integration</strong>이다.</p>
+<p>공식 RNGD overview는 RNGD를 FuriosaAI의 2세대 NPU로 설명한다. 최신 developer docs 기준 RNGD는 TCP architecture를 사용하고, TSMC 5nm, 1.0GHz, BF16 256 TFLOPS, FP8 512 TFLOPS, INT8 512 TOPS, INT4 1024 TOPS, HBM3 1.5TB/s를 제시한다. 같은 문서는 48GB HBM3, 256MB SRAM, PCIe Gen5 x16, passive cooling, 150W TDP, SR-IOV, 8 virtual functions, ECC, secure boot with root of trust를 공개한다.</p>
+<aside aria-label="Note" class="starlight-aside starlight-aside--note"><p class="starlight-aside__title" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="starlight-aside__icon"><path d="M12 11C11.7348 11 11.4804 11.1054 11.2929 11.2929C11.1054 11.4804 11 11.7348 11 12V16C11 16.2652 11.1054 16.5196 11.2929 16.7071C11.4804 16.8946 11.7348 17 12 17C12.2652 17 12.5196 16.8946 12.7071 16.7071C12.8946 16.5196 13 16.2652 13 16V12C13 11.7348 12.8946 11.4804 12.7071 11.2929C12.5196 11.1054 12.2652 11 12 11ZM12.38 7.08C12.1365 6.97998 11.8635 6.97998 11.62 7.08C11.4973 7.12759 11.3851 7.19896 11.29 7.29C11.2017 7.3872 11.1306 7.49882 11.08 7.62C11.024 7.73868 10.9966 7.86882 11 8C10.9992 8.13161 11.0245 8.26207 11.0742 8.38391C11.124 8.50574 11.1973 8.61656 11.29 8.71C11.3872 8.79833 11.4988 8.86936 11.62 8.92C11.7715 8.98224 11.936 9.00632 12.099 8.99011C12.2619 8.97391 12.4184 8.91792 12.5547 8.82707C12.691 8.73622 12.8029 8.61328 12.8805 8.46907C12.9582 8.32486 12.9992 8.16378 13 8C12.9963 7.73523 12.8927 7.48163 12.71 7.29C12.6149 7.19896 12.5028 7.12759 12.38 7.08ZM12 2C10.0222 2 8.08879 2.58649 6.4443 3.6853C4.79981 4.78412 3.51809 6.3459 2.76121 8.17317C2.00433 10.0004 1.8063 12.0111 2.19215 13.9509C2.578 15.8907 3.53041 17.6725 4.92894 19.0711C6.32746 20.4696 8.10929 21.422 10.0491 21.8079C11.9889 22.1937 13.9996 21.9957 15.8268 21.2388C17.6541 20.4819 19.2159 19.2002 20.3147 17.5557C21.4135 15.9112 22 13.9778 22 12C22 10.6868 21.7413 9.38642 21.2388 8.17317C20.7363 6.95991 19.9997 5.85752 19.0711 4.92893C18.1425 4.00035 17.0401 3.26375 15.8268 2.7612C14.6136 2.25866 13.3132 2 12 2ZM12 20C10.4178 20 8.87104 19.5308 7.55544 18.6518C6.23985 17.7727 5.21447 16.5233 4.60897 15.0615C4.00347 13.5997 3.84504 11.9911 4.15372 10.4393C4.4624 8.88743 5.22433 7.46197 6.34315 6.34315C7.46197 5.22433 8.88743 4.4624 10.4393 4.15372C11.9911 3.84504 13.5997 4.00346 15.0615 4.60896C16.5233 5.21447 17.7727 6.23984 18.6518 7.55544C19.5308 8.87103 20 10.4177 20 12C20 14.1217 19.1572 16.1566 17.6569 17.6569C16.1566 19.1571 14.1217 20 12 20Z"></path></svg>Note</p><div class="starlight-aside__content"><p>Furiosa product page와 developer docs 사이에는 TDP 표기가 다르게 보이는 시점이 있었다. 이 노트는 2026.2.0 developer docs의 RNGD hardware specification을 기준으로 150W를 사용한다. 구매나 capacity planning에서는 항상 최신 공식 datasheet와 실제 server wall power를 다시 확인해야 한다.</p></div></aside>
+<div class="sl-heading-wrapper level-h3"><h3 id="41-tcp-matrix-multiply보다-넓은-primitive를-노린다">4.1 TCP: matrix multiply보다 넓은 primitive를 노린다</h3><a class="sl-anchor-link" href="#41-tcp-matrix-multiply보다-넓은-primitive를-노린다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “4.1 TCP: matrix multiply보다 넓은 primitive를 노린다”</span></a></div>
+<p>GPU와 TPU 설명은 보통 matrix multiplication unit에서 시작한다. Furiosa는 RNGD를 Tensor Contraction Processor라고 설명한다. Tensor contraction은 matmul을 포함하지만, 더 일반적인 multi-dimensional tensor operation으로 읽을 수 있다.</p>
+<p>LLM inference 관점에서 이 주장은 다음 가능성을 뜻한다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Claim direction</th><th>Practical interpretation</th></tr></thead><tbody><tr><td>tensor contraction native execution</td><td>matmul뿐 아니라 attention, projection, reduction, layout transform을 compiler가 더 직접적으로 낮출 수 있다.</td></tr><tr><td>compiler-managed layout</td><td>tensor layout과 on-chip memory placement가 performance model의 일부가 된다.</td></tr><tr><td>large SRAM + HBM3</td><td>SRAM reuse와 HBM bandwidth를 함께 활용하려는 design이다.</td></tr><tr><td>low TDP</td><td>tokens/sec/W와 rack density를 주요 metric으로 삼는다.</td></tr></tbody></table>
+<p>주의할 점은 “TCP가 더 일반적이다”라는 설명만으로 실성능을 알 수 없다는 것이다. 실제 질문은 늘 같다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">target model graph가 TCP primitive로 잘 낮아지는가?</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">unsupported op가 CPU fallback으로 빠지지 않는가?</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">compiler가 dynamic serving shape를 잘 처리하는가?</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="target model graph가 TCP primitive로 잘 낮아지는가?unsupported op가 CPU fallback으로 빠지지 않는가?compiler가 dynamic serving shape를 잘 처리하는가?"><div></div></button></div></figure></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="42-rngd의-memory-story">4.2 RNGD의 memory story</h3><a class="sl-anchor-link" href="#42-rngd의-memory-story"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “4.2 RNGD의 memory story”</span></a></div>
+<p>RNGD의 공개 product numbers는 NPU 평가에서 중요한 축을 잘 보여준다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Public spec</th><th>Why it matters</th></tr></thead><tbody><tr><td>48GB HBM3</td><td>7B/13B/32B 계열 model fit과 KV cache capacity에 직접 영향</td></tr><tr><td>1.5TB/s HBM3 bandwidth</td><td>decode weight/KV traffic의 first-order bound</td></tr><tr><td>256MB SRAM</td><td>on-chip tile/cache/scratchpad reuse 가능성</td></tr><tr><td>PCIe Gen5 x16</td><td>host-device path, P2P, multi-card serving에서 중요</td></tr><tr><td>SR-IOV, 8 virtual functions</td><td>multi-tenant partitioning과 isolation의 근거</td></tr><tr><td>150W TDP</td><td>perf/W와 air-cooled deployment argument의 중심</td></tr></tbody></table>
+<p>이 수치들은 GPU와 단순 비교하기 어렵다. 예를 들어 H100/B200은 더 큰 raw compute와 bandwidth를 가질 수 있지만, TDP와 cost도 다르다. NPU의 가치는 보통 “absolute fastest”보다 “target SLO에서 cheaper and more efficient”에 있다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="43-furiosa-llm과-vllm-compatible-api">4.3 Furiosa-LLM과 vLLM-compatible API</h3><a class="sl-anchor-link" href="#43-furiosa-llm과-vllm-compatible-api"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “4.3 Furiosa-LLM과 vLLM-compatible API”</span></a></div>
+<p>FuriosaAI는 Furiosa-LLM을 LLM/Multi-modal LLM inference engine으로 제공한다. 공식 문서 기준 주요 기능에는 vLLM-compatible API, PagedAttention 기반 KV cache management, continuous batching, FP8 quantization, data/tensor/pipeline parallelism, OpenAI-compatible server, tool calling, reasoning parser, structured output, chunked prefill이 포함된다. Speculative decoding은 2026.3 planned로 표시되어 있다.</p>
+<p>이것은 Rebellions와 비슷한 방향이다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Hardware alone:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">interesting chip</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Hardware + LLM runtime:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">deployable inference system</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Hardware + runtime + Kubernetes + metrics:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">production candidate</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Hardware alone:  interesting chipHardware + LLM runtime:  deployable inference systemHardware + runtime + Kubernetes + metrics:  production candidate"><div></div></button></div></figure></div>
+<p>Furiosa software stack 문서는 Furiosa Compiler와 Runtime의 역할도 명확히 나눈다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Component</th><th>Practical meaning</th></tr></thead><tbody><tr><td>Kernel driver / firmware / PE runtime</td><td>Linux device exposure, low-level PE scheduling, host runtime communication</td></tr><tr><td>Furiosa Compiler</td><td>graph optimization, operator fusion, memory allocation, scheduling, cross-layer data movement optimization</td></tr><tr><td>Furiosa Runtime</td><td>compiled executable loading, NPU program scheduling, NPU/host memory allocation, multi-NPU entry point</td></tr><tr><td>Furiosa Model Compressor</td><td>calibration and quantization toolkit</td></tr><tr><td>Furiosa-LLM</td><td>vLLM-compatible serving engine for LLM and multimodal LLM workloads</td></tr></tbody></table>
+<p>Quantization은 특히 조심해서 읽어야 한다. 2026.2 docs 기준 Furiosa-LLM은 FP8 quantization을 주요 기능으로 제시하고, INT4, INT8, GPTQ, AWQ는 planned로 표시한다. 따라서 benchmark 비교에서는 “RNGD hardware가 INT4 TOPS를 공개한다”와 “현재 serving stack이 production INT4 model path를 제공한다”를 분리해야 한다.</p>
+<p>Furiosa의 공개 GitHub 자료도 production surface를 보여준다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Public artifact</th><th>What to learn from it</th></tr></thead><tbody><tr><td><code dir="auto">furiosa-sdk</code></td><td>compiler, profiler, Python bindings, quantizer, serving library</td></tr><tr><td><code dir="auto">furiosa-perf</code></td><td>Furiosa NPU and vLLM benchmark workflow comparison surface</td></tr><tr><td><code dir="auto">furiosa-apps</code></td><td>reference applications and integrations</td></tr><tr><td>DRA driver guide</td><td>Kubernetes Dynamic Resource Allocation integration</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h3"><h3 id="44-prefix-caching-and-hybrid-kv-cache">4.4 Prefix caching and hybrid KV cache</h3><a class="sl-anchor-link" href="#44-prefix-caching-and-hybrid-kv-cache"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “4.4 Prefix caching and hybrid KV cache”</span></a></div>
+<p>Furiosa-LLM docs에서 가장 중요한 serving detail은 KV cache 관련 기능이다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Feature</th><th>What it optimizes</th></tr></thead><tbody><tr><td>PagedAttention</td><td>KV cache memory management and attention memory efficiency</td></tr><tr><td>Prefix caching</td><td>repeated prefix prefill cost and TTFT</td></tr><tr><td>Hybrid KV cache management</td><td>memory over-provisioning in mixed global/sliding-window attention models</td></tr><tr><td>Chunked prefill</td><td>prefill/decode scheduling balance</td></tr></tbody></table>
+<p>Prefix caching은 공통 system prompt, instruction template, shared conversation history, document QA처럼 prefix가 반복되는 workload에서 유용하다. Furiosa docs는 prefix cache를 scheduler가 자동 관리하고, token-level matching과 radix tree를 사용해 matching prefix를 찾는다고 설명한다. 2026.2 release note에서는 prefix caching이 default로 활성화되었다.</p>
+<p>Hybrid KV cache management는 더 미묘하다. 일부 모델은 global attention layer와 sliding-window attention layer를 섞는다. Global attention은 full sequence length에 따라 KV cache가 커지지만, sliding-window attention은 window size로 bound된다. 하나의 KV pool로 모두 관리하면 sliding-window layer에 필요 이상으로 memory를 잡아둘 수 있다.</p>
+<p>Furiosa-LLM은 이를 위해 global-attention pool과 sliding-window pool을 분리하고, sliding-window에서 active window 밖으로 밀려난 block을 조기 회수한다. 이는 long-context serving에서 capacity와 fragmentation을 줄이는 방향이다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Global attention:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">cache grows with full prefix length</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Sliding-window attention:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">cache is bounded by window size</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Hybrid KV manager:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">allocate separate pools</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">reclaim expired sliding-window blocks early</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">keep global blocks reusable for prefix history</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Global attention:  cache grows with full prefix lengthSliding-window attention:  cache is bounded by window sizeHybrid KV manager:  allocate separate pools  reclaim expired sliding-window blocks early  keep global blocks reusable for prefix history"><div></div></button></div></figure></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="45-model-parallelism-and-llm-d-integration">4.5 Model parallelism and llm-d integration</h3><a class="sl-anchor-link" href="#45-model-parallelism-and-llm-d-integration"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “4.5 Model parallelism and llm-d integration”</span></a></div>
+<p>Furiosa-LLM은 TP, PP, DP를 모두 설명한다. 이 자체는 GPU serving에서도 익숙한 개념이지만, NPU에서는 memory capacity, inter-device bandwidth, Kubernetes placement까지 함께 봐야 한다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Parallelism</th><th>Furiosa-LLM reading</th></tr></thead><tbody><tr><td>Tensor parallelism</td><td>layer를 여러 device에 나누어 per-device weight/KV/activation memory를 줄이고 aggregate compute/bandwidth를 활용한다.</td></tr><tr><td>Pipeline parallelism</td><td>layer stage를 device별로 나누어 큰 모델을 올린다.</td></tr><tr><td>Data parallelism</td><td>replica를 여러 개 두고 request routing과 cache locality를 관리한다.</td></tr></tbody></table>
+<p>TP는 memory와 latency에 도움을 줄 수 있지만 collective communication이 추가된다. TP degree가 너무 커지면 all-reduce/all-gather overhead 때문에 오히려 느려질 수 있다는 점은 GPU/TPU와 동일하다.</p>
+<p>2026.2 release note에서 특히 중요한 변화는 DP Router와 prefix-aware routing이다. DP Router는 DP replica 앞에서 request distribution을 별도로 제어하고, prefix-aware routing은 같은 prefix cache를 가진 replica로 요청을 보내 cache hit rate를 높이려는 방향이다.</p>
+<p>Furiosa docs는 llm-d integration도 설명한다. llm-d는 Kubernetes-native distributed inference framework로, intelligent inference scheduling, prefill/decode disaggregation, wide expert parallelism을 제공하는 방향이다. Furiosa-LLM은 Model Server Protocol metrics를 제공해 queued requests, running requests, KV cache utilization 등을 노출한다.</p>
+<p>다만 제약도 명시되어 있다. 최신 docs 기준 Furiosa-LLM은 llm-d의 precise prefix-cache-aware scoring에 필요한 KV cache events를 아직 구현하지 않았다고 설명한다. 따라서 “prefix-aware routing이 있다”와 “정밀한 cache-event 기반 scoring이 완성됐다”를 구분해야 한다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="46-cloud-native-operations-and-host-tuning">4.6 Cloud-native operations and host tuning</h3><a class="sl-anchor-link" href="#46-cloud-native-operations-and-host-tuning"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “4.6 Cloud-native operations and host tuning”</span></a></div>
+<p>Furiosa docs는 Kubernetes와 device management를 상당히 적극적으로 다룬다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Surface</th><th>Why it matters</th></tr></thead><tbody><tr><td>Kubernetes deployment guide</td><td>Furiosa-LLM OpenAI-compatible server를 cluster workload로 올린다.</td></tr><tr><td>Cloud Native Toolkit</td><td>container/Kubernetes 환경에서 NPU workload 배포와 관리를 지원한다.</td></tr><tr><td>Device Plugin / DRA Driver / NPU Operator / Metrics Exporter</td><td>scheduler integration, health, metrics, lifecycle management</td></tr><tr><td>Furiosa SMI</td><td>NPU information, topology, utilization, performance data를 확인한다.</td></tr><tr><td>Host PCI tuning</td><td>hugepage, PCI ACS, latency-performance profile로 PCIe/DMA/P2P variance를 줄인다.</td></tr></tbody></table>
+<p>DRA driver는 alpha로 표시되어 있다. Kubernetes 1.34+와 CDI가 필요하며, device discovery, health tracking, Kubernetes DRA resource registration을 제공한다. 따라서 production 환경에서는 API 안정성, upgrade path, Device Plugin과의 관계를 별도로 검증해야 한다.</p>
+<p>Host PCI tuning 문서도 실전적이다. Hugepage는 큰 pinned allocation이나 DMA buffer에서 TLB/page-walk overhead를 줄일 수 있다. PCI ACS disable은 같은 switch 아래 endpoint 사이 P2P path를 더 직접적으로 만들 수 있지만, endpoint isolation을 낮춘다. Multi-tenant 또는 strict security 환경에서는 적용 여부를 신중하게 결정해야 한다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="47-virtualization-and-multi-tenancy">4.7 Virtualization and multi-tenancy</h3><a class="sl-anchor-link" href="#47-virtualization-and-multi-tenancy"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “4.7 Virtualization and multi-tenancy”</span></a></div>
+<p>RNGD 문서는 SR-IOV를 통해 physical chip을 virtual function으로 나눌 수 있다고 설명한다. 최신 developer docs 기준 multi-instance support는 8이고, SR-IOV virtual function도 8개로 공개되어 있다. Secure boot with root of trust와 ECC도 명시되어 있다.</p>
+<p>이 기능은 datacenter 운영에서 중요하다. LLM serving은 항상 하나의 거대한 model만 돌리는 것이 아니다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Use case</th><th>Why partitioning matters</th></tr></thead><tbody><tr><td>many small models</td><td>accelerator를 작은 tenant에 나눠 배정할 수 있다.</td></tr><tr><td>mixed SLO workloads</td><td>latency-sensitive job과 throughput job을 격리할 수 있다.</td></tr><tr><td>enterprise serving</td><td>hardware isolation, secure boot, model encryption 요구가 생긴다.</td></tr><tr><td>Kubernetes scheduling</td><td>GPU처럼 coarse allocation만으로는 utilization이 낮아질 수 있다.</td></tr></tbody></table>
+<p>다만 partitioning은 공짜가 아니다. 각 partition의 memory bandwidth, SRAM slice, scheduler overhead, context isolation이 실제 p99에 어떤 영향을 주는지 재야 한다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="5-rebellions와-furiosaai를-같은-질문으로-비교하기">5. Rebellions와 FuriosaAI를 같은 질문으로 비교하기</h2><a class="sl-anchor-link" href="#5-rebellions와-furiosaai를-같은-질문으로-비교하기"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “5. Rebellions와 FuriosaAI를 같은 질문으로 비교하기”</span></a></div>
+<p>두 회사의 architecture 이름은 다르지만, 평가 프레임은 같다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Evaluation axis</th><th>Rebellions</th><th>FuriosaAI</th><th>What to verify</th></tr></thead><tbody><tr><td>Compute primitive</td><td>Neural Engine based NPU SoC</td><td>Tensor Contraction Processor</td><td>target model graph lowering</td></tr><tr><td>On-chip memory</td><td>local/global SRAM hierarchy</td><td>256MB SRAM public product spec</td><td>tile reuse, graph breaks, SRAM pressure</td></tr><tr><td>Off-chip memory</td><td>GDDR6 on ATOM public docs; newer products may differ</td><td>48GB HBM3 on RNGD</td><td>model fit, KV fit, bandwidth-bound decode</td></tr><tr><td>Runtime</td><td>RBLN SDK, vLLM RBLN</td><td>Furiosa SDK, Furiosa-LLM</td><td>API compatibility, model coverage</td></tr><tr><td>Serving primitives</td><td>Flash/custom attention, APC, dynamic decoder batch sizes, RSD</td><td>PagedAttention, prefix caching, hybrid KV cache, chunked prefill</td><td>p50/p99 under mixed workloads</td></tr><tr><td>Scale-out</td><td>RSD, multi-node, disaggregated prefill, MoE support</td><td>TP/PP/DP, DP Router, llm-d, prefill/decode disaggregation</td><td>placement, collectives, failure recovery</td></tr><tr><td>Operations</td><td>model zoo, docs, plugin integration</td><td>SMI, DRA alpha, metrics exporter, NPU Operator, host PCI tuning</td><td>installability, observability, upgrades</td></tr></tbody></table>
+<p>이 표의 핵심은 “어느 회사가 더 좋은가”가 아니다. 공개 자료가 말하는 design intent를 같은 실험 언어로 번역하는 것이다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="6-npu-benchmark를-읽는-법">6. NPU benchmark를 읽는 법</h2><a class="sl-anchor-link" href="#6-npu-benchmark를-읽는-법"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “6. NPU benchmark를 읽는 법”</span></a></div>
+<p>NPU 벤치마크를 읽을 때 가장 위험한 숫자는 peak TOPS다. Peak TOPS는 필요한 정보지만 충분하지 않다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="61-반드시-같이-봐야-하는-조건">6.1 반드시 같이 봐야 하는 조건</h3><a class="sl-anchor-link" href="#61-반드시-같이-봐야-하는-조건"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “6.1 반드시 같이 봐야 하는 조건”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Reported metric</th><th>Required context</th></tr></thead><tbody><tr><td>tokens/sec</td><td>batch size, input length, output length, concurrency</td></tr><tr><td>latency</td><td>TTFT, TPOT/ITL, E2E, p50/p95/p99 분리</td></tr><tr><td>power</td><td>chip power인지 server wall power인지</td></tr><tr><td>memory</td><td>model weights, KV cache, max context, fragmentation</td></tr><tr><td>quantization</td><td>format, calibration, quality metric, native support</td></tr><tr><td>model</td><td>architecture, GQA/MLA/MoE, hidden size, vocab, tokenizer</td></tr><tr><td>serving</td><td>continuous batching, prefix cache, scheduler policy</td></tr><tr><td>comparison GPU</td><td>exact GPU SKU, power cap, software stack, quantization parity</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h3"><h3 id="62-useful-benchmark-matrix">6.2 Useful benchmark matrix</h3><a class="sl-anchor-link" href="#62-useful-benchmark-matrix"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “6.2 Useful benchmark matrix”</span></a></div>
+<p>NPU를 실제로 평가한다면 최소한 다음 matrix가 필요하다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Scenario</th><th>Why</th></tr></thead><tbody><tr><td>batch=1 short prompt</td><td>launch/runtime overhead와 single-stream latency를 본다.</td></tr><tr><td>high concurrency short prompt</td><td>continuous batching과 scheduler overhead를 본다.</td></tr><tr><td>long prompt prefill</td><td>compute path와 attention kernel을 본다.</td></tr><tr><td>long context decode</td><td>KV cache bandwidth/capacity를 본다.</td></tr><tr><td>mixed prompt/output length</td><td>production distribution과 p99 tail을 본다.</td></tr><tr><td>quantized model</td><td>native low precision path와 quality trade-off를 본다.</td></tr><tr><td>multi-device</td><td>communication roofline과 placement를 본다.</td></tr><tr><td>rolling upgrade/failure</td><td>operational maturity를 본다.</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h3"><h3 id="63-gpu와-공정하게-비교하는-방법">6.3 GPU와 공정하게 비교하는 방법</h3><a class="sl-anchor-link" href="#63-gpu와-공정하게-비교하는-방법"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “6.3 GPU와 공정하게 비교하는 방법”</span></a></div>
+<p>GPU와 NPU를 비교할 때는 equal footing이 필요하다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Bad comparison:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">NPU INT4 optimized runtime vs GPU BF16 generic runtime</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Better comparison:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">same model</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">same quality target</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">same input/output distribution</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">same SLO</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">best available production runtime on each platform</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">wall power and server cost included</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Bad comparison:  NPU INT4 optimized runtime vs GPU BF16 generic runtimeBetter comparison:  same model  same quality target  same input/output distribution  same SLO  best available production runtime on each platform  wall power and server cost included"><div></div></button></div></figure></div>
+<p>특히 quantization parity가 중요하다. NPU가 INT4 native path를 쓰고 GPU가 BF16이면 NPU가 좋아 보일 수 있다. 반대로 GPU가 TensorRT-LLM/FP8 또는 AWQ fused kernel을 쓰고 NPU가 아직 FP16 path라면 GPU가 좋아 보일 수 있다. 비교는 workload와 software stack의 현재 성숙도까지 포함해야 한다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="7-npu-도입-전-질문지">7. NPU 도입 전 질문지</h2><a class="sl-anchor-link" href="#7-npu-도입-전-질문지"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “7. NPU 도입 전 질문지”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="71-hardware-fit">7.1 Hardware fit</h3><a class="sl-anchor-link" href="#71-hardware-fit"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “7.1 Hardware fit”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Question</th><th>Why it matters</th></tr></thead><tbody><tr><td>target model weights가 memory에 들어가는가?</td><td>sharding이 필요하면 latency와 complexity가 증가한다.</td></tr><tr><td>KV cache까지 포함하면 concurrency가 얼마나 되는가?</td><td>serving capacity는 weights보다 KV가 먼저 막을 수 있다.</td></tr><tr><td>HBM/GDDR bandwidth가 decode target을 만족하는가?</td><td>decode는 bytes/token에 민감하다.</td></tr><tr><td>SRAM이 어떤 방식으로 노출되는가?</td><td>compiler/runtime이 reuse를 만들 수 있어야 한다.</td></tr><tr><td>host-device path가 병목이 아닌가?</td><td>graph break, tokenizer, sampling, CPU fallback을 확인해야 한다.</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h3"><h3 id="72-software-fit">7.2 Software fit</h3><a class="sl-anchor-link" href="#72-software-fit"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “7.2 Software fit”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Question</th><th>Why it matters</th></tr></thead><tbody><tr><td>vLLM-compatible API가 필요한 기능을 모두 지원하는가?</td><td>API compatibility와 feature compatibility는 다르다.</td></tr><tr><td>model conversion/compile 시간이 operationally acceptable한가?</td><td>frequent model updates에서는 compile path가 중요하다.</td></tr><tr><td>profiler가 roofline 질문에 답할 수 있는가?</td><td>black-box accelerator는 debugging cost가 커진다.</td></tr><tr><td>dynamic batch shape가 어떻게 처리되는가?</td><td>compiled decoder shape와 request distribution이 맞지 않으면 padding waste가 생긴다.</td></tr><tr><td>custom kernel path가 필요한 operator를 감당하는가?</td><td>Triton-like surface가 있어도 지원 연산과 compile constraint를 확인해야 한다.</td></tr><tr><td>unsupported operator가 어떻게 처리되는가?</td><td>CPU fallback은 p99 latency를 망가뜨릴 수 있다.</td></tr><tr><td>quantization toolchain이 quality validation과 연결되는가?</td><td>speedup만 보고 quality regression을 놓치면 안 된다.</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h3"><h3 id="73-operations-fit">7.3 Operations fit</h3><a class="sl-anchor-link" href="#73-operations-fit"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “7.3 Operations fit”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Question</th><th>Why it matters</th></tr></thead><tbody><tr><td>Kubernetes device plugin, DRA, metrics exporter가 있는가?</td><td>scheduler integration 없이 production 운영이 어렵다.</td></tr><tr><td>DRA와 Device Plugin을 동시에 켜지 않는가?</td><td>중복 device exposure는 scheduling과 debugging을 혼란스럽게 만든다.</td></tr><tr><td>제품 타입, NUMA, PCIe topology, UUID 조건으로 device를 선택할 수 있는가?</td><td>multi-card/multi-NPU 서버에서는 placement가 latency와 bandwidth에 영향을 준다.</td></tr><tr><td>multi-tenancy isolation이 가능한가?</td><td>enterprise serving에는 noisy neighbor 문제가 생긴다.</td></tr><tr><td>failure handling과 rolling deploy가 검증되었는가?</td><td>accelerator reset과 job eviction policy가 필요하다.</td></tr><tr><td>vendor support와 release cadence가 안정적인가?</td><td>fast-moving SDK는 upgrade risk가 크다.</td></tr><tr><td>fallback path가 있는가?</td><td>NPU unavailable 상황에서 GPU/CPU fallback 전략이 필요하다.</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h2"><h2 id="8-이-레포와의-연결">8. 이 레포와의 연결</h2><a class="sl-anchor-link" href="#8-이-레포와의-연결"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “8. 이 레포와의 연결”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Repository topic</th><th>NPU connection</th></tr></thead><tbody><tr><td>Week 1 performance metrics</td><td>NPU도 TTFT, TPOT, throughput, goodput, p99로 읽어야 한다.</td></tr><tr><td>Week 2 hardware foundations</td><td>SRAM/HBM/GDDR/NoC를 roofline으로 해석한다.</td></tr><tr><td>Week 3 KV cache</td><td>PagedAttention, memory compaction, long-context decode가 핵심 검증 항목이다.</td></tr><tr><td>Week 4 quantization</td><td>NPU의 native FP8/INT8/INT4 path가 실제 latency와 quality로 이어지는지 확인한다.</td></tr><tr><td>DSA appendix</td><td>NPU는 inference DSA의 실제 사례다.</td></tr><tr><td>GPU/TPU appendix</td><td>GPU flexibility, TPU compiler model, NPU product stack을 비교한다.</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h2"><h2 id="9-practical-tips-and-notes">9. Practical Tips and Notes</h2><a class="sl-anchor-link" href="#9-practical-tips-and-notes"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “9. Practical Tips and Notes”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="npu는-gpu의-저렴한-대체품이-아니라-다른-product-surface다">NPU는 GPU의 저렴한 대체품이 아니라 다른 product surface다</h3><a class="sl-anchor-link" href="#npu는-gpu의-저렴한-대체품이-아니라-다른-product-surface다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “NPU는 GPU의 저렴한 대체품이 아니라 다른 product surface다”</span></a></div>
+<p>NPU를 GPU slot에 꽂는 accelerator처럼 볼 수는 있지만, 실제 채택 여부는 compiler/runtime/serving stack까지 포함해 결정된다. CUDA kernel 하나를 직접 고치는 식의 운영은 어렵고, vendor toolchain과 supported model path에 더 의존한다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="peak-tops보다-tokenssecw와-p99가-중요하다">Peak TOPS보다 tokens/sec/W와 p99가 중요하다</h3><a class="sl-anchor-link" href="#peak-tops보다-tokenssecw와-p99가-중요하다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Peak TOPS보다 tokens/sec/W와 p99가 중요하다”</span></a></div>
+<p>Inference business에서는 peak가 아니라 sustained serving이 중요하다. 좋은 benchmark는 다음을 함께 보여준다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">tokens/sec</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">tokens/sec/W</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">TTFT p50/p95/p99</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">TPOT or ITL p50/p95/p99</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">quality metric after quantization</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">server wall power</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="tokens/sectokens/sec/WTTFT p50/p95/p99TPOT or ITL p50/p95/p99quality metric after quantizationserver wall power"><div></div></button></div></figure></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="공개-자료는-design-intent를-읽는-데-좋고-capacity-planning에는-부족하다">공개 자료는 design intent를 읽는 데 좋고, capacity planning에는 부족하다</h3><a class="sl-anchor-link" href="#공개-자료는-design-intent를-읽는-데-좋고-capacity-planning에는-부족하다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “공개 자료는 design intent를 읽는 데 좋고, capacity planning에는 부족하다”</span></a></div>
+<p>Vendor docs는 architecture와 intended use case를 이해하는 데 유용하다. 하지만 capacity planning에는 실제 workload replay가 필요하다.</p>
+<p>예를 들어 다음 조건이 조금만 달라도 결과가 바뀐다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Variable</th><th>Effect</th></tr></thead><tbody><tr><td>input/output length distribution</td><td>TTFT와 TPOT balance 변화</td></tr><tr><td>concurrency</td><td>batching efficiency와 queueing delay 변화</td></tr><tr><td>quantization method</td><td>quality와 runtime path 변화</td></tr><tr><td>model architecture</td><td>GQA/MLA/MoE support 여부</td></tr><tr><td>SLO</td><td>throughput 최적점과 latency 최적점이 달라짐</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h3"><h3 id="npu는-heterogeneous-serving의-후보로-보는-것이-현실적이다">NPU는 heterogeneous serving의 후보로 보는 것이 현실적이다</h3><a class="sl-anchor-link" href="#npu는-heterogeneous-serving의-후보로-보는-것이-현실적이다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “NPU는 heterogeneous serving의 후보로 보는 것이 현실적이다”</span></a></div>
+<p>가까운 미래의 serving cluster는 GPU-only 또는 NPU-only보다 heterogeneous해질 가능성이 크다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Workload</th><th>Possible placement</th></tr></thead><tbody><tr><td>frontier training</td><td>GPU/TPU 중심</td></tr><tr><td>high-QPS stable inference</td><td>NPU 후보</td></tr><tr><td>experimental models and custom kernels</td><td>GPU 후보</td></tr><tr><td>small edge models</td><td>edge NPU/Jetson/CPU 후보</td></tr><tr><td>regulated enterprise serving</td><td>secure virtualization이 있는 NPU 후보</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h2"><h2 id="10-check-questions">10. Check Questions</h2><a class="sl-anchor-link" href="#10-check-questions"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “10. Check Questions”</span></a></div>
+<ol>
+<li>이 노트에서 말하는 server-grade NPU와 mobile NPU의 차이는 무엇인가?</li>
+<li>NPU benchmark에서 peak TOPS만 보면 안 되는 이유는 무엇인가?</li>
+<li>Rebellions ATOM의 local/global SRAM hierarchy는 LLM inference에서 어떤 의미를 갖는가?</li>
+<li>Rebellions RSD가 disaggregated prefill과 MoE support를 강조하는 이유는 무엇인가?</li>
+<li>Furiosa RNGD의 TCP 주장은 matrix multiply 중심 GPU/TPU 설명과 어떻게 다른가?</li>
+<li>Furiosa RNGD의 48GB HBM3, 256MB SRAM, 150W TDP는 각각 어떤 operational 질문과 연결되는가?</li>
+<li>vLLM-compatible API가 있다고 해서 production compatibility가 보장되지 않는 이유는 무엇인가?</li>
+<li>NPU와 GPU를 공정하게 비교하려면 quantization과 runtime 조건을 어떻게 맞춰야 하는가?</li>
+<li>NPU 도입 전 CPU fallback과 unsupported operator를 반드시 확인해야 하는 이유는 무엇인가?</li>
+<li>어떤 workload에서 NPU가 GPU보다 더 설득력 있는 선택지가 될 수 있는가?</li>
+</ol>
+<div class="sl-heading-wrapper level-h2"><h2 id="references">References</h2><a class="sl-anchor-link" href="#references"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “References”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Topic</th><th>Source</th></tr></thead><tbody><tr><td>Rebellions ATOM architecture and profiler commands</td><td><a href="https://docs.rbln.ai/v0.10.4/ko/software/profiler/architecture.html">https://docs.rbln.ai/v0.10.4/ko/software/profiler/architecture.html</a></td></tr><tr><td>Rebellions ATOM white paper page</td><td><a href="https://rebellions.ai/atom-architecture-finding-the-sweet-spot-for-genai/">https://rebellions.ai/atom-architecture-finding-the-sweet-spot-for-genai/</a></td></tr><tr><td>Rebellions LLM serving with NPU</td><td><a href="https://rebellions.ai/llm-serving-with-npu/">https://rebellions.ai/llm-serving-with-npu/</a></td></tr><tr><td>Rebellions Scalable Design</td><td><a href="https://rebellions.ai/rebellions-scalable-design/">https://rebellions.ai/rebellions-scalable-design/</a></td></tr><tr><td>RBLN Compiler API overview</td><td><a href="https://docs.rbln.ai/v0.10.4/ko/software/api/index.html">https://docs.rbln.ai/v0.10.4/ko/software/api/index.html</a></td></tr><tr><td>RBLN C/C++ language binding installation</td><td><a href="https://docs.rbln.ai/v0.10.4/ko/software/api/language_binding/c/installation.html">https://docs.rbln.ai/v0.10.4/ko/software/api/language_binding/c/installation.html</a></td></tr><tr><td>RBLN Optimum overview</td><td><a href="https://docs.rbln.ai/v0.10.4/ko/software/optimum/index.html">https://docs.rbln.ai/v0.10.4/ko/software/optimum/index.html</a></td></tr><tr><td>RBLN Optimum Qwen3-VL-2B tutorial</td><td><a href="https://docs.rbln.ai/v0.10.4/ko/software/optimum/tutorial/qwen3-vl-2b.html">https://docs.rbln.ai/v0.10.4/ko/software/optimum/tutorial/qwen3-vl-2b.html</a></td></tr><tr><td>vLLM RBLN documentation</td><td><a href="https://docs.rbln.ai/latest/software/model_serving/vllm_support/vllm-rbln.html">https://docs.rbln.ai/latest/software/model_serving/vllm_support/vllm-rbln.html</a></td></tr><tr><td>vLLM RBLN attention modes</td><td><a href="https://docs.rbln.ai/v0.10.4/ko/software/model_serving/vllm_support/features/attention-modes.html">https://docs.rbln.ai/v0.10.4/ko/software/model_serving/vllm_support/features/attention-modes.html</a></td></tr><tr><td>vLLM RBLN Automatic Prefix Caching</td><td><a href="https://docs.rbln.ai/v0.10.4/ko/software/model_serving/vllm_support/features/prefix-caching.html">https://docs.rbln.ai/v0.10.4/ko/software/model_serving/vllm_support/features/prefix-caching.html</a></td></tr><tr><td>vLLM RBLN dynamic decoder batch sizes</td><td><a href="https://docs.rbln.ai/v0.10.4/ko/software/model_serving/vllm_support/tutorial/vllm-dynamic-batching.html">https://docs.rbln.ai/v0.10.4/ko/software/model_serving/vllm_support/tutorial/vllm-dynamic-batching.html</a></td></tr><tr><td>vLLM RBLN custom kernel</td><td><a href="https://docs.rbln.ai/v0.10.4/ko/software/model_serving/vllm_support/features/triton_rbln/custom_kernel.html">https://docs.rbln.ai/v0.10.4/ko/software/model_serving/vllm_support/features/triton_rbln/custom_kernel.html</a></td></tr><tr><td>vLLM RBLN profiling guide</td><td><a href="https://docs.rbln.ai/v0.10.4/ko/software/model_serving/vllm_support/features/profiler.html">https://docs.rbln.ai/v0.10.4/ko/software/model_serving/vllm_support/features/profiler.html</a></td></tr><tr><td>vLLM RBLN Disaggregated Encoder</td><td><a href="https://docs.rbln.ai/v0.10.4/ko/software/model_serving/vllm_support/features/disaggregated-encoder.html">https://docs.rbln.ai/v0.10.4/ko/software/model_serving/vllm_support/features/disaggregated-encoder.html</a></td></tr><tr><td>RBLN NPU DRA driver</td><td><a href="https://docs.rbln.ai/v0.10.4/ko/software/system_management/kubernetes/npu_dra_driver.html">https://docs.rbln.ai/v0.10.4/ko/software/system_management/kubernetes/npu_dra_driver.html</a></td></tr><tr><td>Optimum RBLN GitHub</td><td><a href="https://github.com/RBLN-SW/optimum-rbln">https://github.com/RBLN-SW/optimum-rbln</a></td></tr><tr><td>vLLM RBLN GitHub</td><td><a href="https://github.com/RBLN-SW/vllm-rbln">https://github.com/RBLN-SW/vllm-rbln</a></td></tr><tr><td>torch-rbln GitHub</td><td><a href="https://github.com/RBLN-SW/torch-rbln">https://github.com/RBLN-SW/torch-rbln</a></td></tr><tr><td>RBLN Model Zoo</td><td><a href="https://github.com/RBLN-SW/rbln-model-zoo">https://github.com/RBLN-SW/rbln-model-zoo</a></td></tr><tr><td>FuriosaAI RNGD overview</td><td><a href="https://developer.furiosa.ai/latest/en/overview/rngd.html">https://developer.furiosa.ai/latest/en/overview/rngd.html</a></td></tr><tr><td>FuriosaAI RNGD product page</td><td><a href="https://furiosa.ai/rngd">https://furiosa.ai/rngd</a></td></tr><tr><td>FuriosaAI software stack</td><td><a href="https://developer.furiosa.ai/latest/en/overview/software_stack.html">https://developer.furiosa.ai/latest/en/overview/software_stack.html</a></td></tr><tr><td>FuriosaAI supported models</td><td><a href="https://developer.furiosa.ai/latest/en/overview/supported_models.html">https://developer.furiosa.ai/latest/en/overview/supported_models.html</a></td></tr><tr><td>Furiosa SDK 2026.2 release notes</td><td><a href="https://developer.furiosa.ai/latest/en/whatsnew/release-2026.2.html">https://developer.furiosa.ai/latest/en/whatsnew/release-2026.2.html</a></td></tr><tr><td>Furiosa-LLM overview</td><td><a href="https://developer.furiosa.ai/latest/en/furiosa_llm/intro.html">https://developer.furiosa.ai/latest/en/furiosa_llm/intro.html</a></td></tr><tr><td>Furiosa-LLM prefix caching</td><td><a href="https://developer.furiosa.ai/latest/en/furiosa_llm/prefix-caching.html">https://developer.furiosa.ai/latest/en/furiosa_llm/prefix-caching.html</a></td></tr><tr><td>Furiosa-LLM hybrid KV cache</td><td><a href="https://developer.furiosa.ai/latest/en/furiosa_llm/hybrid-kv-cache.html">https://developer.furiosa.ai/latest/en/furiosa_llm/hybrid-kv-cache.html</a></td></tr><tr><td>Furiosa-LLM model parallelism</td><td><a href="https://developer.furiosa.ai/latest/en/furiosa_llm/model-parallelism.html">https://developer.furiosa.ai/latest/en/furiosa_llm/model-parallelism.html</a></td></tr><tr><td>Furiosa-LLM Kubernetes deployment</td><td><a href="https://developer.furiosa.ai/latest/en/furiosa_llm/k8s_deployment.html">https://developer.furiosa.ai/latest/en/furiosa_llm/k8s_deployment.html</a></td></tr><tr><td>Furiosa Cloud Native Toolkit</td><td><a href="https://developer.furiosa.ai/latest/en/cloud_native_toolkit/intro.html">https://developer.furiosa.ai/latest/en/cloud_native_toolkit/intro.html</a></td></tr><tr><td>Furiosa DRA driver docs</td><td><a href="https://developer.furiosa.ai/latest/en/cloud_native_toolkit/kubernetes/dra_driver.html">https://developer.furiosa.ai/latest/en/cloud_native_toolkit/kubernetes/dra_driver.html</a></td></tr><tr><td>Furiosa-LLM with llm-d</td><td><a href="https://developer.furiosa.ai/latest/en/cloud_native_toolkit/llm_d.html">https://developer.furiosa.ai/latest/en/cloud_native_toolkit/llm_d.html</a></td></tr><tr><td>Furiosa SMI</td><td><a href="https://developer.furiosa.ai/latest/en/device_management/system_management_interface.html">https://developer.furiosa.ai/latest/en/device_management/system_management_interface.html</a></td></tr><tr><td>Furiosa host PCI tuning</td><td><a href="https://developer.furiosa.ai/latest/en/device_management/host_tuning.html">https://developer.furiosa.ai/latest/en/device_management/host_tuning.html</a></td></tr><tr><td>Furiosa SDK GitHub</td><td><a href="https://github.com/furiosa-ai/furiosa-sdk">https://github.com/furiosa-ai/furiosa-sdk</a></td></tr><tr><td>Furiosa performance tooling</td><td><a href="https://github.com/furiosa-ai/furiosa-perf">https://github.com/furiosa-ai/furiosa-perf</a></td></tr><tr><td>Furiosa DRA driver guide</td><td><a href="https://github.com/furiosa-ai/furiosa-dra-driver-guide">https://github.com/furiosa-ai/furiosa-dra-driver-guide</a></td></tr><tr><td>Furiosa Hot Chips 2024 announcement</td><td><a href="https://furiosa.ai/blog/furiosaai-rngd-hot-chips-2024">https://furiosa.ai/blog/furiosaai-rngd-hot-chips-2024</a></td></tr></tbody></table> </div> <footer class="sl-flex astro-3yyafb3n"> <div class="meta sl-flex astro-3yyafb3n"> <a href="https://github.com/ziwon/ai-data-center-systems/edit/main/inference/efficient-llm-inference-systems/appendix/hardware-architectures/npus.ko.md" class="sl-flex print:hidden astro-eez2twj6"><svg aria-hidden="true" class="astro-eez2twj6 astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.2em;"><path d="M22 7.24a1 1 0 0 0-.29-.71l-4.24-4.24a1 1 0 0 0-1.1-.22 1 1 0 0 0-.32.22l-2.83 2.83L2.29 16.05a1 1 0 0 0-.29.71V21a1 1 0 0 0 1 1h4.24a1 1 0 0 0 .76-.29l10.87-10.93L21.71 8c.1-.1.17-.2.22-.33a1 1 0 0 0 0-.24v-.14l.07-.05ZM6.83 20H4v-2.83l9.93-9.93 2.83 2.83L6.83 20ZM18.17 8.66l-2.83-2.83 1.42-1.41 2.82 2.82-1.41 1.42Z"/></svg>Edit page</a> <p>Last updated: <time datetime="2026-07-26T08:06:10.000Z">Jul 26, 2026</time></p> </div> <div class="pagination-links print:hidden astro-u2l5gyhi" dir="ltr"> <a href="/inference/efficient-llm-inference-systems/appendix/hardware-architectures/gpus.ko/" rel="prev" class="astro-u2l5gyhi"> <svg aria-hidden="true" class="astro-u2l5gyhi astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17 11H9.41l3.3-3.29a1.004 1.004 0 1 0-1.42-1.42l-5 5a1 1 0 0 0-.21.33 1 1 0 0 0 0 .76 1 1 0 0 0 .21.33l5 5a1.002 1.002 0 0 0 1.639-.325 1 1 0 0 0-.219-1.095L9.41 13H17a1 1 0 0 0 0-2Z"/></svg> <span class="astro-u2l5gyhi"> Previous <br class="astro-u2l5gyhi"> <span class="link-title astro-u2l5gyhi">How to Think About GPUs</span> </span> </a> <a href="/inference/efficient-llm-inference-systems/appendix/hardware-architectures/roofline.ko/" rel="next" class="astro-u2l5gyhi"> <svg aria-hidden="true" class="astro-u2l5gyhi astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17.92 11.62a1.001 1.001 0 0 0-.21-.33l-5-5a1.003 1.003 0 1 0-1.42 1.42l3.3 3.29H7a1 1 0 0 0 0 2h7.59l-3.3 3.29a1.002 1.002 0 0 0 .325 1.639 1 1 0 0 0 1.095-.219l5-5a1 1 0 0 0 .21-.33 1 1 0 0 0 0-.76Z"/></svg> <span class="astro-u2l5gyhi"> Next <br class="astro-u2l5gyhi"> <span class="link-title astro-u2l5gyhi">All About Rooflines</span> </span> </a> </div>  </footer> </div> </div>  </main> </div> </div> </div> <ask-docs-widget> <button class="ask-fab" type="button" data-open aria-label="Ask this docs"> <span class="ask-fab-icon" aria-hidden="true">?</span>
+Ask this docs
+</button> <div class="ask-panel" data-panel hidden> <div class="ask-resize-handle" data-resize aria-hidden="true"></div> <div class="ask-panel-inner"> <header class="ask-header"> <div> <p class="ask-eyebrow">AI Data Center Systems</p> <h2 class="ask-title">Ask this docs</h2> </div> <div class="ask-header-controls"> <button class="ask-mode-btn" data-mode-btn="right" title="오른쪽 패널" aria-label="오른쪽 패널"> <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="6" height="16" rx="1.5" opacity="0.35"></rect><rect x="8" y="0" width="8" height="16" rx="1.5"></rect></svg> </button> <button class="ask-mode-btn" data-mode-btn="bottom" title="하단 패널" aria-label="하단 패널"> <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="16" height="6" rx="1.5" opacity="0.35"></rect><rect x="0" y="8" width="16" height="8" rx="1.5"></rect></svg> </button> <button class="ask-mode-btn" data-mode-btn="expand" title="전체 확장" aria-label="전체 확장"> <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 5.5V1h4.5M10.5 1H15v4.5M15 10.5V15h-4.5M5.5 15H1v-4.5"></path></svg> </button> <button class="ask-close-btn" type="button" aria-label="닫기" data-close> <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13"></path></svg> </button> </div> </header> <div class="ask-body"> <label class="ask-field"> <span class="ask-field-row"> <span>Question</span> <span class="ask-char" data-char>0 / 800</span> </span> <textarea name="question" rows="3" maxlength="800" placeholder="이 문서에서 핵심 운영 체크포인트는 무엇인가요?" data-question></textarea> <span class="ask-hint">시간당 최대 20회 · 질문당 최대 800자</span> </label> <div class="ask-actions"> <button class="ask-submit" type="button" data-submit> <svg class="ask-spinner" viewBox="0 0 24 24" fill="none" aria-hidden="true" hidden> <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2.5" stroke-dasharray="56" stroke-dashoffset="14" stroke-linecap="round"></circle> </svg> <span data-submit-label>Ask</span> </button> <p class="ask-status" data-status></p> </div> <section class="ask-answer" data-answer hidden></section> <section class="ask-sources" data-sources hidden> <h3>Sources</h3> <ul class="ask-source-chips" data-source-list></ul> </section> </div> </div> </div> <div class="ask-backdrop" data-backdrop hidden></div> </ask-docs-widget> <script type="module" src="/_astro/AskDocs.astro_astro_type_script_index_0_lang.BbnAb04M.js"></script> </div> <script type="module">const r=document.documentElement,c=document.querySelector("#starlight__sidebar"),s=document.querySelector(".navigation-mode-toggle"),a=document.querySelector(".navigation-drawer-toggle"),u=window.matchMedia("(min-width: 50rem)");function d(){return r.dataset.navigationMode==="compact"}function o(){return r.dataset.navigationDrawer==="open"}function l(){const e=d(),t=e&&o();s?.setAttribute("aria-pressed",String(e)),s?.setAttribute("title",e?"Use normal navigation":"Use compact navigation"),a?.setAttribute("aria-expanded",String(t)),a?.setAttribute("title",t?"Close navigation":"Open navigation");const n=a?.querySelector(".navigation-drawer-label");n&&(n.textContent=t?"Close navigation":"Open navigation")}function i(e,t=!1){const n=!!(e&&d()&&u.matches);r.dataset.navigationDrawer=n?"open":"closed",l(),n?requestAnimationFrame(()=>{const g=c?.querySelector('a[aria-current="page"]'),m=c?.querySelector(".starlight-sidebar-topics-current");(g??m)?.focus()}):t&&a?.focus()}function p(e){r.dataset.navigationMode=e,i(!1);try{localStorage.setItem("adcs-navigation-mode",e)}catch{}l()}s?.addEventListener("click",()=>{p(d()?"normal":"compact")});a?.addEventListener("click",()=>{i(!o(),o())});document.addEventListener("keydown",e=>{e.key==="Escape"&&o()&&i(!1,!0)});document.addEventListener("pointerdown",e=>{!o()||!(e.target instanceof Node)||c?.contains(e.target)||i(!1)});u.addEventListener("change",()=>i(!1));r.dataset.navigationDrawer="closed";l();</script> </body></html>

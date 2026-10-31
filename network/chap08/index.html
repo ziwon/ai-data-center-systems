@@ -1,0 +1,1433 @@
+<!DOCTYPE html><html lang="en" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-bguv2lll"> <head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Chapter 8: IP Routing for AI/ML Fabrics | AI Data Center Systems</title><link rel="canonical" href="https://adcs.restack.tech/network/chap08/"/><link rel="sitemap" href="/sitemap-index.xml"/><script async src="https://www.googletagmanager.com/gtag/js?id=G-76LFZJVBTE"></script><script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-76LFZJVBTE');
+      </script><script async crossorigin="anonymous" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8128231647578658"></script><link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v6.4.8"/><meta name="generator" content="Starlight v0.40.0"/><meta property="og:title" content="Chapter 8: IP Routing for AI/ML Fabrics"/><meta property="og:url" content="https://adcs.restack.tech/network/chap08/"/><meta property="og:locale" content="en"/><meta property="og:description" content="This chapter explains routing choices for AI/ML data center fabrics."/><meta property="og:site_name" content="AI Data Center Systems"/><meta name="description" content="This chapter explains routing choices for AI/ML data center fabrics."/><meta property="og:type" content="article"/><meta property="og:image" content="https://adcs.restack.tech/og/network/chap08.png?v=2"/><meta property="og:image:width" content="1200"/><meta property="og:image:height" content="630"/><meta name="twitter:image" content="https://adcs.restack.tech/og/network/chap08.png?v=2"/><meta name="twitter:card" content="summary_large_image"/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/_astro/print.DNXP8c50.css" media="print"><link rel="stylesheet" href="/_astro/common.DYbqSTpl.css"><script type="module" src="/_astro/page.CtJXHRyR.js"></script></head> <body class="astro-bguv2lll"> <a href="#_top" class="astro-7q3lir66">Skip to content</a> <script>
+  (() => {
+    try {
+      const savedMode = localStorage.getItem('adcs-navigation-mode');
+      document.documentElement.dataset.navigationMode = savedMode === 'compact' ? 'compact' : 'normal';
+    } catch {
+      document.documentElement.dataset.navigationMode = 'normal';
+    }
+  })();
+</script> <div class="page sl-flex astro-4toy2ex6"> <header class="header astro-4toy2ex6"><div class="header astro-3ef6ksr2"> <div class="title-wrapper sl-flex astro-3ef6ksr2"> <a href="/" class="site-title sl-flex astro-m46x6ez3">  <span class="astro-m46x6ez3" translate="no"> AI Data Center Systems </span> </a> <button class="navigation-mode-toggle print:hidden astro-3ef6ksr2" type="button" aria-label="Compact navigation" aria-pressed="false" title="Use compact navigation"> <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" class="astro-3ef6ksr2"> <rect x="3" y="4" width="18" height="16" rx="2" class="astro-3ef6ksr2"></rect> <path d="M9 4v16M6.5 10 4.5 12l2 2" class="astro-3ef6ksr2"></path> </svg> </button> </div> <div class="sl-flex print:hidden astro-3ef6ksr2"> <site-search class="astro-3ef6ksr2 astro-v37mnknz" data-translations="{&quot;placeholder&quot;:&quot;Search&quot;}"> <button data-open-modal disabled aria-label="Search" aria-keyshortcuts="Control+K" class="astro-v37mnknz"> <svg aria-hidden="true" class="astro-v37mnknz astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg> <span class="sl-hidden md:sl-block astro-v37mnknz" aria-hidden="true">Search</span> <kbd class="sl-hidden md:sl-flex astro-v37mnknz" style="display: none;"> <kbd class="astro-v37mnknz">Ctrl</kbd><kbd class="astro-v37mnknz">K</kbd> </kbd> </button> <dialog style="padding:0" aria-label="Search" class="astro-v37mnknz"> <div class="dialog-frame sl-flex astro-v37mnknz">  <button data-close-modal class="sl-flex md:sl-hidden astro-v37mnknz"> Cancel </button> <div class="search-container astro-v37mnknz"> <div id="starlight__search" class="astro-v37mnknz"></div> </div> </div> </dialog> </site-search>  <script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script> <script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.D1WXcfCt.js"></script>  </div> <div class="sl-hidden md:sl-flex print:hidden right-group astro-3ef6ksr2"> <div class="sl-flex social-icons astro-3ef6ksr2"> <a href="https://github.com/ziwon/ai-data-center-systems" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">GitHub</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script> <script type="module">const r="starlight-theme",o=e=>e==="auto"||e==="dark"||e==="light"?e:"auto",c=()=>o(typeof localStorage<"u"&&localStorage.getItem(r));function n(e){typeof localStorage<"u"&&localStorage.setItem(r,e==="light"||e==="dark"?e:"")}const l=()=>matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";function t(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e==="auto"?l():e,n(e)}matchMedia("(prefers-color-scheme: light)").addEventListener("change",()=>{c()==="auto"&&t("auto")});class s extends HTMLElement{constructor(){super(),t(c()),this.querySelector("select")?.addEventListener("change",a=>{a.currentTarget instanceof HTMLSelectElement&&t(o(a.currentTarget.value))})}}customElements.define("starlight-theme-select",s);</script> <script type="module">class s extends HTMLElement{constructor(){super();const e=this.querySelector("select");e&&(e.addEventListener("change",t=>{t.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=t.currentTarget.value)}),window.addEventListener("pageshow",t=>{if(!t.persisted)return;const n=e.querySelector("option[selected]")?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}}customElements.define("starlight-lang-select",s);</script> </div> </div></header> <nav class="sidebar print:hidden astro-4toy2ex6" aria-label="Main"> <starlight-menu-button class="print:hidden astro-jif73yzw"> <button aria-expanded="false" aria-label="Menu" aria-controls="starlight__sidebar" class="sl-flex md:sl-hidden astro-jif73yzw"> <svg aria-hidden="true" class="open-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg> <svg aria-hidden="true" class="close-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg> </button> </starlight-menu-button> <script type="module">class s extends HTMLElement{constructor(){super(),this.btn=this.querySelector("button"),this.btn.addEventListener("click",()=>this.toggleExpanded());const t=this.closest("nav");t&&t.addEventListener("keyup",e=>this.closeOnEscape(e))}setExpanded(t){this.setAttribute("aria-expanded",String(t)),document.body.toggleAttribute("data-mobile-menu-expanded",t)}toggleExpanded(){this.setExpanded(this.getAttribute("aria-expanded")!=="true")}closeOnEscape(t){t.code==="Escape"&&(this.setExpanded(!1),this.btn.focus())}}customElements.define("starlight-menu-button",s);</script>  <div id="starlight__sidebar" class="sidebar-pane astro-4toy2ex6"> <div class="navigation-controls astro-4toy2ex6"> <button class="navigation-drawer-toggle astro-4toy2ex6" type="button" aria-controls="starlight__sidebar-content" aria-expanded="false" title="Open navigation"> <svg class="navigation-menu-icon astro-4toy2ex6" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"> <path d="M4 6h16M4 12h16M4 18h16" class="astro-4toy2ex6"></path> </svg> <svg class="navigation-close-icon astro-4toy2ex6" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"> <path d="m6 6 12 12M18 6 6 18" class="astro-4toy2ex6"></path> </svg> <span class="navigation-drawer-label astro-4toy2ex6">Open navigation</span> </button> </div> <div id="starlight__sidebar-content" class="sidebar-content sl-flex astro-4toy2ex6"> <ul class="starlight-sidebar-topics astro-2fh6iaza"> <li class="astro-2fh6iaza"> <a aria-label="Network" title="Network" href="/network/" class="starlight-sidebar-topics-current astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8.7 10a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-6.27-6.3a1 1 0 0 0-1.42 1.42ZM21 14a1 1 0 0 0-1 1v3.59L15.44 14A1 1 0 0 0 14 15.44L18.59 20H15a1 1 0 0 0 0 2h6a1 1 0 0 0 .38-.08 1 1 0 0 0 .54-.54A1 1 0 0 0 22 21v-6a1 1 0 0 0-1-1Zm.92-11.38a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-6a1 1 0 0 0 0 2h3.59L2.29 20.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V9a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z"/></svg> </div> <div class="astro-2fh6iaza"> Network  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="GPU &amp; Accelerator Systems" title="GPU &amp; Accelerator Systems" href="/gpu/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> </div> <div class="astro-2fh6iaza"> GPU &amp; Accelerator Systems  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Storage" title="Storage" href="/storage/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8 16.5a1 1 0 1 0 1 1 1 1 0 0 0-1-1M12 2C8 2 4 3.37 4 6v12c0 2.63 4 4 8 4s8-1.37 8-4V6c0-2.63-4-4-8-4m6 16c0 .71-2.28 2-6 2s-6-1.29-6-2v-3.27A13 13 0 0 0 12 16a13 13 0 0 0 6-1.27Zm0-6c0 .71-2.28 2-6 2s-6-1.29-6-2V8.73A13 13 0 0 0 12 10a13 13 0 0 0 6-1.27Zm-6-4C8.28 8 6 6.71 6 6s2.28-2 6-2 6 1.29 6 2-2.28 2-6 2m-4 2.5a1 1 0 1 0 1 1 1 1 0 0 0-1-1"/></svg> </div> <div class="astro-2fh6iaza"> Storage  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Training" title="Training" href="/training/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1 1v8a1 1 0 0 0 2 0v-8a1 1 0 0 0-1-1m5-10a1 1 0 0 0-1 1v18a1 1 0 0 0 2 0V3a1 1 0 0 0-1-1m10 14a1 1 0 0 0-1 1v4a1 1 0 0 0 2 0v-4a1 1 0 0 0-1-1m-5-8a1 1 0 0 0-1 1v12a1 1 0 0 0 2 0V9a1 1 0 0 0-1-1"/></svg> </div> <div class="astro-2fh6iaza"> Training  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Inference" title="Inference" data-topic-icon="brain" href="/inference/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 22H5a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3h1a4 4 0 0 1 7.3-2.18c.448.64.692 1.4.7 2.18h3a1 1 0 0 1 1 1v3a4 4 0 0 1 2.18 7.3A3.86 3.86 0 0 1 18 18v3a1 1 0 0 1-1 1ZM5 8a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11v-3.18a1 1 0 0 1 1.33-.95 1.77 1.77 0 0 0 1.74-.23 2 2 0 0 0 .93-1.37 2 2 0 0 0-.48-1.59 1.89 1.89 0 0 0-2.17-.55 1 1 0 0 1-1.33-.95V8h-3.2a1 1 0 0 1-1-1.33 1.77 1.77 0 0 0-.23-1.74 1.939 1.939 0 0 0-3-.43A2 2 0 0 0 8 6c.002.23.046.456.13.67A1 1 0 0 1 7.18 8H5Z"/></svg> </div> <div class="astro-2fh6iaza"> Inference  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="MLOps" title="MLOps" data-topic-icon="cycle" href="/mlops/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8.7 10a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-6.27-6.3a1 1 0 0 0-1.42 1.42ZM21 14a1 1 0 0 0-1 1v3.59L15.44 14A1 1 0 0 0 14 15.44L18.59 20H15a1 1 0 0 0 0 2h6a1 1 0 0 0 .38-.08 1 1 0 0 0 .54-.54A1 1 0 0 0 22 21v-6a1 1 0 0 0-1-1Zm.92-11.38a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-6a1 1 0 0 0 0 2h3.59L2.29 20.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V9a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z"/></svg> </div> <div class="astro-2fh6iaza"> MLOps  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Systems Performance" title="Systems Performance" href="/systems-performance/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path fill-rule="evenodd" d="M1.44 8.855v-.001l3.527-3.516c.34-.344.802-.541 1.285-.548h6.649l.947-.947c3.07-3.07 6.207-3.072 7.62-2.868a1.821 1.821 0 0 1 1.557 1.557c.204 1.413.203 4.55-2.868 7.62l-.946.946v6.649a1.845 1.845 0 0 1-.549 1.286l-3.516 3.528a1.844 1.844 0 0 1-3.11-.944l-.858-4.275-4.52-4.52-2.31-.463-1.964-.394A1.847 1.847 0 0 1 .98 10.693a1.843 1.843 0 0 1 .46-1.838Zm5.379 2.017-3.873-.776L6.32 6.733h4.638l-4.14 4.14Zm8.403-5.655c2.459-2.46 4.856-2.463 5.89-2.33.134 1.035.13 3.432-2.329 5.891l-6.71 6.71-3.561-3.56 6.71-6.711Zm-1.318 15.837-.776-3.873 4.14-4.14v4.639l-3.364 3.374Z" clip-rule="evenodd"/><path d="M9.318 18.345a.972.972 0 0 0-1.86-.561c-.482 1.435-1.687 2.204-2.934 2.619a8.22 8.22 0 0 1-1.23.302c.062-.365.157-.79.303-1.229.415-1.247 1.184-2.452 2.62-2.935a.971.971 0 1 0-.62-1.842c-.12.04-.236.084-.35.13-2.02.828-3.012 2.588-3.493 4.033a10.383 10.383 0 0 0-.51 2.845l-.001.016v.063c0 .536.434.972.97.972H2.24a7.21 7.21 0 0 0 .878-.065c.527-.063 1.248-.19 2.02-.447 1.445-.48 3.205-1.472 4.033-3.494a5.828 5.828 0 0 0 .147-.407Z"/></svg> </div> <div class="astro-2fh6iaza"> Systems Performance  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Courses" title="Courses" href="/courses/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.17 2.06A13.1 13.1 0 0 0 19 1.87a12.94 12.94 0 0 0-7 2.05 12.94 12.94 0 0 0-7-2 13.1 13.1 0 0 0-2.17.19 1 1 0 0 0-.83 1v12a1 1 0 0 0 1.17 1 10.9 10.9 0 0 1 8.25 1.91l.12.07h.11a.91.91 0 0 0 .7 0h.11l.12-.07A10.899 10.899 0 0 1 20.83 16 1 1 0 0 0 22 15V3a1 1 0 0 0-.83-.94ZM11 15.35a12.87 12.87 0 0 0-6-1.48H4v-10c.333-.02.667-.02 1 0a10.86 10.86 0 0 1 6 1.8v9.68Zm9-1.44h-1a12.87 12.87 0 0 0-6 1.48V5.67a10.86 10.86 0 0 1 6-1.8c.333-.02.667-.02 1 0v10.04Zm1.17 4.15a13.098 13.098 0 0 0-2.17-.19 12.94 12.94 0 0 0-7 2.05 12.94 12.94 0 0 0-7-2.05c-.727.003-1.453.066-2.17.19A1 1 0 0 0 2 19.21a1 1 0 0 0 1.17.79 10.9 10.9 0 0 1 8.25 1.91 1 1 0 0 0 1.16 0A10.9 10.9 0 0 1 20.83 20a1 1 0 0 0 1.17-.79 1 1 0 0 0-.83-1.15Z"/></svg> </div> <div class="astro-2fh6iaza"> Courses  </div> </a> </li> </ul> <sl-sidebar-state-persist data-hash="0j7rqvj" class="astro-kku4brbg"> <script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script>  <ul class="top-level astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">AI Data Center Network</span>  </a> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">articles</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="0"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">cloud-data-center-network-now-and-next.ko</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="1"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/articles/cloud-data-center-network-now-and-next.ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Cloud Data Center Network의 지금과 앞으로</span>  </a> </li> </ul> </details> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap01</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="2"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap01/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 1: Wonders in the Workload</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap02</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="3"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap02/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 2: &quot;The Common-Man View&quot; of AI Data Center Fabrics</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap03</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="4"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap03/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 3: Network Design Considerations</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap04</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="5"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap04/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 4: Optics and Cable Management</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap05</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="6"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap05/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 5: Thermal and Power Efficiency Considerations</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap06</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="7"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap06/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 6: Efficient Load Balancing</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap07</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="8"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap07/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 7: RoCEv2 Transport and Congestion Management</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap08</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="9"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap08/" aria-current="page" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 8: IP Routing for AI/ML Fabrics</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap09</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="10"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap09/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 9: Storage Network Design and Technologies for AI Data Centers</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap10</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="11"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap10/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 10: AI Network Performance KPIs</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap11</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="12"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap11/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 11: Monitoring and Telemetry</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap12</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="13"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap12/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 12: Ultra Ethernet Consortium, UEC</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">clos-ebgp-lab</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="14"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/clos-ebgp-lab/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Clos Fabric Lab Series</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">glb-nnhn-bgp-underlay</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="15"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/glb-nnhn-bgp-underlay/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Appendix: BGP-based Underlay and GLB NNHN in AI Data Center Fabrics</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">gpu-cluster-failure-analysis</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="16"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/gpu-cluster-failure-analysis/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">GPU 클러스터 장애 분석: ECC, Xid, RDMA, NCCL Hang은 어떻게 연결되는가</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">ib-packet-analysis</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="17"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/ib-packet-analysis/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">InfiniBand Packet Analysis: A Practical RDMA Transport Primer</span>  </a> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">packet-format-reference</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="18"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/ib-packet-analysis/packet-format-reference/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">InfiniBand Packet Format Reference</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">packet-format-reference_KO</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="19"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/ib-packet-analysis/packet-format-reference_ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">InfiniBand 패킷 형식 참조 문서</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">README_KO</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="20"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/ib-packet-analysis/readme_ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">InfiniBand 패킷 분석: 실전 RDMA 전송 입문서</span>  </a> </li> </ul> </details> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">rdma-examples</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="21"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/rdma-examples/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">RDMA Read/Write 실전 입문</span>  </a> </li> </ul> </details> </li> </ul>  <script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script> </sl-sidebar-state-persist> <div class="md:sl-hidden"> <div class="mobile-preferences sl-flex astro-wu23bvmt"> <div class="social-icons astro-wu23bvmt"> <a href="https://github.com/ziwon/ai-data-center-systems" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">GitHub</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script>   </div> </div> </div> </div> </nav> <div class="main-frame astro-4toy2ex6">  <script type="module">const a=document.getElementById("starlight__sidebar"),n=a?.querySelector("sl-sidebar-state-persist"),o="sl-sidebar-state",i=()=>{let t=[];const e=n?.dataset.hash||"";try{const s=sessionStorage.getItem(o),r=JSON.parse(s||"{}");Array.isArray(r.open)&&r.hash===e&&(t=r.open)}catch{}return{hash:e,open:t,scroll:a?.scrollTop||0}},c=t=>{try{sessionStorage.setItem(o,JSON.stringify(t))}catch{}},d=()=>c(i()),l=(t,e)=>{const s=i();s.open[e]=t,c(s)};n?.addEventListener("click",t=>{if(!(t.target instanceof Element))return;const e=t.target.closest("summary")?.closest("details");if(!e)return;const s=e.querySelector("sl-sidebar-restore"),r=parseInt(s?.dataset.index||"");isNaN(r)||l(!e.open,r)});addEventListener("visibilitychange",()=>{document.visibilityState==="hidden"&&d()});addEventListener("pageHide",d);</script> <div class="lg:sl-flex astro-67yu43on"> <aside class="right-sidebar-container print:hidden astro-67yu43on"> <div class="right-sidebar astro-67yu43on"> <div class="lg:sl-hidden astro-rl4sue7z"><mobile-starlight-toc data-min-h="2" data-max-h="2" class="astro-doynk5tl"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-doynk5tl"><details id="starlight__mobile-toc" class="astro-doynk5tl"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-doynk5tl"><span class="toggle sl-flex astro-doynk5tl">On this page<svg aria-hidden="true" class="caret astro-doynk5tl astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-doynk5tl"></span></summary><div class="dropdown astro-doynk5tl"><ul class="isMobile astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#table-of-contents" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Table of Contents</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#goal" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Goal</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#why-ip-routing-matters-in-ai-fabrics" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Why IP Routing Matters in AI Fabrics</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#ebgp-underlay-for-ai-data-centers" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">eBGP Underlay for AI Data Centers</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#bgp-deterministic-path-forwarding-bgp-dpf" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">BGP Deterministic Path Forwarding, BGP-DPF</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#rift-for-fat-tree-and-dragonfly-fabrics" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">RIFT for Fat-Tree and Dragonfly Fabrics</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#is-is-for-ai-fabrics" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">IS-IS for AI Fabrics</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#multi-tenancy-for-aiml-data-centers" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Multi-Tenancy for AI/ML Data Centers</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#extending-ip-routing-to-the-server" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Extending IP Routing to the Server</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#traffic-engineering-and-telemetry" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Traffic Engineering and Telemetry</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#segment-routing-and-srv6" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Segment Routing and SRv6</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#routing-protocol-comparison" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Routing Protocol Comparison</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#operational-validation-checklist" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Operational Validation Checklist</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#chapter-summary" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Chapter Summary</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#key-terms" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Key Terms</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#qa" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Q&amp;A</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#references" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">References</span> </a>  </li> </ul></div></details></nav></mobile-starlight-toc><script type="module" src="/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.hwBsy0Mo.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-rl4sue7z"><div class="sl-container astro-rl4sue7z"><kb-graph-card> <button class="kb-graph-card" type="button" data-open aria-haspopup="dialog"> <span class="kb-graph-copy"> <span class="kb-graph-title">Knowledge graph</span> <span class="kb-graph-subtitle" data-count>Loading related docs</span> </span> <span class="kb-graph-thumb" aria-hidden="true" data-map></span> <span class="kb-graph-expand" aria-hidden="true">Expand</span> </button> <dialog class="kb-graph-dialog" aria-label="Knowledge graph" data-dialog> <div class="kb-graph-panel"> <div class="kb-graph-panel-header"> <div> <p>Knowledge graph</p> <h2 data-heading>Related documents</h2> </div> <div class="kb-graph-tabs" role="tablist" aria-label="Knowledge graph views"> <button type="button" role="tab" aria-selected="true" data-tab="page">This page</button> <button type="button" role="tab" aria-selected="false" data-tab="global">Full graph</button> </div> <button type="button" data-close aria-label="Close knowledge graph">×</button> </div> <div class="kb-graph-stage" data-stage data-view="page"> <div data-page-stage></div> <div data-global-stage hidden></div> </div> </div> </dialog> </kb-graph-card> <script type="module" src="/_astro/KnowledgeGraphCard.astro_astro_type_script_index_0_lang.C475L69c.js"></script><starlight-toc data-min-h="2" data-max-h="2"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">On this page</h2><ul class="astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#table-of-contents" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Table of Contents</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#goal" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Goal</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#why-ip-routing-matters-in-ai-fabrics" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Why IP Routing Matters in AI Fabrics</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#ebgp-underlay-for-ai-data-centers" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">eBGP Underlay for AI Data Centers</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#bgp-deterministic-path-forwarding-bgp-dpf" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">BGP Deterministic Path Forwarding, BGP-DPF</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#rift-for-fat-tree-and-dragonfly-fabrics" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">RIFT for Fat-Tree and Dragonfly Fabrics</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#is-is-for-ai-fabrics" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">IS-IS for AI Fabrics</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#multi-tenancy-for-aiml-data-centers" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Multi-Tenancy for AI/ML Data Centers</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#extending-ip-routing-to-the-server" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Extending IP Routing to the Server</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#traffic-engineering-and-telemetry" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Traffic Engineering and Telemetry</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#segment-routing-and-srv6" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Segment Routing and SRv6</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#routing-protocol-comparison" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Routing Protocol Comparison</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#operational-validation-checklist" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Operational Validation Checklist</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#chapter-summary" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Chapter Summary</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#key-terms" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Key Terms</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#qa" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Q&amp;A</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#references" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">References</span> </a>  </li> </ul></nav></starlight-toc><script type="module" src="/_astro/TableOfContents.astro_astro_type_script_index_0_lang.FuRcXuRY.js"></script></div></div> </div> </aside> <div class="main-pane astro-67yu43on">  <main data-pagefind-body class="astro-bguv2lll" lang="en" dir="ltr">    <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <h1 id="_top" class="astro-j6tvhyss">Chapter 8: IP Routing for AI/ML Fabrics</h1> </div> </div> <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <starlight-image-zoom> <template class="astro-vjux6bgf"> <dialog class="starlight-image-zoom-dialog astro-vjux6bgf"> <button aria-label="Unzoom image" class="starlight-image-zoom-control astro-vjux6bgf"> <svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" class="astro-vjux6bgf"> <use href="#starlight-image-zoom-icon-unzoom" class="astro-vjux6bgf"></use> </svg> </button> <figure class="astro-vjux6bgf"></figure> </dialog> </template> <svg xmlns="http://www.w3.org/2000/svg" style="display:none" class="astro-vjux6bgf"> <symbol id="starlight-image-zoom-icon-zoom" viewBox="0 0 24 24" class="astro-vjux6bgf"> <path d="M9.79 12.79 4 18.59V17a1 1 0 0 0-2 0v4a1 1 0 0 0 .08.38 1 1 0 0 0 .54.54A1 1 0 0 0 3 22h4a1 1 0 0 0 0-2H5.41l5.8-5.79a1 1 0 0 0-1.42-1.42ZM21.92 2.62a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-4a1 1 0 0 0 0 2h1.59l-5.8 5.79a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V7a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z" class="astro-vjux6bgf"></path> </symbol> <symbol id="starlight-image-zoom-icon-unzoom" viewBox="0 0 24 24" class="astro-vjux6bgf"> <path d="M21.71 2.29a1 1 0 0 0-1.42 0l-5.79 5.8V6.5a1 1 0 0 0-2 0v4a1 1 0 0 0 .08.38 1 1 0 0 0 .54.54 1 1 0 0 0 .38.08h4a1 1 0 0 0 0-2h-1.59l5.8-5.79a1 1 0 0 0 0-1.42ZM10.88 12.58a1 1 0 0 0-.38-.08h-4a1 1 0 0 0 0 2h1.59l-5.8 5.79a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l5.79-5.8v1.59a1 1 0 0 0 2 0v-4a1 1 0 0 0-.08-.38 1 1 0 0 0-.54-.54Z" class="astro-vjux6bgf"></path> </symbol> </svg> </starlight-image-zoom>   <script type="module" src="/_astro/ImageZoom.astro_astro_type_script_index_0_lang.CZmBqK-T.js"></script> <div class="sl-markdown-content"> <div class="sl-heading-wrapper level-h2"><h2 id="table-of-contents">Table of Contents</h2><a class="sl-anchor-link" href="#table-of-contents"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Table of Contents”</span></a></div>
+<ul>
+<li><a href="#goal">Goal</a></li>
+<li><a href="#why-ip-routing-matters-in-ai-fabrics">Why IP Routing Matters in AI Fabrics</a>
+<ul>
+<li><a href="#backend-and-frontend-routing-domains">Backend and Frontend Routing Domains</a></li>
+<li><a href="#dynamic-ip-routing-options">Dynamic IP Routing Options</a></li>
+</ul>
+</li>
+<li><a href="#ebgp-underlay-for-ai-data-centers">eBGP Underlay for AI Data Centers</a>
+<ul>
+<li><a href="#why-ebgp-is-common">Why eBGP Is Common</a></li>
+<li><a href="#bgp-unnumbered">BGP Unnumbered</a></li>
+<li><a href="#next-hop-rewrite-and-as-path">Next-Hop Rewrite and AS-PATH</a></li>
+<li><a href="#bgp-asn-allocation">BGP ASN Allocation</a></li>
+<li><a href="#bgp-add-path">BGP ADD-PATH</a></li>
+<li><a href="#as-path-strip-and-replace">AS-PATH Strip and Replace</a></li>
+<li><a href="#bgp-link-bandwidth-extended-community">BGP Link Bandwidth Extended Community</a></li>
+<li><a href="#minimum-bgp-peers-per-prefix">Minimum BGP Peers per Prefix</a></li>
+</ul>
+</li>
+<li><a href="#bgp-deterministic-path-forwarding-bgp-dpf">BGP Deterministic Path Forwarding, BGP-DPF</a>
+<ul>
+<li><a href="#logical-fabric-colors">Logical Fabric Colors</a></li>
+<li><a href="#rail-optimized-and-rail-unified-dpf">Rail-Optimized and Rail-Unified DPF</a></li>
+<li><a href="#session-coloring-and-colored-routes">Session Coloring and Colored Routes</a></li>
+<li><a href="#evpn-vxlan-and-underlay-color">EVPN-VXLAN and Underlay Color</a></li>
+</ul>
+</li>
+<li><a href="#rift-for-fat-tree-and-dragonfly-fabrics">RIFT for Fat-Tree and Dragonfly Fabrics</a>
+<ul>
+<li><a href="#rift-basics">RIFT Basics</a></li>
+<li><a href="#dragonfly-and-dragonfly-sparse">Dragonfly and Dragonfly Sparse</a></li>
+</ul>
+</li>
+<li><a href="#is-is-for-ai-fabrics">IS-IS for AI Fabrics</a>
+<ul>
+<li><a href="#optimal-distributed-flooding">Optimal Distributed Flooding</a></li>
+<li><a href="#is-is-flexalgo">IS-IS FlexAlgo</a></li>
+<li><a href="#flexalgo-compared-with-bgp-dpf">FlexAlgo Compared with BGP-DPF</a></li>
+</ul>
+</li>
+<li><a href="#multi-tenancy-for-aiml-data-centers">Multi-Tenancy for AI/ML Data Centers</a>
+<ul>
+<li><a href="#network-level-multi-tenancy">Network-Level Multi-Tenancy</a></li>
+<li><a href="#evpn-vxlan-multi-tenancy">EVPN-VXLAN Multi-Tenancy</a></li>
+<li><a href="#server-level-multi-tenancy">Server-Level Multi-Tenancy</a></li>
+<li><a href="#combining-server-and-network-multi-tenancy">Combining Server and Network Multi-Tenancy</a></li>
+<li><a href="#dynamic-acl-based-multi-tenancy">Dynamic ACL-Based Multi-Tenancy</a></li>
+</ul>
+</li>
+<li><a href="#extending-ip-routing-to-the-server">Extending IP Routing to the Server</a>
+<ul>
+<li><a href="#server-to-tor-ebgp">Server-to-ToR eBGP</a></li>
+<li><a href="#virtual-bgp-route-reflector">Virtual BGP Route Reflector</a></li>
+</ul>
+</li>
+<li><a href="#traffic-engineering-and-telemetry">Traffic Engineering and Telemetry</a></li>
+<li><a href="#segment-routing-and-srv6">Segment Routing and SRv6</a>
+<ul>
+<li><a href="#segment-routing-basics">Segment Routing Basics</a></li>
+<li><a href="#sr-mpls-vs-srv6">SR-MPLS vs. SRv6</a></li>
+<li><a href="#srv6-segment-routing-header">SRv6 Segment Routing Header</a></li>
+<li><a href="#compressed-sid-and-usid">Compressed SID and uSID</a></li>
+</ul>
+</li>
+<li><a href="#routing-protocol-comparison">Routing Protocol Comparison</a></li>
+<li><a href="#operational-validation-checklist">Operational Validation Checklist</a></li>
+<li><a href="#chapter-summary">Chapter Summary</a></li>
+<li><a href="#key-terms">Key Terms</a></li>
+<li><a href="#qa">Q&#x26;A</a></li>
+<li><a href="#references">References</a></li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="goal">Goal</h2><a class="sl-anchor-link" href="#goal"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Goal”</span></a></div>
+<p>This chapter explains routing choices for AI/ML data center fabrics.</p>
+<p>The core idea is:</p>
+<blockquote>
+<p>AI fabric routing is no longer just reachability. It must support scale, fast convergence, path diversity, traffic engineering, tenant isolation, and workload-aware forwarding.</p>
+</blockquote>
+<p>The chapter focuses on these topics:</p>
+<ul>
+<li>eBGP underlay for three-stage and five-stage Clos fabrics</li>
+<li>BGP unnumbered using IPv6 link-local next hops</li>
+<li>BGP ASN allocation and AS-PATH behavior</li>
+<li>BGP ADD-PATH and BGP Link Bandwidth Extended Community</li>
+<li>BGP Deterministic Path Forwarding, DPF</li>
+<li>RIFT for fat-tree and Dragonfly-style fabrics</li>
+<li>IS-IS flood optimization and FlexAlgo</li>
+<li>EVPN-VXLAN and server/GPU-level multi-tenancy</li>
+<li>Extending routing to GPU servers</li>
+<li>Controller-driven traffic engineering</li>
+<li>Segment Routing, SRv6, and uSID</li>
+</ul>
+<p><starlight-image-zoom-zoomable><img src="/network/chap08/assets/routing-for-ai-fabrics-map.svg" alt="Routing map for AI fabrics"><button aria-label="Zoom image: Routing map for AI fabrics" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<div class="sl-heading-wrapper level-h2"><h2 id="why-ip-routing-matters-in-ai-fabrics">Why IP Routing Matters in AI Fabrics</h2><a class="sl-anchor-link" href="#why-ip-routing-matters-in-ai-fabrics"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Why IP Routing Matters in AI Fabrics”</span></a></div>
+<p>Earlier chapters covered topology, load balancing, and congestion control. Routing ties those pieces together.</p>
+<p>In AI fabrics, the routing protocol must answer more than “Can this prefix be reached?”</p>
+<p>It also affects:</p>
+<ul>
+<li>How quickly the fabric converges after a link or node failure</li>
+<li>Whether ECMP has enough usable next hops</li>
+<li>Whether unequal link speeds can be represented</li>
+<li>Whether workload or tenant traffic can be pinned to selected paths</li>
+<li>Whether multi-tenant overlays can be signaled</li>
+<li>Whether fabric topology can be exposed to controllers or adaptive routing</li>
+<li>Whether GPU servers can participate in routing directly</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="backend-and-frontend-routing-domains">Backend and Frontend Routing Domains</h3><a class="sl-anchor-link" href="#backend-and-frontend-routing-domains"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Backend and Frontend Routing Domains”</span></a></div>
+<p>AI data centers often separate backend and frontend concerns.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Domain</th><th>Main Traffic</th><th>Common Routing Style</th></tr></thead><tbody><tr><td>Backend training fabric</td><td>GPU/NIC east-west RDMA, RoCEv2</td><td>Native IP eBGP, BGP-DPF, GLB, BGP link bandwidth, RIFT, IS-IS FlexAlgo</td></tr><tr><td>Frontend / inference fabric</td><td>User traffic, API serving, storage, tenant services</td><td>eBGP underlay plus EVPN-VXLAN overlay</td></tr><tr><td>Storage domain</td><td>Checkpoints, data loading, object or block storage</td><td>RoCEv2, NVMe/TCP, iSCSI, or other IP storage designs</td></tr></tbody></table>
+<p>The same routing protocol can be used in both domains, but with different features. For example, backend eBGP may use weighted ECMP and BGP Link Bandwidth Extended Community, while frontend eBGP may carry EVPN-VXLAN services for tenant segmentation.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="dynamic-ip-routing-options">Dynamic IP Routing Options</h3><a class="sl-anchor-link" href="#dynamic-ip-routing-options"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Dynamic IP Routing Options”</span></a></div>
+<p>The chapter compares traditional and emerging routing choices.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Protocol</th><th>Basic Type</th><th>Strength</th><th>Concern</th></tr></thead><tbody><tr><td>eBGP</td><td>Path-vector</td><td>Scale, policy, multi-vendor adoption, loop prevention</td><td>Convergence and topology awareness need tuning</td></tr><tr><td>OSPF</td><td>Link-state IGP</td><td>Familiar, hierarchical, fast enough in many networks</td><td>Flooding, complexity, and less data center traction</td></tr><tr><td>IS-IS</td><td>Link-state IGP</td><td>Scalable, extensible TLVs, FlexAlgo, link-local behavior</td><td>Less common in enterprise/data center operations</td></tr><tr><td>RIFT</td><td>Fat-tree optimized IGP</td><td>Designed for Clos/fat-tree, fast convergence, disaggregation</td><td>Newer and less mature than BGP</td></tr><tr><td>Segment Routing</td><td>Source-routing architecture</td><td>Explicit path control and controller-driven TE</td><td>Header overhead, hardware support, operational complexity</td></tr></tbody></table>
+<p>There is no universal best routing protocol. The right choice depends on topology, scale, operations, vendor support, convergence target, and traffic engineering needs.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="ebgp-underlay-for-ai-data-centers">eBGP Underlay for AI Data Centers</h2><a class="sl-anchor-link" href="#ebgp-underlay-for-ai-data-centers"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “eBGP Underlay for AI Data Centers”</span></a></div>
+<p>eBGP is widely used for large data center fabrics, including AI fabrics, because it scales well and has strong policy controls.</p>
+<p>Typical AI fabric use:</p>
+<ul>
+<li>Three-stage Clos: leaf - spine - leaf</li>
+<li>Five-stage Clos: leaf - spine - super-spine - spine - leaf</li>
+<li>Backend native IP fabric for GPU RDMA traffic</li>
+<li>Frontend underlay for EVPN-VXLAN overlays</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="why-ebgp-is-common">Why eBGP Is Common</h3><a class="sl-anchor-link" href="#why-ebgp-is-common"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Why eBGP Is Common”</span></a></div>
+<p>Benefits:</p>
+<ul>
+<li>Proven at cloud scale</li>
+<li>Clear loop prevention through AS-PATH</li>
+<li>Strong route policy controls</li>
+<li>Works across vendors</li>
+<li>Supports Clos, Dragonfly-like, and full-mesh variations</li>
+<li>Can carry additional service families such as EVPN</li>
+<li>Can be automated with per-rack or per-switch ASN plans</li>
+</ul>
+<p>Limitations:</p>
+<ul>
+<li>BGP was not originally designed as a link-state fabric protocol.</li>
+<li>Native BGP has limited link/queue awareness.</li>
+<li>Convergence can be slower than some IGPs.</li>
+<li>Large topologies require careful ASN and policy design.</li>
+<li>Advanced AI features often require extensions or route policies.</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="bgp-unnumbered">BGP Unnumbered</h3><a class="sl-anchor-link" href="#bgp-unnumbered"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “BGP Unnumbered”</span></a></div>
+<p>BGP unnumbered simplifies leaf-spine peering by avoiding per-link IPv4 addressing.</p>
+<p>The idea:</p>
+<ul>
+<li>Interfaces use IPv6 link-local addresses.</li>
+<li>IPv6 Neighbor Discovery discovers neighbors.</li>
+<li>BGP establishes TCP sessions over link-local addresses.</li>
+<li>IPv4 prefixes can be advertised with IPv6 link-local next hops.</li>
+<li>Extended Next Hop Encoding, RFC 5549, allows this behavior.</li>
+</ul>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+sequenceDiagram
+    participant Leaf as Leaf
+    participant Spine as Spine
+
+    Leaf->>Spine: IPv6 Neighbor Solicitation
+    Spine-->>Leaf: IPv6 Neighbor Advertisement
+    Spine-->>Leaf: Router Advertisement / link-local info
+    Leaf->>Spine: TCP SYN to BGP port 179
+    Spine-->>Leaf: TCP SYN/ACK
+    Leaf->>Spine: BGP OPEN with capabilities
+    Spine-->>Leaf: BGP OPEN / KEEPALIVE
+    Leaf->>Spine: BGP UPDATE: IPv4 NLRI, IPv6 link-local next hop</pre>
+<p>Operational benefit:</p>
+<ul>
+<li>Fewer point-to-point addresses to allocate</li>
+<li>Easier automation</li>
+<li>Less per-link configuration</li>
+<li>Good fit for fabrics with many leaf-spine links</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="next-hop-rewrite-and-as-path">Next-Hop Rewrite and AS-PATH</h3><a class="sl-anchor-link" href="#next-hop-rewrite-and-as-path"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Next-Hop Rewrite and AS-PATH”</span></a></div>
+<p>In eBGP, each hop normally rewrites the next hop and adds its ASN to AS-PATH.</p>
+<p>Example:</p>
+<ol>
+<li>Leaf 1 originates a GPU server prefix.</li>
+<li>Spine receives it and advertises it to Leaf 2.</li>
+<li>Spine rewrites the next hop to itself.</li>
+<li>AS-PATH is updated with the relevant AS sequence.</li>
+</ol>
+<p>This behavior helps loop prevention and policy, but it must be understood when designing deterministic forwarding, maintenance policies, and failure handling.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="bgp-asn-allocation">BGP ASN Allocation</h3><a class="sl-anchor-link" href="#bgp-asn-allocation"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “BGP ASN Allocation”</span></a></div>
+<p>ASN design is important in AI fabrics.</p>
+<p>Common patterns:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Pattern</th><th>Description</th><th>Benefit</th><th>Risk</th></tr></thead><tbody><tr><td>Same ASN for all spines, unique ASN per leaf</td><td>Common eBGP Clos design</td><td>Simple loop prevention and origin identification</td><td>Requires planning for AS-PATH expectations</td></tr><tr><td>Unique ASN per spine and leaf</td><td>More granular identity</td><td>More explicit topology identity</td><td>Can create suboptimal forwarding under failures</td></tr><tr><td>iBGP with route reflectors</td><td>Same ASN across fabric</td><td>Avoids eBGP next-hop rewrite</td><td>Less common for cloud-style data center fabrics</td></tr></tbody></table>
+<p>The chapter emphasizes that using the same ASN for spines and unique ASNs for ToR/leaf switches can help avoid suboptimal forwarding after failures because BGP loop prevention rejects routes containing repeated ASNs.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="bgp-add-path">BGP ADD-PATH</h3><a class="sl-anchor-link" href="#bgp-add-path"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “BGP ADD-PATH”</span></a></div>
+<p>BGP normally advertises only the best path for a prefix. BGP ADD-PATH allows more than one path to be advertised.</p>
+<p>Why this matters:</p>
+<ul>
+<li>More path diversity</li>
+<li>Better redundancy</li>
+<li>Better multipath visibility</li>
+<li>Useful when route reflectors or policy otherwise hide alternate paths</li>
+</ul>
+<p>In AI fabrics, ADD-PATH can help preserve usable paths for GPU traffic where link diversity and rapid recovery matter.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="as-path-strip-and-replace">AS-PATH Strip and Replace</h3><a class="sl-anchor-link" href="#as-path-strip-and-replace"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “AS-PATH Strip and Replace”</span></a></div>
+<p>AS-PATH strip and replace normalizes AS-PATH when private ASNs are used inside the data center and routes must be exchanged with a larger core network.</p>
+<p>Uses:</p>
+<ul>
+<li>Hide internal private ASN details from the core</li>
+<li>Normalize path length</li>
+<li>Avoid exposing tenant or fabric-internal ASN design</li>
+<li>Support multi-tenant or multi-domain routing boundaries</li>
+</ul>
+<p>This is mainly relevant at fabric borders or when connecting to a core IP network.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="bgp-link-bandwidth-extended-community">BGP Link Bandwidth Extended Community</h3><a class="sl-anchor-link" href="#bgp-link-bandwidth-extended-community"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “BGP Link Bandwidth Extended Community”</span></a></div>
+<p>BGP Link Bandwidth Extended Community carries bandwidth information that can be used for weighted ECMP.</p>
+<p>Example:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Path</th><th align="right">Link Bandwidth</th><th>Weighting Goal</th></tr></thead><tbody><tr><td>Path A</td><td align="right">400G</td><td>Lower share</td></tr><tr><td>Path B</td><td align="right">800G</td><td>Higher share</td></tr></tbody></table>
+<p>If one next hop has twice the capacity, weighted ECMP can send more traffic to it. This is useful in mixed-speed fabrics or during transitions from 400G to 800G links.</p>
+<p><starlight-image-zoom-zoomable><img src="/network/chap08/assets/ebgp-underlay-path-diversity.svg" alt="eBGP underlay path diversity in an AI fabric"><button aria-label="Zoom image: eBGP underlay path diversity in an AI fabric" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<div class="sl-heading-wrapper level-h3"><h3 id="minimum-bgp-peers-per-prefix">Minimum BGP Peers per Prefix</h3><a class="sl-anchor-link" href="#minimum-bgp-peers-per-prefix"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Minimum BGP Peers per Prefix”</span></a></div>
+<p>Some designs require a minimum number of active BGP peers for a prefix to be considered usable.</p>
+<p>Reason:</p>
+<ul>
+<li>Avoid advertising or using a destination when too few paths remain.</li>
+<li>Protect workload performance when ECMP width has collapsed.</li>
+<li>Keep GPU jobs away from partially degraded fabric areas.</li>
+</ul>
+<p>This is a routing-level guardrail for performance, not just reachability.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="bgp-deterministic-path-forwarding-bgp-dpf">BGP Deterministic Path Forwarding, BGP-DPF</h2><a class="sl-anchor-link" href="#bgp-deterministic-path-forwarding-bgp-dpf"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “BGP Deterministic Path Forwarding, BGP-DPF”</span></a></div>
+<p>BGP Deterministic Path Forwarding, BGP-DPF, provides deterministic path selection by associating traffic with logical fabric colors.</p>
+<p>The goal is similar to traffic engineering:</p>
+<ul>
+<li>Divide one physical fabric into logical fabrics.</li>
+<li>Pin selected traffic to a fabric color.</li>
+<li>Use GPU ID, QP, tenant, or SLA to choose a path.</li>
+<li>Keep elephant flows predictable.</li>
+<li>Improve isolation between tenants or workloads.</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="logical-fabric-colors">Logical Fabric Colors</h3><a class="sl-anchor-link" href="#logical-fabric-colors"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Logical Fabric Colors”</span></a></div>
+<p><starlight-image-zoom-zoomable><img src="/network/chap08/assets/deterministic-routing-planes.svg" alt="Deterministic routing planes for AI fabrics"><button aria-label="Zoom image: Deterministic routing planes for AI fabrics" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<p>DPF can be implemented through:</p>
+<ul>
+<li>BGP communities</li>
+<li>Colored route advertisement</li>
+<li>Session coloring</li>
+<li>Route policy</li>
+<li>ASIC forwarding behavior that maps flow characteristics to a color</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="rail-optimized-and-rail-unified-dpf">Rail-Optimized and Rail-Unified DPF</h3><a class="sl-anchor-link" href="#rail-optimized-and-rail-unified-dpf"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Rail-Optimized and Rail-Unified DPF”</span></a></div>
+<p>BGP-DPF can be applied in both ROD and RUD designs.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Design</th><th>DPF Use</th></tr></thead><tbody><tr><td>Rail-Optimized Design, ROD</td><td>Each rail can carry a specific logical fabric or tenant path</td></tr><tr><td>Rail-Unified Design, RUD</td><td>GPU ID, QP, or tenant can choose a logical fabric even when rails share leaf groups</td></tr></tbody></table>
+<p>In a RUD design, DPF becomes especially useful because multiple GPU/NIC positions may share the same physical leaf. The fabric needs a logical way to keep selected flows separated.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="session-coloring-and-colored-routes">Session Coloring and Colored Routes</h3><a class="sl-anchor-link" href="#session-coloring-and-colored-routes"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Session Coloring and Colored Routes”</span></a></div>
+<p>DPF can color the BGP session or the routes carried over the session.</p>
+<p>Session coloring:</p>
+<ul>
+<li>A BGP peer/session belongs to a color such as black or gray.</li>
+<li>Routes learned over that session are associated with that color.</li>
+<li>Forwarding can select color-specific next hops.</li>
+</ul>
+<p>Colored route advertisement:</p>
+<ul>
+<li>Server or leaf advertises a prefix with color metadata.</li>
+<li>Fabric uses that color to select the logical path.</li>
+<li>A tenant or GPU workload can be mapped to a deterministic fabric.</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="evpn-vxlan-and-underlay-color">EVPN-VXLAN and Underlay Color</h3><a class="sl-anchor-link" href="#evpn-vxlan-and-underlay-color"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “EVPN-VXLAN and Underlay Color”</span></a></div>
+<p>BGP-DPF can correlate overlay tenants with underlay colors.</p>
+<p>Example:</p>
+<ul>
+<li>Tenant Black uses MAC-VRF Black.</li>
+<li>Tenant Gray uses MAC-VRF Gray.</li>
+<li>Tenant Black overlay is mapped to Underlay Fabric Black.</li>
+<li>Tenant Gray overlay is mapped to Underlay Fabric Gray.</li>
+</ul>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TB
+    classDef tenant fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef overlay fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef underlay fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    TB[Tenant Black]:::tenant
+    TG[Tenant Gray]:::tenant
+    MB[MAC-VRF Black&#x3C;br/>EVPN-VXLAN]:::overlay
+    MG[MAC-VRF Gray&#x3C;br/>EVPN-VXLAN]:::overlay
+    UB[Underlay Color Black]:::underlay
+    UG[Underlay Color Gray]:::underlay
+
+    TB --> MB --> UB
+    TG --> MG --> UG</pre>
+<p>This gives both tenant isolation and path isolation.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="rift-for-fat-tree-and-dragonfly-fabrics">RIFT for Fat-Tree and Dragonfly Fabrics</h2><a class="sl-anchor-link" href="#rift-for-fat-tree-and-dragonfly-fabrics"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “RIFT for Fat-Tree and Dragonfly Fabrics”</span></a></div>
+<p>RIFT, Routing in Fat Trees, is an IGP designed for fat-tree and Clos-like data center topologies.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="rift-basics">RIFT Basics</h3><a class="sl-anchor-link" href="#rift-basics"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “RIFT Basics”</span></a></div>
+<p>RIFT combines two propagation styles:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Direction</th><th>Behavior</th></tr></thead><tbody><tr><td>Northbound</td><td>Link-state flooding toward higher levels</td></tr><tr><td>Southbound</td><td>Distance-vector style routing toward lower levels</td></tr></tbody></table>
+<p>Key benefits:</p>
+<ul>
+<li>Designed for fat-tree topology</li>
+<li>Fast convergence</li>
+<li>Automatic disaggregation on failure</li>
+<li>Wide ECMP and UCMP support</li>
+<li>Topology awareness</li>
+<li>Metadata advertisements</li>
+<li>Better fit for large Clos than general-purpose IGP flooding</li>
+</ul>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TB
+    classDef leaf fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef spine fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef super fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    L1[Leaf 1]:::leaf
+    L2[Leaf 2]:::leaf
+    S1[Spine 1]:::spine
+    S2[Spine 2]:::spine
+    SS[Super-spine]:::super
+
+    L1 -->|northbound link-state| S1
+    L2 -->|northbound link-state| S2
+    S1 -->|northbound| SS
+    S2 -->|northbound| SS
+    SS -->|southbound distance-vector| S1
+    SS -->|southbound distance-vector| S2
+    S1 -->|southbound| L1
+    S2 -->|southbound| L2</pre>
+<div class="sl-heading-wrapper level-h3"><h3 id="dragonfly-and-dragonfly-sparse">Dragonfly and Dragonfly Sparse</h3><a class="sl-anchor-link" href="#dragonfly-and-dragonfly-sparse"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Dragonfly and Dragonfly Sparse”</span></a></div>
+<p>The chapter discusses Dragonfly as a topology where groups connect to other groups through global links.</p>
+<p>Benefits:</p>
+<ul>
+<li>Reduced network diameter</li>
+<li>Lower hop count</li>
+<li>Lower latency potential</li>
+<li>High path diversity</li>
+<li>Useful for HPC-like topologies</li>
+</ul>
+<p>Challenges:</p>
+<ul>
+<li>Cabling complexity</li>
+<li>Group-to-group link planning</li>
+<li>Workload placement sensitivity</li>
+<li>Need for topology-aware routing</li>
+<li>Less familiar operational model than Clos</li>
+</ul>
+<p>Dragonfly Sparse reduces some complexity by using leaf-spine Clos inside a group and connecting selected top-of-fabric nodes between groups.</p>
+<p>RIFT is relevant here because it can encode topology information that traditional Clos-only assumptions may not support.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="is-is-for-ai-fabrics">IS-IS for AI Fabrics</h2><a class="sl-anchor-link" href="#is-is-for-ai-fabrics"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “IS-IS for AI Fabrics”</span></a></div>
+<p>IS-IS is a link-state IGP. The chapter presents it as an alternative to BGP and RIFT for AI backend fabrics, especially where fast convergence, dense topology optimization, and logical path computation matter.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="optimal-distributed-flooding">Optimal Distributed Flooding</h3><a class="sl-anchor-link" href="#optimal-distributed-flooding"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Optimal Distributed Flooding”</span></a></div>
+<p>Traditional link-state flooding can become expensive in dense topologies. IS-IS Optimal Distributed Flooding reduces unnecessary flooding by electing selected neighbors for update propagation.</p>
+<p>Benefits:</p>
+<ul>
+<li>Less control-plane flooding</li>
+<li>Faster convergence in dense leaf-spine designs</li>
+<li>Reduced LSP fragment processing</li>
+<li>More useful as spine count grows to 32, 64, or more</li>
+</ul>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    classDef leaf fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef spine fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef chosen fill:#173f32,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    L[Leaf announces new prefix]:::leaf
+    S1[Spine 1]:::spine
+    S2[Spine 2&#x3C;br/>selected flood neighbor]:::chosen
+    S3[Spine 3]:::spine
+
+    L -.-> S1
+    L ==>|flood update here| S2
+    L -.-> S3</pre>
+<div class="sl-heading-wrapper level-h3"><h3 id="is-is-flexalgo">IS-IS FlexAlgo</h3><a class="sl-anchor-link" href="#is-is-flexalgo"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “IS-IS FlexAlgo”</span></a></div>
+<p>FlexAlgo lets IS-IS compute multiple logical topologies over the same physical fabric.</p>
+<p>Each FlexAlgo is defined by a Flexible Algorithm Definition, FAD:</p>
+<ul>
+<li>Calculation type</li>
+<li>Metric type</li>
+<li>Constraints</li>
+</ul>
+<p>Example:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>FlexAlgo</th><th>Constraint Goal</th><th>Possible Workload</th></tr></thead><tbody><tr><td>Default</td><td>Normal shortest path</td><td>General traffic</td></tr><tr><td>128</td><td>Low latency</td><td>Latency-sensitive collectives</td></tr><tr><td>129</td><td>High bandwidth</td><td>Elephant RDMA flows</td></tr><tr><td>130</td><td>Low congestion</td><td>Congestion-sensitive or premium workloads</td></tr></tbody></table>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TB
+    classDef physical fill:#5a3520,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef low fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef bw fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef cong fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    P[Same physical leaf-spine fabric]:::physical
+    A128[FlexAlgo 128&#x3C;br/>low latency plane]:::low
+    A129[FlexAlgo 129&#x3C;br/>high bandwidth plane]:::bw
+    A130[FlexAlgo 130&#x3C;br/>low congestion plane]:::cong
+
+    P --> A128
+    P --> A129
+    P --> A130</pre>
+<p>FlexAlgo can steer different AI workloads into different logical path planes without requiring SR-MPLS or SRv6 encapsulation for the basic pure-IP use case.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="flexalgo-compared-with-bgp-dpf">FlexAlgo Compared with BGP-DPF</h3><a class="sl-anchor-link" href="#flexalgo-compared-with-bgp-dpf"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “FlexAlgo Compared with BGP-DPF”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Aspect</th><th>BGP-DPF</th><th>IS-IS FlexAlgo</th></tr></thead><tbody><tr><td>Control input</td><td>BGP communities, route/session colors, policy</td><td>IS-IS TLVs and FAD constraints</td></tr><tr><td>Main abstraction</td><td>Logical fabric color</td><td>Algorithm-specific topology</td></tr><tr><td>Topology awareness</td><td>Policy-driven, BGP is not native link-state</td><td>Native link-state</td></tr><tr><td>Workload mapping</td><td>Tenant, GPU ID, QP, SLA</td><td>Metric/constraint-based plane</td></tr><tr><td>Best fit</td><td>BGP-based fabrics needing deterministic colors</td><td>IGP fabrics needing path diversity and fast convergence</td></tr></tbody></table>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="multi-tenancy-for-aiml-data-centers">Multi-Tenancy for AI/ML Data Centers</h2><a class="sl-anchor-link" href="#multi-tenancy-for-aiml-data-centers"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Multi-Tenancy for AI/ML Data Centers”</span></a></div>
+<p>Multi-tenancy appears when GPUs are shared between users, teams, customers, or services.</p>
+<p>Reasons:</p>
+<ul>
+<li>Security isolation</li>
+<li>Performance isolation</li>
+<li>Capacity planning</li>
+<li>GPU-as-a-Service, GPUaaS</li>
+<li>Public or private cloud AI offerings</li>
+<li>Separate training and inference tenants</li>
+</ul>
+<p><starlight-image-zoom-zoomable><img src="/network/chap08/assets/tenant-server-routing-traffic-engineering.svg" alt="Tenant isolation, server routing, telemetry, and SRv6 traffic engineering"><button aria-label="Zoom image: Tenant isolation, server routing, telemetry, and SRv6 traffic engineering" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<div class="sl-heading-wrapper level-h3"><h3 id="network-level-multi-tenancy">Network-Level Multi-Tenancy</h3><a class="sl-anchor-link" href="#network-level-multi-tenancy"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Network-Level Multi-Tenancy”</span></a></div>
+<p>The simplest model is dedicated physical resources:</p>
+<ul>
+<li>A tenant gets a full GPU server.</li>
+<li>Each GPU/NIC port is connected to a rail leaf.</li>
+<li>Switch ports are dedicated to that tenant.</li>
+</ul>
+<p>This is simple and strong from an isolation perspective, but it can waste resources if tenants do not need full servers or full rails.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="evpn-vxlan-multi-tenancy">EVPN-VXLAN Multi-Tenancy</h3><a class="sl-anchor-link" href="#evpn-vxlan-multi-tenancy"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “EVPN-VXLAN Multi-Tenancy”</span></a></div>
+<p>EVPN-VXLAN can segment tenant traffic using:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Object</th><th>Role</th></tr></thead><tbody><tr><td>VLAN</td><td>Local Layer 2 tenant mapping</td></tr><tr><td>VNI</td><td>VXLAN network identifier</td></tr><tr><td>MAC-VRF</td><td>Tenant Layer 2 forwarding instance</td></tr><tr><td>IP-VRF</td><td>Tenant Layer 3 routing instance</td></tr><tr><td>EVPN RT-2</td><td>MAC/IP host route advertisement</td></tr><tr><td>EVPN RT-5</td><td>IP prefix route advertisement</td></tr><tr><td>Routing VNI</td><td>Tenant L3 VXLAN tunnel identifier</td></tr></tbody></table>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TB
+    classDef tenant fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef evpn fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef fabric fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    TA[Tenant A GPU]:::tenant
+    TB[Tenant B GPU]:::tenant
+    VA[VLAN A / VNI 10010&#x3C;br/>MAC-VRF A / IP-VRF A]:::evpn
+    VB[VLAN B / VNI 10020&#x3C;br/>MAC-VRF B / IP-VRF B]:::evpn
+    F[Shared leaf-spine fabric]:::fabric
+
+    TA --> VA --> F
+    TB --> VB --> F</pre>
+<p>The chapter describes using RT-5 EVPN IP instances between rails and using route servers at the spine layer. Tenant routes are defined at the ToR/leaf, while spines provide EVPN route reflection or route-server behavior.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="server-level-multi-tenancy">Server-Level Multi-Tenancy</h3><a class="sl-anchor-link" href="#server-level-multi-tenancy"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Server-Level Multi-Tenancy”</span></a></div>
+<p>Server vendors may provide GPU-level partitioning. The chapter uses NVIDIA MIG, Multi-Instance GPU, as the example.</p>
+<p>MIG can partition one physical GPU into multiple GPU instances. Each instance can be assigned to a different tenant or workload.</p>
+<p>Example:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Physical GPU</th><th>Tenant Mapping</th></tr></thead><tbody><tr><td>MIG instance 1</td><td>Tenant 1</td></tr><tr><td>MIG instance 2</td><td>Tenant 2</td></tr><tr><td>MIG instance 3</td><td>Tenant 3</td></tr><tr><td>…</td><td>…</td></tr><tr><td>MIG instance 7</td><td>Tenant 7</td></tr></tbody></table>
+<p>Inside the server, vGPU or MIG-level tenancy can be scheduled across servers with collective communication software such as NCCL or RCCL.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="combining-server-and-network-multi-tenancy">Combining Server and Network Multi-Tenancy</h3><a class="sl-anchor-link" href="#combining-server-and-network-multi-tenancy"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Combining Server and Network Multi-Tenancy”</span></a></div>
+<p>Server-level and network-level tenancy can be combined.</p>
+<p>Example:</p>
+<ul>
+<li>A server has seven MIG instances.</li>
+<li>Each MIG instance maps to a VLAN.</li>
+<li>The ToR leaf has seven MAC-VRFs and seven EVPN IP-level instances.</li>
+<li>Each tenant gets separate L2 tags, VNI, VRF, and routing policy.</li>
+</ul>
+<p>This creates end-to-end tenant isolation from GPU instance to fabric path.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    classDef gpu fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef vlan fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef vrf fill:#173f32,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    M1[MIG 1&#x3C;br/>Tenant 1]:::gpu
+    M2[MIG 2&#x3C;br/>Tenant 2]:::gpu
+    V1[VLAN 101&#x3C;br/>VNI 100101]:::vlan
+    V2[VLAN 102&#x3C;br/>VNI 100102]:::vlan
+    R1[MAC-VRF / IP-VRF&#x3C;br/>Tenant 1]:::vrf
+    R2[MAC-VRF / IP-VRF&#x3C;br/>Tenant 2]:::vrf
+
+    M1 --> V1 --> R1
+    M2 --> V2 --> R2</pre>
+<div class="sl-heading-wrapper level-h3"><h3 id="dynamic-acl-based-multi-tenancy">Dynamic ACL-Based Multi-Tenancy</h3><a class="sl-anchor-link" href="#dynamic-acl-based-multi-tenancy"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Dynamic ACL-Based Multi-Tenancy”</span></a></div>
+<p>Another approach is dynamic ACLs on the ToR data plane, driven by a tenant profile from a system such as RADIUS.</p>
+<p>Benefits:</p>
+<ul>
+<li>Centralized policy</li>
+<li>Potentially simpler than full EVPN-VXLAN in smaller designs</li>
+<li>Can apply tenant rules directly at the ToR</li>
+</ul>
+<p>Limitations:</p>
+<ul>
+<li>TCAM scale can become a blocker.</li>
+<li>ACL complexity grows with tenant count.</li>
+<li>EVPN-VXLAN is usually more scalable for distributed tenant isolation.</li>
+</ul>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="extending-ip-routing-to-the-server">Extending IP Routing to the Server</h2><a class="sl-anchor-link" href="#extending-ip-routing-to-the-server"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Extending IP Routing to the Server”</span></a></div>
+<p>The chapter also discusses extending routing to GPU servers.</p>
+<p>Instead of treating servers as passive hosts, a GPU server can run a BGP stack and advertise prefixes to the fabric.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="server-to-tor-ebgp">Server-to-ToR eBGP</h3><a class="sl-anchor-link" href="#server-to-tor-ebgp"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Server-to-ToR eBGP”</span></a></div>
+<p>Use cases:</p>
+<ul>
+<li>Advertise service IPs from servers</li>
+<li>Advertise host routes or anycast services</li>
+<li>Improve failover through BGP withdraw</li>
+<li>Keep end-to-end routing protocol behavior consistent</li>
+<li>Avoid static host route models</li>
+</ul>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    classDef server fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef leaf fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef spine fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    S1[GPU server 1&#x3C;br/>BGP ASN]:::server
+    S2[GPU server 2&#x3C;br/>BGP ASN]:::server
+    L1[ToR / Leaf 1]:::leaf
+    L2[ToR / Leaf 2]:::leaf
+    SP[Spine]:::spine
+
+    S1 &#x3C;-->|eBGP| L1
+    S2 &#x3C;-->|eBGP| L2
+    L1 &#x3C;-->|fabric eBGP| SP
+    L2 &#x3C;-->|fabric eBGP| SP</pre>
+<p>If a server-side service fails, the server can withdraw the prefix, and the fabric can stop forwarding traffic to it.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="virtual-bgp-route-reflector">Virtual BGP Route Reflector</h3><a class="sl-anchor-link" href="#virtual-bgp-route-reflector"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Virtual BGP Route Reflector”</span></a></div>
+<p>At larger scale, having every server peer directly with every relevant fabric node may be too heavy.</p>
+<p>A virtual appliance BGP route reflector can:</p>
+<ul>
+<li>Reduce peering count</li>
+<li>Centralize server route reflection</li>
+<li>Advertise server service prefixes into spines</li>
+<li>Provide a cleaner boundary between server routing and fabric routing</li>
+</ul>
+<p>This is especially useful for service prefixes such as anycast IPs.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="traffic-engineering-and-telemetry">Traffic Engineering and Telemetry</h2><a class="sl-anchor-link" href="#traffic-engineering-and-telemetry"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Traffic Engineering and Telemetry”</span></a></div>
+<p>AI fabric traffic engineering can be distributed or controller-driven.</p>
+<p>Distributed examples:</p>
+<ul>
+<li>ECMP</li>
+<li>DLB</li>
+<li>GLB</li>
+<li>BGP-DPF</li>
+<li>IS-IS FlexAlgo</li>
+</ul>
+<p>For the GLB-specific use of BGP NNHN and forwarding-plane heartbeats, see <a href="/network/glb-nnhn-bgp-underlay/">Appendix: BGP-based Underlay and GLB NNHN</a>.</p>
+<p>Controller-driven examples:</p>
+<ul>
+<li>Controller receives fabric topology</li>
+<li>Controller receives telemetry</li>
+<li>Controller receives job scheduler intent</li>
+<li>Controller computes preferred GPU-to-GPU paths</li>
+<li>Controller pushes routing or policy updates</li>
+</ul>
+<p>Telemetry inputs:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Signal</th><th>Use</th></tr></thead><tbody><tr><td>Link utilization</td><td>Avoid hot links</td></tr><tr><td>Queue occupancy</td><td>Detect congestion pressure</td></tr><tr><td>PFC/ECN counters</td><td>Detect lossless fabric stress</td></tr><tr><td>sFlow or sampled flow data</td><td>Identify traffic patterns</td></tr><tr><td>Egress BGP statistics</td><td>Understand route and next-hop use</td></tr><tr><td>Active probes</td><td>Measure end-to-end path quality</td></tr><tr><td>Job scheduler metadata</td><td>Map workload to fabric policy</td></tr></tbody></table>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TB
+    classDef scheduler fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef telemetry fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef controller fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef fabric fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    J[GPU job scheduler&#x3C;br/>placement and SLA]:::scheduler
+    T[Fabric telemetry&#x3C;br/>links, queues, ECN/PFC, probes]:::telemetry
+    C[Fabric controller&#x3C;br/>path computation]:::controller
+    F[AI fabric&#x3C;br/>BGP, DPF, SR, policy]:::fabric
+
+    J --> C
+    T --> C
+    C --> F
+    F --> T</pre>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="segment-routing-and-srv6">Segment Routing and SRv6</h2><a class="sl-anchor-link" href="#segment-routing-and-srv6"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Segment Routing and SRv6”</span></a></div>
+<p>Segment Routing, SR, is a source-routing architecture. The ingress node encodes path instructions in the packet, and transit nodes forward based on those instructions.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="segment-routing-basics">Segment Routing Basics</h3><a class="sl-anchor-link" href="#segment-routing-basics"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Segment Routing Basics”</span></a></div>
+<p>Important terms:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Term</th><th>Meaning</th></tr></thead><tbody><tr><td>SR domain</td><td>Network where Segment Routing is enabled</td></tr><tr><td>Segment</td><td>A node, link, adjacency, or instruction</td></tr><tr><td>SID</td><td>Segment Identifier</td></tr><tr><td>Node SID</td><td>Identifier for a node</td></tr><tr><td>Adjacency SID</td><td>Identifier for a specific link or adjacency</td></tr><tr><td>Anycast SID</td><td>Shared identifier for a group of nodes</td></tr><tr><td>EPE SID</td><td>Egress Peer Engineering SID</td></tr><tr><td>SR path</td><td>Ordered list of segments from ingress to egress</td></tr></tbody></table>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    classDef node fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef sid fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    I[Ingress leaf]:::node
+    S[Spine&#x3C;br/>Node SID 5]:::sid
+    E[Egress leaf&#x3C;br/>Node SID 1]:::sid
+    D[Destination server]:::node
+
+    I -->|packet carries SID 5, SID 1| S
+    S -->|pop SID 5, follow SID 1| E
+    E -->|pop SID 1| D</pre>
+<p>SR lets a controller compute an explicit path and install instructions at ingress rather than relying only on local ECMP choices at each hop.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="sr-mpls-vs-srv6">SR-MPLS vs. SRv6</h3><a class="sl-anchor-link" href="#sr-mpls-vs-srv6"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “SR-MPLS vs. SRv6”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Data Plane</th><th>How It Encodes SIDs</th><th>Notes</th></tr></thead><tbody><tr><td>SR-MPLS</td><td>MPLS label stack</td><td>Common in service provider networks</td></tr><tr><td>SRv6</td><td>IPv6 Segment Routing Header, SRH</td><td>Uses IPv6 extension header with segment list</td></tr></tbody></table>
+<p>Control-plane information for Segment Routing can come from:</p>
+<ul>
+<li>IGP</li>
+<li>BGP-LS</li>
+<li>Controller topology database</li>
+<li>Path Computation Element Protocol, PCEP</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="srv6-segment-routing-header">SRv6 Segment Routing Header</h3><a class="sl-anchor-link" href="#srv6-segment-routing-header"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “SRv6 Segment Routing Header”</span></a></div>
+<p>SRv6 uses an IPv6 extension header called the Segment Routing Header, SRH.</p>
+<p>The SRH sits between IPv6 and upper-layer payload such as UDP/RoCEv2.</p>
+<p>Conceptual packet:</p>
+<div class="expressive-code"><link rel="stylesheet" href="/_astro/ec.v4551.css"><script type="module" src="/_astro/ec.0vx5m.js"></script><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">IPv6 header</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">SRH: segment list</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">UDP / RoCEv2 header</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Payload</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="IPv6 headerSRH: segment listUDP / RoCEv2 headerPayload"><div></div></button></div></figure></div>
+<p>SRv6 SID structure can include:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Part</th><th>Meaning</th></tr></thead><tbody><tr><td>Locator</td><td>Identifies the node or location</td></tr><tr><td>Function</td><td>Encodes node, adjacency, or service behavior</td></tr><tr><td>Argument</td><td>Optional service or application metadata</td></tr></tbody></table>
+<p>The chapter notes that SRv6 network programming lets the network encode a program of forwarding instructions into IPv6 packet headers.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="compressed-sid-and-usid">Compressed SID and uSID</h3><a class="sl-anchor-link" href="#compressed-sid-and-usid"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Compressed SID and uSID”</span></a></div>
+<p>Long SRv6 segment lists can increase packet overhead.</p>
+<p>Compressed SID and micro-segment SRv6, uSID, reduce that overhead.</p>
+<p>Key ideas:</p>
+<ul>
+<li>Normal SRv6 SID is 128 bits.</li>
+<li>uSID can encode micro-segments in smaller chunks, such as 16-bit micro-SIDs.</li>
+<li>uSID keeps the SRv6 programming model while reducing header size.</li>
+<li>This helps multi-domain or long-path deployments.</li>
+</ul>
+<p>For AI fabrics, SRv6/uSID is interesting because it can support deterministic path placement, but it must still coexist with RoCEv2 lossless mechanisms such as DCQCN.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="routing-protocol-comparison">Routing Protocol Comparison</h2><a class="sl-anchor-link" href="#routing-protocol-comparison"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Routing Protocol Comparison”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Characteristic</th><th>BGP</th><th>RIFT</th><th>IS-IS</th></tr></thead><tbody><tr><td>IP Clos ECMP support</td><td>Yes</td><td>Yes</td><td>Yes</td></tr><tr><td>Dragonfly topology support</td><td>Limited</td><td>Yes</td><td>Limited</td></tr><tr><td>Multi-tenancy options</td><td>Strong with EVPN-VXLAN</td><td>Limited</td><td>Limited</td></tr><tr><td>Convergence speed</td><td>Medium</td><td>Fast</td><td>Fast</td></tr><tr><td>Link awareness</td><td>Low by default</td><td>High</td><td>High</td></tr><tr><td>Full topology awareness</td><td>Medium</td><td>High</td><td>Medium</td></tr><tr><td>Automatic disaggregation on failure</td><td>No</td><td>Yes</td><td>No</td></tr><tr><td>Fabric configuration metadata</td><td>Limited</td><td>Yes</td><td>Limited</td></tr><tr><td>Wide ECMP / UCMP</td><td>Yes with extensions</td><td>Yes</td><td>Limited</td></tr><tr><td>Policy control</td><td>High</td><td>Lower</td><td>Medium</td></tr><tr><td>Operational maturity in DC fabrics</td><td>High</td><td>Emerging</td><td>Medium</td></tr></tbody></table>
+<p>Decision guidance:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Requirement</th><th>Likely Fit</th></tr></thead><tbody><tr><td>Cloud-style Clos with strong policy and EVPN</td><td>eBGP</td></tr><tr><td>Fat-tree optimized IGP with fast convergence</td><td>RIFT</td></tr><tr><td>Pure IP fabric with logical path algorithms</td><td>IS-IS FlexAlgo</td></tr><tr><td>Deterministic tenant/GPU/QP path coloring in BGP fabric</td><td>BGP-DPF</td></tr><tr><td>Explicit controller-computed paths</td><td>Segment Routing / SRv6</td></tr><tr><td>Server anycast or service prefix advertisement</td><td>Server-to-ToR BGP</td></tr></tbody></table>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="operational-validation-checklist">Operational Validation Checklist</h2><a class="sl-anchor-link" href="#operational-validation-checklist"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Operational Validation Checklist”</span></a></div>
+<p>Routing design should be validated as a workload-facing system, not only as a reachability graph.</p>
+<p>Checklist:</p>
+<ul>
+<li>Confirm backend and frontend routing domains are intentionally separated or shared.</li>
+<li>Validate eBGP ASN allocation and AS-PATH loop prevention.</li>
+<li>Confirm BGP unnumbered peers exchange IPv4 NLRI with IPv6 link-local next hops.</li>
+<li>Test link failure convergence for leaf-spine and spine-super-spine paths.</li>
+<li>Verify ECMP width for GPU prefixes.</li>
+<li>Test BGP ADD-PATH behavior if route reflectors or path hiding are present.</li>
+<li>Validate BGP Link Bandwidth Extended Community and weighted ECMP behavior.</li>
+<li>Confirm minimum active peer policy for critical prefixes.</li>
+<li>Validate BGP-DPF color assignment for tenant, GPU, QP, or SLA traffic.</li>
+<li>Verify EVPN-VXLAN tenant route isolation with RT-2 and RT-5 routes.</li>
+<li>Test RIFT or IS-IS convergence if using IGP alternatives.</li>
+<li>Validate IS-IS FlexAlgo path constraints and fallback behavior.</li>
+<li>Confirm server-to-ToR BGP withdraw behavior for service failure.</li>
+<li>Validate controller-driven path updates against real telemetry.</li>
+<li>Test SRv6/uSID MTU and hardware forwarding support.</li>
+<li>Measure workload effects: NCCL latency, p99 iteration time, GPU utilization, and JCT.</li>
+</ul>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TB
+    classDef model fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef test fill:#173f32,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef signal fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef decision fill:#173f32,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef fix fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    R[Routing model&#x3C;br/>BGP, RIFT, IS-IS, SR]:::model
+    P[Policy model&#x3C;br/>tenant, color, VRF, path]:::model
+    F[Failure tests&#x3C;br/>link, spine, ToR, server]:::test
+    T[Telemetry&#x3C;br/>ECMP width, queues, route churn]:::signal
+    W[Workload validation&#x3C;br/>NCCL, RoCEv2, storage]:::test
+    D{Does routing behavior&#x3C;br/>protect workload target?}:::decision
+    A[Accept design&#x3C;br/>document operating envelope]:::model
+    X[Revise ASN, policy,&#x3C;br/>protocol, path, or topology]:::fix
+
+    R --> P --> F --> T --> W --> D
+    D -->|Yes| A
+    D -->|No| X
+    X --> R</pre>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="chapter-summary">Chapter Summary</h2><a class="sl-anchor-link" href="#chapter-summary"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Chapter Summary”</span></a></div>
+<p>AI data center routing must support reachability, convergence, path control, and tenant isolation at the same time.</p>
+<p>The main takeaways:</p>
+<ul>
+<li>eBGP remains the most common underlay choice for three-stage and five-stage Clos AI fabrics.</li>
+<li>BGP unnumbered reduces per-link addressing and simplifies automation.</li>
+<li>ASN allocation matters because AS-PATH behavior can prevent loops or create suboptimal paths.</li>
+<li>BGP ADD-PATH and BGP Link Bandwidth Extended Community improve path diversity and weighted ECMP.</li>
+<li>BGP-DPF introduces deterministic logical fabric colors for tenant, GPU, QP, or SLA traffic.</li>
+<li>RIFT is designed for fat-tree fabrics and can also support Dragonfly-style topology awareness.</li>
+<li>IS-IS Optimal Distributed Flooding improves convergence in dense fabrics.</li>
+<li>IS-IS FlexAlgo can create logical routing planes using bandwidth, latency, or congestion constraints.</li>
+<li>EVPN-VXLAN, VRFs, MIG, and dynamic ACLs are different tools for AI multi-tenancy.</li>
+<li>Extending BGP to servers enables anycast and service prefix advertisement directly from GPU hosts.</li>
+<li>Segment Routing and SRv6 provide explicit path programming, especially with controller-driven traffic engineering.</li>
+<li>No routing protocol is universally best; the right answer depends on topology, scale, vendor support, operations, and workload goals.</li>
+</ul>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="key-terms">Key Terms</h2><a class="sl-anchor-link" href="#key-terms"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Key Terms”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Term</th><th>Meaning</th></tr></thead><tbody><tr><td>eBGP</td><td>External Border Gateway Protocol</td></tr><tr><td>BGP unnumbered</td><td>BGP peering using IPv6 link-local addresses instead of numbered IPv4 point-to-point links</td></tr><tr><td>RFC 5549</td><td>Advertising IPv4 NLRI with IPv6 next hop</td></tr><tr><td>ASN</td><td>Autonomous System Number</td></tr><tr><td>AS-PATH</td><td>BGP path attribute listing ASNs traversed</td></tr><tr><td>ADD-PATH</td><td>BGP capability to advertise multiple paths for a prefix</td></tr><tr><td>BGP Link Bandwidth Extended Community</td><td>BGP community carrying bandwidth for weighted ECMP</td></tr><tr><td>DPF</td><td>Deterministic Path Forwarding</td></tr><tr><td>Fabric color</td><td>Logical fabric or path group used for deterministic forwarding</td></tr><tr><td>RIFT</td><td>Routing in Fat Trees</td></tr><tr><td>UCMP</td><td>Unequal-Cost Multipathing</td></tr><tr><td>IS-IS</td><td>Intermediate System to Intermediate System</td></tr><tr><td>FlexAlgo</td><td>IS-IS flexible algorithm for constraint-based logical topologies</td></tr><tr><td>FAD</td><td>Flexible Algorithm Definition</td></tr><tr><td>EVPN</td><td>Ethernet VPN control plane</td></tr><tr><td>VXLAN</td><td>Overlay encapsulation using VNI identifiers</td></tr><tr><td>VNI</td><td>VXLAN Network Identifier</td></tr><tr><td>MAC-VRF</td><td>Layer 2 tenant forwarding instance</td></tr><tr><td>IP-VRF</td><td>Layer 3 tenant routing instance</td></tr><tr><td>RT-2</td><td>EVPN MAC/IP route type</td></tr><tr><td>RT-5</td><td>EVPN IP prefix route type</td></tr><tr><td>MIG</td><td>Multi-Instance GPU</td></tr><tr><td>SR</td><td>Segment Routing</td></tr><tr><td>SID</td><td>Segment Identifier</td></tr><tr><td>SRH</td><td>Segment Routing Header</td></tr><tr><td>SRv6</td><td>Segment Routing over IPv6</td></tr><tr><td>uSID</td><td>Micro-segment SRv6</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h2"><h2 id="qa">Q&#x26;A</h2><a class="sl-anchor-link" href="#qa"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Q&#x26;A”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="1-why-is-bgp-widely-adopted-for-routing-in-large-scale-ai-data-center-fabrics">1. Why is BGP widely adopted for routing in large-scale AI data center fabrics?</h3><a class="sl-anchor-link" href="#1-why-is-bgp-widely-adopted-for-routing-in-large-scale-ai-data-center-fabrics"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “1. Why is BGP widely adopted for routing in large-scale AI data center fabrics?”</span></a></div>
+<p>BGP is widely adopted because it scales well, has strong policy control, works across vendors, and has built-in loop prevention through AS-PATH.</p>
+<p>In AI fabrics, eBGP is commonly used with unique ASNs per leaf or rack and shared ASNs at spine layers. BGP unnumbered simplifies leaf-spine peering by using IPv6 link-local addresses, while route policies control prefix advertisement, filtering, maintenance, and tenant behavior.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="2-what-does-bgp-unnumbered-solve">2. What does BGP unnumbered solve?</h3><a class="sl-anchor-link" href="#2-what-does-bgp-unnumbered-solve"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “2. What does BGP unnumbered solve?”</span></a></div>
+<p>BGP unnumbered removes the need to assign IPv4 point-to-point addresses to every leaf-spine link.</p>
+<p>The fabric uses IPv6 link-local addresses for BGP neighbor discovery and session establishment. IPv4 server prefixes can still be advertised, but the next hop is an IPv6 link-local address. This is useful in AI fabrics because the number of physical links can be very large.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="3-why-does-asn-allocation-matter-in-ebgp-clos-fabrics">3. Why does ASN allocation matter in eBGP Clos fabrics?</h3><a class="sl-anchor-link" href="#3-why-does-asn-allocation-matter-in-ebgp-clos-fabrics"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3. Why does ASN allocation matter in eBGP Clos fabrics?”</span></a></div>
+<p>ASN allocation determines how AS-PATH loop prevention behaves. If spines share an ASN and leaves use unique ASNs, BGP can reject routes that would loop through the same AS. This can also help prevent suboptimal forwarding after failures.</p>
+<p>Poor ASN design can make troubleshooting harder or allow unexpected backup paths with bad performance.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="4-how-does-bgp-dpf-help-ai-workloads">4. How does BGP-DPF help AI workloads?</h3><a class="sl-anchor-link" href="#4-how-does-bgp-dpf-help-ai-workloads"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “4. How does BGP-DPF help AI workloads?”</span></a></div>
+<p>BGP-DPF divides one physical fabric into logical colored fabrics. Traffic can be mapped to a color based on tenant, GPU ID, QP range, or SLA.</p>
+<p>This gives deterministic path selection. It can isolate elephant flows, keep tenant traffic predictable, and align overlay tenants with underlay path colors.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="5-what-are-rifts-advantages-in-ai-fabrics">5. What are RIFT’s advantages in AI fabrics?</h3><a class="sl-anchor-link" href="#5-what-are-rifts-advantages-in-ai-fabrics"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “5. What are RIFT’s advantages in AI fabrics?”</span></a></div>
+<p>RIFT is designed for fat-tree and Clos-style topologies. It provides fast convergence, topology awareness, wide ECMP, UCMP, and automatic disaggregation on failures.</p>
+<p>It can be attractive when BGP policy is less important than topology-native convergence and fabric awareness. Its main trade-off is maturity and operational familiarity compared with eBGP.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="6-how-does-is-is-flexalgo-support-workload-isolation">6. How does IS-IS FlexAlgo support workload isolation?</h3><a class="sl-anchor-link" href="#6-how-does-is-is-flexalgo-support-workload-isolation"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “6. How does IS-IS FlexAlgo support workload isolation?”</span></a></div>
+<p>IS-IS FlexAlgo computes multiple logical topologies over the same physical fabric. Each algorithm can use different constraints such as latency, bandwidth, or congestion.</p>
+<p>This lets one workload use a low-latency plane, another use a high-bandwidth plane, and another use a low-congestion plane. It is similar in spirit to BGP-DPF, but implemented through link-state TLVs and FADs.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="7-how-does-multi-tenancy-affect-ai-routing">7. How does multi-tenancy affect AI routing?</h3><a class="sl-anchor-link" href="#7-how-does-multi-tenancy-affect-ai-routing"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “7. How does multi-tenancy affect AI routing?”</span></a></div>
+<p>Multi-tenancy requires segmentation and policy at multiple layers. A tenant may need isolated GPU instances, isolated VLAN/VNI mappings, separate MAC-VRF/IP-VRF instances, and separate EVPN routes.</p>
+<p>BGP-EVPN is commonly used because it can signal tenant MAC/IP and prefix routes at scale. Server-level features such as MIG can be combined with network-level EVPN-VXLAN to provide end-to-end GPU tenant isolation.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="8-why-extend-ip-routing-to-gpu-servers">8. Why extend IP routing to GPU servers?</h3><a class="sl-anchor-link" href="#8-why-extend-ip-routing-to-gpu-servers"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “8. Why extend IP routing to GPU servers?”</span></a></div>
+<p>Server-to-ToR BGP lets GPU servers advertise service prefixes or anycast addresses directly into the fabric. If a service fails, the server can withdraw the prefix.</p>
+<p>This makes routing more dynamic and can simplify anycast service design, but it adds operational responsibility to the server side and may require route reflectors at scale.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="9-what-role-does-telemetry-play-in-routing-and-traffic-engineering">9. What role does telemetry play in routing and traffic engineering?</h3><a class="sl-anchor-link" href="#9-what-role-does-telemetry-play-in-routing-and-traffic-engineering"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “9. What role does telemetry play in routing and traffic engineering?”</span></a></div>
+<p>Telemetry gives routing controllers and operators the data needed to make path decisions. Useful signals include link utilization, queue occupancy, ECN/PFC counters, active probes, sFlow, and job scheduler placement.</p>
+<p>Without telemetry, traffic engineering becomes static policy. With telemetry, the fabric can adapt paths to real workload and congestion state.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="10-how-does-segment-routing-or-srv6-help-ai-fabrics">10. How does Segment Routing or SRv6 help AI fabrics?</h3><a class="sl-anchor-link" href="#10-how-does-segment-routing-or-srv6-help-ai-fabrics"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “10. How does Segment Routing or SRv6 help AI fabrics?”</span></a></div>
+<p>Segment Routing lets an ingress node encode a path into the packet. With a controller, GPU-to-GPU paths can be computed to avoid congestion or satisfy SLA goals.</p>
+<p>SRv6 carries path instructions in an IPv6 Segment Routing Header. uSID reduces header overhead by using compact micro-segments. The trade-off is that SRv6 requires hardware support, MTU planning, and careful integration with RoCEv2 lossless mechanisms such as DCQCN.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="references">References</h2><a class="sl-anchor-link" href="#references"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “References”</span></a></div>
+<ul>
+<li><a href="https://www.rfc-editor.org/rfc/rfc7938.html">RFC 7938, Use of BGP for Routing in Large-Scale Data Centers</a></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc5549.html">RFC 5549, Advertising IPv4 NLRI with an IPv6 Next Hop</a></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc9692.html">RFC 9692, RIFT: Routing in Fat Trees</a></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc9350.html">RFC 9350, IGP Flexible Algorithm</a></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc9502.html">RFC 9502, IGP Flexible Algorithm in IP Networks</a></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc8754.html">RFC 8754, IPv6 Segment Routing Header</a></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc8986.html">RFC 8986, Segment Routing over IPv6 Network Programming</a></li>
+<li><a href="https://datatracker.ietf.org/doc/html/draft-wang-idr-dpf-00">IETF draft-wang-idr-dpf, BGP Deterministic Path Forwarding</a></li>
+</ul> </div> <footer class="sl-flex astro-3yyafb3n"> <div class="meta sl-flex astro-3yyafb3n"> <a href="https://github.com/ziwon/ai-data-center-systems/edit/main/network/chap08/README.md" class="sl-flex print:hidden astro-eez2twj6"><svg aria-hidden="true" class="astro-eez2twj6 astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.2em;"><path d="M22 7.24a1 1 0 0 0-.29-.71l-4.24-4.24a1 1 0 0 0-1.1-.22 1 1 0 0 0-.32.22l-2.83 2.83L2.29 16.05a1 1 0 0 0-.29.71V21a1 1 0 0 0 1 1h4.24a1 1 0 0 0 .76-.29l10.87-10.93L21.71 8c.1-.1.17-.2.22-.33a1 1 0 0 0 0-.24v-.14l.07-.05ZM6.83 20H4v-2.83l9.93-9.93 2.83 2.83L6.83 20ZM18.17 8.66l-2.83-2.83 1.42-1.41 2.82 2.82-1.41 1.42Z"/></svg>Edit page</a> <p>Last updated: <time datetime="2026-07-22T12:47:10.000Z">Jul 22, 2026</time></p> </div> <div class="pagination-links print:hidden astro-u2l5gyhi" dir="ltr"> <a href="/network/chap07/" rel="prev" class="astro-u2l5gyhi"> <svg aria-hidden="true" class="astro-u2l5gyhi astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17 11H9.41l3.3-3.29a1.004 1.004 0 1 0-1.42-1.42l-5 5a1 1 0 0 0-.21.33 1 1 0 0 0 0 .76 1 1 0 0 0 .21.33l5 5a1.002 1.002 0 0 0 1.639-.325 1 1 0 0 0-.219-1.095L9.41 13H17a1 1 0 0 0 0-2Z"/></svg> <span class="astro-u2l5gyhi"> Previous <br class="astro-u2l5gyhi"> <span class="link-title astro-u2l5gyhi">Chapter 7: RoCEv2 Transport and Congestion Management</span> </span> </a> <a href="/network/chap09/" rel="next" class="astro-u2l5gyhi"> <svg aria-hidden="true" class="astro-u2l5gyhi astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17.92 11.62a1.001 1.001 0 0 0-.21-.33l-5-5a1.003 1.003 0 1 0-1.42 1.42l3.3 3.29H7a1 1 0 0 0 0 2h7.59l-3.3 3.29a1.002 1.002 0 0 0 .325 1.639 1 1 0 0 0 1.095-.219l5-5a1 1 0 0 0 .21-.33 1 1 0 0 0 0-.76Z"/></svg> <span class="astro-u2l5gyhi"> Next <br class="astro-u2l5gyhi"> <span class="link-title astro-u2l5gyhi">Chapter 9: Storage Network Design and Technologies for AI Data Centers</span> </span> </a> </div>  </footer> </div> </div>  </main> </div> </div> </div> <ask-docs-widget> <button class="ask-fab" type="button" data-open aria-label="Ask this docs"> <span class="ask-fab-icon" aria-hidden="true">?</span>
+Ask this docs
+</button> <div class="ask-panel" data-panel hidden> <div class="ask-resize-handle" data-resize aria-hidden="true"></div> <div class="ask-panel-inner"> <header class="ask-header"> <div> <p class="ask-eyebrow">AI Data Center Systems</p> <h2 class="ask-title">Ask this docs</h2> </div> <div class="ask-header-controls"> <button class="ask-mode-btn" data-mode-btn="right" title="오른쪽 패널" aria-label="오른쪽 패널"> <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="6" height="16" rx="1.5" opacity="0.35"></rect><rect x="8" y="0" width="8" height="16" rx="1.5"></rect></svg> </button> <button class="ask-mode-btn" data-mode-btn="bottom" title="하단 패널" aria-label="하단 패널"> <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="16" height="6" rx="1.5" opacity="0.35"></rect><rect x="0" y="8" width="16" height="8" rx="1.5"></rect></svg> </button> <button class="ask-mode-btn" data-mode-btn="expand" title="전체 확장" aria-label="전체 확장"> <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 5.5V1h4.5M10.5 1H15v4.5M15 10.5V15h-4.5M5.5 15H1v-4.5"></path></svg> </button> <button class="ask-close-btn" type="button" aria-label="닫기" data-close> <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13"></path></svg> </button> </div> </header> <div class="ask-body"> <label class="ask-field"> <span class="ask-field-row"> <span>Question</span> <span class="ask-char" data-char>0 / 800</span> </span> <textarea name="question" rows="3" maxlength="800" placeholder="이 문서에서 핵심 운영 체크포인트는 무엇인가요?" data-question></textarea> <span class="ask-hint">시간당 최대 20회 · 질문당 최대 800자</span> </label> <div class="ask-actions"> <button class="ask-submit" type="button" data-submit> <svg class="ask-spinner" viewBox="0 0 24 24" fill="none" aria-hidden="true" hidden> <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2.5" stroke-dasharray="56" stroke-dashoffset="14" stroke-linecap="round"></circle> </svg> <span data-submit-label>Ask</span> </button> <p class="ask-status" data-status></p> </div> <section class="ask-answer" data-answer hidden></section> <section class="ask-sources" data-sources hidden> <h3>Sources</h3> <ul class="ask-source-chips" data-source-list></ul> </section> </div> </div> </div> <div class="ask-backdrop" data-backdrop hidden></div> </ask-docs-widget> <script type="module" src="/_astro/AskDocs.astro_astro_type_script_index_0_lang.BbnAb04M.js"></script> </div> <script type="module">const r=document.documentElement,c=document.querySelector("#starlight__sidebar"),s=document.querySelector(".navigation-mode-toggle"),a=document.querySelector(".navigation-drawer-toggle"),u=window.matchMedia("(min-width: 50rem)");function d(){return r.dataset.navigationMode==="compact"}function o(){return r.dataset.navigationDrawer==="open"}function l(){const e=d(),t=e&&o();s?.setAttribute("aria-pressed",String(e)),s?.setAttribute("title",e?"Use normal navigation":"Use compact navigation"),a?.setAttribute("aria-expanded",String(t)),a?.setAttribute("title",t?"Close navigation":"Open navigation");const n=a?.querySelector(".navigation-drawer-label");n&&(n.textContent=t?"Close navigation":"Open navigation")}function i(e,t=!1){const n=!!(e&&d()&&u.matches);r.dataset.navigationDrawer=n?"open":"closed",l(),n?requestAnimationFrame(()=>{const g=c?.querySelector('a[aria-current="page"]'),m=c?.querySelector(".starlight-sidebar-topics-current");(g??m)?.focus()}):t&&a?.focus()}function p(e){r.dataset.navigationMode=e,i(!1);try{localStorage.setItem("adcs-navigation-mode",e)}catch{}l()}s?.addEventListener("click",()=>{p(d()?"normal":"compact")});a?.addEventListener("click",()=>{i(!o(),o())});document.addEventListener("keydown",e=>{e.key==="Escape"&&o()&&i(!1,!0)});document.addEventListener("pointerdown",e=>{!o()||!(e.target instanceof Node)||c?.contains(e.target)||i(!1)});u.addEventListener("change",()=>i(!1));r.dataset.navigationDrawer="closed";l();</script> </body></html>

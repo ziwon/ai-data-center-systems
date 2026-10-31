@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-labelledby="title desc">
+  <title id="title">RLHF, best-of-N, and DPO trade-off</title>
+  <desc id="desc">A comparison diagram showing which components are needed by PPO-style RLHF, best-of-N, and DPO.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .lane { fill: none; stroke: #D8D1C7; stroke-width: 1.3; rx: 8; }
+    .box { fill: #F3EFE7; stroke: #111111; stroke-width: 1.5; rx: 8; }
+    .muted { fill: #F5F1EA; stroke: #D8D1C7; stroke-width: 1.2; rx: 8; }
+    .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2.1; rx: 8; }
+    .text { fill: #050505; font-family: Arial, Helvetica, sans-serif; font-size: 19px; font-weight: 700; }
+    .small { fill: #6F6A63; font-family: Arial, Helvetica, sans-serif; font-size: 14px; }
+    .label { fill: #050505; font-family: Arial, Helvetica, sans-serif; font-size: 17px; font-weight: 700; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.4; marker-end: url(#arrow); }
+    .dash { fill: none; stroke: #6F6A63; stroke-width: 1.2; stroke-dasharray: 6 6; marker-end: url(#arrowGray); }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#111111"/>
+    </marker>
+    <marker id="arrowGray" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#6F6A63"/>
+    </marker>
+  </defs>
+  <rect class="bg" width="1120" height="560"/>
+
+  <rect class="lane" x="48" y="62" width="1024" height="126"/>
+  <rect class="lane" x="48" y="218" width="1024" height="126"/>
+  <rect class="lane" x="48" y="374" width="1024" height="126"/>
+
+  <text class="label" x="78" y="104">PPO-style RLHF</text>
+  <text class="label" x="78" y="260">Best-of-N</text>
+  <text class="label" x="78" y="416">DPO</text>
+
+  <rect class="box" x="248" y="86" width="140" height="56"/>
+  <text class="text" x="286" y="120">Policy</text>
+  <rect class="box" x="432" y="86" width="150" height="56"/>
+  <text class="text" x="462" y="120">Reward</text>
+  <rect class="box" x="626" y="86" width="142" height="56"/>
+  <text class="text" x="666" y="120">Value</text>
+  <rect class="accent" x="812" y="86" width="148" height="56"/>
+  <text class="text" x="848" y="120">KL ref</text>
+  <path class="line" d="M388 114 H412"/>
+  <path class="line" d="M582 114 H606"/>
+  <path class="line" d="M768 114 H792"/>
+  <text class="small" x="248" y="164">highest ceiling, hardest tuning</text>
+
+  <rect class="box" x="248" y="242" width="154" height="56"/>
+  <text class="text" x="276" y="276">Sample N</text>
+  <rect class="box" x="454" y="242" width="150" height="56"/>
+  <text class="text" x="484" y="276">Reward</text>
+  <rect class="accent" x="656" y="242" width="150" height="56"/>
+  <text class="text" x="688" y="276">Pick best</text>
+  <path class="line" d="M402 270 H434"/>
+  <path class="line" d="M604 270 H636"/>
+  <text class="small" x="248" y="320">simple training, expensive serving path</text>
+
+  <rect class="box" x="248" y="398" width="172" height="56"/>
+  <text class="text" x="282" y="432">Pref pairs</text>
+  <rect class="accent" x="486" y="398" width="172" height="56"/>
+  <text class="text" x="526" y="432">DPO loss</text>
+  <rect class="muted" x="724" y="398" width="172" height="56"/>
+  <text class="text" x="766" y="432">Ref model</text>
+  <path class="line" d="M420 426 H466"/>
+  <path class="dash" d="M724 426 H680"/>
+  <text class="small" x="248" y="476">supervised-style preference tuning</text>
+
+  <text class="small" x="78" y="530">Read left to right: each row shows the minimum machinery emphasized by the method.</text>
+</svg>

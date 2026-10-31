@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="680" viewBox="0 0 1200 680" role="img" aria-labelledby="title desc">
+  <title id="title">GPU SIMT execution hierarchy</title>
+  <desc id="desc">A GPU contains streaming multiprocessors, which host active warps made of 32 threads.</desc>
+  <style>
+    .bg { fill: #F3EFE7; }
+    .box { fill: #F5F1EA; stroke: #111111; stroke-width: 2; }
+    .key-box { fill: none; stroke: #D9392E; stroke-width: 3; }
+    .line { fill: none; stroke: #111111; stroke-width: 2; marker-end: url(#arrow); }
+    .label { fill: #050505; font: 600 22px Inter, Arial, sans-serif; text-anchor: middle; }
+    .small { fill: #6F6A63; font: 16px Inter, Arial, sans-serif; text-anchor: middle; }
+    .key { fill: #D9392E; font: 700 15px Inter, Arial, sans-serif; letter-spacing: 1px; text-anchor: middle; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#111111"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1200" height="680" rx="12"/>
+
+  <rect class="box" x="480" y="35" width="240" height="80" rx="4"/>
+  <text class="label" x="600" y="84">GPU</text>
+
+  <path class="line" d="M600 115 V145 H180 V185"/>
+  <path class="line" d="M600 115 V185"/>
+  <path class="line" d="M600 115 V145 H1020 V185"/>
+
+  <g>
+    <rect class="box" x="60" y="185" width="240" height="90" rx="4"/>
+    <text class="label" x="180" y="228">SM 0</text>
+    <text class="small" x="180" y="253">scheduling partition</text>
+
+    <rect class="box" x="480" y="185" width="240" height="90" rx="4"/>
+    <text class="label" x="600" y="228">SM 1</text>
+    <text class="small" x="600" y="253">independent residency</text>
+
+    <rect class="box" x="900" y="185" width="240" height="90" rx="4"/>
+    <text class="label" x="1020" y="228">SM N</text>
+    <text class="small" x="1020" y="253">more parallel work</text>
+  </g>
+
+  <path class="line" d="M180 275 V315 H180 V350"/>
+  <path class="line" d="M180 275 V315 H500 V350"/>
+  <path class="line" d="M180 275 V315 H840 V350"/>
+
+  <g>
+    <rect class="key-box" x="60" y="350" width="240" height="100" rx="4"/>
+    <text class="key" x="180" y="380">SIMT EXECUTION UNIT</text>
+    <text class="label" x="180" y="414">Warp 0</text>
+    <text class="small" x="180" y="438">32 threads</text>
+
+    <rect class="box" x="380" y="350" width="240" height="100" rx="4"/>
+    <text class="label" x="500" y="398">Warp 1</text>
+    <text class="small" x="500" y="426">32 threads</text>
+
+    <rect class="box" x="700" y="350" width="280" height="100" rx="4"/>
+    <text class="label" x="840" y="398">More active warps</text>
+    <text class="small" x="840" y="426">latency-hiding capacity</text>
+  </g>
+
+  <path class="line" d="M180 450 V490 H180 V525"/>
+  <path class="line" d="M180 450 V490 H500 V525"/>
+  <path class="line" d="M180 450 V490 H820 V525"/>
+
+  <g>
+    <rect class="box" x="60" y="525" width="240" height="90" rx="4"/>
+    <text class="label" x="180" y="568">Thread 0</text>
+    <text class="small" x="180" y="593">lane 0</text>
+
+    <rect class="box" x="380" y="525" width="240" height="90" rx="4"/>
+    <text class="label" x="500" y="568">Thread 1</text>
+    <text class="small" x="500" y="593">lane 1</text>
+
+    <rect class="box" x="700" y="525" width="240" height="90" rx="4"/>
+    <text class="label" x="820" y="568">Thread 31</text>
+    <text class="small" x="820" y="593">lane 31</text>
+  </g>
+</svg>

@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="560" viewBox="0 0 1120 560" role="img" aria-labelledby="title desc">
+  <title id="title">MIG peer communication caveat</title>
+  <desc id="desc">A diagram contrasting full GPUs with NVLink peer-to-peer paths and MIG slices where peer communication must use host or network fabric.</desc>
+  <defs>
+    <style>
+      text { font-family: Arial, sans-serif; }
+      .bg { fill: #F5F1EA; }
+      .panel { fill: none; stroke: #D8D1C7; stroke-width: 1.2; }
+      .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.4; }
+      .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; }
+      .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+      .line { fill: none; stroke: #111111; stroke-width: 2; }
+      .redline { fill: none; stroke: #D9392E; stroke-width: 2.2; }
+      .dash { fill: none; stroke: #6F6A63; stroke-width: 1.4; stroke-dasharray: 6 5; }
+      .label { fill: #050505; font-size: 17px; font-weight: 700; }
+      .small { fill: #6F6A63; font-size: 13px; }
+      .red { fill: #D9392E; font-size: 13px; font-weight: 700; }
+      .arrow { fill: #111111; }
+      .arrow-red { fill: #D9392E; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1120" height="560"/>
+
+  <rect class="panel" x="54" y="52" width="470" height="420" rx="8"/>
+  <text class="label" x="86" y="88">Full GPU mode</text>
+  <text class="small" x="86" y="112">best fit for collective-heavy training</text>
+
+  <rect class="box" x="112" y="176" width="150" height="100" rx="8"/>
+  <text class="label" x="158" y="214">GPU 0</text>
+  <text class="small" x="144" y="238">full HBM + SMs</text>
+  <rect class="box" x="326" y="176" width="150" height="100" rx="8"/>
+  <text class="label" x="372" y="214">GPU 1</text>
+  <text class="small" x="358" y="238">full HBM + SMs</text>
+  <line class="line" x1="262" y1="226" x2="326" y2="226"/>
+  <polygon class="arrow" points="326,226 314,220 314,232"/>
+  <line class="line" x1="326" y1="244" x2="262" y2="244"/>
+  <polygon class="arrow" points="262,244 274,238 274,250"/>
+  <text class="small" x="246" y="310">NVLink / PCIe P2P path available</text>
+
+  <rect class="panel" x="596" y="52" width="470" height="420" rx="8"/>
+  <text class="label" x="628" y="88">MIG mode</text>
+  <text class="small" x="628" y="112">best fit for isolated independent jobs</text>
+
+  <rect class="accent" x="642" y="154" width="180" height="132" rx="8"/>
+  <text class="label" x="692" y="184">GPU 0</text>
+  <rect class="soft" x="666" y="204" width="62" height="46" rx="5"/>
+  <text class="small" x="678" y="232">1g</text>
+  <rect class="soft" x="742" y="204" width="62" height="46" rx="5"/>
+  <text class="small" x="754" y="232">2g</text>
+
+  <rect class="accent" x="872" y="154" width="180" height="132" rx="8"/>
+  <text class="label" x="922" y="184">GPU 1</text>
+  <rect class="soft" x="896" y="204" width="62" height="46" rx="5"/>
+  <text class="small" x="908" y="232">1g</text>
+  <rect class="soft" x="972" y="204" width="62" height="46" rx="5"/>
+  <text class="small" x="984" y="232">2g</text>
+
+  <path class="redline" d="M 822 220 L 872 220"/>
+  <path class="redline" d="M 822 250 L 872 250"/>
+  <line class="redline" x1="842" y1="205" x2="856" y2="265"/>
+  <line class="redline" x1="856" y1="205" x2="842" y2="265"/>
+  <text class="red" x="700" y="330">P2P, NVLink, CUDA IPC may be unavailable in MIG mode</text>
+
+  <rect class="soft" x="722" y="376" width="252" height="62" rx="8"/>
+  <text class="label" x="784" y="402">Fallback path</text>
+  <text class="small" x="754" y="424">host memory or network fabric</text>
+  <path class="dash" d="M 732 286 C 708 338, 740 358, 790 376"/>
+  <path class="dash" d="M 962 286 C 988 338, 944 358, 904 376"/>
+</svg>

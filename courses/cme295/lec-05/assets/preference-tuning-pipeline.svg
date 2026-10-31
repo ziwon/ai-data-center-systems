@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 520" role="img" aria-labelledby="title desc">
+  <title id="title">Preference tuning pipeline</title>
+  <desc id="desc">A flow diagram showing SFT model sampling, pairwise preference labels, reward model training, and policy tuning with KL control.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .box { fill: none; stroke: #111111; stroke-width: 1.6; rx: 8; }
+    .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.3; rx: 8; }
+    .accent { fill: none; stroke: #D9392E; stroke-width: 2.2; rx: 8; }
+    .text { fill: #050505; font-family: Arial, Helvetica, sans-serif; font-size: 20px; font-weight: 700; }
+    .small { fill: #6F6A63; font-family: Arial, Helvetica, sans-serif; font-size: 15px; }
+    .tiny { fill: #6F6A63; font-family: Arial, Helvetica, sans-serif; font-size: 13px; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.5; marker-end: url(#arrow); }
+    .dash { fill: none; stroke: #6F6A63; stroke-width: 1.3; stroke-dasharray: 6 6; marker-end: url(#arrowGray); }
+    .redline { fill: none; stroke: #D9392E; stroke-width: 2; marker-end: url(#arrowRed); }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#111111"/>
+    </marker>
+    <marker id="arrowGray" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#6F6A63"/>
+    </marker>
+    <marker id="arrowRed" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#D9392E"/>
+    </marker>
+  </defs>
+  <rect class="bg" width="1120" height="520"/>
+
+  <rect class="box" x="56" y="82" width="170" height="86"/>
+  <text class="text" x="84" y="120">SFT model</text>
+  <text class="small" x="84" y="146">instruction-tuned</text>
+
+  <rect class="soft" x="294" y="52" width="190" height="72"/>
+  <text class="text" x="326" y="92">Response A</text>
+  <text class="tiny" x="326" y="112">candidate completion</text>
+
+  <rect class="soft" x="294" y="146" width="190" height="72"/>
+  <text class="text" x="326" y="186">Response B</text>
+  <text class="tiny" x="326" y="206">candidate completion</text>
+
+  <rect class="accent" x="558" y="82" width="188" height="86"/>
+  <text class="text" x="590" y="120">Pairwise label</text>
+  <text class="small" x="590" y="146">chosen vs rejected</text>
+
+  <rect class="box" x="822" y="82" width="210" height="86"/>
+  <text class="text" x="856" y="120">Reward model</text>
+  <text class="small" x="856" y="146">prompt + answer to score</text>
+
+  <path class="line" d="M226 125 H272"/>
+  <path class="line" d="M484 88 H536"/>
+  <path class="line" d="M484 182 H536"/>
+  <path class="line" d="M746 125 H800"/>
+
+  <rect class="box" x="154" y="342" width="188" height="84"/>
+  <text class="text" x="190" y="380">Policy model</text>
+  <text class="small" x="190" y="406">updated from SFT</text>
+
+  <rect class="soft" x="442" y="342" width="190" height="84"/>
+  <text class="text" x="484" y="380">Completion</text>
+  <text class="small" x="484" y="406">sampled on-policy</text>
+
+  <rect class="accent" x="732" y="342" width="194" height="84"/>
+  <text class="text" x="774" y="380">RL update</text>
+  <text class="small" x="774" y="406">reward up, drift down</text>
+
+  <rect class="soft" x="732" y="206" width="194" height="62"/>
+  <text class="text" x="764" y="244">Reference SFT</text>
+  <text class="tiny" x="764" y="262">frozen KL anchor</text>
+
+  <path class="line" d="M342 384 H420"/>
+  <path class="line" d="M632 384 H710"/>
+  <path class="redline" d="M927 168 V318 C927 332 872 332 834 340"/>
+  <path class="dash" d="M829 268 V326"/>
+
+  <text class="small" x="58" y="276">Stage 1: learn preference scores from comparisons</text>
+  <path class="dash" d="M56 290 H1038"/>
+  <text class="small" x="58" y="488">Stage 2: tune the policy, but keep it close to the SFT reference</text>
+</svg>

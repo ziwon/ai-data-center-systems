@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 540" role="img" aria-labelledby="title desc">
+  <title id="title">Co-packaged optics for inter-rack fabric</title>
+  <desc id="desc">A diagram comparing electrical distance inside a switch with the optical path between AI racks when co-packaged optics is used.</desc>
+  <style>
+    svg {
+      background: #F3EFE7;
+      color: #050505;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    .box {
+      fill: none;
+      stroke: #111111;
+      stroke-width: 1.6;
+    }
+    .soft {
+      fill: none;
+      stroke: #D8D1C7;
+      stroke-width: 1.4;
+    }
+    .dash {
+      fill: none;
+      stroke: #6F6A63;
+      stroke-width: 1.3;
+      stroke-dasharray: 7 7;
+    }
+    .wire {
+      fill: none;
+      stroke: #6F6A63;
+      stroke-width: 1.4;
+      marker-end: url(#arrow-soft);
+    }
+    .optical {
+      fill: none;
+      stroke: #D9392E;
+      stroke-width: 2.3;
+      marker-end: url(#arrow-accent);
+    }
+    .label {
+      fill: #050505;
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .text {
+      fill: #050505;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .small {
+      fill: #6F6A63;
+      font-size: 13px;
+    }
+    .warn {
+      fill: #D9392E;
+      font-size: 14px;
+      font-weight: 700;
+    }
+  </style>
+  <defs>
+    <marker id="arrow-soft" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#6F6A63"/>
+    </marker>
+    <marker id="arrow-accent" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#D9392E"/>
+    </marker>
+  </defs>
+
+  <rect x="46" y="78" width="230" height="340" class="box"/>
+  <text x="78" y="118" class="label">AI rack</text>
+  <text x="78" y="146" class="small">NVLink domain</text>
+  <rect x="78" y="184" width="166" height="54" class="soft"/>
+  <text x="104" y="217" class="text">GPUs</text>
+  <rect x="78" y="270" width="166" height="54" class="soft"/>
+  <text x="104" y="303" class="text">NICs / DPUs</text>
+  <path d="M161 238 V270" class="wire"/>
+
+  <rect x="844" y="78" width="230" height="340" class="box"/>
+  <text x="876" y="118" class="label">AI rack</text>
+  <text x="876" y="146" class="small">another NVLink domain</text>
+  <rect x="876" y="184" width="166" height="54" class="soft"/>
+  <text x="902" y="217" class="text">GPUs</text>
+  <rect x="876" y="270" width="166" height="54" class="soft"/>
+  <text x="902" y="303" class="text">NICs / DPUs</text>
+  <path d="M959 270 V238" class="wire"/>
+
+  <rect x="398" y="104" width="324" height="280" class="box"/>
+  <text x="434" y="144" class="label">Fabric switch</text>
+  <text x="434" y="172" class="small">Quantum / Spectrum class platform</text>
+  <rect x="436" y="220" width="112" height="78" class="soft"/>
+  <text x="466" y="254" class="text">Switch</text>
+  <text x="464" y="276" class="small">silicon</text>
+  <rect x="584" y="220" width="96" height="78" class="soft"/>
+  <text x="608" y="254" class="text">CPO</text>
+  <text x="602" y="276" class="small">optics</text>
+  <path d="M548 259 H584" class="wire"/>
+
+  <path d="M244 297 C304 297, 340 259, 436 259" class="optical"/>
+  <path d="M680 259 C780 259, 806 297, 876 297" class="optical"/>
+
+  <rect x="348" y="430" width="424" height="58" class="dash"/>
+  <text x="374" y="456" class="warn">inter-rack bottleneck target</text>
+  <text x="374" y="478" class="small">shorter electrical path, lower optics power, higher fabric bandwidth</text>
+</svg>

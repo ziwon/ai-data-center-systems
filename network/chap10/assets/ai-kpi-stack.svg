@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="620" viewBox="0 0 1120 620" role="img" aria-labelledby="title desc">
+  <title id="title">AI data center KPI stack</title>
+  <desc id="desc">AI data center KPIs grouped into model, data, infrastructure, and fabric signal layers, all feeding a valid benchmark result.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .panel { fill: none; stroke: #D8D1C7; stroke-width: 1.2; }
+    .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.4; }
+    .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; }
+    .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.5; }
+    .accent-line { fill: none; stroke: #D9392E; stroke-width: 2.2; }
+    .muted-line { fill: none; stroke: #D8D1C7; stroke-width: 1.2; stroke-dasharray: 7 6; }
+    .head { font-family: Inter, Arial, sans-serif; font-size: 23px; font-weight: 700; fill: #050505; }
+    .label { font-family: Inter, Arial, sans-serif; font-size: 16px; font-weight: 700; fill: #050505; }
+    .small { font-family: Inter, Arial, sans-serif; font-size: 12px; fill: #6F6A63; }
+    .tiny { font-family: Inter, Arial, sans-serif; font-size: 11px; fill: #6F6A63; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#111111"/>
+    </marker>
+    <marker id="arrowAccent" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#D9392E"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1120" height="620"/>
+  <rect class="panel" x="42" y="40" width="1036" height="520" rx="8"/>
+
+  <g transform="translate(80 84)">
+    <rect class="box" x="0" y="0" width="960" height="82" rx="6"/>
+    <text class="head" x="480" y="34" text-anchor="middle">AI workload benchmark</text>
+    <text class="small" x="480" y="58" text-anchor="middle">Training or inference result must be fast, efficient, scalable, and quality-valid.</text>
+
+    <rect class="soft" x="0" y="150" width="210" height="150" rx="6"/>
+    <text class="label" x="105" y="185" text-anchor="middle">Model KPIs</text>
+    <text class="small" x="105" y="215" text-anchor="middle">accuracy, precision</text>
+    <text class="small" x="105" y="237" text-anchor="middle">recall, F1, MAP</text>
+    <text class="small" x="105" y="259" text-anchor="middle">inference latency</text>
+
+    <rect class="soft" x="250" y="150" width="210" height="150" rx="6"/>
+    <text class="label" x="355" y="185" text-anchor="middle">Data KPIs</text>
+    <text class="small" x="355" y="215" text-anchor="middle">data efficiency</text>
+    <text class="small" x="355" y="237" text-anchor="middle">data loading</text>
+    <text class="small" x="355" y="259" text-anchor="middle">training time</text>
+
+    <rect class="box" x="500" y="150" width="210" height="150" rx="6"/>
+    <text class="label" x="605" y="185" text-anchor="middle">Infrastructure KPIs</text>
+    <text class="small" x="605" y="215" text-anchor="middle">JCT, throughput</text>
+    <text class="small" x="605" y="237" text-anchor="middle">latency, power</text>
+    <text class="small" x="605" y="259" text-anchor="middle">efficiency, scale</text>
+
+    <rect class="accent" x="750" y="150" width="210" height="150" rx="6"/>
+    <text class="label" x="855" y="185" text-anchor="middle">Fabric signals</text>
+    <text class="small" x="855" y="215" text-anchor="middle">ECN, CNP, PFC</text>
+    <text class="small" x="855" y="237" text-anchor="middle">drops, queues</text>
+    <text class="small" x="855" y="259" text-anchor="middle">checkpoint stalls</text>
+
+    <path class="line" d="M480 82 C361 121 199 126 105 150" marker-end="url(#arrow)"/>
+    <path class="line" d="M480 82 C428 119 389 129 355 150" marker-end="url(#arrow)"/>
+    <path class="line" d="M480 82 C524 119 570 129 605 150" marker-end="url(#arrow)"/>
+    <path class="accent-line" d="M480 82 C645 116 779 126 855 150" marker-end="url(#arrowAccent)"/>
+
+    <rect class="accent" x="260" y="388" width="440" height="92" rx="6"/>
+    <text class="head" x="480" y="426" text-anchor="middle">Valid benchmark result</text>
+    <text class="small" x="480" y="452" text-anchor="middle">Target quality met, configuration reproducible, and bottlenecks explained by telemetry.</text>
+
+    <path class="muted-line" d="M105 300 C143 352 225 384 260 416" marker-end="url(#arrow)"/>
+    <path class="muted-line" d="M355 300 C370 347 399 370 430 388" marker-end="url(#arrow)"/>
+    <path class="line" d="M605 300 C590 347 561 370 530 388" marker-end="url(#arrow)"/>
+    <path class="accent-line" d="M855 300 C790 357 718 383 700 416" marker-end="url(#arrowAccent)"/>
+
+    <text class="tiny" x="480" y="520" text-anchor="middle">Use top-level KPIs for outcomes; use network and storage counters to explain why the outcome changed.</text>
+  </g>
+</svg>

@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540">
+<rect width="100%" height="100%" fill="white"/>
+<rect x="0" y="0" width="960" height="540" fill="#f8fafc"/>
+<text x="60" y="40" font-size="22" font-family="Inter, Arial, sans-serif" font-weight="700" fill="#0f172a">Orin edge projection: weight bytes -> decode latency</text>
+<text x="60" y="64" font-size="13" font-family="Inter, Arial, sans-serif" fill="#475569">AGX Orin 64GB, 7B GQA, bandwidth-bound model calibrated to the Week 3 BF16 measurement (94 ms/token).</text>
+<line x1="90" y1="440.0" x2="900" y2="440.0" stroke="#e5e7eb"/>
+<text x="80" y="444.0" text-anchor="end" font-size="11" font-family="Inter, Arial, sans-serif" fill="#475569">0</text>
+<line x1="90" y1="372.0" x2="900" y2="372.0" stroke="#e5e7eb"/>
+<text x="80" y="376.0" text-anchor="end" font-size="11" font-family="Inter, Arial, sans-serif" fill="#475569">20</text>
+<line x1="90" y1="304.0" x2="900" y2="304.0" stroke="#e5e7eb"/>
+<text x="80" y="308.0" text-anchor="end" font-size="11" font-family="Inter, Arial, sans-serif" fill="#475569">40</text>
+<line x1="90" y1="236.0" x2="900" y2="236.0" stroke="#e5e7eb"/>
+<text x="80" y="240.0" text-anchor="end" font-size="11" font-family="Inter, Arial, sans-serif" fill="#475569">60</text>
+<line x1="90" y1="168.0" x2="900" y2="168.0" stroke="#e5e7eb"/>
+<text x="80" y="172.0" text-anchor="end" font-size="11" font-family="Inter, Arial, sans-serif" fill="#475569">80</text>
+<line x1="90" y1="100.0" x2="900" y2="100.0" stroke="#e5e7eb"/>
+<text x="80" y="104.0" text-anchor="end" font-size="11" font-family="Inter, Arial, sans-serif" fill="#475569">100</text>
+<rect x="157.5" y="120.4" width="135.0" height="319.6" fill="#2563eb" stroke="#1e3a8a" stroke-width="1.5" rx="3"/>
+<text x="225.0" y="110.4" text-anchor="middle" font-size="14" font-weight="700" font-family="Inter, Arial, sans-serif" fill="#0f172a">94</text>
+<text x="225.0" y="460.0" text-anchor="middle" font-size="12" font-weight="600" font-family="Inter, Arial, sans-serif" fill="#0f172a">BF16</text>
+<text x="225.0" y="478.0" text-anchor="middle" font-size="11" font-family="Inter, Arial, sans-serif" fill="#475569">14.0GB weights  -  1.0x</text>
+<rect x="427.5" y="280.2" width="135.0" height="159.8" fill="#d97706" stroke="#92400e" stroke-width="1.5" rx="3"/>
+<text x="495.0" y="270.2" text-anchor="middle" font-size="14" font-weight="700" font-family="Inter, Arial, sans-serif" fill="#0f172a">47</text>
+<text x="495.0" y="460.0" text-anchor="middle" font-size="12" font-weight="600" font-family="Inter, Arial, sans-serif" fill="#0f172a">INT8</text>
+<text x="495.0" y="478.0" text-anchor="middle" font-size="11" font-family="Inter, Arial, sans-serif" fill="#475569">7.0GB weights  -  2.0x</text>
+<rect x="697.5" y="360.1" width="135.0" height="79.9" fill="#16a34a" stroke="#14532d" stroke-width="1.5" rx="3"/>
+<text x="765.0" y="350.1" text-anchor="middle" font-size="14" font-weight="700" font-family="Inter, Arial, sans-serif" fill="#0f172a">24</text>
+<text x="765.0" y="460.0" text-anchor="middle" font-size="12" font-weight="600" font-family="Inter, Arial, sans-serif" fill="#0f172a">INT4</text>
+<text x="765.0" y="478.0" text-anchor="middle" font-size="11" font-family="Inter, Arial, sans-serif" fill="#475569">3.5GB weights  -  4.0x</text>
+<line x1="90" y1="100" x2="90" y2="440" stroke="#0f172a" stroke-width="1.4"/>
+<line x1="90" y1="440" x2="900" y2="440" stroke="#0f172a" stroke-width="1.4"/>
+<text transform="translate(28 270) rotate(-90)" text-anchor="middle" font-size="13" font-family="Inter, Arial, sans-serif" fill="#0f172a">Decode latency (ms / token)</text>
+<text x="60" y="500" font-size="12" font-family="Inter, Arial, sans-serif" fill="#475569">Bandwidth-bound regime: halving weight bytes ~halves decode latency. INT4 -> 4x faster decode, the regime where quantization pays off.</text>
+</svg>

@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 390" role="img" aria-labelledby="title desc">
+  <title id="title">Latency and bandwidth are independent properties</title>
+  <desc id="desc">Two memory paths have the same end-to-end latency, while the wider path transfers more items per unit time.</desc>
+  <style>
+    .bg { fill: #F3EFE7; }
+    .box { fill: none; stroke: #111111; stroke-width: 2; }
+    .subtle { fill: none; stroke: #D8D1C7; stroke-width: 1.5; }
+    .line { fill: none; stroke: #111111; stroke-width: 2; }
+    .accent-line { fill: none; stroke: #D9392E; stroke-width: 3; }
+    .item { fill: #F3EFE7; stroke: #111111; stroke-width: 2; }
+    .accent-item { fill: #D9392E; stroke: #D9392E; stroke-width: 2; }
+    .text { fill: #050505; font-family: Inter, Arial, sans-serif; font-size: 18px; }
+    .label { fill: #050505; font-family: Inter, Arial, sans-serif; font-size: 22px; font-weight: 700; }
+    .small { fill: #6F6A63; font-family: Inter, Arial, sans-serif; font-size: 15px; }
+    .key { fill: #D9392E; font-family: Inter, Arial, sans-serif; font-size: 18px; font-weight: 700; }
+  </style>
+
+  <rect class="bg" width="1120" height="390"/>
+
+  <text class="label" x="55" y="70">Same latency</text>
+  <text class="small" x="55" y="96">An item still travels the same end-to-end distance.</text>
+
+  <rect class="box" x="55" y="125" width="120" height="70" rx="4"/>
+  <text class="text" x="85" y="168">Memory</text>
+  <rect class="box" x="945" y="125" width="120" height="70" rx="4"/>
+  <text class="text" x="970" y="168">Processor</text>
+
+  <line class="line" x1="175" y1="160" x2="945" y2="160"/>
+  <line class="subtle" x1="175" y1="145" x2="945" y2="145"/>
+  <line class="subtle" x1="175" y1="175" x2="945" y2="175"/>
+
+  <rect class="item" x="300" y="146" width="28" height="28"/>
+  <rect class="item" x="500" y="146" width="28" height="28"/>
+  <rect class="item" x="700" y="146" width="28" height="28"/>
+  <rect class="accent-item" x="900" y="146" width="28" height="28"/>
+
+  <path class="accent-line" d="M300 115 H928"/>
+  <path class="accent-line" d="M300 108 L288 115 L300 122"/>
+  <path class="accent-line" d="M928 108 L940 115 L928 122"/>
+  <text class="key" x="515" y="105">end-to-end latency</text>
+
+  <text class="label" x="55" y="265">Different bandwidth</text>
+  <text class="small" x="55" y="291">More items can be in flight or transferred side by side.</text>
+
+  <rect class="box" x="500" y="245" width="300" height="52" rx="4"/>
+  <rect class="item" x="525" y="257" width="28" height="28"/>
+  <rect class="item" x="588" y="257" width="28" height="28"/>
+  <rect class="item" x="651" y="257" width="28" height="28"/>
+  <rect class="item" x="714" y="257" width="28" height="28"/>
+  <text class="small" x="836" y="277">4 items / interval</text>
+
+  <rect class="box" x="500" y="315" width="300" height="52" rx="4"/>
+  <rect class="accent-item" x="525" y="327" width="28" height="28"/>
+  <rect class="accent-item" x="565" y="327" width="28" height="28"/>
+  <rect class="accent-item" x="605" y="327" width="28" height="28"/>
+  <rect class="accent-item" x="645" y="327" width="28" height="28"/>
+  <rect class="accent-item" x="685" y="327" width="28" height="28"/>
+  <rect class="accent-item" x="725" y="327" width="28" height="28"/>
+  <text class="key" x="836" y="347">6 items / interval</text>
+</svg>

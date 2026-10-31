@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="500" viewBox="0 0 960 500" role="img" aria-labelledby="title desc">
+  <title id="title">Roofline time bounds</title>
+  <desc id="desc">A diagram comparing math time, communication time, overlapped lower bound, and serialized upper bound.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .box { fill: none; stroke: #111111; stroke-width: 2; }
+    .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.4; }
+    .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2.5; }
+    .line { stroke: #111111; stroke-width: 2; fill: none; }
+    .dash { stroke: #D9392E; stroke-width: 2; stroke-dasharray: 8 8; fill: none; }
+    .text { fill: #050505; font-family: Arial, Helvetica, sans-serif; }
+    .muted { fill: #6F6A63; font-family: Arial, Helvetica, sans-serif; }
+    .label { font-size: 22px; font-weight: 700; }
+    .small { font-size: 17px; }
+    .formula { font-size: 20px; font-weight: 700; }
+  </style>
+  <rect class="bg" width="960" height="500" />
+
+  <text class="text label" x="90" y="80">Compute work</text>
+  <rect class="soft" x="90" y="110" width="300" height="64" />
+  <text class="text formula" x="132" y="150">T_math = FLOPs / FLOPs/s</text>
+
+  <text class="text label" x="90" y="235">Data movement</text>
+  <rect class="soft" x="90" y="265" width="420" height="64" />
+  <text class="text formula" x="126" y="305">T_comms = Bytes / Bandwidth</text>
+
+  <path class="line" d="M560 80 H860" />
+  <text class="text label" x="560" y="65">If overlapped</text>
+  <rect class="accent" x="560" y="110" width="360" height="64" />
+  <text class="text formula" x="594" y="150">lower bound = max(T_math, T_comms)</text>
+  <path class="dash" d="M560 174 H862" />
+  <text class="muted small" x="594" y="204">The slower side sets the visible time.</text>
+
+  <path class="line" d="M560 255 H860" />
+  <text class="text label" x="560" y="240">If serialized</text>
+  <rect class="box" x="560" y="285" width="160" height="64" />
+  <rect class="box" x="720" y="285" width="230" height="64" />
+  <text class="text small" x="598" y="323">T_math</text>
+  <text class="text small" x="780" y="323">T_comms</text>
+  <text class="text formula" x="604" y="390">upper bound = T_math + T_comms</text>
+
+  <path class="line" d="M410 142 H535" />
+  <path class="line" d="M535 142 l-12 -8 M535 142 l-12 8" />
+  <path class="line" d="M530 296 H535" />
+</svg>

@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="620" viewBox="0 0 1120 620" role="img" aria-labelledby="title desc">
+  <title id="title">NVMe-oF transport comparison</title>
+  <desc id="desc">NVMe-oF keeps NVMe queues and capsules while changing the fabric transport between TCP, RDMA over RoCEv2 or InfiniBand, and Fibre Channel.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.4; }
+    .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; }
+    .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.5; }
+    .accent-line { fill: none; stroke: #D9392E; stroke-width: 2.2; }
+    .muted-line { fill: none; stroke: #D8D1C7; stroke-width: 1.2; stroke-dasharray: 7 6; }
+    .label { font-family: Inter, Arial, sans-serif; font-size: 16px; font-weight: 700; fill: #050505; }
+    .small { font-family: Inter, Arial, sans-serif; font-size: 12px; fill: #6F6A63; }
+    .head { font-family: Inter, Arial, sans-serif; font-size: 22px; font-weight: 700; fill: #050505; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#111111"/>
+    </marker>
+    <marker id="arrowAccent" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#D9392E"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1120" height="620"/>
+
+  <g transform="translate(70 70)">
+    <rect class="box" x="330" y="0" width="320" height="88" rx="6"/>
+    <text class="head" x="490" y="35" text-anchor="middle">Common NVMe-oF model</text>
+    <text class="small" x="490" y="60" text-anchor="middle">SQ/CQ, command capsule, response capsule, NSID, SGL/PRP</text>
+
+    <rect class="soft" x="0" y="190" width="280" height="178" rx="8"/>
+    <text class="label" x="140" y="226" text-anchor="middle">NVMe-o-TCP</text>
+    <text class="small" x="140" y="253" text-anchor="middle">TCP port 8009</text>
+    <text class="small" x="140" y="276" text-anchor="middle">lossy IP fabric is possible</text>
+    <text class="small" x="140" y="299" text-anchor="middle">uses CPU and TCP stack</text>
+    <text class="small" x="140" y="322" text-anchor="middle">lower entry cost, broad support</text>
+
+    <rect class="accent" x="350" y="190" width="280" height="178" rx="8"/>
+    <text class="label" x="490" y="226" text-anchor="middle">NVMe-o-RDMA / RoCEv2</text>
+    <text class="small" x="490" y="253" text-anchor="middle">discovery TCP 8009</text>
+    <text class="small" x="490" y="276" text-anchor="middle">RDMA CM UDP 4420</text>
+    <text class="small" x="490" y="299" text-anchor="middle">data UDP 4791</text>
+    <text class="small" x="490" y="322" text-anchor="middle">NIC offload, lossless tuning required</text>
+
+    <rect class="soft" x="700" y="190" width="280" height="178" rx="8"/>
+    <text class="label" x="840" y="226" text-anchor="middle">NVMe-o-FC / InfiniBand</text>
+    <text class="small" x="840" y="253" text-anchor="middle">FC SAN or native IB</text>
+    <text class="small" x="840" y="276" text-anchor="middle">credit-based flow control</text>
+    <text class="small" x="840" y="299" text-anchor="middle">low latency, lower flexibility</text>
+    <text class="small" x="840" y="322" text-anchor="middle">brownfield or HPC friendly</text>
+
+    <path class="line" d="M420 88 C335 128 243 156 140 190" marker-end="url(#arrow)"/>
+    <path class="accent-line" d="M490 88 V190" marker-end="url(#arrowAccent)"/>
+    <path class="line" d="M560 88 C653 127 751 157 840 190" marker-end="url(#arrow)"/>
+
+    <rect class="box" x="125" y="440" width="730" height="82" rx="6"/>
+    <text class="label" x="490" y="474" text-anchor="middle">Core difference</text>
+    <text class="small" x="490" y="499" text-anchor="middle">NVMe semantics stay stable; reliability, flow control, CPU load, NIC needs, and lossless dependence change.</text>
+
+    <path class="muted-line" d="M140 368 C211 410 284 429 390 440" marker-end="url(#arrow)"/>
+    <path class="accent-line" d="M490 368 V440" marker-end="url(#arrowAccent)"/>
+    <path class="muted-line" d="M840 368 C770 410 698 429 590 440" marker-end="url(#arrow)"/>
+  </g>
+</svg>

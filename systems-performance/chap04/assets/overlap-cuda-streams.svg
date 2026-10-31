@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="560" viewBox="0 0 1120 560" role="img" aria-labelledby="title desc">
+  <title id="title">Communication and computation overlap on CUDA streams</title>
+  <desc id="desc">A timeline diagram showing backward compute on one CUDA stream overlapped with NCCL all-reduce buckets on another stream.</desc>
+  <defs>
+    <style>
+      text { font-family: Arial, sans-serif; }
+      .bg { fill: #F5F1EA; }
+      .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.4; }
+      .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; }
+      .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+      .line { fill: none; stroke: #111111; stroke-width: 1.7; }
+      .dash { fill: none; stroke: #6F6A63; stroke-width: 1.2; stroke-dasharray: 6 5; }
+      .label { fill: #050505; font-size: 17px; font-weight: 700; }
+      .small { fill: #6F6A63; font-size: 13px; }
+      .red { fill: #D9392E; font-size: 13px; font-weight: 700; }
+      .arrow { fill: #111111; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1120" height="560"/>
+
+  <text class="label" x="78" y="78">Manual sync path</text>
+  <text class="small" x="78" y="102">Communication starts after backward finishes.</text>
+  <line class="line" x1="190" y1="150" x2="970" y2="150"/>
+  <text class="small" x="78" y="156">GPU stream</text>
+  <rect class="soft" x="190" y="125" width="150" height="50" rx="6"/>
+  <text class="small" x="226" y="154">backward L3</text>
+  <rect class="soft" x="340" y="125" width="150" height="50" rx="6"/>
+  <text class="small" x="376" y="154">backward L2</text>
+  <rect class="soft" x="490" y="125" width="150" height="50" rx="6"/>
+  <text class="small" x="526" y="154">backward L1</text>
+  <rect class="accent" x="650" y="125" width="240" height="50" rx="6"/>
+  <text class="small" x="716" y="154">all-reduce exposed</text>
+  <text class="red" x="900" y="154">tail waits</text>
+
+  <line class="dash" x1="650" y1="186" x2="650" y2="470"/>
+  <text class="small" x="665" y="205">backward done</text>
+
+  <text class="label" x="78" y="286">DDP overlap path</text>
+  <text class="small" x="78" y="310">Buckets reduce as soon as gradients become ready.</text>
+  <line class="line" x1="190" y1="360" x2="970" y2="360"/>
+  <line class="line" x1="190" y1="440" x2="970" y2="440"/>
+  <text class="small" x="78" y="366">compute stream</text>
+  <text class="small" x="78" y="446">NCCL stream</text>
+
+  <rect class="soft" x="190" y="335" width="150" height="50" rx="6"/>
+  <text class="small" x="226" y="364">backward L3</text>
+  <rect class="soft" x="340" y="335" width="150" height="50" rx="6"/>
+  <text class="small" x="376" y="364">backward L2</text>
+  <rect class="soft" x="490" y="335" width="150" height="50" rx="6"/>
+  <text class="small" x="526" y="364">backward L1</text>
+  <rect class="accent" x="305" y="415" width="170" height="50" rx="6"/>
+  <text class="small" x="334" y="444">bucket 3 reduce</text>
+  <rect class="accent" x="455" y="415" width="170" height="50" rx="6"/>
+  <text class="small" x="484" y="444">bucket 2 reduce</text>
+  <rect class="accent" x="625" y="415" width="155" height="50" rx="6"/>
+  <text class="small" x="656" y="444">bucket 1 tail</text>
+
+  <path class="dash" d="M 340 335 C 360 316, 392 314, 416 335"/>
+  <path class="dash" d="M 490 335 C 510 316, 542 314, 566 335"/>
+  <path class="dash" d="M 640 335 C 660 316, 694 314, 720 335"/>
+  <text class="red" x="802" y="444">only final tail is exposed</text>
+</svg>

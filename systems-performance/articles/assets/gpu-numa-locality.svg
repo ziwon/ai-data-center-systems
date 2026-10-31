@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="620" viewBox="0 0 1120 620" role="img" aria-labelledby="title desc">
+  <title id="title">NUMA-local and cross-socket GPU data paths</title>
+  <desc id="desc">A comparison of a GPU workload whose CPU cores and host memory are local to the GPU versus a workload whose CPU and memory cross a socket interconnect.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .panel { fill: #F5F1EA; stroke: #D8D1C7; stroke-width: 1.2; }
+    .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.4; }
+    .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; }
+    .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.8; }
+    .softline { fill: none; stroke: #6F6A63; stroke-width: 1.4; }
+    .redline { fill: none; stroke: #D9392E; stroke-width: 2.4; }
+    .text { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #050505; font-size: 16px; }
+    .small { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #6F6A63; font-size: 13px; }
+    .label { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #050505; font-size: 14px; font-weight: 700; }
+    .red { fill: #D9392E; font-weight: 700; }
+  </style>
+
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#111111"/>
+    </marker>
+    <marker id="arrow-red" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#D9392E"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1120" height="620"/>
+
+  <rect class="panel" x="56" y="62" width="478" height="486" rx="0"/>
+  <rect class="panel" x="586" y="62" width="478" height="486" rx="0"/>
+
+  <text class="label" x="84" y="102">NUMA-local placement</text>
+  <text class="small" x="84" y="126">CPU cores, host memory, and GPU share the same locality domain.</text>
+
+  <text class="label" x="614" y="102">Cross-socket placement</text>
+  <text class="small" x="614" y="126">CPU or host memory sits behind the other socket interconnect.</text>
+
+  <rect class="box" x="86" y="166" width="194" height="242" rx="0"/>
+  <text class="label" x="108" y="196">NUMA 0</text>
+  <rect class="soft" x="108" y="220" width="150" height="50" rx="0"/>
+  <text class="text" x="130" y="251">CPU cores</text>
+  <rect class="soft" x="108" y="294" width="150" height="50" rx="0"/>
+  <text class="text" x="126" y="325">Host memory</text>
+
+  <rect class="box" x="312" y="166" width="176" height="242" rx="0"/>
+  <text class="label" x="334" y="196">PCIe root</text>
+  <rect class="soft" x="334" y="246" width="132" height="78" rx="0"/>
+  <text class="text" x="384" y="291" text-anchor="middle">GPU</text>
+
+  <path class="line" d="M258 245 C286 245, 304 258, 334 270" marker-end="url(#arrow)"/>
+  <path class="line" d="M258 319 C288 319, 304 304, 334 294" marker-end="url(#arrow)"/>
+  <text class="small" x="154" y="452">DMA / H2D path stays inside one NUMA domain</text>
+  <text class="small" x="154" y="476">Expected effect: lower variance, cleaner p99</text>
+
+  <rect class="box" x="616" y="166" width="172" height="242" rx="0"/>
+  <text class="label" x="638" y="196">NUMA 0</text>
+  <rect class="soft" x="638" y="246" width="128" height="78" rx="0"/>
+  <text class="text" x="686" y="291" text-anchor="middle">GPU</text>
+
+  <rect class="accent" x="846" y="166" width="172" height="242" rx="0"/>
+  <text class="label" x="868" y="196">NUMA 1</text>
+  <rect class="soft" x="868" y="220" width="128" height="50" rx="0"/>
+  <text class="text" x="888" y="251">CPU cores</text>
+  <rect class="soft" x="868" y="294" width="128" height="50" rx="0"/>
+  <text class="text" x="884" y="325">Host memory</text>
+
+  <path class="softline" d="M796 286 L838 286"/>
+  <text class="small" x="806" y="274">socket</text>
+  <text class="small" x="794" y="306">interconnect</text>
+
+  <path class="redline" d="M868 245 C810 236, 792 246, 766 270" marker-end="url(#arrow-red)"/>
+  <path class="redline" d="M868 319 C810 330, 792 314, 766 296" marker-end="url(#arrow-red)"/>
+  <text class="small" x="684" y="452">DMA / H2D path crosses the socket boundary</text>
+  <text class="small" x="684" y="476"><tspan class="red">Critical symptom:</tspan> silent p99 or step-time regression</text>
+
+  <path class="softline" d="M560 98 L560 526"/>
+  <text class="small" x="84" y="586">The point is locality, not exact SKU geometry. Actual NUMA boundaries depend on socket count, NPS/SNC settings, PCIe wiring, and device-plugin topology hints.</text>
+</svg>

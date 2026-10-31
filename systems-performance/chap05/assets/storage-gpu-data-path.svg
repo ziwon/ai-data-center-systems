@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="600" viewBox="0 0 1120 600" role="img" aria-labelledby="title desc">
+  <title id="title">Traditional and GPUDirect Storage data paths</title>
+  <desc id="desc">A comparison of the traditional storage path through CPU buffers with a GPUDirect Storage path that transfers payload data into GPU memory.</desc>
+  <defs>
+    <style>
+      text { font-family: Arial, sans-serif; }
+      .bg { fill: #F5F1EA; }
+      .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.4; }
+      .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; }
+      .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+      .line { fill: none; stroke: #111111; stroke-width: 1.8; }
+      .dash { fill: none; stroke: #6F6A63; stroke-width: 1.2; stroke-dasharray: 7 5; }
+      .label { fill: #050505; font-size: 17px; font-weight: 700; }
+      .small { fill: #6F6A63; font-size: 13px; }
+      .red { fill: #D9392E; font-size: 13px; font-weight: 700; }
+      .arrow { fill: #111111; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1120" height="600"/>
+
+  <rect class="box" x="56" y="70" width="1008" height="198" rx="8"/>
+  <text class="label" x="82" y="105">Traditional CPU-mediated path</text>
+  <text class="small" x="82" y="130">Payload crosses host memory before CUDA copies it into HBM.</text>
+
+  <rect class="soft" x="82" y="166" width="142" height="62" rx="6"/>
+  <text class="small" x="115" y="202">NVMe / remote FS</text>
+  <rect class="soft" x="270" y="166" width="142" height="62" rx="6"/>
+  <text class="small" x="299" y="194">kernel / VFS</text>
+  <text class="small" x="304" y="212">page cache</text>
+  <rect class="accent" x="458" y="166" width="142" height="62" rx="6"/>
+  <text class="small" x="488" y="194">host buffer</text>
+  <text class="small" x="484" y="212">CPU memcpy</text>
+  <rect class="accent" x="646" y="166" width="142" height="62" rx="6"/>
+  <text class="small" x="682" y="194">pinned staging</text>
+  <text class="small" x="683" y="212">H2D copy</text>
+  <rect class="soft" x="834" y="166" width="142" height="62" rx="6"/>
+  <text class="small" x="873" y="202">GPU HBM</text>
+
+  <line class="line" x1="224" y1="197" x2="270" y2="197"/>
+  <polygon class="arrow" points="270,197 258,191 258,203"/>
+  <line class="line" x1="412" y1="197" x2="458" y2="197"/>
+  <polygon class="arrow" points="458,197 446,191 446,203"/>
+  <line class="line" x1="600" y1="197" x2="646" y2="197"/>
+  <polygon class="arrow" points="646,197 634,191 634,203"/>
+  <line class="line" x1="788" y1="197" x2="834" y2="197"/>
+  <polygon class="arrow" points="834,197 822,191 822,203"/>
+
+  <rect class="box" x="56" y="322" width="1008" height="198" rx="8"/>
+  <text class="label" x="82" y="357">GPUDirect Storage path</text>
+  <text class="small" x="82" y="382">CPU submits I/O; the bulk payload avoids a CPU-memory bounce buffer when the direct path is valid.</text>
+
+  <rect class="soft" x="82" y="418" width="174" height="62" rx="6"/>
+  <text class="small" x="126" y="454">NVMe / storage NIC</text>
+  <rect class="soft" x="364" y="418" width="174" height="62" rx="6"/>
+  <text class="small" x="410" y="446">cuFile + VFS</text>
+  <text class="small" x="401" y="464">direct-capable stack</text>
+  <rect class="accent" x="646" y="418" width="174" height="62" rx="6"/>
+  <text class="small" x="695" y="446">DMA path</text>
+  <text class="small" x="684" y="464">topology selected</text>
+  <rect class="soft" x="890" y="418" width="86" height="62" rx="6"/>
+  <text class="small" x="904" y="454">GPU HBM</text>
+
+  <line class="line" x1="256" y1="449" x2="364" y2="449"/>
+  <polygon class="arrow" points="364,449 352,443 352,455"/>
+  <line class="line" x1="538" y1="449" x2="646" y2="449"/>
+  <polygon class="arrow" points="646,449 634,443 634,455"/>
+  <line class="line" x1="820" y1="449" x2="890" y2="449"/>
+  <polygon class="arrow" points="890,449 878,443 878,455"/>
+
+  <path class="dash" d="M 529 228 L 529 308"/>
+  <text class="red" x="570" y="292">Measure removed copies, CPU load, latency, and application goodput.</text>
+</svg>

@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="430" viewBox="0 0 960 430" role="img" aria-labelledby="title desc">
+  <title id="title">Data parallel training and ZeRO sharding</title>
+  <desc id="desc">Data parallel GPUs each process a microbatch. ZeRO reduces redundant memory by sharding optimizer states, gradients, and parameters across GPUs.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .box { fill: none; stroke: #111111; stroke-width: 1.4; rx: 6; }
+    .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; rx: 6; }
+    .accent { fill: none; stroke: #D9392E; stroke-width: 2.2; rx: 6; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.3; marker-end: url(#arrow); }
+    .dash { fill: none; stroke: #6F6A63; stroke-width: 1.1; stroke-dasharray: 5 5; marker-end: url(#arrowSoft); }
+    .hot { fill: none; stroke: #D9392E; stroke-width: 1.8; marker-end: url(#arrowRed); }
+    .text { fill: #050505; font-family: Arial, sans-serif; font-size: 16px; font-weight: 700; }
+    .small { fill: #6F6A63; font-family: Arial, sans-serif; font-size: 13px; }
+    .mono { fill: #050505; font-family: "Courier New", monospace; font-size: 13px; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#111111"/>
+    </marker>
+    <marker id="arrowSoft" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#6F6A63"/>
+    </marker>
+    <marker id="arrowRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#D9392E"/>
+    </marker>
+  </defs>
+  <rect class="bg" width="960" height="430"/>
+
+  <rect class="box" x="45" y="58" width="150" height="76"/>
+  <text class="text" x="120" y="90" text-anchor="middle">Global batch</text>
+  <text class="small" x="120" y="113" text-anchor="middle">split into microbatches</text>
+
+  <rect class="soft" x="280" y="35" width="150" height="88"/>
+  <text class="text" x="355" y="66" text-anchor="middle">GPU 0</text>
+  <text class="small" x="355" y="88" text-anchor="middle">microbatch</text>
+  <text class="mono" x="355" y="108" text-anchor="middle">full model copy</text>
+
+  <rect class="soft" x="485" y="35" width="150" height="88"/>
+  <text class="text" x="560" y="66" text-anchor="middle">GPU 1</text>
+  <text class="small" x="560" y="88" text-anchor="middle">microbatch</text>
+  <text class="mono" x="560" y="108" text-anchor="middle">full model copy</text>
+
+  <rect class="soft" x="690" y="35" width="150" height="88"/>
+  <text class="text" x="765" y="66" text-anchor="middle">GPU 2</text>
+  <text class="small" x="765" y="88" text-anchor="middle">microbatch</text>
+  <text class="mono" x="765" y="108" text-anchor="middle">full model copy</text>
+
+  <path class="line" d="M195 96 L280 80"/>
+  <path class="line" d="M195 96 L485 80"/>
+  <path class="line" d="M195 96 L690 80"/>
+
+  <rect class="accent" x="374" y="172" width="372" height="64"/>
+  <text class="text" x="560" y="200" text-anchor="middle">Gradient synchronization</text>
+  <text class="small" x="560" y="222" text-anchor="middle">communication cost grows with scale</text>
+  <path class="hot" d="M355 123 C355 150 415 160 430 172"/>
+  <path class="hot" d="M560 123 L560 172"/>
+  <path class="hot" d="M765 123 C765 150 705 160 690 172"/>
+
+  <text class="small" x="121" y="289" text-anchor="middle">ZeRO memory view</text>
+
+  <rect class="box" x="45" y="310" width="190" height="64"/>
+  <text class="text" x="140" y="338" text-anchor="middle">ZeRO-1</text>
+  <text class="small" x="140" y="360" text-anchor="middle">optimizer states sharded</text>
+
+  <rect class="box" x="285" y="310" width="190" height="64"/>
+  <text class="text" x="380" y="338" text-anchor="middle">ZeRO-2</text>
+  <text class="small" x="380" y="360" text-anchor="middle">+ gradients sharded</text>
+
+  <rect class="accent" x="525" y="310" width="190" height="64"/>
+  <text class="text" x="620" y="338" text-anchor="middle">ZeRO-3</text>
+  <text class="small" x="620" y="360" text-anchor="middle">+ parameters sharded</text>
+
+  <rect class="soft" x="765" y="310" width="150" height="64"/>
+  <text class="text" x="840" y="338" text-anchor="middle">Trade-off</text>
+  <text class="small" x="840" y="360" text-anchor="middle">less memory, more comm</text>
+
+  <path class="dash" d="M235 342 L285 342"/>
+  <path class="dash" d="M475 342 L525 342"/>
+  <path class="dash" d="M715 342 L765 342"/>
+</svg>

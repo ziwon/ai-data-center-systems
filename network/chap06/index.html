@@ -1,0 +1,1537 @@
+<!DOCTYPE html><html lang="en" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-bguv2lll"> <head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Chapter 6: Efficient Load Balancing | AI Data Center Systems</title><link rel="canonical" href="https://adcs.restack.tech/network/chap06/"/><link rel="sitemap" href="/sitemap-index.xml"/><script async src="https://www.googletagmanager.com/gtag/js?id=G-76LFZJVBTE"></script><script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-76LFZJVBTE');
+      </script><script async crossorigin="anonymous" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8128231647578658"></script><link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v6.4.8"/><meta name="generator" content="Starlight v0.40.0"/><meta property="og:title" content="Chapter 6: Efficient Load Balancing"/><meta property="og:url" content="https://adcs.restack.tech/network/chap06/"/><meta property="og:locale" content="en"/><meta property="og:description" content="This chapter explains how load balancing works in AI/ML data center fabrics and why conventional ECMP is often not enough for large RoCEv2 training clusters."/><meta property="og:site_name" content="AI Data Center Systems"/><meta name="description" content="This chapter explains how load balancing works in AI/ML data center fabrics and why conventional ECMP is often not enough for large RoCEv2 training clusters."/><meta property="og:type" content="article"/><meta property="og:image" content="https://adcs.restack.tech/og/network/chap06.png?v=2"/><meta property="og:image:width" content="1200"/><meta property="og:image:height" content="630"/><meta name="twitter:image" content="https://adcs.restack.tech/og/network/chap06.png?v=2"/><meta name="twitter:card" content="summary_large_image"/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/_astro/print.DNXP8c50.css" media="print"><link rel="stylesheet" href="/_astro/common.DYbqSTpl.css"><script type="module" src="/_astro/page.CtJXHRyR.js"></script></head> <body class="astro-bguv2lll"> <a href="#_top" class="astro-7q3lir66">Skip to content</a> <script>
+  (() => {
+    try {
+      const savedMode = localStorage.getItem('adcs-navigation-mode');
+      document.documentElement.dataset.navigationMode = savedMode === 'compact' ? 'compact' : 'normal';
+    } catch {
+      document.documentElement.dataset.navigationMode = 'normal';
+    }
+  })();
+</script> <div class="page sl-flex astro-4toy2ex6"> <header class="header astro-4toy2ex6"><div class="header astro-3ef6ksr2"> <div class="title-wrapper sl-flex astro-3ef6ksr2"> <a href="/" class="site-title sl-flex astro-m46x6ez3">  <span class="astro-m46x6ez3" translate="no"> AI Data Center Systems </span> </a> <button class="navigation-mode-toggle print:hidden astro-3ef6ksr2" type="button" aria-label="Compact navigation" aria-pressed="false" title="Use compact navigation"> <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" class="astro-3ef6ksr2"> <rect x="3" y="4" width="18" height="16" rx="2" class="astro-3ef6ksr2"></rect> <path d="M9 4v16M6.5 10 4.5 12l2 2" class="astro-3ef6ksr2"></path> </svg> </button> </div> <div class="sl-flex print:hidden astro-3ef6ksr2"> <site-search class="astro-3ef6ksr2 astro-v37mnknz" data-translations="{&quot;placeholder&quot;:&quot;Search&quot;}"> <button data-open-modal disabled aria-label="Search" aria-keyshortcuts="Control+K" class="astro-v37mnknz"> <svg aria-hidden="true" class="astro-v37mnknz astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg> <span class="sl-hidden md:sl-block astro-v37mnknz" aria-hidden="true">Search</span> <kbd class="sl-hidden md:sl-flex astro-v37mnknz" style="display: none;"> <kbd class="astro-v37mnknz">Ctrl</kbd><kbd class="astro-v37mnknz">K</kbd> </kbd> </button> <dialog style="padding:0" aria-label="Search" class="astro-v37mnknz"> <div class="dialog-frame sl-flex astro-v37mnknz">  <button data-close-modal class="sl-flex md:sl-hidden astro-v37mnknz"> Cancel </button> <div class="search-container astro-v37mnknz"> <div id="starlight__search" class="astro-v37mnknz"></div> </div> </div> </dialog> </site-search>  <script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script> <script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.D1WXcfCt.js"></script>  </div> <div class="sl-hidden md:sl-flex print:hidden right-group astro-3ef6ksr2"> <div class="sl-flex social-icons astro-3ef6ksr2"> <a href="https://github.com/ziwon/ai-data-center-systems" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">GitHub</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script> <script type="module">const r="starlight-theme",o=e=>e==="auto"||e==="dark"||e==="light"?e:"auto",c=()=>o(typeof localStorage<"u"&&localStorage.getItem(r));function n(e){typeof localStorage<"u"&&localStorage.setItem(r,e==="light"||e==="dark"?e:"")}const l=()=>matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";function t(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e==="auto"?l():e,n(e)}matchMedia("(prefers-color-scheme: light)").addEventListener("change",()=>{c()==="auto"&&t("auto")});class s extends HTMLElement{constructor(){super(),t(c()),this.querySelector("select")?.addEventListener("change",a=>{a.currentTarget instanceof HTMLSelectElement&&t(o(a.currentTarget.value))})}}customElements.define("starlight-theme-select",s);</script> <script type="module">class s extends HTMLElement{constructor(){super();const e=this.querySelector("select");e&&(e.addEventListener("change",t=>{t.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=t.currentTarget.value)}),window.addEventListener("pageshow",t=>{if(!t.persisted)return;const n=e.querySelector("option[selected]")?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}}customElements.define("starlight-lang-select",s);</script> </div> </div></header> <nav class="sidebar print:hidden astro-4toy2ex6" aria-label="Main"> <starlight-menu-button class="print:hidden astro-jif73yzw"> <button aria-expanded="false" aria-label="Menu" aria-controls="starlight__sidebar" class="sl-flex md:sl-hidden astro-jif73yzw"> <svg aria-hidden="true" class="open-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg> <svg aria-hidden="true" class="close-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg> </button> </starlight-menu-button> <script type="module">class s extends HTMLElement{constructor(){super(),this.btn=this.querySelector("button"),this.btn.addEventListener("click",()=>this.toggleExpanded());const t=this.closest("nav");t&&t.addEventListener("keyup",e=>this.closeOnEscape(e))}setExpanded(t){this.setAttribute("aria-expanded",String(t)),document.body.toggleAttribute("data-mobile-menu-expanded",t)}toggleExpanded(){this.setExpanded(this.getAttribute("aria-expanded")!=="true")}closeOnEscape(t){t.code==="Escape"&&(this.setExpanded(!1),this.btn.focus())}}customElements.define("starlight-menu-button",s);</script>  <div id="starlight__sidebar" class="sidebar-pane astro-4toy2ex6"> <div class="navigation-controls astro-4toy2ex6"> <button class="navigation-drawer-toggle astro-4toy2ex6" type="button" aria-controls="starlight__sidebar-content" aria-expanded="false" title="Open navigation"> <svg class="navigation-menu-icon astro-4toy2ex6" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"> <path d="M4 6h16M4 12h16M4 18h16" class="astro-4toy2ex6"></path> </svg> <svg class="navigation-close-icon astro-4toy2ex6" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"> <path d="m6 6 12 12M18 6 6 18" class="astro-4toy2ex6"></path> </svg> <span class="navigation-drawer-label astro-4toy2ex6">Open navigation</span> </button> </div> <div id="starlight__sidebar-content" class="sidebar-content sl-flex astro-4toy2ex6"> <ul class="starlight-sidebar-topics astro-2fh6iaza"> <li class="astro-2fh6iaza"> <a aria-label="Network" title="Network" href="/network/" class="starlight-sidebar-topics-current astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8.7 10a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-6.27-6.3a1 1 0 0 0-1.42 1.42ZM21 14a1 1 0 0 0-1 1v3.59L15.44 14A1 1 0 0 0 14 15.44L18.59 20H15a1 1 0 0 0 0 2h6a1 1 0 0 0 .38-.08 1 1 0 0 0 .54-.54A1 1 0 0 0 22 21v-6a1 1 0 0 0-1-1Zm.92-11.38a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-6a1 1 0 0 0 0 2h3.59L2.29 20.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V9a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z"/></svg> </div> <div class="astro-2fh6iaza"> Network  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="GPU &amp; Accelerator Systems" title="GPU &amp; Accelerator Systems" href="/gpu/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> </div> <div class="astro-2fh6iaza"> GPU &amp; Accelerator Systems  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Storage" title="Storage" href="/storage/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8 16.5a1 1 0 1 0 1 1 1 1 0 0 0-1-1M12 2C8 2 4 3.37 4 6v12c0 2.63 4 4 8 4s8-1.37 8-4V6c0-2.63-4-4-8-4m6 16c0 .71-2.28 2-6 2s-6-1.29-6-2v-3.27A13 13 0 0 0 12 16a13 13 0 0 0 6-1.27Zm0-6c0 .71-2.28 2-6 2s-6-1.29-6-2V8.73A13 13 0 0 0 12 10a13 13 0 0 0 6-1.27Zm-6-4C8.28 8 6 6.71 6 6s2.28-2 6-2 6 1.29 6 2-2.28 2-6 2m-4 2.5a1 1 0 1 0 1 1 1 1 0 0 0-1-1"/></svg> </div> <div class="astro-2fh6iaza"> Storage  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Training" title="Training" href="/training/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1 1v8a1 1 0 0 0 2 0v-8a1 1 0 0 0-1-1m5-10a1 1 0 0 0-1 1v18a1 1 0 0 0 2 0V3a1 1 0 0 0-1-1m10 14a1 1 0 0 0-1 1v4a1 1 0 0 0 2 0v-4a1 1 0 0 0-1-1m-5-8a1 1 0 0 0-1 1v12a1 1 0 0 0 2 0V9a1 1 0 0 0-1-1"/></svg> </div> <div class="astro-2fh6iaza"> Training  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Inference" title="Inference" data-topic-icon="brain" href="/inference/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 22H5a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3h1a4 4 0 0 1 7.3-2.18c.448.64.692 1.4.7 2.18h3a1 1 0 0 1 1 1v3a4 4 0 0 1 2.18 7.3A3.86 3.86 0 0 1 18 18v3a1 1 0 0 1-1 1ZM5 8a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11v-3.18a1 1 0 0 1 1.33-.95 1.77 1.77 0 0 0 1.74-.23 2 2 0 0 0 .93-1.37 2 2 0 0 0-.48-1.59 1.89 1.89 0 0 0-2.17-.55 1 1 0 0 1-1.33-.95V8h-3.2a1 1 0 0 1-1-1.33 1.77 1.77 0 0 0-.23-1.74 1.939 1.939 0 0 0-3-.43A2 2 0 0 0 8 6c.002.23.046.456.13.67A1 1 0 0 1 7.18 8H5Z"/></svg> </div> <div class="astro-2fh6iaza"> Inference  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="MLOps" title="MLOps" data-topic-icon="cycle" href="/mlops/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8.7 10a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-6.27-6.3a1 1 0 0 0-1.42 1.42ZM21 14a1 1 0 0 0-1 1v3.59L15.44 14A1 1 0 0 0 14 15.44L18.59 20H15a1 1 0 0 0 0 2h6a1 1 0 0 0 .38-.08 1 1 0 0 0 .54-.54A1 1 0 0 0 22 21v-6a1 1 0 0 0-1-1Zm.92-11.38a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-6a1 1 0 0 0 0 2h3.59L2.29 20.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V9a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z"/></svg> </div> <div class="astro-2fh6iaza"> MLOps  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Systems Performance" title="Systems Performance" href="/systems-performance/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path fill-rule="evenodd" d="M1.44 8.855v-.001l3.527-3.516c.34-.344.802-.541 1.285-.548h6.649l.947-.947c3.07-3.07 6.207-3.072 7.62-2.868a1.821 1.821 0 0 1 1.557 1.557c.204 1.413.203 4.55-2.868 7.62l-.946.946v6.649a1.845 1.845 0 0 1-.549 1.286l-3.516 3.528a1.844 1.844 0 0 1-3.11-.944l-.858-4.275-4.52-4.52-2.31-.463-1.964-.394A1.847 1.847 0 0 1 .98 10.693a1.843 1.843 0 0 1 .46-1.838Zm5.379 2.017-3.873-.776L6.32 6.733h4.638l-4.14 4.14Zm8.403-5.655c2.459-2.46 4.856-2.463 5.89-2.33.134 1.035.13 3.432-2.329 5.891l-6.71 6.71-3.561-3.56 6.71-6.711Zm-1.318 15.837-.776-3.873 4.14-4.14v4.639l-3.364 3.374Z" clip-rule="evenodd"/><path d="M9.318 18.345a.972.972 0 0 0-1.86-.561c-.482 1.435-1.687 2.204-2.934 2.619a8.22 8.22 0 0 1-1.23.302c.062-.365.157-.79.303-1.229.415-1.247 1.184-2.452 2.62-2.935a.971.971 0 1 0-.62-1.842c-.12.04-.236.084-.35.13-2.02.828-3.012 2.588-3.493 4.033a10.383 10.383 0 0 0-.51 2.845l-.001.016v.063c0 .536.434.972.97.972H2.24a7.21 7.21 0 0 0 .878-.065c.527-.063 1.248-.19 2.02-.447 1.445-.48 3.205-1.472 4.033-3.494a5.828 5.828 0 0 0 .147-.407Z"/></svg> </div> <div class="astro-2fh6iaza"> Systems Performance  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Courses" title="Courses" href="/courses/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.17 2.06A13.1 13.1 0 0 0 19 1.87a12.94 12.94 0 0 0-7 2.05 12.94 12.94 0 0 0-7-2 13.1 13.1 0 0 0-2.17.19 1 1 0 0 0-.83 1v12a1 1 0 0 0 1.17 1 10.9 10.9 0 0 1 8.25 1.91l.12.07h.11a.91.91 0 0 0 .7 0h.11l.12-.07A10.899 10.899 0 0 1 20.83 16 1 1 0 0 0 22 15V3a1 1 0 0 0-.83-.94ZM11 15.35a12.87 12.87 0 0 0-6-1.48H4v-10c.333-.02.667-.02 1 0a10.86 10.86 0 0 1 6 1.8v9.68Zm9-1.44h-1a12.87 12.87 0 0 0-6 1.48V5.67a10.86 10.86 0 0 1 6-1.8c.333-.02.667-.02 1 0v10.04Zm1.17 4.15a13.098 13.098 0 0 0-2.17-.19 12.94 12.94 0 0 0-7 2.05 12.94 12.94 0 0 0-7-2.05c-.727.003-1.453.066-2.17.19A1 1 0 0 0 2 19.21a1 1 0 0 0 1.17.79 10.9 10.9 0 0 1 8.25 1.91 1 1 0 0 0 1.16 0A10.9 10.9 0 0 1 20.83 20a1 1 0 0 0 1.17-.79 1 1 0 0 0-.83-1.15Z"/></svg> </div> <div class="astro-2fh6iaza"> Courses  </div> </a> </li> </ul> <sl-sidebar-state-persist data-hash="0j7rqvj" class="astro-kku4brbg"> <script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script>  <ul class="top-level astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">AI Data Center Network</span>  </a> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">articles</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="0"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">cloud-data-center-network-now-and-next.ko</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="1"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/articles/cloud-data-center-network-now-and-next.ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Cloud Data Center Network의 지금과 앞으로</span>  </a> </li> </ul> </details> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap01</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="2"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap01/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 1: Wonders in the Workload</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap02</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="3"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap02/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 2: &quot;The Common-Man View&quot; of AI Data Center Fabrics</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap03</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="4"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap03/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 3: Network Design Considerations</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap04</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="5"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap04/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 4: Optics and Cable Management</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap05</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="6"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap05/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 5: Thermal and Power Efficiency Considerations</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap06</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="7"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap06/" aria-current="page" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 6: Efficient Load Balancing</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap07</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="8"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap07/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 7: RoCEv2 Transport and Congestion Management</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap08</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="9"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap08/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 8: IP Routing for AI/ML Fabrics</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap09</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="10"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap09/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 9: Storage Network Design and Technologies for AI Data Centers</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap10</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="11"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap10/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 10: AI Network Performance KPIs</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap11</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="12"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap11/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 11: Monitoring and Telemetry</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">chap12</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="13"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/chap12/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Chapter 12: Ultra Ethernet Consortium, UEC</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">clos-ebgp-lab</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="14"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/clos-ebgp-lab/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Clos Fabric Lab Series</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">glb-nnhn-bgp-underlay</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="15"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/glb-nnhn-bgp-underlay/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Appendix: BGP-based Underlay and GLB NNHN in AI Data Center Fabrics</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">gpu-cluster-failure-analysis</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="16"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/gpu-cluster-failure-analysis/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">GPU 클러스터 장애 분석: ECC, Xid, RDMA, NCCL Hang은 어떻게 연결되는가</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">ib-packet-analysis</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="17"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/ib-packet-analysis/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">InfiniBand Packet Analysis: A Practical RDMA Transport Primer</span>  </a> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">packet-format-reference</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="18"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/ib-packet-analysis/packet-format-reference/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">InfiniBand Packet Format Reference</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">packet-format-reference_KO</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="19"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/ib-packet-analysis/packet-format-reference_ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">InfiniBand 패킷 형식 참조 문서</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">README_KO</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="20"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/ib-packet-analysis/readme_ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">InfiniBand 패킷 분석: 실전 RDMA 전송 입문서</span>  </a> </li> </ul> </details> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">rdma-examples</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="21"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/network/rdma-examples/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">RDMA Read/Write 실전 입문</span>  </a> </li> </ul> </details> </li> </ul>  <script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script> </sl-sidebar-state-persist> <div class="md:sl-hidden"> <div class="mobile-preferences sl-flex astro-wu23bvmt"> <div class="social-icons astro-wu23bvmt"> <a href="https://github.com/ziwon/ai-data-center-systems" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">GitHub</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script>   </div> </div> </div> </div> </nav> <div class="main-frame astro-4toy2ex6">  <script type="module">const a=document.getElementById("starlight__sidebar"),n=a?.querySelector("sl-sidebar-state-persist"),o="sl-sidebar-state",i=()=>{let t=[];const e=n?.dataset.hash||"";try{const s=sessionStorage.getItem(o),r=JSON.parse(s||"{}");Array.isArray(r.open)&&r.hash===e&&(t=r.open)}catch{}return{hash:e,open:t,scroll:a?.scrollTop||0}},c=t=>{try{sessionStorage.setItem(o,JSON.stringify(t))}catch{}},d=()=>c(i()),l=(t,e)=>{const s=i();s.open[e]=t,c(s)};n?.addEventListener("click",t=>{if(!(t.target instanceof Element))return;const e=t.target.closest("summary")?.closest("details");if(!e)return;const s=e.querySelector("sl-sidebar-restore"),r=parseInt(s?.dataset.index||"");isNaN(r)||l(!e.open,r)});addEventListener("visibilitychange",()=>{document.visibilityState==="hidden"&&d()});addEventListener("pageHide",d);</script> <div class="lg:sl-flex astro-67yu43on"> <aside class="right-sidebar-container print:hidden astro-67yu43on"> <div class="right-sidebar astro-67yu43on"> <div class="lg:sl-hidden astro-rl4sue7z"><mobile-starlight-toc data-min-h="2" data-max-h="2" class="astro-doynk5tl"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-doynk5tl"><details id="starlight__mobile-toc" class="astro-doynk5tl"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-doynk5tl"><span class="toggle sl-flex astro-doynk5tl">On this page<svg aria-hidden="true" class="caret astro-doynk5tl astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-doynk5tl"></span></summary><div class="dropdown astro-doynk5tl"><ul class="isMobile astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#table-of-contents" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Table of Contents</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#goal" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Goal</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#why-load-balancing-is-hard-in-ai-fabrics" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Why Load Balancing Is Hard in AI Fabrics</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#ecmp-foundation" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">ECMP Foundation</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#load-balancing-mechanisms" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Load-Balancing Mechanisms</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#global-load-balancing-glb" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Global Load Balancing, GLB</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#traffic-engineering-based-load-balancing-telb" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Traffic Engineering-Based Load Balancing, TELB</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#per-packet-load-balancing" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Per-Packet Load Balancing</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#mechanism-comparison" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Mechanism Comparison</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#operational-validation-checklist" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Operational Validation Checklist</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#chapter-summary" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Chapter Summary</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#key-terms" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Key Terms</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#qa" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Q&amp;A</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#references" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">References</span> </a>  </li> </ul></div></details></nav></mobile-starlight-toc><script type="module" src="/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.hwBsy0Mo.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-rl4sue7z"><div class="sl-container astro-rl4sue7z"><kb-graph-card> <button class="kb-graph-card" type="button" data-open aria-haspopup="dialog"> <span class="kb-graph-copy"> <span class="kb-graph-title">Knowledge graph</span> <span class="kb-graph-subtitle" data-count>Loading related docs</span> </span> <span class="kb-graph-thumb" aria-hidden="true" data-map></span> <span class="kb-graph-expand" aria-hidden="true">Expand</span> </button> <dialog class="kb-graph-dialog" aria-label="Knowledge graph" data-dialog> <div class="kb-graph-panel"> <div class="kb-graph-panel-header"> <div> <p>Knowledge graph</p> <h2 data-heading>Related documents</h2> </div> <div class="kb-graph-tabs" role="tablist" aria-label="Knowledge graph views"> <button type="button" role="tab" aria-selected="true" data-tab="page">This page</button> <button type="button" role="tab" aria-selected="false" data-tab="global">Full graph</button> </div> <button type="button" data-close aria-label="Close knowledge graph">×</button> </div> <div class="kb-graph-stage" data-stage data-view="page"> <div data-page-stage></div> <div data-global-stage hidden></div> </div> </div> </dialog> </kb-graph-card> <script type="module" src="/_astro/KnowledgeGraphCard.astro_astro_type_script_index_0_lang.C475L69c.js"></script><starlight-toc data-min-h="2" data-max-h="2"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">On this page</h2><ul class="astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#table-of-contents" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Table of Contents</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#goal" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Goal</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#why-load-balancing-is-hard-in-ai-fabrics" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Why Load Balancing Is Hard in AI Fabrics</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#ecmp-foundation" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">ECMP Foundation</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#load-balancing-mechanisms" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Load-Balancing Mechanisms</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#global-load-balancing-glb" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Global Load Balancing, GLB</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#traffic-engineering-based-load-balancing-telb" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Traffic Engineering-Based Load Balancing, TELB</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#per-packet-load-balancing" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Per-Packet Load Balancing</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#mechanism-comparison" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Mechanism Comparison</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#operational-validation-checklist" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Operational Validation Checklist</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#chapter-summary" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Chapter Summary</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#key-terms" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Key Terms</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#qa" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Q&amp;A</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#references" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">References</span> </a>  </li> </ul></nav></starlight-toc><script type="module" src="/_astro/TableOfContents.astro_astro_type_script_index_0_lang.FuRcXuRY.js"></script></div></div> </div> </aside> <div class="main-pane astro-67yu43on">  <main data-pagefind-body class="astro-bguv2lll" lang="en" dir="ltr">    <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <h1 id="_top" class="astro-j6tvhyss">Chapter 6: Efficient Load Balancing</h1> </div> </div> <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <starlight-image-zoom> <template class="astro-vjux6bgf"> <dialog class="starlight-image-zoom-dialog astro-vjux6bgf"> <button aria-label="Unzoom image" class="starlight-image-zoom-control astro-vjux6bgf"> <svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" class="astro-vjux6bgf"> <use href="#starlight-image-zoom-icon-unzoom" class="astro-vjux6bgf"></use> </svg> </button> <figure class="astro-vjux6bgf"></figure> </dialog> </template> <svg xmlns="http://www.w3.org/2000/svg" style="display:none" class="astro-vjux6bgf"> <symbol id="starlight-image-zoom-icon-zoom" viewBox="0 0 24 24" class="astro-vjux6bgf"> <path d="M9.79 12.79 4 18.59V17a1 1 0 0 0-2 0v4a1 1 0 0 0 .08.38 1 1 0 0 0 .54.54A1 1 0 0 0 3 22h4a1 1 0 0 0 0-2H5.41l5.8-5.79a1 1 0 0 0-1.42-1.42ZM21.92 2.62a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-4a1 1 0 0 0 0 2h1.59l-5.8 5.79a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V7a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z" class="astro-vjux6bgf"></path> </symbol> <symbol id="starlight-image-zoom-icon-unzoom" viewBox="0 0 24 24" class="astro-vjux6bgf"> <path d="M21.71 2.29a1 1 0 0 0-1.42 0l-5.79 5.8V6.5a1 1 0 0 0-2 0v4a1 1 0 0 0 .08.38 1 1 0 0 0 .54.54 1 1 0 0 0 .38.08h4a1 1 0 0 0 0-2h-1.59l5.8-5.79a1 1 0 0 0 0-1.42ZM10.88 12.58a1 1 0 0 0-.38-.08h-4a1 1 0 0 0 0 2h1.59l-5.8 5.79a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l5.79-5.8v1.59a1 1 0 0 0 2 0v-4a1 1 0 0 0-.08-.38 1 1 0 0 0-.54-.54Z" class="astro-vjux6bgf"></path> </symbol> </svg> </starlight-image-zoom>   <script type="module" src="/_astro/ImageZoom.astro_astro_type_script_index_0_lang.CZmBqK-T.js"></script> <div class="sl-markdown-content"> <div class="sl-heading-wrapper level-h2"><h2 id="table-of-contents">Table of Contents</h2><a class="sl-anchor-link" href="#table-of-contents"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Table of Contents”</span></a></div>
+<ul>
+<li><a href="#goal">Goal</a></li>
+<li><a href="#why-load-balancing-is-hard-in-ai-fabrics">Why Load Balancing Is Hard in AI Fabrics</a>
+<ul>
+<li><a href="#low-entropy-in-rocev2-traffic">Low Entropy in RoCEv2 Traffic</a></li>
+<li><a href="#elephant-flows-and-flow-collisions">Elephant Flows and Flow Collisions</a></li>
+</ul>
+</li>
+<li><a href="#ecmp-foundation">ECMP Foundation</a>
+<ul>
+<li><a href="#control-plane-view">Control Plane View</a></li>
+<li><a href="#data-plane-view">Data Plane View</a></li>
+<li><a href="#hash-inputs-and-rocev2-bth">Hash Inputs and RoCEv2 BTH</a></li>
+</ul>
+</li>
+<li><a href="#load-balancing-mechanisms">Load-Balancing Mechanisms</a>
+<ul>
+<li><a href="#static-load-balancing-slb">Static Load Balancing, SLB</a></li>
+<li><a href="#resilient-symmetric-and-weighted-hashing">Resilient, Symmetric, and Weighted Hashing</a></li>
+<li><a href="#dynamic-load-balancing-dlb">Dynamic Load Balancing, DLB</a></li>
+<li><a href="#dlb-assigned-flow-mode">DLB Assigned-Flow Mode</a></li>
+<li><a href="#dlb-flowlet-mode">DLB Flowlet Mode</a></li>
+<li><a href="#dlb-reactive-path-rebalancing">DLB Reactive Path Rebalancing</a></li>
+<li><a href="#dlb-per-packet-mode">DLB Per-Packet Mode</a></li>
+</ul>
+</li>
+<li><a href="#global-load-balancing-glb">Global Load Balancing, GLB</a>
+<ul>
+<li><a href="#why-local-link-quality-is-not-enough">Why Local Link Quality Is Not Enough</a></li>
+<li><a href="#remote-link-quality-and-end-to-end-path-quality">Remote Link Quality and End-to-End Path Quality</a></li>
+<li><a href="#bgp-nnhn-and-glb-heartbeats">BGP NNHN and GLB Heartbeats</a></li>
+<li><a href="#where-glb-can-be-applied">Where GLB Can Be Applied</a></li>
+</ul>
+</li>
+<li><a href="#traffic-engineering-based-load-balancing-telb">Traffic Engineering-Based Load Balancing, TELB</a>
+<ul>
+<li><a href="#why-telb-exists">Why TELB Exists</a></li>
+<li><a href="#path-color-tenant-gpu-and-qp-pinning">Path Color, Tenant, GPU, and QP Pinning</a></li>
+<li><a href="#bgp-deterministic-path-forwarding">BGP Deterministic Path Forwarding</a></li>
+<li><a href="#controller-based-telb">Controller-Based TELB</a></li>
+</ul>
+</li>
+<li><a href="#per-packet-load-balancing">Per-Packet Load Balancing</a>
+<ul>
+<li><a href="#random-spray">Random Spray</a></li>
+<li><a href="#selective-packet-spraying">Selective Packet Spraying</a></li>
+<li><a href="#packet-reordering">Packet Reordering</a></li>
+<li><a href="#mrc-as-a-modern-packet-spraying-example">MRC as a Modern Packet-Spraying Example</a></li>
+</ul>
+</li>
+<li><a href="#mechanism-comparison">Mechanism Comparison</a></li>
+<li><a href="#operational-validation-checklist">Operational Validation Checklist</a></li>
+<li><a href="#chapter-summary">Chapter Summary</a></li>
+<li><a href="#key-terms">Key Terms</a></li>
+<li><a href="#qa">Q&#x26;A</a></li>
+<li><a href="#references">References</a></li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="goal">Goal</h2><a class="sl-anchor-link" href="#goal"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Goal”</span></a></div>
+<p>This chapter explains how load balancing works in AI/ML data center fabrics and why conventional ECMP is often not enough for large RoCEv2 training clusters.</p>
+<p>The core idea is:</p>
+<blockquote>
+<p>AI fabrics need load balancing that understands low entropy, elephant flows, local and remote congestion, packet ordering, and workload policy.</p>
+</blockquote>
+<p>The chapter focuses on these topics:</p>
+<ul>
+<li>ECMP control-plane and data-plane behavior</li>
+<li>Why RoCEv2 traffic often has low flow entropy</li>
+<li>Static Load Balancing, SLB</li>
+<li>Dynamic Load Balancing, DLB</li>
+<li>Flowlet-based balancing and reactive rebalancing</li>
+<li>Global Load Balancing, GLB</li>
+<li>BGP Next-Next-Hop Nodes, NNHN, and GLB heartbeats</li>
+<li>Traffic Engineering-Based Load Balancing, TELB</li>
+<li>Per-packet load balancing and selective packet spraying</li>
+</ul>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TB
+    classDef workload fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef fabric fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef method fill:#5a3520,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef advanced fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef risk fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    W[AI training workload&#x3C;br/>few applications, huge GPU flows]:::workload
+    R[RoCEv2 traffic&#x3C;br/>UDP/IP + BTH + QP]:::workload
+    E[Low entropy&#x3C;br/>similar source/destination pairs]:::risk
+    C[Clos fabric&#x3C;br/>many equal-cost spine paths]:::fabric
+
+    SLB[SLB&#x3C;br/>packet header hash]:::method
+    DLB[DLB&#x3C;br/>local link and queue quality]:::method
+    GLB[GLB&#x3C;br/>remote link quality and topology]:::advanced
+    TELB[TELB&#x3C;br/>tenant/job/path policy]:::advanced
+    PPS[Per-packet spraying&#x3C;br/>packet-level path spread]:::advanced
+
+    W --> R
+    R --> E
+    E --> C
+    C --> SLB
+    C --> DLB
+    C --> GLB
+    C --> TELB
+    C --> PPS</pre>
+<div class="sl-heading-wrapper level-h2"><h2 id="why-load-balancing-is-hard-in-ai-fabrics">Why Load Balancing Is Hard in AI Fabrics</h2><a class="sl-anchor-link" href="#why-load-balancing-is-hard-in-ai-fabrics"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Why Load Balancing Is Hard in AI Fabrics”</span></a></div>
+<p>AI/ML fabrics are not typical enterprise data center fabrics. A cluster may run a small number of large distributed jobs, and most useful traffic may be RDMA over Converged Ethernet, RoCEv2.</p>
+<p>Important properties:</p>
+<ul>
+<li>Traffic is dominated by east-west GPU-to-GPU communication.</li>
+<li>Distributed training creates synchronized bursts.</li>
+<li>The number of large flows may be small.</li>
+<li>Many flows share similar source/destination IP and UDP fields.</li>
+<li>RoCEv2 normally uses UDP destination port 4791.</li>
+<li>A few elephant flows can consume whole leaf-spine or spine-leaf links.</li>
+<li>Packet reordering can hurt RDMA unless the NIC, DPU, or transport can handle it.</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="low-entropy-in-rocev2-traffic">Low Entropy in RoCEv2 Traffic</h3><a class="sl-anchor-link" href="#low-entropy-in-rocev2-traffic"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Low Entropy in RoCEv2 Traffic”</span></a></div>
+<p>Entropy means the amount of useful variation in packet header fields that a switch can hash on.</p>
+<p>Traditional ECMP often hashes on a 5-tuple:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Field</th><th>Meaning</th></tr></thead><tbody><tr><td>Source IP</td><td>Sender address</td></tr><tr><td>Destination IP</td><td>Receiver address</td></tr><tr><td>Source port</td><td>Transport source port</td></tr><tr><td>Destination port</td><td>Transport destination port</td></tr><tr><td>Protocol</td><td>TCP, UDP, and so on</td></tr></tbody></table>
+<p>In AI RoCEv2 fabrics, this can be weak because the same GPU pairs may communicate repeatedly, UDP destination port 4791 is common, and the number of flows is often much smaller than in web or enterprise traffic.</p>
+<p>To improve entropy, some implementations can include RoCEv2 Base Transport Header, BTH, fields such as Queue Pair, QP, in the hash calculation.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="elephant-flows-and-flow-collisions">Elephant Flows and Flow Collisions</h3><a class="sl-anchor-link" href="#elephant-flows-and-flow-collisions"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Elephant Flows and Flow Collisions”</span></a></div>
+<p>An elephant flow is a large, bandwidth-heavy flow. A mouse flow is a short, small flow.</p>
+<p>In AI training, elephant flows are common:</p>
+<ul>
+<li>Gradient synchronization</li>
+<li>Activation transfer</li>
+<li>Parameter exchange</li>
+<li>AllReduce, AllGather, ReduceScatter, and AlltoAll communication</li>
+<li>Checkpoint-heavy storage or synchronization traffic</li>
+</ul>
+<p>When multiple elephant flows hash to the same ECMP member, that link can become congested while other equal-cost links remain underused.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    classDef gpu fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef leaf fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef spine fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef hot fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef idle fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    G1[GPU flow 1&#x3C;br/>elephant]:::gpu
+    G2[GPU flow 2&#x3C;br/>elephant]:::gpu
+    LA[Leaf A]:::leaf
+    SB[Spine B&#x3C;br/>hot link]:::hot
+    SA[Spine A&#x3C;br/>unused capacity]:::idle
+    SC[Spine C&#x3C;br/>unused capacity]:::idle
+    LD[Leaf D]:::leaf
+    DST[Destination GPUs]:::gpu
+
+    G1 --> LA
+    G2 --> LA
+    LA ==>|both flows hash here| SB
+    LA -.-> SA
+    LA -.-> SC
+    SB ==> LD
+    SA -.-> LD
+    SC -.-> LD
+    LD --> DST</pre>
+<p>The result is poor fabric utilization, longer tail latency, more ECN/CNP activity, and possibly more PFC pressure.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="ecmp-foundation">ECMP Foundation</h2><a class="sl-anchor-link" href="#ecmp-foundation"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “ECMP Foundation”</span></a></div>
+<p>Equal-Cost Multipathing, ECMP, lets a leaf switch use several equal-cost paths through the spine layer.</p>
+<p>Example:</p>
+<ul>
+<li>GPU1 is attached behind Leaf A.</li>
+<li>GPU2 is attached behind Leaf B.</li>
+<li>Leaf A can reach Leaf B through Spine A, Spine B, or Spine C.</li>
+<li>BGP or an IGP installs equal-cost next hops.</li>
+<li>The ASIC chooses one next hop for each flow.</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="control-plane-view">Control Plane View</h3><a class="sl-anchor-link" href="#control-plane-view"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Control Plane View”</span></a></div>
+<p>The routing control plane tells the switch which next hops are available.</p>
+<p>In a BGP-based IP fabric:</p>
+<ol>
+<li>Leaf B advertises the GPU2 prefix to the spines.</li>
+<li>Spine A, Spine B, and Spine C advertise the same prefix to Leaf A.</li>
+<li>Leaf A sees multiple routes with equal attributes.</li>
+<li>Leaf A programs an ECMP next-hop group in the ASIC.</li>
+</ol>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TB
+    classDef leaf fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef spine fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef route fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    LA[Leaf A&#x3C;br/>ingress]:::leaf
+    SA[Spine A&#x3C;br/>next hop]:::spine
+    SB[Spine B&#x3C;br/>next hop]:::spine
+    SC[Spine C&#x3C;br/>next hop]:::spine
+    LB[Leaf B&#x3C;br/>GPU2 prefix]:::leaf
+    NH[ASIC ECMP group&#x3C;br/>nh1, nh2, nh3]:::route
+
+    LB -->|BGP advertises GPU2 prefix| SA
+    LB -->|BGP advertises GPU2 prefix| SB
+    LB -->|BGP advertises GPU2 prefix| SC
+    SA -->|next-hop self| LA
+    SB -->|next-hop self| LA
+    SC -->|next-hop self| LA
+    LA -.-> NH</pre>
+<p>For a vendor reference topology, see Juniper’s EBGP underlay overview in its IP fabric underlay design guide.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="data-plane-view">Data Plane View</h3><a class="sl-anchor-link" href="#data-plane-view"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Data Plane View”</span></a></div>
+<p>The data plane makes the forwarding decision at packet arrival time. The control plane is not consulted for every packet.</p>
+<p>The switch ASIC:</p>
+<ol>
+<li>Parses packet headers.</li>
+<li>Looks up the destination in the forwarding table.</li>
+<li>Finds an ECMP next-hop group.</li>
+<li>Computes a hash over selected packet fields.</li>
+<li>Maps the hash result to an ECMP bucket.</li>
+<li>Sends the packet toward the chosen spine.</li>
+</ol>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    classDef packet fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef stage fill:#173f32,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef table fill:#173f32,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef out fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    P[Packet from GPU]:::packet
+    H[Header parse&#x3C;br/>IP, UDP, BTH, VLAN/VNI]:::stage
+    L[Route lookup&#x3C;br/>destination prefix]:::table
+    E[ECMP next-hop group&#x3C;br/>Spine A, B, C]:::table
+    X[Hash calculation&#x3C;br/>5-tuple or extended fields]:::stage
+    B[ECMP bucket&#x3C;br/>member selection]:::table
+    O[Chosen spine link]:::out
+
+    P --> H --> L --> E
+    H --> X --> B
+    E --> B --> O</pre>
+<p>For classic ECMP, the ASIC does not need to remember every flow. The hash is deterministic, so packets with the same hash inputs select the same ECMP member while different flows are spread across the available spine links.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="hash-inputs-and-rocev2-bth">Hash Inputs and RoCEv2 BTH</h3><a class="sl-anchor-link" href="#hash-inputs-and-rocev2-bth"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Hash Inputs and RoCEv2 BTH”</span></a></div>
+<p>Possible hash inputs include:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Field</th><th>Usefulness</th></tr></thead><tbody><tr><td>Source IP</td><td>Basic flow separation</td></tr><tr><td>Destination IP</td><td>Basic flow separation</td></tr><tr><td>Source UDP/TCP port</td><td>Helps when varied</td></tr><tr><td>Destination UDP/TCP port</td><td>Weak for RoCEv2 if many packets use UDP 4791</td></tr><tr><td>Protocol</td><td>Basic 5-tuple field</td></tr><tr><td>VLAN/VNI</td><td>Useful in overlays or segmentation</td></tr><tr><td>RoCEv2 BTH QP</td><td>Improves entropy for RDMA traffic</td></tr></tbody></table>
+<p>The chapter’s practical point is that default packet-header hashing may be too coarse for AI training. The switch may need RoCEv2-aware hash fields or a more adaptive load-balancing mechanism.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="load-balancing-mechanisms">Load-Balancing Mechanisms</h2><a class="sl-anchor-link" href="#load-balancing-mechanisms"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Load-Balancing Mechanisms”</span></a></div>
+<p>The chapter compares several mechanisms:</p>
+<p><starlight-image-zoom-zoomable><img src="/network/chap06/assets/proactive-load-balancing-vs-reactive-congestion.svg" alt="Proactive load balancing and reactive congestion management"><button aria-label="Zoom image: Proactive load balancing and reactive congestion management" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<p>Juniper’s elephant-flow discussion separates the problem into proactive and reactive controls. Proactive mechanisms try to avoid congestion before it forms by choosing better paths for flows, flowlets, or selected packets. Reactive mechanisms respond after queues begin to build by marking, pausing, or slowing traffic.</p>
+<p>In this model, SLB, DLB, DLB v2, GLB, TELB, and selective packet spraying are mainly proactive load-balancing tools. ECN, PFC, and DCQCN are reactive congestion-management tools. A RoCEv2 fabric usually needs both: proactive path selection to reduce hot spots, and reactive congestion control to protect loss-sensitive RDMA traffic when queues still build.</p>
+<p><starlight-image-zoom-zoomable><img src="/network/chap06/assets/load-balancing-pyramid.svg" alt="AI fabric load-balancing mechanism pyramid"><button aria-label="Zoom image: AI fabric load-balancing mechanism pyramid" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<p>This pyramid is a simplified, original diagram based on the load-balancing categories discussed in Juniper’s AI data center elephant-flow blog.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Mechanism</th><th>Decision Input</th><th>Main Benefit</th><th>Main Risk</th></tr></thead><tbody><tr><td>SLB</td><td>Packet or flow header hash</td><td>Simple and widely deployed</td><td>Blind to real-time congestion</td></tr><tr><td>DLB</td><td>Header hash plus local link and queue quality</td><td>Better local link utilization</td><td>Does not see remote spine-to-leaf congestion</td></tr><tr><td>GLB</td><td>Local and remote link quality plus topology</td><td>Better end-to-end path choice</td><td>Requires topology awareness and heartbeat scale</td></tr><tr><td>TELB</td><td>Tenant, GPU, QP, port, path policy</td><td>Predictable path control</td><td>Operational and policy complexity</td></tr><tr><td>Per-packet</td><td>Packet-level path choice</td><td>Very high link utilization</td><td>Packet reordering</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h3"><h3 id="static-load-balancing-slb">Static Load Balancing, SLB</h3><a class="sl-anchor-link" href="#static-load-balancing-slb"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Static Load Balancing, SLB”</span></a></div>
+<p>Static Load Balancing is the traditional Ethernet ECMP model. It uses packet or flow header fields to assign a flow to an outgoing ECMP member.</p>
+<p>SLB works well when:</p>
+<ul>
+<li>There are many flows.</li>
+<li>Flow sizes are diverse.</li>
+<li>Header entropy is high.</li>
+<li>Link capacities are symmetric.</li>
+<li>Workloads are not tightly synchronized.</li>
+</ul>
+<p>It is weaker for AI fabrics because it does not consider:</p>
+<ul>
+<li>Current link utilization</li>
+<li>Queue depth</li>
+<li>Flow size</li>
+<li>Remote congestion</li>
+<li>Whether elephant flows collided on the same path</li>
+</ul>
+<p>Example:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Flow</th><th>Assigned Link</th><th align="right">Rate</th></tr></thead><tbody><tr><td>Flow 1</td><td>Leaf A to Spine A</td><td align="right">50 Gbps</td></tr><tr><td>Flow 3</td><td>Leaf A to Spine A</td><td align="right">50 Gbps</td></tr><tr><td>Flow 2</td><td>Leaf A to Spine B</td><td align="right">100 Gbps</td></tr><tr><td>Flow 4</td><td>Leaf A to Spine B</td><td align="right">100 Gbps</td></tr></tbody></table>
+<p>If each leaf-spine link is 200 Gbps:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Link</th><th align="right">Load</th><th align="right">Utilization</th></tr></thead><tbody><tr><td>Leaf A to Spine A</td><td align="right">100 Gbps</td><td align="right">50%</td></tr><tr><td>Leaf A to Spine B</td><td align="right">200 Gbps</td><td align="right">100%</td></tr></tbody></table>
+<p>The number of flows is balanced, but bandwidth is not.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="resilient-symmetric-and-weighted-hashing">Resilient, Symmetric, and Weighted Hashing</h3><a class="sl-anchor-link" href="#resilient-symmetric-and-weighted-hashing"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Resilient, Symmetric, and Weighted Hashing”</span></a></div>
+<p>SLB can be enhanced, but it is still fundamentally hash-based.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Enhancement</th><th>Purpose</th></tr></thead><tbody><tr><td>Resilient hashing</td><td>Reduce flow churn when ECMP members fail or recover</td></tr><tr><td>Symmetric hashing</td><td>Keep forward and reverse directions on the same path</td></tr><tr><td>Weighted ECMP</td><td>Send more hash buckets to higher-capacity or preferred paths</td></tr></tbody></table>
+<p>Resilient hashing commonly uses a fixed bucket table, such as 512 or 1024 buckets. When a link fails, only buckets pointing to that link are remapped, instead of remapping many flows because the ECMP member count changed.</p>
+<p>Weighted ECMP changes bucket distribution:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Next Hop</th><th align="right">Capacity Example</th><th align="right">Weight</th><th align="right">Bucket Share</th></tr></thead><tbody><tr><td>Spine A</td><td align="right">400G</td><td align="right">2</td><td align="right">40%</td></tr><tr><td>Spine B</td><td align="right">400G</td><td align="right">2</td><td align="right">40%</td></tr><tr><td>Spine C</td><td align="right">200G</td><td align="right">1</td><td align="right">20%</td></tr></tbody></table>
+<p>These tools help normal fabrics, but they do not solve the core AI problem when there are only a few low-entropy elephant flows.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="dynamic-load-balancing-dlb">Dynamic Load Balancing, DLB</h3><a class="sl-anchor-link" href="#dynamic-load-balancing-dlb"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Dynamic Load Balancing, DLB”</span></a></div>
+<p>Dynamic Load Balancing improves on SLB by adding local link quality information.</p>
+<p>DLB considers signals such as:</p>
+<ul>
+<li>Link utilization</li>
+<li>Queue depth</li>
+<li>Buffer utilization</li>
+<li>Local congestion</li>
+<li>Recent usage</li>
+</ul>
+<p>The ASIC or packet forwarding engine keeps a link quality table and chooses better local ECMP members for new flows or flowlets.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TB
+    classDef signal fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef asic fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef table fill:#173f32,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef decision fill:#173f32,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    U[Interface utilization]:::signal
+    Q[Queue depth / buffer use]:::signal
+    C[Local congestion signal]:::signal
+    A[ASIC microkernel&#x3C;br/>quality algorithm]:::asic
+    T[Link quality table&#x3C;br/>per ECMP member]:::table
+    D[Forwarding decision&#x3C;br/>choose better local link]:::decision
+
+    U --> A
+    Q --> A
+    C --> A
+    A --> T
+    T --> D</pre>
+<p>With the earlier example, DLB can avoid putting both 100 Gbps flows on the same link. Instead, it can drive both links to roughly 75% utilization.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="dlb-assigned-flow-mode">DLB Assigned-Flow Mode</h3><a class="sl-anchor-link" href="#dlb-assigned-flow-mode"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “DLB Assigned-Flow Mode”</span></a></div>
+<p>Assigned-flow mode pins an active flow to an interface for the flow’s lifetime.</p>
+<p>Benefits:</p>
+<ul>
+<li>Preserves packet ordering</li>
+<li>Works well for short-lived or high-entropy traffic</li>
+<li>Simple behavior after initial assignment</li>
+</ul>
+<p>Limitations:</p>
+<ul>
+<li>A long-lived elephant flow can remain on a path even after conditions change.</li>
+<li>It is less useful when a small number of flows dominate the link.</li>
+<li>It can still leave persistent imbalance in AI workloads.</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="dlb-flowlet-mode">DLB Flowlet Mode</h3><a class="sl-anchor-link" href="#dlb-flowlet-mode"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “DLB Flowlet Mode”</span></a></div>
+<p>Flowlet mode splits one flow into bursts separated by idle gaps.</p>
+<p>The switch monitors inactivity:</p>
+<ul>
+<li>If the idle gap is shorter than the inactivity timer, the flow stays on the same path.</li>
+<li>If the idle gap is longer than the inactivity timer, the next burst can be assigned to a different path.</li>
+</ul>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+sequenceDiagram
+    participant GPU1 as GPU 1
+    participant Leaf as Ingress Leaf
+    participant A as Spine A
+    participant B as Spine B
+    participant GPU2 as GPU 2
+
+    GPU1->>Leaf: Flowlet 1
+    Leaf->>A: Use current best path
+    A->>GPU2: Deliver packets in order
+    Note over GPU1,Leaf: idle gap > inactivity timer
+    GPU1->>Leaf: Flowlet 2
+    Leaf->>B: Reassign to better path
+    B->>GPU2: Deliver next burst</pre>
+<p>Why it fits AI workloads:</p>
+<ul>
+<li>Distributed training often has bursty communication phases.</li>
+<li>A collective may create bursts separated by compute or synchronization gaps.</li>
+<li>Flowlet reassignment improves load distribution while reducing packet reordering risk.</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="dlb-reactive-path-rebalancing">DLB Reactive Path Rebalancing</h3><a class="sl-anchor-link" href="#dlb-reactive-path-rebalancing"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “DLB Reactive Path Rebalancing”</span></a></div>
+<p>Reactive path rebalancing monitors the quality of the path assigned to a long-lived flow.</p>
+<p>If a link degrades and another ECMP member has better quality, the switch may move the flow or a later burst to the better path.</p>
+<p>Trade-off:</p>
+<ul>
+<li>Better response to changing congestion</li>
+<li>Possible short-term packet reordering</li>
+<li>Requires NIC/RDMA stack tolerance if packets from the same logical flow can arrive out of order</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="dlb-per-packet-mode">DLB Per-Packet Mode</h3><a class="sl-anchor-link" href="#dlb-per-packet-mode"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “DLB Per-Packet Mode”</span></a></div>
+<p>DLB per-packet mode sprays packets from the same flow across ECMP members based on the link quality table.</p>
+<p>This can improve link utilization, but it directly creates packet reordering risk. It should be used only when the receiver side can handle the reordering for the relevant RDMA operation or when the traffic class is safe for spraying.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="global-load-balancing-glb">Global Load Balancing, GLB</h2><a class="sl-anchor-link" href="#global-load-balancing-glb"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Global Load Balancing, GLB”</span></a></div>
+<p>DLB only sees local link quality. GLB extends the idea by using remote link quality and topology information to select a better end-to-end path.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="why-local-link-quality-is-not-enough">Why Local Link Quality Is Not Enough</h3><a class="sl-anchor-link" href="#why-local-link-quality-is-not-enough"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Why Local Link Quality Is Not Enough”</span></a></div>
+<p>Consider two ingress leaves sending traffic to the same egress leaf. Each ingress leaf may independently choose Spine A because its local link to Spine A looks good. However, Spine A may have only one congested downlink toward the egress leaf.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    classDef leaf fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef spine fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef hot fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef ok fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    LA[Leaf A&#x3C;br/>ingress]:::leaf
+    LB[Leaf B&#x3C;br/>ingress]:::leaf
+    SA[Spine A]:::spine
+    SB[Spine B]:::ok
+    LD[Leaf D&#x3C;br/>egress]:::leaf
+
+    LA -->|local DLB chooses A| SA
+    LB -->|local DLB chooses A| SA
+    SA ==>|shared congested downlink| LD
+    LA -.-> SB
+    LB -.-> SB
+    SB -.-> LD
+    linkStyle 2 stroke:#e11d48,stroke-width:3px</pre>
+<p>DLB improved the ingress leaf decision, but it did not see the downstream congestion from Spine A to Leaf D.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="remote-link-quality-and-end-to-end-path-quality">Remote Link Quality and End-to-End Path Quality</h3><a class="sl-anchor-link" href="#remote-link-quality-and-end-to-end-path-quality"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Remote Link Quality and End-to-End Path Quality”</span></a></div>
+<p>GLB lets a leaf consider:</p>
+<ul>
+<li>Local leaf-to-spine quality</li>
+<li>Remote spine-to-egress-leaf quality</li>
+<li>Destination location</li>
+<li>Next-hop and next-next-hop topology</li>
+</ul>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TB
+    classDef local fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef remote fill:#173f32,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef topo fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef decision fill:#173f32,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    LQ[Local link quality&#x3C;br/>Leaf to Spine]:::local
+    RQ[Remote link quality&#x3C;br/>Spine to egress Leaf]:::remote
+    TO[Topology mapping&#x3C;br/>destination behind Leaf D]:::topo
+    PQ[End-to-end path quality]:::decision
+    BEST[Choose best path&#x3C;br/>for new flow or flowlet]:::decision
+
+    LQ --> PQ
+    RQ --> PQ
+    TO --> PQ
+    PQ --> BEST</pre>
+<p>GLB can reduce the chance that many elephant flows converge on the same congested spine-to-leaf link. It can also reduce DCQCN triggers and PFC pressure because new traffic can be steered away from degraded paths earlier.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="bgp-nnhn-and-glb-heartbeats">BGP NNHN and GLB Heartbeats</h3><a class="sl-anchor-link" href="#bgp-nnhn-and-glb-heartbeats"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “BGP NNHN and GLB Heartbeats”</span></a></div>
+<p>GLB needs two kinds of information:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Component</th><th>Role</th></tr></thead><tbody><tr><td>Control-plane topology</td><td>Tell a leaf which egress node is behind which next-next-hop</td></tr><tr><td>ASIC-level heartbeat</td><td>Carry fast path quality information between neighboring switches</td></tr></tbody></table>
+<p>BGP Next-Next-Hop Nodes, NNHN, is one proposed way to tell a switch which nodes sit behind a next hop for ECMP forwarding. In a leaf-spine fabric, the next hop may be a spine and the next-next-hop may be the egress leaf.</p>
+<p>Example:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>View from Leaf A</th><th>Meaning</th></tr></thead><tbody><tr><td>Destination GPU2 prefix</td><td>The prefix Leaf A wants to reach</td></tr><tr><td>Next hop</td><td>Spine A, Spine B, or Spine C</td></tr><tr><td>Next-next-hop</td><td>Leaf B, the egress leaf behind those spines</td></tr><tr><td>NNHN topology signal</td><td>Which egress leaves are reachable behind each spine next hop</td></tr></tbody></table>
+<p>Without NNHN-like topology information, Leaf A knows that several spines can reach the destination prefix, but it does not have a clean control-plane mapping from each spine next hop to the egress leaf behind it. With NNHN, the switch can associate a next hop with the downstream node that matters for path quality.</p>
+<p>GLB heartbeats carry link quality information at the forwarding level. The chapter describes heartbeats as change-based, with an example frequency of 20 ms.</p>
+<p>The division of labor is important:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Signal</th><th>Question Answered</th><th>Example</th></tr></thead><tbody><tr><td>BGP NNHN</td><td>Where can this next hop take me?</td><td>Spine A can reach Leaf B</td></tr><tr><td>GLB heartbeat</td><td>How healthy is that path right now?</td><td>Spine A to Leaf B is congested</td></tr><tr><td>GLB decision</td><td>Which path should this flow or flowlet use?</td><td>Prefer Spine C for traffic to Leaf B</td></tr></tbody></table>
+<p>For more detail on the BGP underlay assumptions, NNHN signaling, and GLB operational roles, see <a href="/network/glb-nnhn-bgp-underlay/">Appendix: BGP-based Underlay and GLB NNHN</a>.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    classDef control fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef data fill:#173f32,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef table fill:#173f32,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    BGP[BGP NNHN&#x3C;br/>next-hop and next-next-hop topology]:::control
+    HB[GLB heartbeat&#x3C;br/>link quality signal]:::data
+    PFE[PFE / ASIC&#x3C;br/>path monitor]:::data
+    PQ[Path quality profile&#x3C;br/>simple or compound]:::table
+    LB[GLB forwarding decision]:::table
+
+    BGP --> PFE
+    HB --> PFE
+    PFE --> PQ
+    PQ --> LB</pre>
+<div class="sl-heading-wrapper level-h3"><h3 id="where-glb-can-be-applied">Where GLB Can Be Applied</h3><a class="sl-anchor-link" href="#where-glb-can-be-applied"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Where GLB Can Be Applied”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Fabric Area</th><th>GLB Application</th></tr></thead><tbody><tr><td>Three-stage Clos</td><td>GLB can run across all leaf and spine devices</td></tr><tr><td>Within a pod</td><td>In five-stage Clos, each pod can be treated like its own three-stage GLB domain</td></tr><tr><td>Spine to super-spine</td><td>Useful when upper layers are oversubscribed or congested</td></tr><tr><td>All layers</td><td>Possible, but table scale and heartbeat overhead must be evaluated</td></tr></tbody></table>
+<p>Important constraints:</p>
+<ul>
+<li>GLB is newer than SLB and DLB.</li>
+<li>Vendor implementation matters.</li>
+<li>Heartbeat frequency and scale must be tuned.</li>
+<li>Microburst behavior must be tested.</li>
+<li>Multi-vendor interoperability may still be difficult.</li>
+</ul>
+<hr>
+<aside aria-label="Note" class="starlight-aside starlight-aside--note"><p class="starlight-aside__title" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="starlight-aside__icon"><path d="M12 11C11.7348 11 11.4804 11.1054 11.2929 11.2929C11.1054 11.4804 11 11.7348 11 12V16C11 16.2652 11.1054 16.5196 11.2929 16.7071C11.4804 16.8946 11.7348 17 12 17C12.2652 17 12.5196 16.8946 12.7071 16.7071C12.8946 16.5196 13 16.2652 13 16V12C13 11.7348 12.8946 11.4804 12.7071 11.2929C12.5196 11.1054 12.2652 11 12 11ZM12.38 7.08C12.1365 6.97998 11.8635 6.97998 11.62 7.08C11.4973 7.12759 11.3851 7.19896 11.29 7.29C11.2017 7.3872 11.1306 7.49882 11.08 7.62C11.024 7.73868 10.9966 7.86882 11 8C10.9992 8.13161 11.0245 8.26207 11.0742 8.38391C11.124 8.50574 11.1973 8.61656 11.29 8.71C11.3872 8.79833 11.4988 8.86936 11.62 8.92C11.7715 8.98224 11.936 9.00632 12.099 8.99011C12.2619 8.97391 12.4184 8.91792 12.5547 8.82707C12.691 8.73622 12.8029 8.61328 12.8805 8.46907C12.9582 8.32486 12.9992 8.16378 13 8C12.9963 7.73523 12.8927 7.48163 12.71 7.29C12.6149 7.19896 12.5028 7.12759 12.38 7.08ZM12 2C10.0222 2 8.08879 2.58649 6.4443 3.6853C4.79981 4.78412 3.51809 6.3459 2.76121 8.17317C2.00433 10.0004 1.8063 12.0111 2.19215 13.9509C2.578 15.8907 3.53041 17.6725 4.92894 19.0711C6.32746 20.4696 8.10929 21.422 10.0491 21.8079C11.9889 22.1937 13.9996 21.9957 15.8268 21.2388C17.6541 20.4819 19.2159 19.2002 20.3147 17.5557C21.4135 15.9112 22 13.9778 22 12C22 10.6868 21.7413 9.38642 21.2388 8.17317C20.7363 6.95991 19.9997 5.85752 19.0711 4.92893C18.1425 4.00035 17.0401 3.26375 15.8268 2.7612C14.6136 2.25866 13.3132 2 12 2ZM12 20C10.4178 20 8.87104 19.5308 7.55544 18.6518C6.23985 17.7727 5.21447 16.5233 4.60897 15.0615C4.00347 13.5997 3.84504 11.9911 4.15372 10.4393C4.4624 8.88743 5.22433 7.46197 6.34315 6.34315C7.46197 5.22433 8.88743 4.4624 10.4393 4.15372C11.9911 3.84504 13.5997 4.00346 15.0615 4.60896C16.5233 5.21447 17.7727 6.23984 18.6518 7.55544C19.5308 8.87103 20 10.4177 20 12C20 14.1217 19.1572 16.1566 17.6569 17.6569C16.1566 19.1571 14.1217 20 12 20Z"></path></svg>Note</p><div class="starlight-aside__content"><p>The SLB, DLB, GLB, and DLB v2 terminology in this chapter is mainly an Ethernet/RoCEv2 way to discuss load balancing in an IP fabric. NVIDIA QM97xx switches are Quantum-2 InfiniBand systems, so they should not be mapped one-to-one to Ethernet DLB or GLB terminology.</p><p>The problems are similar: avoid elephant-flow concentration, steer around degraded paths, and improve fabric utilization. The mechanisms are different.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Item</th><th>RoCEv2 Ethernet</th><th>QM97xx InfiniBand</th></tr></thead><tbody><tr><td>Transport</td><td>RoCEv2 over UDP/IP</td><td>Native InfiniBand RDMA</td></tr><tr><td>Basic path selection</td><td>ECMP hash</td><td>InfiniBand routing and Subnet Manager</td></tr><tr><td>Dynamic path avoidance</td><td>Vendor DLB, GLB, or DLB v2 features</td><td>Adaptive routing</td></tr><tr><td>Congestion control</td><td>ECN, PFC, and DCQCN</td><td>InfiniBand congestion control</td></tr><tr><td>QoS unit</td><td>Ethernet priority, DSCP, and queues</td><td>VL, SL, and QoS</td></tr><tr><td>AI-specific functions</td><td>RoCE-aware hashing or selective packet spraying</td><td>SHARP, adaptive routing, and congestion control</td></tr></tbody></table><p>QM97xx addresses many of the same AI fabric goals, but through InfiniBand-native mechanisms rather than Ethernet ECMP extensions.</p></div></aside>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="traffic-engineering-based-load-balancing-telb">Traffic Engineering-Based Load Balancing, TELB</h2><a class="sl-anchor-link" href="#traffic-engineering-based-load-balancing-telb"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Traffic Engineering-Based Load Balancing, TELB”</span></a></div>
+<p>Traffic Engineering-Based Load Balancing uses policy to steer AI traffic over specific logical paths.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="why-telb-exists">Why TELB Exists</h3><a class="sl-anchor-link" href="#why-telb-exists"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Why TELB Exists”</span></a></div>
+<p>SLB, DLB, and GLB still choose paths dynamically based on hashing and quality. TELB is useful when an operator wants more deterministic behavior.</p>
+<p>TELB can be useful for:</p>
+<ul>
+<li>Multi-tenant AI fabrics</li>
+<li>Predictable job performance</li>
+<li>Tenant isolation</li>
+<li>Steering a tenant, GPU, QP range, or UDP port range to a path color</li>
+<li>Keeping packet order by limiting path diversity for selected traffic</li>
+<li>Using backup path IDs after failures</li>
+</ul>
+<p>The chapter notes that traditional service-provider traffic engineering technologies such as MPLS-TE or SR-MPLS are mature, but may be too heavy or expensive for AI data center fabrics. AI fabrics often need a lightweight pure-IP form of traffic engineering.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="path-color-tenant-gpu-and-qp-pinning">Path Color, Tenant, GPU, and QP Pinning</h3><a class="sl-anchor-link" href="#path-color-tenant-gpu-and-qp-pinning"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Path Color, Tenant, GPU, and QP Pinning”</span></a></div>
+<p>TELB can match traffic characteristics and assign a path color.</p>
+<p>Possible match inputs:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Match Input</th><th>Example Use</th></tr></thead><tbody><tr><td>Tenant ID</td><td>Put one training job on a dedicated spine set</td></tr><tr><td>GPU ID</td><td>Map GPU traffic to a logical fabric color</td></tr><tr><td>QP range</td><td>Pin RoCEv2 QP ranges to path colors</td></tr><tr><td>Source UDP port range</td><td>Use port allocation to represent a job or tenant</td></tr><tr><td>Ingress interface</td><td>Tie a server rail or NIC to a logical path group</td></tr></tbody></table>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    classDef match fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef policy fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef path fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef backup fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    T[Tenant / job ID]:::match
+    G[GPU ID]:::match
+    Q[QP or UDP port range]:::match
+    I[Ingress interface]:::match
+    P[Policy lookup&#x3C;br/>path color]:::policy
+    B[Backup path color]:::backup
+    S[Selected spine set&#x3C;br/>logical fabric color]:::path
+
+    T --> P
+    G --> P
+    Q --> P
+    I --> P
+    P --> S
+    P --> B</pre>
+<div class="sl-heading-wrapper level-h3"><h3 id="bgp-deterministic-path-forwarding">BGP Deterministic Path Forwarding</h3><a class="sl-anchor-link" href="#bgp-deterministic-path-forwarding"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “BGP Deterministic Path Forwarding”</span></a></div>
+<p>BGP Deterministic Path Forwarding, BGP-DPF, is described as one way to deliver TELB. The idea is to use BGP policy to pin traffic characteristics to colored paths.</p>
+<p>Example policy model:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>GPU ID</th><th>QP Range</th><th>Tenant Port Range</th><th>Primary Path Color</th><th>Backup Path Color</th></tr></thead><tbody><tr><td>GPU 0</td><td>1000-1999</td><td>Tenant 1 ports</td><td>Blue</td><td>Green</td></tr><tr><td>GPU 1</td><td>2000-2999</td><td>Tenant 2 ports</td><td>Green</td><td>Blue</td></tr><tr><td>Any</td><td>Storage sync range</td><td>Red</td><td>Blue</td><td></td></tr></tbody></table>
+<p>The ASIC must be able to apply the policy quickly and switch to a backup path when a link or node fails.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="controller-based-telb">Controller-Based TELB</h3><a class="sl-anchor-link" href="#controller-based-telb"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Controller-Based TELB”</span></a></div>
+<p>A centralized controller can combine fabric telemetry with scheduler intent.</p>
+<p>Inputs:</p>
+<ul>
+<li>Tenant and job identity</li>
+<li>GPU allocation</li>
+<li>Leaf/spine utilization</li>
+<li>Queue depth</li>
+<li>ECN, PFC, and DCQCN signals</li>
+<li>Link or node failure events</li>
+<li>Policy objectives</li>
+</ul>
+<p>Outputs:</p>
+<ul>
+<li>Path color assignment</li>
+<li>BGP-DPF or policy updates</li>
+<li>Monitoring and alerting</li>
+<li>Automated remediation</li>
+</ul>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TB
+    classDef sched fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef telemetry fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef controller fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef fabric fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    S[AI scheduler&#x3C;br/>tenant, job, GPU placement]:::sched
+    T[Fabric telemetry&#x3C;br/>utilization, queues, ECN/PFC/DCQCN]:::telemetry
+    C[Controller&#x3C;br/>path policy and remediation]:::controller
+    F[AI fabric&#x3C;br/>BGP-DPF / ACL / path colors]:::fabric
+
+    S --> C
+    T --> C
+    C --> F
+    F --> T</pre>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="per-packet-load-balancing">Per-Packet Load Balancing</h2><a class="sl-anchor-link" href="#per-packet-load-balancing"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Per-Packet Load Balancing”</span></a></div>
+<p>Per-packet load balancing treats packets independently rather than pinning a whole flow to one path.</p>
+<p>Benefits:</p>
+<ul>
+<li>Uses ECMP members more evenly.</li>
+<li>Can break a single elephant flow across multiple paths.</li>
+<li>Can improve bandwidth utilization when flow entropy is low.</li>
+</ul>
+<p>Main risk:</p>
+<ul>
+<li>Packets can arrive out of order.</li>
+</ul>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    classDef packet fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef leaf fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef spine fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef dest fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    SRC[One elephant flow]:::packet
+    L[Ingress leaf]:::leaf
+    A[Spine A&#x3C;br/>packet A]:::spine
+    B[Spine B&#x3C;br/>packet B]:::spine
+    C[Spine C&#x3C;br/>packet C]:::spine
+    D[Destination NIC&#x3C;br/>reorder needed]:::dest
+
+    SRC --> L
+    L --> A --> D
+    L --> B --> D
+    L --> C --> D</pre>
+<div class="sl-heading-wrapper level-h3"><h3 id="random-spray">Random Spray</h3><a class="sl-anchor-link" href="#random-spray"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Random Spray”</span></a></div>
+<p>Random spray sends packets across ECMP members randomly or round-robin.</p>
+<p>It does not check link quality before sending each packet. It is simple, but it can still send packets to poor-quality links.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="selective-packet-spraying">Selective Packet Spraying</h3><a class="sl-anchor-link" href="#selective-packet-spraying"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Selective Packet Spraying”</span></a></div>
+<p>Selective packet spraying applies per-packet mode only to traffic that can tolerate or handle reordering.</p>
+<p>The switch can match packet characteristics such as:</p>
+<ul>
+<li>RoCEv2 opcode</li>
+<li>BTH fields</li>
+<li>QP</li>
+<li>ACL match</li>
+<li>Tenant or traffic class</li>
+</ul>
+<p>The chapter notes that some modern 400G NICs and DPUs can handle reordering for selected RDMA operations, especially certain write operations. That makes selective spraying more practical than spraying everything.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TB
+    classDef flow fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef match fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef normal fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef spray fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    F1[Flow 1]:::flow
+    F2[Flow 2]:::flow
+    ACL{Packet header&#x3C;br/>matches selective spraying rule?}:::match
+    N[Default load balancing&#x3C;br/>SLB / DLB / flowlet]:::normal
+    P[Per-packet spraying&#x3C;br/>only for safe traffic]:::spray
+
+    F1 --> ACL
+    F2 --> ACL
+    ACL -->|No| N
+    ACL -->|Yes| P</pre>
+<p>Selective spraying requires:</p>
+<ul>
+<li>ASIC support for parsing the required fields</li>
+<li>ACL or TCAM resources</li>
+<li>Clear knowledge of NIC reordering capability</li>
+<li>Per-traffic-class policy</li>
+<li>Validation with real RDMA workloads</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="packet-reordering">Packet Reordering</h3><a class="sl-anchor-link" href="#packet-reordering"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Packet Reordering”</span></a></div>
+<p>When packets take different spines, they may experience different queueing and processing delays. Packet B can arrive before packet A even if A was sent first.</p>
+<p>The receiver then needs to:</p>
+<ol>
+<li>Buffer out-of-order packets.</li>
+<li>Identify missing sequence positions.</li>
+<li>Reorder packets.</li>
+<li>Forward in-order data to the application or RDMA operation.</li>
+</ol>
+<p>Small amounts of reordering may be manageable. Under congestion, the number of out-of-order packets can grow and can hurt latency, throughput, buffer usage, and CPU/NIC/DPU work.</p>
+<p>The practical rule:</p>
+<blockquote>
+<p>Per-packet load balancing is powerful, but it should be enabled only where the transport, NIC, and workload semantics can handle the reordering.</p>
+</blockquote>
+<div class="sl-heading-wrapper level-h3"><h3 id="mrc-as-a-modern-packet-spraying-example">MRC as a Modern Packet-Spraying Example</h3><a class="sl-anchor-link" href="#mrc-as-a-modern-packet-spraying-example"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “MRC as a Modern Packet-Spraying Example”</span></a></div>
+<p>OpenAI’s MRC, Multipath Reliable Connection, is a recent example of packet spraying becoming part of the transport design rather than only a switch load-balancing mode.</p>
+<p><starlight-image-zoom-zoomable><img src="/network/chap06/assets/mrc-packet-spraying.svg" alt="MRC packet spraying compared with traditional single-path forwarding"><button aria-label="Zoom image: MRC packet spraying compared with traditional single-path forwarding" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<p>This is an original diagram based on OpenAI’s MRC article and the MRC/SRv6 paper.</p>
+<p>Traditional ECMP usually keeps one flow or RDMA transfer on one path:</p>
+<div class="expressive-code"><link rel="stylesheet" href="/_astro/ec.v4551.css"><script type="module" src="/_astro/ec.0vx5m.js"></script><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">One flow or transfer -> one path</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="One flow or transfer -> one path"><div></div></button></div></figure></div>
+<p>This preserves ordering, but it also means a single elephant transfer can be trapped behind one path’s bandwidth and congestion state.</p>
+<p>MRC changes the model:</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">One RDMA transfer -> many packets -> many paths</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="One RDMA transfer -> many packets -> many paths"><div></div></button></div></figure></div>
+<p>MRC extends RoCE and sprays packets from a single transfer across many paths in a multi-plane network. Packets may arrive out of order, but MRC packets carry enough placement information for the destination to deliver data to the correct memory location. In other words, MRC treats out-of-order delivery as an expected transport behavior, not as an accidental side effect.</p>
+<p>The packet load-balancing view is:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Mechanism</th><th>Load-Balancing Unit</th><th>Main Benefit</th><th>Main Burden</th></tr></thead><tbody><tr><td>Per-flow ECMP</td><td>Flow</td><td>Simple ordering</td><td>Elephant flow can be stuck on one path</td></tr><tr><td>Flowlet DLB</td><td>Burst or flowlet</td><td>Better distribution with lower reordering risk</td><td>Inactivity timer must match the workload</td></tr><tr><td>Per-packet spraying</td><td>Packet</td><td>High link utilization</td><td>Receiver must handle reordering</td></tr><tr><td>MRC</td><td>Packets within one reliable transfer</td><td>One transfer can use many paths safely</td><td>Transport must handle placement, reliability, and path health</td></tr></tbody></table>
+<p>MRC also adapts away from congested or failed paths. If a path looks unhealthy, MRC can stop using it, retransmit affected data, and probe for recovery. It also uses packet trimming: when congestion would otherwise cause a drop, a switch can trim the payload and forward header information so the destination can request retransmission more explicitly.</p>
+<p>The practical takeaway is that MRC is not just “turning on per-packet mode.” It combines packet spraying, out-of-order-safe delivery, multipath reliability, path failure handling, and congestion signaling into one transport-level design.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="mechanism-comparison">Mechanism Comparison</h2><a class="sl-anchor-link" href="#mechanism-comparison"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Mechanism Comparison”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Feature</th><th>SLB</th><th>DLB</th><th>GLB</th><th>TELB</th></tr></thead><tbody><tr><td>Packet or flow header hash</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Policy-dependent</td></tr><tr><td>Local link bandwidth awareness</td><td>No</td><td>Yes</td><td>Yes</td><td>Optional</td></tr><tr><td>Queue size awareness</td><td>No</td><td>Yes</td><td>Yes</td><td>Optional</td></tr><tr><td>Remote link quality</td><td>No</td><td>No</td><td>Yes</td><td>Optional</td></tr><tr><td>RoCEv2 BTH fields</td><td>Possible</td><td>Possible</td><td>Possible</td><td>Useful</td></tr><tr><td>Fabric telemetry</td><td>No</td><td>Local</td><td>Remote heartbeat</td><td>Controller or policy</td></tr><tr><td>Path determinism</td><td>Low</td><td>Medium</td><td>Medium</td><td>High</td></tr><tr><td>Reordering risk</td><td>Low</td><td>Low to medium</td><td>Low to medium</td><td>Usually controlled</td></tr><tr><td>Operational complexity</td><td>Low</td><td>Medium</td><td>High</td><td>High</td></tr><tr><td>Industry adoption</td><td>High</td><td>Medium</td><td>Lower</td><td>Lower</td></tr></tbody></table>
+<p>Recommended mental model:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Workload or Fabric Condition</th><th>Likely Mechanism</th></tr></thead><tbody><tr><td>Many small diverse flows</td><td>SLB may be enough</td></tr><tr><td>AI training with local link imbalance</td><td>DLB, especially flowlet mode</td></tr><tr><td>Congestion hidden behind spines</td><td>GLB</td></tr><tr><td>Multi-tenant fabric needing predictable path policy</td><td>TELB or BGP-DPF</td></tr><tr><td>One elephant flow must use many links</td><td>Selective per-packet spraying</td></tr></tbody></table>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="operational-validation-checklist">Operational Validation Checklist</h2><a class="sl-anchor-link" href="#operational-validation-checklist"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Operational Validation Checklist”</span></a></div>
+<p>Before relying on a load-balancing design, validate it under AI-like traffic.</p>
+<p>Checklist:</p>
+<ul>
+<li>Confirm which fields are used in the hash: 5-tuple, VLAN/VNI, RoCEv2 BTH, QP.</li>
+<li>Measure per-link utilization across leaf-spine and spine-leaf links.</li>
+<li>Check whether elephant flows collide on the same ECMP member.</li>
+<li>Test DLB quality table behavior under mixed 50G, 100G, 200G, 400G, or 800G flows.</li>
+<li>Tune flowlet inactivity timers against actual collective traffic gaps.</li>
+<li>Validate packet reordering counters on NICs and DPUs.</li>
+<li>Verify ECN, CNP, PFC, and DCQCN behavior during congestion.</li>
+<li>Test link and node failure convergence.</li>
+<li>Confirm whether GLB heartbeat scale and frequency are acceptable.</li>
+<li>For TELB, validate tenant/job policy, backup path behavior, and controller failure behavior.</li>
+<li>Run workload-level tests such as NCCL collectives, all-to-all patterns, storage synchronization, and checkpoint bursts.</li>
+</ul>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TB
+    classDef observe fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef test fill:#173f32,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef signal fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef decision fill:#173f32,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef fix fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    H[Inspect hash fields&#x3C;br/>and ASIC support]:::observe
+    W[Generate AI-like workload&#x3C;br/>NCCL, RDMA, checkpoint]:::test
+    L[Observe link and queue balance]:::signal
+    R[Observe reordering&#x3C;br/>ECN, CNP, PFC, DCQCN]:::signal
+    D{Does fabric behavior&#x3C;br/>match workload target?}:::decision
+    A[Accept operating envelope]:::observe
+    F[Retune hash, DLB timer,&#x3C;br/>GLB, TELB, or spraying policy]:::fix
+
+    H --> W --> L --> R --> D
+    D -->|Yes| A
+    D -->|No| F
+    F --> W</pre>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="chapter-summary">Chapter Summary</h2><a class="sl-anchor-link" href="#chapter-summary"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Chapter Summary”</span></a></div>
+<p>Efficient load balancing is central to Ethernet AI fabric performance.</p>
+<p>The main takeaways:</p>
+<ul>
+<li>AI training traffic often has low entropy and large elephant flows.</li>
+<li>ECMP provides multiple paths, but default per-flow hashing can create hot spots.</li>
+<li>SLB is simple and common, but it does not understand real-time link utilization or queue depth.</li>
+<li>Resilient, symmetric, and weighted hashing improve SLB operations but do not fully solve AI low-entropy traffic.</li>
+<li>DLB uses local link quality and queue state to improve local path choice.</li>
+<li>Flowlet mode is often a practical compromise because it improves path distribution while limiting packet reordering.</li>
+<li>GLB adds remote link quality and topology awareness, helping avoid congestion beyond the first hop.</li>
+<li>BGP NNHN and GLB heartbeats are mechanisms for distributing topology and path quality information.</li>
+<li>TELB provides deterministic path control for tenants, jobs, GPUs, QPs, or port ranges.</li>
+<li>Per-packet load balancing can maximize link utilization but requires careful handling of packet reordering.</li>
+<li>Selective packet spraying is more practical than spraying all traffic because it can be limited to RDMA operations and NICs that support reordering.</li>
+<li>MRC shows a modern transport-level approach where packet spraying, out-of-order-safe delivery, reliability, and path health are designed together.</li>
+</ul>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="key-terms">Key Terms</h2><a class="sl-anchor-link" href="#key-terms"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Key Terms”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Term</th><th>Meaning</th></tr></thead><tbody><tr><td>ECMP</td><td>Equal-Cost Multipathing; forwarding across multiple equal-cost next hops</td></tr><tr><td>SLB</td><td>Static Load Balancing; hash-based path selection without real-time congestion awareness</td></tr><tr><td>DLB</td><td>Dynamic Load Balancing; path choice based on local link and queue quality</td></tr><tr><td>GLB</td><td>Global Load Balancing; path choice using local and remote link quality plus topology</td></tr><tr><td>TELB</td><td>Traffic Engineering-Based Load Balancing; policy-driven path control</td></tr><tr><td>BGP-DPF</td><td>BGP Deterministic Path Forwarding; BGP-based mechanism for deterministic path selection</td></tr><tr><td>NNHN</td><td>Next-Next-Hop Nodes; BGP capability for signaling nodes behind a next hop</td></tr><tr><td>Flow entropy</td><td>Header variation available for hashing</td></tr><tr><td>Elephant flow</td><td>Large bandwidth-heavy flow</td></tr><tr><td>Mouse flow</td><td>Small short-lived flow</td></tr><tr><td>Flowlet</td><td>A burst within a flow separated by an idle gap</td></tr><tr><td>Inactivity timer</td><td>Timer used to decide whether the next burst can be reassigned</td></tr><tr><td>Packet spraying</td><td>Sending packets from the same flow across multiple paths</td></tr><tr><td>MRC</td><td>Multipath Reliable Connection; OpenAI’s RoCE-based transport that sprays packets across many paths and handles placement, reliability, and path health</td></tr><tr><td>RoCEv2 BTH</td><td>RoCEv2 Base Transport Header</td></tr><tr><td>QP</td><td>RDMA Queue Pair</td></tr><tr><td>TCAM</td><td>Ternary Content-Addressable Memory used for fast match rules</td></tr><tr><td>DCQCN</td><td>Data Center Quantized Congestion Notification</td></tr><tr><td>PFC</td><td>Priority Flow Control</td></tr><tr><td>CNP</td><td>Congestion Notification Packet</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h2"><h2 id="qa">Q&#x26;A</h2><a class="sl-anchor-link" href="#qa"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Q&#x26;A”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="1-what-is-the-role-of-ecmp-in-aiml-data-center-fabrics">1. What is the role of ECMP in AI/ML data center fabrics?</h3><a class="sl-anchor-link" href="#1-what-is-the-role-of-ecmp-in-aiml-data-center-fabrics"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “1. What is the role of ECMP in AI/ML data center fabrics?”</span></a></div>
+<p>ECMP gives the fabric multiple equal-cost paths between leaf switches, usually through several spine switches. The control plane, such as BGP or an IGP, installs equal-cost next hops, and the switch ASIC maps packets or flows to one of those next hops using selected packet fields.</p>
+<p>ECMP should be treated as the baseline multipathing mechanism, not the complete AI load-balancing solution. It gives the network path diversity, but it does not automatically guarantee bandwidth balance. If several large RoCEv2 flows hash to the same spine, the fabric can have one hot link and several idle links even though the topology looks non-blocking on paper.</p>
+<p>The important point is that ECMP balances hash buckets, not bytes. That distinction matters in AI fabrics because a few elephant flows can dominate total bandwidth. ECMP is therefore necessary, but AI clusters usually need better entropy, DLB, GLB, TELB, or selective spraying on top of basic ECMP behavior.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="2-why-is-static-load-balancing-often-insufficient-for-ai-workloads">2. Why is static load balancing often insufficient for AI workloads?</h3><a class="sl-anchor-link" href="#2-why-is-static-load-balancing-often-insufficient-for-ai-workloads"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “2. Why is static load balancing often insufficient for AI workloads?”</span></a></div>
+<p>SLB assigns flows based on header hashes. It does not consider flow size, link utilization, queue depth, or remote congestion.</p>
+<p>That is acceptable when there are many small flows with diverse headers. It becomes weak when the workload has a small number of synchronized, high-bandwidth RoCEv2 flows. In that case, the number of flows may look balanced while the number of bits per second is badly skewed.</p>
+<p>The key factors are entropy and elephant flows. RoCEv2 traffic often shares common fields, such as UDP destination port 4791, and may not expose enough useful entropy to a default 5-tuple hash. If two or three elephant flows collide on the same ECMP member, the impact is not a minor statistical imbalance. It can create queue buildup, ECN/CNP activity, PFC pressure, and longer collective completion time.</p>
+<p>So the problem with SLB is not that hashing is wrong. The problem is that static hashing is blind to traffic volume and fabric state.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="3-how-does-dlb-improve-on-slb">3. How does DLB improve on SLB?</h3><a class="sl-anchor-link" href="#3-how-does-dlb-improve-on-slb"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3. How does DLB improve on SLB?”</span></a></div>
+<p>DLB adds local link quality information. Instead of relying only on the hash, the switch can consider local interface utilization, queue depth, buffer state, and recent usage.</p>
+<p>This allows the switch to steer new flows, flowlets, or in some modes packets toward less congested local ECMP members. The practical improvement is that the ingress leaf is no longer completely blind. If one uplink has a deep queue and another uplink is clean, DLB can prefer the cleaner member.</p>
+<p>The limitation is equally important. DLB usually sees the local leaf-to-spine condition well, but it may not see the downstream condition behind the spine. A path can look healthy from the ingress leaf to the spine while the spine-to-egress-leaf link is congested. That is why DLB improves local utilization but does not fully solve end-to-end path quality.</p>
+<p>In practice, I would describe DLB as the first move from static hashing toward state-aware forwarding. It is useful, but it still has a local view.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="4-why-is-flowlet-mode-useful-for-ai-training-traffic">4. Why is flowlet mode useful for AI training traffic?</h3><a class="sl-anchor-link" href="#4-why-is-flowlet-mode-useful-for-ai-training-traffic"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “4. Why is flowlet mode useful for AI training traffic?”</span></a></div>
+<p>Flowlet mode uses natural pauses between bursts as reassignment points. If the idle gap exceeds the inactivity timer, the next burst can move to a better path.</p>
+<p>This is useful because AI training often alternates compute and communication phases. Collective operations can create bursts separated by short idle gaps. Flowlet mode uses those gaps as safer boundaries for moving traffic to a different path.</p>
+<p>The key trade-off is between load distribution and packet ordering. Per-packet spraying gives the most aggressive link utilization, but it can reorder packets. Pure per-flow hashing preserves ordering, but it can create hot spots. Flowlet mode sits between those extremes. It can move a later burst to a better path while reducing the chance that packets from the same burst arrive out of order.</p>
+<p>Flowlet mode is a practical compromise. It is not magic; the inactivity timer must match the workload. If the timer is too short, the fabric may reorder packets. If it is too long, the mechanism behaves too much like static per-flow hashing.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="5-what-problem-does-glb-solve">5. What problem does GLB solve?</h3><a class="sl-anchor-link" href="#5-what-problem-does-glb-solve"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “5. What problem does GLB solve?”</span></a></div>
+<p>GLB solves the problem where local path choice looks good but the downstream path is congested. For example, several leaves may choose the same spine, and that spine may have a congested downlink to the egress leaf.</p>
+<p>The classic example is two ingress leaves sending traffic to the same egress leaf. Each ingress leaf may independently choose Spine A because its local uplink to Spine A looks good. But Spine A may have a congested downlink to the egress leaf. Local DLB cannot see that full picture, so it keeps choosing a path that is locally good and globally bad.</p>
+<p>GLB adds remote link quality and topology information. Instead of asking only “which local uplink is good?”, the ingress leaf can ask “which end-to-end path toward the egress leaf is good?” That is the real value of GLB.</p>
+<p>The key point is that GLB attacks hidden downstream congestion. It is especially relevant in Clos fabrics where many ingress leaves can converge on the same spine-to-leaf segment. If GLB works well, it can reduce queue buildup before ECN, CNP, or PFC become the main line of defense.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="6-what-are-bgp-nnhn-and-glb-heartbeats-used-for">6. What are BGP NNHN and GLB heartbeats used for?</h3><a class="sl-anchor-link" href="#6-what-are-bgp-nnhn-and-glb-heartbeats-used-for"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “6. What are BGP NNHN and GLB heartbeats used for?”</span></a></div>
+<p>BGP NNHN tells a switch which next-next-hop nodes are behind a next hop. In a Clos fabric, this helps a leaf understand which egress leaf is behind a spine.</p>
+<p>GLB heartbeats carry fast path quality information at the forwarding level. Together, topology information and heartbeat quality let the ASIC build path quality profiles and choose better paths.</p>
+<p>The clean way to explain this is:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Signal</th><th>Question Answered</th></tr></thead><tbody><tr><td>BGP NNHN</td><td>Where can this next hop take me?</td></tr><tr><td>GLB heartbeat</td><td>How healthy is that path right now?</td></tr><tr><td>GLB decision</td><td>Which path should this flow or flowlet use?</td></tr></tbody></table>
+<p>For example, Leaf A may know that Spine A, Spine B, and Spine C can all reach a GPU prefix. NNHN-like topology signaling tells Leaf A which egress leaf sits behind those spines. Heartbeats then tell Leaf A whether the relevant downstream path is healthy or degraded.</p>
+<p>It is important to separate the two. NNHN is not the congestion signal. It is topology context. Heartbeats are not the routing protocol. They are fast path-quality signals. GLB needs both.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="7-why-would-an-operator-use-telb">7. Why would an operator use TELB?</h3><a class="sl-anchor-link" href="#7-why-would-an-operator-use-telb"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “7. Why would an operator use TELB?”</span></a></div>
+<p>TELB is useful when the operator needs deterministic path behavior. It can pin tenant, job, GPU, QP, or port-range traffic to specific path colors or spine sets.</p>
+<p>This is especially useful in multi-tenant AI fabrics where predictable job performance and isolation matter. For example, one tenant or training job can be assigned to one set of spine paths, while another tenant uses a different path color. A storage or checkpoint traffic class may also be steered differently from GPU collective traffic.</p>
+<p>The difference from DLB or GLB is intent. DLB and GLB are dynamic mechanisms that react to quality signals. TELB is more policy-driven. It lets the operator express “this class of traffic should use this logical path set” rather than leaving every choice to hashing and local quality.</p>
+<p>The trade-off is operational complexity. TELB needs clean policy, match criteria, backup path behavior, and failure handling. If the policy is wrong, the network can become less balanced, not more balanced. I would use TELB when isolation, predictability, or tenant control is more important than maximum automatic path freedom.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="8-what-is-the-main-trade-off-of-per-packet-load-balancing">8. What is the main trade-off of per-packet load balancing?</h3><a class="sl-anchor-link" href="#8-what-is-the-main-trade-off-of-per-packet-load-balancing"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “8. What is the main trade-off of per-packet load balancing?”</span></a></div>
+<p>Per-packet load balancing can spread a single elephant flow across many ECMP members and achieve excellent link utilization.</p>
+<p>The trade-off is packet reordering. Packets sent across different spines can arrive in a different order because the paths may have different queueing, serialization, or congestion conditions. The receiver NIC, DPU, RDMA stack, or application must be able to buffer and reorder safely.</p>
+<p>In AI fabrics, this is a serious design question, not a minor implementation detail. Some traffic and operations may tolerate reordering well if the NIC or transport has the right support. Other traffic may suffer from retransmission, buffering pressure, latency spikes, or reduced throughput.</p>
+<p>Per-packet mode is powerful, but it moves complexity to the receiver and validation process. It should not be enabled broadly just because it improves link utilization in a synthetic test. Reordering counters, NIC behavior, tail latency, and JCT should be validated under real NCCL or RDMA workloads.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="9-why-is-selective-packet-spraying-safer-than-spraying-all-traffic">9. Why is selective packet spraying safer than spraying all traffic?</h3><a class="sl-anchor-link" href="#9-why-is-selective-packet-spraying-safer-than-spraying-all-traffic"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “9. Why is selective packet spraying safer than spraying all traffic?”</span></a></div>
+<p>Selective packet spraying applies per-packet mode only to traffic that matches safe criteria, such as specific RoCEv2 opcodes, QP ranges, or traffic classes.</p>
+<p>This lets the operator use packet spraying where the NIC can handle reordering, while leaving other traffic on SLB, DLB, or flowlet mode. It is safer because it acknowledges that not every packet has the same ordering tolerance.</p>
+<p>For RoCEv2, the useful idea is to look beyond the basic IP and UDP header. A RoCE-aware device may use BTH fields, QP information, opcode information, or traffic class policy to decide whether a flow is eligible for more aggressive balancing.</p>
+<p>Selective spraying is a form of risk containment. The network gets some of the bandwidth benefit of per-packet distribution without turning the entire fabric into a reordering experiment. The hard requirement is evidence: the selected traffic class must be tested on the actual NICs, firmware, drivers, and application stack.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="10-how-should-load-balancing-mechanisms-be-chosen">10. How should load-balancing mechanisms be chosen?</h3><a class="sl-anchor-link" href="#10-how-should-load-balancing-mechanisms-be-chosen"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “10. How should load-balancing mechanisms be chosen?”</span></a></div>
+<p>Start from workload behavior and hardware capability.</p>
+<p>If traffic has high entropy and many small flows, SLB may be enough. If AI training traffic creates local imbalance, DLB and flowlet mode are usually the next mechanisms to evaluate. If congestion appears beyond the first hop, GLB becomes relevant because the ingress leaf needs remote path-quality information. If the fabric is multi-tenant or needs predictable path control, TELB can add policy-based steering. If one elephant flow must use many links, selective packet spraying may be useful, but only after validating reordering support.</p>
+<p>I would not choose the mechanism from a feature checklist. I would choose it from observed failure modes:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Symptom</th><th>Likely Direction</th></tr></thead><tbody><tr><td>Hash collisions among elephant flows</td><td>Better hash inputs, DLB, or flowlet mode</td></tr><tr><td>Local uplink imbalance</td><td>DLB</td></tr><tr><td>Downstream spine-to-leaf congestion</td><td>GLB</td></tr><tr><td>Tenant or job interference</td><td>TELB or path coloring</td></tr><tr><td>Single flow cannot fill enough paths</td><td>Selective packet spraying</td></tr></tbody></table>
+<p>The practical answer is to start simple, measure, and then add sophistication where the data proves it is needed. Every mechanism adds its own operational cost: timers, telemetry, policy, heartbeat scale, reordering validation, or vendor-specific behavior.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="references">References</h2><a class="sl-anchor-link" href="#references"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “References”</span></a></div>
+<ul>
+<li><a href="https://www.broadcom.com/products/ethernet-connectivity/switching/strataxgs/bcm78900-series">Broadcom Tomahawk 5 Switch Series</a></li>
+<li><a href="https://www.broadcom.com/blog/cognitive-routing-in-the-tomahawk-5-data-center-switch">Broadcom: Cognitive Routing in the Tomahawk 5 Data Center Switch</a></li>
+<li><a href="https://www.cisco.com/c/en/us/products/collateral/switches/catalyst-9300-series-switches/nb-06-cat9300-architecture-cte-en.html">Cisco Catalyst 9300 Series Switches Architecture White Paper</a></li>
+<li><a href="https://www.cisco.com/c/en/us/solutions/collateral/silicon-one/evolve-ai-ml-network-silicon-one.html">Cisco: Evolve your AI/ML Network with Cisco Silicon One</a></li>
+<li><a href="https://www.cisco.com/c/dam/global/en_uk/products/switches/cisco_nexus_9300_ex_platform_switches_white_paper_uki.pdf">Cisco Nexus 9300-EX Platform Switches Architecture White Paper</a></li>
+<li><a href="https://datatracker.ietf.org/doc/draft-wang-idr-next-next-hop-nodes/">IETF Datatracker: BGP Next-Next Hop Nodes</a></li>
+<li><a href="https://blogs.juniper.net/en-us/industry-solutions-and-trends/managing-the-elephant-in-the-room-for-ai-data-centers">Juniper Blog: Managing the Elephant in the Room for AI Data Centers</a></li>
+<li><a href="https://www.juniper.net/documentation/us/en/software/nce/sg-005-data-center-fabric/topics/task/ip-fabric-underlay-cloud-dc-configuring.html">Juniper: IP Fabric Underlay Network Design and Implementation</a></li>
+<li><a href="https://documentation.nokia.com/srlinux/26-3/books/routing-protocols/ip-ecmp-load-balanc.html">Nokia SR Linux: IP ECMP Load Balancing</a></li>
+<li><a href="https://docs.nvidia.com/networking/display/onyxv31040100/ip+routing+overview">NVIDIA Onyx: IP Routing Overview</a></li>
+<li><a href="https://docs.nvidia.com/networking/display/QM97X0PUB/Introduction">NVIDIA QM97xx Quantum-2 NDR InfiniBand Switch Platform Introduction</a></li>
+<li><a href="https://docs.nvidia.com/networking/display/MLNXOFEDv23103220lts/RDMA+over+Converged+Ethernet+(RoCE)">NVIDIA RoCE Documentation</a></li>
+<li><a href="https://openai.com/index/mrc-supercomputer-networking/">OpenAI: Supercomputer networking to accelerate large scale AI training</a></li>
+<li><a href="https://cdn.openai.com/pdf/resilient-ai-supercomputer-networking-using-mrc-and-srv6.pdf">OpenAI: Resilient AI Supercomputer Networking using MRC and SRv6</a></li>
+<li><a href="https://p4lang.github.io/p4-spec/docs/PSA-v1.0.0.html">P4 Portable Switch Architecture Specification</a></li>
+<li><a href="https://p4.org/p4-spec/docs/P4-16-v1.0.0-spec.html">P4-16 Language Specification</a></li>
+<li><a href="https://ultraethernet.org/">Ultra Ethernet Consortium</a></li>
+</ul> </div> <footer class="sl-flex astro-3yyafb3n"> <div class="meta sl-flex astro-3yyafb3n"> <a href="https://github.com/ziwon/ai-data-center-systems/edit/main/network/chap06/README.md" class="sl-flex print:hidden astro-eez2twj6"><svg aria-hidden="true" class="astro-eez2twj6 astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.2em;"><path d="M22 7.24a1 1 0 0 0-.29-.71l-4.24-4.24a1 1 0 0 0-1.1-.22 1 1 0 0 0-.32.22l-2.83 2.83L2.29 16.05a1 1 0 0 0-.29.71V21a1 1 0 0 0 1 1h4.24a1 1 0 0 0 .76-.29l10.87-10.93L21.71 8c.1-.1.17-.2.22-.33a1 1 0 0 0 0-.24v-.14l.07-.05ZM6.83 20H4v-2.83l9.93-9.93 2.83 2.83L6.83 20ZM18.17 8.66l-2.83-2.83 1.42-1.41 2.82 2.82-1.41 1.42Z"/></svg>Edit page</a> <p>Last updated: <time datetime="2026-07-22T12:47:10.000Z">Jul 22, 2026</time></p> </div> <div class="pagination-links print:hidden astro-u2l5gyhi" dir="ltr"> <a href="/network/chap05/" rel="prev" class="astro-u2l5gyhi"> <svg aria-hidden="true" class="astro-u2l5gyhi astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17 11H9.41l3.3-3.29a1.004 1.004 0 1 0-1.42-1.42l-5 5a1 1 0 0 0-.21.33 1 1 0 0 0 0 .76 1 1 0 0 0 .21.33l5 5a1.002 1.002 0 0 0 1.639-.325 1 1 0 0 0-.219-1.095L9.41 13H17a1 1 0 0 0 0-2Z"/></svg> <span class="astro-u2l5gyhi"> Previous <br class="astro-u2l5gyhi"> <span class="link-title astro-u2l5gyhi">Chapter 5: Thermal and Power Efficiency Considerations</span> </span> </a> <a href="/network/chap07/" rel="next" class="astro-u2l5gyhi"> <svg aria-hidden="true" class="astro-u2l5gyhi astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17.92 11.62a1.001 1.001 0 0 0-.21-.33l-5-5a1.003 1.003 0 1 0-1.42 1.42l3.3 3.29H7a1 1 0 0 0 0 2h7.59l-3.3 3.29a1.002 1.002 0 0 0 .325 1.639 1 1 0 0 0 1.095-.219l5-5a1 1 0 0 0 .21-.33 1 1 0 0 0 0-.76Z"/></svg> <span class="astro-u2l5gyhi"> Next <br class="astro-u2l5gyhi"> <span class="link-title astro-u2l5gyhi">Chapter 7: RoCEv2 Transport and Congestion Management</span> </span> </a> </div>  </footer> </div> </div>  </main> </div> </div> </div> <ask-docs-widget> <button class="ask-fab" type="button" data-open aria-label="Ask this docs"> <span class="ask-fab-icon" aria-hidden="true">?</span>
+Ask this docs
+</button> <div class="ask-panel" data-panel hidden> <div class="ask-resize-handle" data-resize aria-hidden="true"></div> <div class="ask-panel-inner"> <header class="ask-header"> <div> <p class="ask-eyebrow">AI Data Center Systems</p> <h2 class="ask-title">Ask this docs</h2> </div> <div class="ask-header-controls"> <button class="ask-mode-btn" data-mode-btn="right" title="오른쪽 패널" aria-label="오른쪽 패널"> <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="6" height="16" rx="1.5" opacity="0.35"></rect><rect x="8" y="0" width="8" height="16" rx="1.5"></rect></svg> </button> <button class="ask-mode-btn" data-mode-btn="bottom" title="하단 패널" aria-label="하단 패널"> <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="16" height="6" rx="1.5" opacity="0.35"></rect><rect x="0" y="8" width="16" height="8" rx="1.5"></rect></svg> </button> <button class="ask-mode-btn" data-mode-btn="expand" title="전체 확장" aria-label="전체 확장"> <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 5.5V1h4.5M10.5 1H15v4.5M15 10.5V15h-4.5M5.5 15H1v-4.5"></path></svg> </button> <button class="ask-close-btn" type="button" aria-label="닫기" data-close> <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13"></path></svg> </button> </div> </header> <div class="ask-body"> <label class="ask-field"> <span class="ask-field-row"> <span>Question</span> <span class="ask-char" data-char>0 / 800</span> </span> <textarea name="question" rows="3" maxlength="800" placeholder="이 문서에서 핵심 운영 체크포인트는 무엇인가요?" data-question></textarea> <span class="ask-hint">시간당 최대 20회 · 질문당 최대 800자</span> </label> <div class="ask-actions"> <button class="ask-submit" type="button" data-submit> <svg class="ask-spinner" viewBox="0 0 24 24" fill="none" aria-hidden="true" hidden> <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2.5" stroke-dasharray="56" stroke-dashoffset="14" stroke-linecap="round"></circle> </svg> <span data-submit-label>Ask</span> </button> <p class="ask-status" data-status></p> </div> <section class="ask-answer" data-answer hidden></section> <section class="ask-sources" data-sources hidden> <h3>Sources</h3> <ul class="ask-source-chips" data-source-list></ul> </section> </div> </div> </div> <div class="ask-backdrop" data-backdrop hidden></div> </ask-docs-widget> <script type="module" src="/_astro/AskDocs.astro_astro_type_script_index_0_lang.BbnAb04M.js"></script> </div> <script type="module">const r=document.documentElement,c=document.querySelector("#starlight__sidebar"),s=document.querySelector(".navigation-mode-toggle"),a=document.querySelector(".navigation-drawer-toggle"),u=window.matchMedia("(min-width: 50rem)");function d(){return r.dataset.navigationMode==="compact"}function o(){return r.dataset.navigationDrawer==="open"}function l(){const e=d(),t=e&&o();s?.setAttribute("aria-pressed",String(e)),s?.setAttribute("title",e?"Use normal navigation":"Use compact navigation"),a?.setAttribute("aria-expanded",String(t)),a?.setAttribute("title",t?"Close navigation":"Open navigation");const n=a?.querySelector(".navigation-drawer-label");n&&(n.textContent=t?"Close navigation":"Open navigation")}function i(e,t=!1){const n=!!(e&&d()&&u.matches);r.dataset.navigationDrawer=n?"open":"closed",l(),n?requestAnimationFrame(()=>{const g=c?.querySelector('a[aria-current="page"]'),m=c?.querySelector(".starlight-sidebar-topics-current");(g??m)?.focus()}):t&&a?.focus()}function p(e){r.dataset.navigationMode=e,i(!1);try{localStorage.setItem("adcs-navigation-mode",e)}catch{}l()}s?.addEventListener("click",()=>{p(d()?"normal":"compact")});a?.addEventListener("click",()=>{i(!o(),o())});document.addEventListener("keydown",e=>{e.key==="Escape"&&o()&&i(!1,!0)});document.addEventListener("pointerdown",e=>{!o()||!(e.target instanceof Node)||c?.contains(e.target)||i(!1)});u.addEventListener("change",()=>i(!1));r.dataset.navigationDrawer="closed";l();</script> </body></html>

@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="430" viewBox="0 0 960 430" role="img" aria-labelledby="title desc">
+  <title id="title">FlashAttention IO-aware attention</title>
+  <desc id="desc">Vanilla attention writes large intermediate matrices to HBM. FlashAttention tiles Q, K, and V into SRAM and fuses exact attention computation to reduce HBM traffic.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .box { fill: none; stroke: #111111; stroke-width: 1.4; rx: 6; }
+    .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; rx: 6; }
+    .accent { fill: none; stroke: #D9392E; stroke-width: 2.2; rx: 6; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.3; marker-end: url(#arrow); }
+    .hot { fill: none; stroke: #D9392E; stroke-width: 1.8; marker-end: url(#arrowRed); }
+    .muted { fill: none; stroke: #6F6A63; stroke-width: 1.1; stroke-dasharray: 4 4; marker-end: url(#arrowSoft); }
+    .text { fill: #050505; font-family: Arial, sans-serif; font-size: 16px; font-weight: 700; }
+    .small { fill: #6F6A63; font-family: Arial, sans-serif; font-size: 13px; }
+    .mono { fill: #050505; font-family: "Courier New", monospace; font-size: 13px; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#111111"/>
+    </marker>
+    <marker id="arrowRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#D9392E"/>
+    </marker>
+    <marker id="arrowSoft" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#6F6A63"/>
+    </marker>
+  </defs>
+  <rect class="bg" width="960" height="430"/>
+
+  <text class="text" x="235" y="48" text-anchor="middle">Vanilla attention</text>
+  <rect class="box" x="55" y="75" width="140" height="62"/>
+  <text class="text" x="125" y="103" text-anchor="middle">HBM</text>
+  <text class="small" x="125" y="123" text-anchor="middle">Q, K, V</text>
+
+  <rect class="soft" x="245" y="75" width="150" height="62"/>
+  <text class="text" x="320" y="103" text-anchor="middle">QK^T</text>
+  <text class="small" x="320" y="123" text-anchor="middle">large matrix</text>
+
+  <rect class="soft" x="445" y="75" width="150" height="62"/>
+  <text class="text" x="520" y="103" text-anchor="middle">Softmax</text>
+  <text class="small" x="520" y="123" text-anchor="middle">row normalize</text>
+
+  <rect class="soft" x="645" y="75" width="150" height="62"/>
+  <text class="text" x="720" y="103" text-anchor="middle">Multiply V</text>
+  <text class="small" x="720" y="123" text-anchor="middle">output block</text>
+
+  <path class="hot" d="M195 106 L245 106"/>
+  <path class="hot" d="M395 106 L445 106"/>
+  <path class="hot" d="M595 106 L645 106"/>
+  <path class="muted" d="M320 137 C320 171 520 171 520 137"/>
+  <text class="small" x="420" y="177" text-anchor="middle">intermediates repeatedly read/write HBM</text>
+
+  <text class="text" x="240" y="252" text-anchor="middle">FlashAttention</text>
+  <rect class="box" x="55" y="280" width="140" height="62"/>
+  <text class="text" x="125" y="308" text-anchor="middle">HBM</text>
+  <text class="small" x="125" y="328" text-anchor="middle">Q, K, V tiles</text>
+
+  <rect class="accent" x="280" y="255" width="245" height="112"/>
+  <text class="text" x="402.5" y="292" text-anchor="middle">SRAM tile</text>
+  <text class="small" x="402.5" y="316" text-anchor="middle">fused QK^T, softmax, V</text>
+  <text class="mono" x="402.5" y="341" text-anchor="middle">exact block-wise softmax</text>
+
+  <rect class="box" x="620" y="280" width="150" height="62"/>
+  <text class="text" x="695" y="308" text-anchor="middle">HBM</text>
+  <text class="small" x="695" y="328" text-anchor="middle">final output</text>
+
+  <rect class="soft" x="810" y="280" width="110" height="62"/>
+  <text class="text" x="865" y="308" text-anchor="middle">Backward</text>
+  <text class="small" x="865" y="328" text-anchor="middle">recompute</text>
+
+  <path class="line" d="M195 311 L280 311"/>
+  <path class="line" d="M525 311 L620 311"/>
+  <path class="muted" d="M770 311 L810 311"/>
+  <text class="small" x="402" y="391" text-anchor="middle">Less HBM traffic can reduce memory pressure and runtime without approximating attention</text>
+</svg>

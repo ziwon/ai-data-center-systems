@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="520" viewBox="0 0 1120 520" role="img" aria-labelledby="title desc">
+  <title id="title">GPU clock and ECC benchmark controls</title>
+  <desc id="desc">A diagram showing GPU Boost, clock locking, power limits, thermal throttling, ECC reliability, and benchmark metadata.</desc>
+  <defs>
+    <style>
+      text { font-family: Arial, sans-serif; }
+      .bg { fill: #F3EFE7; }
+      .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.4; }
+      .soft { fill: #F5F1EA; stroke: #D8D1C7; stroke-width: 1.2; }
+      .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+      .line { fill: none; stroke: #111111; stroke-width: 1.8; }
+      .redline { fill: none; stroke: #D9392E; stroke-width: 2; }
+      .label { fill: #050505; font-size: 17px; font-weight: 700; }
+      .small { fill: #6F6A63; font-size: 13px; }
+      .red { fill: #D9392E; font-size: 13px; font-weight: 700; }
+      .arrow { fill: #111111; }
+      .arrow-red { fill: #D9392E; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1120" height="520"/>
+
+  <rect class="box" x="70" y="92" width="210" height="92" rx="8"/>
+  <text class="label" x="112" y="128">GPU Boost</text>
+  <text class="small" x="98" y="152">automatic clock control</text>
+  <text class="small" x="98" y="170">within power/thermal limits</text>
+
+  <rect class="accent" x="382" y="92" width="220" height="92" rx="8"/>
+  <text class="label" x="426" y="128">Benchmark mode</text>
+  <text class="small" x="420" y="152">lock core/memory clocks</text>
+  <text class="small" x="420" y="170">record power and temp</text>
+
+  <rect class="soft" x="704" y="92" width="238" height="92" rx="8"/>
+  <text class="label" x="752" y="128">Production mode</text>
+  <text class="small" x="742" y="152">usually keep auto boost</text>
+  <text class="small" x="742" y="170">watch throttling variance</text>
+
+  <line class="line" x1="280" y1="138" x2="382" y2="138"/>
+  <polygon class="arrow" points="382,138 370,132 370,144"/>
+  <line class="line" x1="602" y1="138" x2="704" y2="138"/>
+  <polygon class="arrow" points="704,138 692,132 692,144"/>
+
+  <rect class="soft" x="124" y="284" width="220" height="100" rx="8"/>
+  <text class="label" x="174" y="320">Power limit</text>
+  <text class="small" x="158" y="344">set below TDP to reduce</text>
+  <text class="small" x="158" y="364">thermal throttling risk</text>
+
+  <rect class="accent" x="462" y="284" width="220" height="100" rx="8"/>
+  <text class="label" x="544" y="320">ECC</text>
+  <text class="small" x="500" y="344">keep enabled for long jobs</text>
+  <text class="small" x="500" y="364">protect data integrity</text>
+
+  <rect class="box" x="802" y="284" width="220" height="100" rx="8"/>
+  <text class="label" x="860" y="320">Run metadata</text>
+  <text class="small" x="834" y="344">clock, power, temp, ECC</text>
+  <text class="small" x="834" y="364">driver, CUDA, GPU model</text>
+
+  <path class="redline" d="M 492 184 C 450 232, 320 240, 236 284"/>
+  <polygon class="arrow-red" points="236,284 246,273 250,285"/>
+  <path class="redline" d="M 492 184 C 538 232, 560 244, 572 284"/>
+  <polygon class="arrow-red" points="572,284 565,272 578,272"/>
+  <line class="line" x1="682" y1="334" x2="802" y2="334"/>
+  <polygon class="arrow" points="802,334 790,328 790,340"/>
+
+  <text class="red" x="322" y="444">Clock controls help reproducibility. ECC protects correctness.</text>
+</svg>

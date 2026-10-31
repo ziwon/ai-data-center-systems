@@ -1,0 +1,136 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 620" role="img" aria-labelledby="title desc">
+  <title id="title">Scheduler, MIG, and goodput</title>
+  <desc id="desc">A diagram showing how scheduler placement choices affect topology, MIG partitioning, and useful GPU work.</desc>
+  <style>
+    svg {
+      background: #F5F1EA;
+      color: #050505;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    .box {
+      fill: none;
+      stroke: #111111;
+      stroke-width: 1.6;
+    }
+    .soft {
+      fill: none;
+      stroke: #D8D1C7;
+      stroke-width: 1.4;
+    }
+    .dash {
+      fill: none;
+      stroke: #6F6A63;
+      stroke-width: 1.3;
+      stroke-dasharray: 7 7;
+    }
+    .arrow {
+      fill: none;
+      stroke: #111111;
+      stroke-width: 1.5;
+      marker-end: url(#arrow);
+    }
+    .arrow-soft {
+      fill: none;
+      stroke: #6F6A63;
+      stroke-width: 1.3;
+      marker-end: url(#arrow-soft);
+    }
+    .arrow-accent {
+      fill: none;
+      stroke: #D9392E;
+      stroke-width: 2.2;
+      marker-end: url(#arrow-accent);
+    }
+    .label {
+      fill: #050505;
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .text {
+      fill: #050505;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .small {
+      fill: #6F6A63;
+      font-size: 13px;
+    }
+    .warn {
+      fill: #D9392E;
+      font-size: 14px;
+      font-weight: 700;
+    }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#111111"/>
+    </marker>
+    <marker id="arrow-soft" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#6F6A63"/>
+    </marker>
+    <marker id="arrow-accent" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#D9392E"/>
+    </marker>
+  </defs>
+
+  <rect x="56" y="64" width="238" height="132" class="box"/>
+  <text x="86" y="104" class="label">Workload request</text>
+  <text x="86" y="134" class="small">training, inference, serving</text>
+  <text x="86" y="160" class="small">needs compute, memory, fabric</text>
+
+  <rect x="436" y="64" width="248" height="132" class="box"/>
+  <text x="466" y="104" class="label">Scheduler</text>
+  <text x="466" y="134" class="small">SLURM / Kubernetes</text>
+  <text x="466" y="160" class="small">placement and partition policy</text>
+
+  <rect x="820" y="64" width="238" height="132" class="box"/>
+  <text x="850" y="104" class="label">Useful work</text>
+  <text x="850" y="134" class="small">tokens, samples, requests</text>
+  <text x="850" y="160" class="small">goodput, not allocation only</text>
+
+  <path d="M294 130 H436" class="arrow"/>
+  <path d="M684 130 H820" class="arrow"/>
+
+  <rect x="436" y="228" width="248" height="44" class="dash"/>
+  <text x="488" y="256" class="small">Placement policy</text>
+
+  <rect x="86" y="306" width="252" height="176" class="soft"/>
+  <text x="116" y="344" class="text">Whole GPU group</text>
+  <text x="116" y="372" class="small">TP / PP / EP jobs</text>
+  <text x="116" y="394" class="small">needs same NVSwitch domain</text>
+  <line x1="122" y1="436" x2="302" y2="436" class="soft"/>
+  <circle cx="146" cy="436" r="14" class="box"/>
+  <circle cx="198" cy="436" r="14" class="box"/>
+  <circle cx="250" cy="436" r="14" class="box"/>
+  <path d="M160 436 H184" class="arrow-soft"/>
+  <path d="M212 436 H236" class="arrow-soft"/>
+
+  <rect x="434" y="306" width="252" height="176" class="soft"/>
+  <text x="464" y="344" class="text">MIG partition</text>
+  <text x="464" y="372" class="small">small inference jobs</text>
+  <text x="464" y="394" class="small">isolated memory and SM slices</text>
+  <rect x="474" y="426" width="172" height="42" class="box"/>
+  <line x1="498" y1="426" x2="498" y2="468" class="soft"/>
+  <line x1="522" y1="426" x2="522" y2="468" class="soft"/>
+  <line x1="546" y1="426" x2="546" y2="468" class="soft"/>
+  <line x1="570" y1="426" x2="570" y2="468" class="soft"/>
+  <line x1="594" y1="426" x2="594" y2="468" class="soft"/>
+  <line x1="618" y1="426" x2="618" y2="468" class="soft"/>
+
+  <rect x="782" y="306" width="252" height="176" class="soft"/>
+  <text x="812" y="344" class="text">Bad fragmentation</text>
+  <text x="812" y="372" class="small">free GPUs, poor locality</text>
+  <text x="812" y="394" class="small">idle gaps and slow collectives</text>
+  <path d="M826 438 H988" class="arrow-accent"/>
+  <text x="846" y="466" class="warn">lost goodput</text>
+
+  <path d="M560 196 V228" class="arrow-soft"/>
+  <path d="M560 272 V288" class="arrow-soft"/>
+  <path d="M212 288 H908" class="dash"/>
+  <path d="M212 288 V306" class="arrow-soft"/>
+  <path d="M560 288 V306" class="arrow-soft"/>
+  <path d="M908 288 V306" class="arrow-soft"/>
+
+  <rect x="86" y="532" width="948" height="48" class="dash"/>
+  <text x="282" y="562" class="small">Placement must match communication pattern, memory footprint, and tenant isolation.</text>
+</svg>

@@ -1,0 +1,1120 @@
+<!DOCTYPE html><html lang="en" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-bguv2lll"> <head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Week 3: Parallelism Strategies in Deep Learning | AI Data Center Systems</title><link rel="canonical" href="https://adcs.restack.tech/courses/deep-learning-for-network-engineers/week03/"/><link rel="sitemap" href="/sitemap-index.xml"/><script async src="https://www.googletagmanager.com/gtag/js?id=G-76LFZJVBTE"></script><script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-76LFZJVBTE');
+      </script><script async crossorigin="anonymous" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8128231647578658"></script><link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v6.4.8"/><meta name="generator" content="Starlight v0.40.0"/><meta property="og:title" content="Week 3: Parallelism Strategies in Deep Learning"/><meta property="og:url" content="https://adcs.restack.tech/courses/deep-learning-for-network-engineers/week03/"/><meta property="og:locale" content="en"/><meta property="og:description" content="이번 주 목표는 대규모 deep learning training이 왜 parallelism을 필요로 하는지 , 그리고 각 parallelization strategy가 GPU memory, GPU utilization, backend network design에 어떤 영향을..."/><meta property="og:site_name" content="AI Data Center Systems"/><meta name="description" content="이번 주 목표는 대규모 deep learning training이 왜 parallelism을 필요로 하는지 , 그리고 각 parallelization strategy가 GPU memory, GPU utilization, backend network design에 어떤 영향을..."/><meta property="og:type" content="article"/><meta property="og:image" content="https://adcs.restack.tech/og/courses/deep-learning-for-network-engineers/week03.png?v=2"/><meta property="og:image:width" content="1200"/><meta property="og:image:height" content="630"/><meta name="twitter:image" content="https://adcs.restack.tech/og/courses/deep-learning-for-network-engineers/week03.png?v=2"/><meta name="twitter:card" content="summary_large_image"/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/_astro/print.DNXP8c50.css" media="print"><link rel="stylesheet" href="/_astro/common.DYbqSTpl.css"><script type="module" src="/_astro/page.CtJXHRyR.js"></script></head> <body class="astro-bguv2lll"> <a href="#_top" class="astro-7q3lir66">Skip to content</a> <script>
+  (() => {
+    try {
+      const savedMode = localStorage.getItem('adcs-navigation-mode');
+      document.documentElement.dataset.navigationMode = savedMode === 'compact' ? 'compact' : 'normal';
+    } catch {
+      document.documentElement.dataset.navigationMode = 'normal';
+    }
+  })();
+</script> <div class="page sl-flex astro-4toy2ex6"> <header class="header astro-4toy2ex6"><div class="header astro-3ef6ksr2"> <div class="title-wrapper sl-flex astro-3ef6ksr2"> <a href="/" class="site-title sl-flex astro-m46x6ez3">  <span class="astro-m46x6ez3" translate="no"> AI Data Center Systems </span> </a> <button class="navigation-mode-toggle print:hidden astro-3ef6ksr2" type="button" aria-label="Compact navigation" aria-pressed="false" title="Use compact navigation"> <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" class="astro-3ef6ksr2"> <rect x="3" y="4" width="18" height="16" rx="2" class="astro-3ef6ksr2"></rect> <path d="M9 4v16M6.5 10 4.5 12l2 2" class="astro-3ef6ksr2"></path> </svg> </button> </div> <div class="sl-flex print:hidden astro-3ef6ksr2"> <site-search class="astro-3ef6ksr2 astro-v37mnknz" data-translations="{&quot;placeholder&quot;:&quot;Search&quot;}"> <button data-open-modal disabled aria-label="Search" aria-keyshortcuts="Control+K" class="astro-v37mnknz"> <svg aria-hidden="true" class="astro-v37mnknz astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg> <span class="sl-hidden md:sl-block astro-v37mnknz" aria-hidden="true">Search</span> <kbd class="sl-hidden md:sl-flex astro-v37mnknz" style="display: none;"> <kbd class="astro-v37mnknz">Ctrl</kbd><kbd class="astro-v37mnknz">K</kbd> </kbd> </button> <dialog style="padding:0" aria-label="Search" class="astro-v37mnknz"> <div class="dialog-frame sl-flex astro-v37mnknz">  <button data-close-modal class="sl-flex md:sl-hidden astro-v37mnknz"> Cancel </button> <div class="search-container astro-v37mnknz"> <div id="starlight__search" class="astro-v37mnknz"></div> </div> </div> </dialog> </site-search>  <script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script> <script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.D1WXcfCt.js"></script>  </div> <div class="sl-hidden md:sl-flex print:hidden right-group astro-3ef6ksr2"> <div class="sl-flex social-icons astro-3ef6ksr2"> <a href="https://github.com/ziwon/ai-data-center-systems" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">GitHub</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script> <script type="module">const r="starlight-theme",o=e=>e==="auto"||e==="dark"||e==="light"?e:"auto",c=()=>o(typeof localStorage<"u"&&localStorage.getItem(r));function n(e){typeof localStorage<"u"&&localStorage.setItem(r,e==="light"||e==="dark"?e:"")}const l=()=>matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";function t(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e==="auto"?l():e,n(e)}matchMedia("(prefers-color-scheme: light)").addEventListener("change",()=>{c()==="auto"&&t("auto")});class s extends HTMLElement{constructor(){super(),t(c()),this.querySelector("select")?.addEventListener("change",a=>{a.currentTarget instanceof HTMLSelectElement&&t(o(a.currentTarget.value))})}}customElements.define("starlight-theme-select",s);</script> <script type="module">class s extends HTMLElement{constructor(){super();const e=this.querySelector("select");e&&(e.addEventListener("change",t=>{t.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=t.currentTarget.value)}),window.addEventListener("pageshow",t=>{if(!t.persisted)return;const n=e.querySelector("option[selected]")?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}}customElements.define("starlight-lang-select",s);</script> </div> </div></header> <nav class="sidebar print:hidden astro-4toy2ex6" aria-label="Main"> <starlight-menu-button class="print:hidden astro-jif73yzw"> <button aria-expanded="false" aria-label="Menu" aria-controls="starlight__sidebar" class="sl-flex md:sl-hidden astro-jif73yzw"> <svg aria-hidden="true" class="open-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg> <svg aria-hidden="true" class="close-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg> </button> </starlight-menu-button> <script type="module">class s extends HTMLElement{constructor(){super(),this.btn=this.querySelector("button"),this.btn.addEventListener("click",()=>this.toggleExpanded());const t=this.closest("nav");t&&t.addEventListener("keyup",e=>this.closeOnEscape(e))}setExpanded(t){this.setAttribute("aria-expanded",String(t)),document.body.toggleAttribute("data-mobile-menu-expanded",t)}toggleExpanded(){this.setExpanded(this.getAttribute("aria-expanded")!=="true")}closeOnEscape(t){t.code==="Escape"&&(this.setExpanded(!1),this.btn.focus())}}customElements.define("starlight-menu-button",s);</script>  <div id="starlight__sidebar" class="sidebar-pane astro-4toy2ex6"> <div class="navigation-controls astro-4toy2ex6"> <button class="navigation-drawer-toggle astro-4toy2ex6" type="button" aria-controls="starlight__sidebar-content" aria-expanded="false" title="Open navigation"> <svg class="navigation-menu-icon astro-4toy2ex6" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"> <path d="M4 6h16M4 12h16M4 18h16" class="astro-4toy2ex6"></path> </svg> <svg class="navigation-close-icon astro-4toy2ex6" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"> <path d="m6 6 12 12M18 6 6 18" class="astro-4toy2ex6"></path> </svg> <span class="navigation-drawer-label astro-4toy2ex6">Open navigation</span> </button> </div> <div id="starlight__sidebar-content" class="sidebar-content sl-flex astro-4toy2ex6"> <ul class="starlight-sidebar-topics astro-2fh6iaza"> <li class="astro-2fh6iaza"> <a aria-label="Network" title="Network" href="/network/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8.7 10a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-6.27-6.3a1 1 0 0 0-1.42 1.42ZM21 14a1 1 0 0 0-1 1v3.59L15.44 14A1 1 0 0 0 14 15.44L18.59 20H15a1 1 0 0 0 0 2h6a1 1 0 0 0 .38-.08 1 1 0 0 0 .54-.54A1 1 0 0 0 22 21v-6a1 1 0 0 0-1-1Zm.92-11.38a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-6a1 1 0 0 0 0 2h3.59L2.29 20.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V9a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z"/></svg> </div> <div class="astro-2fh6iaza"> Network  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="GPU &amp; Accelerator Systems" title="GPU &amp; Accelerator Systems" href="/gpu/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> </div> <div class="astro-2fh6iaza"> GPU &amp; Accelerator Systems  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Storage" title="Storage" href="/storage/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8 16.5a1 1 0 1 0 1 1 1 1 0 0 0-1-1M12 2C8 2 4 3.37 4 6v12c0 2.63 4 4 8 4s8-1.37 8-4V6c0-2.63-4-4-8-4m6 16c0 .71-2.28 2-6 2s-6-1.29-6-2v-3.27A13 13 0 0 0 12 16a13 13 0 0 0 6-1.27Zm0-6c0 .71-2.28 2-6 2s-6-1.29-6-2V8.73A13 13 0 0 0 12 10a13 13 0 0 0 6-1.27Zm-6-4C8.28 8 6 6.71 6 6s2.28-2 6-2 6 1.29 6 2-2.28 2-6 2m-4 2.5a1 1 0 1 0 1 1 1 1 0 0 0-1-1"/></svg> </div> <div class="astro-2fh6iaza"> Storage  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Training" title="Training" href="/training/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1 1v8a1 1 0 0 0 2 0v-8a1 1 0 0 0-1-1m5-10a1 1 0 0 0-1 1v18a1 1 0 0 0 2 0V3a1 1 0 0 0-1-1m10 14a1 1 0 0 0-1 1v4a1 1 0 0 0 2 0v-4a1 1 0 0 0-1-1m-5-8a1 1 0 0 0-1 1v12a1 1 0 0 0 2 0V9a1 1 0 0 0-1-1"/></svg> </div> <div class="astro-2fh6iaza"> Training  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Inference" title="Inference" data-topic-icon="brain" href="/inference/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 22H5a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3h1a4 4 0 0 1 7.3-2.18c.448.64.692 1.4.7 2.18h3a1 1 0 0 1 1 1v3a4 4 0 0 1 2.18 7.3A3.86 3.86 0 0 1 18 18v3a1 1 0 0 1-1 1ZM5 8a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11v-3.18a1 1 0 0 1 1.33-.95 1.77 1.77 0 0 0 1.74-.23 2 2 0 0 0 .93-1.37 2 2 0 0 0-.48-1.59 1.89 1.89 0 0 0-2.17-.55 1 1 0 0 1-1.33-.95V8h-3.2a1 1 0 0 1-1-1.33 1.77 1.77 0 0 0-.23-1.74 1.939 1.939 0 0 0-3-.43A2 2 0 0 0 8 6c.002.23.046.456.13.67A1 1 0 0 1 7.18 8H5Z"/></svg> </div> <div class="astro-2fh6iaza"> Inference  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="MLOps" title="MLOps" data-topic-icon="cycle" href="/mlops/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8.7 10a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-6.27-6.3a1 1 0 0 0-1.42 1.42ZM21 14a1 1 0 0 0-1 1v3.59L15.44 14A1 1 0 0 0 14 15.44L18.59 20H15a1 1 0 0 0 0 2h6a1 1 0 0 0 .38-.08 1 1 0 0 0 .54-.54A1 1 0 0 0 22 21v-6a1 1 0 0 0-1-1Zm.92-11.38a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-6a1 1 0 0 0 0 2h3.59L2.29 20.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V9a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z"/></svg> </div> <div class="astro-2fh6iaza"> MLOps  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Systems Performance" title="Systems Performance" href="/systems-performance/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path fill-rule="evenodd" d="M1.44 8.855v-.001l3.527-3.516c.34-.344.802-.541 1.285-.548h6.649l.947-.947c3.07-3.07 6.207-3.072 7.62-2.868a1.821 1.821 0 0 1 1.557 1.557c.204 1.413.203 4.55-2.868 7.62l-.946.946v6.649a1.845 1.845 0 0 1-.549 1.286l-3.516 3.528a1.844 1.844 0 0 1-3.11-.944l-.858-4.275-4.52-4.52-2.31-.463-1.964-.394A1.847 1.847 0 0 1 .98 10.693a1.843 1.843 0 0 1 .46-1.838Zm5.379 2.017-3.873-.776L6.32 6.733h4.638l-4.14 4.14Zm8.403-5.655c2.459-2.46 4.856-2.463 5.89-2.33.134 1.035.13 3.432-2.329 5.891l-6.71 6.71-3.561-3.56 6.71-6.711Zm-1.318 15.837-.776-3.873 4.14-4.14v4.639l-3.364 3.374Z" clip-rule="evenodd"/><path d="M9.318 18.345a.972.972 0 0 0-1.86-.561c-.482 1.435-1.687 2.204-2.934 2.619a8.22 8.22 0 0 1-1.23.302c.062-.365.157-.79.303-1.229.415-1.247 1.184-2.452 2.62-2.935a.971.971 0 1 0-.62-1.842c-.12.04-.236.084-.35.13-2.02.828-3.012 2.588-3.493 4.033a10.383 10.383 0 0 0-.51 2.845l-.001.016v.063c0 .536.434.972.97.972H2.24a7.21 7.21 0 0 0 .878-.065c.527-.063 1.248-.19 2.02-.447 1.445-.48 3.205-1.472 4.033-3.494a5.828 5.828 0 0 0 .147-.407Z"/></svg> </div> <div class="astro-2fh6iaza"> Systems Performance  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Courses" title="Courses" href="/courses/" class="starlight-sidebar-topics-current astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.17 2.06A13.1 13.1 0 0 0 19 1.87a12.94 12.94 0 0 0-7 2.05 12.94 12.94 0 0 0-7-2 13.1 13.1 0 0 0-2.17.19 1 1 0 0 0-.83 1v12a1 1 0 0 0 1.17 1 10.9 10.9 0 0 1 8.25 1.91l.12.07h.11a.91.91 0 0 0 .7 0h.11l.12-.07A10.899 10.899 0 0 1 20.83 16 1 1 0 0 0 22 15V3a1 1 0 0 0-.83-.94ZM11 15.35a12.87 12.87 0 0 0-6-1.48H4v-10c.333-.02.667-.02 1 0a10.86 10.86 0 0 1 6 1.8v9.68Zm9-1.44h-1a12.87 12.87 0 0 0-6 1.48V5.67a10.86 10.86 0 0 1 6-1.8c.333-.02.667-.02 1 0v10.04Zm1.17 4.15a13.098 13.098 0 0 0-2.17-.19 12.94 12.94 0 0 0-7 2.05 12.94 12.94 0 0 0-7-2.05c-.727.003-1.453.066-2.17.19A1 1 0 0 0 2 19.21a1 1 0 0 0 1.17.79 10.9 10.9 0 0 1 8.25 1.91 1 1 0 0 0 1.16 0A10.9 10.9 0 0 1 20.83 20a1 1 0 0 0 1.17-.79 1 1 0 0 0-.83-1.15Z"/></svg> </div> <div class="astro-2fh6iaza"> Courses  </div> </a> </li> </ul> <sl-sidebar-state-persist data-hash="147ldbs" class="astro-kku4brbg"> <script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script>  <ul class="top-level astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">Courses</span>  </a> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">cme295</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="0"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/cme295/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">CME295 Lecture Notes</span>  </a> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">lec-01</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="1"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/cme295/lec-01/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 1: Transformer</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">lec-02</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="2"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/cme295/lec-02/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 2: Transformer-Based Models &amp; Tricks</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">lec-03</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="3"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/cme295/lec-03/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 3: Large Language Models, Decoding, Prompting, and Inference</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">lec-04</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="4"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/cme295/lec-04/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 4: LLM Training, Fine-Tuning, and Efficient Adaptation</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">lec-05</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="5"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/cme295/lec-05/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 5: LLM Tuning and Human Preferences</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">lec-06</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="6"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/cme295/lec-06/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 6: LLM Reasoning and GRPO</span>  </a> </li> </ul> </details> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">cs336</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="7"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/cs336/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Stanford CS336: Language Modeling from Scratch</span>  </a> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">lec-01</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="8"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/cs336/lec-01/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lecture 1: Overview and Tokenization</span>  </a> </li> </ul> </details> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">deep-learning-for-network-engineers</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="9"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/deep-learning-for-network-engineers/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Deep Learning for Network Engineers</span>  </a> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">week01</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="10"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/deep-learning-for-network-engineers/week01/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 1: From Artificial Neuron to AI Training Fabric</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">week02</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="11"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/deep-learning-for-network-engineers/week02/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 2: Large Language Model, LLM</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">week03</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="12"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/deep-learning-for-network-engineers/week03/" aria-current="page" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 3: Parallelism Strategies in Deep Learning</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">week04</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="13"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/courses/deep-learning-for-network-engineers/week04/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 4: RDMA and GPU Cluster Communication</span>  </a> </li> </ul> </details> </li> </ul> </details> </li> </ul>  <script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script> </sl-sidebar-state-persist> <div class="md:sl-hidden"> <div class="mobile-preferences sl-flex astro-wu23bvmt"> <div class="social-icons astro-wu23bvmt"> <a href="https://github.com/ziwon/ai-data-center-systems" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">GitHub</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script>   </div> </div> </div> </div> </nav> <div class="main-frame astro-4toy2ex6">  <script type="module">const a=document.getElementById("starlight__sidebar"),n=a?.querySelector("sl-sidebar-state-persist"),o="sl-sidebar-state",i=()=>{let t=[];const e=n?.dataset.hash||"";try{const s=sessionStorage.getItem(o),r=JSON.parse(s||"{}");Array.isArray(r.open)&&r.hash===e&&(t=r.open)}catch{}return{hash:e,open:t,scroll:a?.scrollTop||0}},c=t=>{try{sessionStorage.setItem(o,JSON.stringify(t))}catch{}},d=()=>c(i()),l=(t,e)=>{const s=i();s.open[e]=t,c(s)};n?.addEventListener("click",t=>{if(!(t.target instanceof Element))return;const e=t.target.closest("summary")?.closest("details");if(!e)return;const s=e.querySelector("sl-sidebar-restore"),r=parseInt(s?.dataset.index||"");isNaN(r)||l(!e.open,r)});addEventListener("visibilitychange",()=>{document.visibilityState==="hidden"&&d()});addEventListener("pageHide",d);</script> <div class="lg:sl-flex astro-67yu43on"> <aside class="right-sidebar-container print:hidden astro-67yu43on"> <div class="right-sidebar astro-67yu43on"> <div class="lg:sl-hidden astro-rl4sue7z"><mobile-starlight-toc data-min-h="2" data-max-h="2" class="astro-doynk5tl"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-doynk5tl"><details id="starlight__mobile-toc" class="astro-doynk5tl"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-doynk5tl"><span class="toggle sl-flex astro-doynk5tl">On this page<svg aria-hidden="true" class="caret astro-doynk5tl astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-doynk5tl"></span></summary><div class="dropdown astro-doynk5tl"><ul class="isMobile astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#table-of-contents" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Table of Contents</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#goal" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Goal</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#why-parallelism-matters" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Why Parallelism Matters</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#parallelism-strategy-overview" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Parallelism Strategy Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#data-parallelism" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Data Parallelism</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#lossless-transport-and-restart-cost" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Lossless Transport and Restart Cost</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#pipeline-parallelism" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Pipeline Parallelism</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#tensor-parallelism" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Tensor Parallelism</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#tensor-parallelism-details-in-transformer-layers" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Tensor Parallelism Details in Transformer Layers</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#hybrid-parallelism" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Hybrid Parallelism</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#practical-extensions-zero-fsdp-and-expert-parallelism" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Practical Extensions: ZeRO, FSDP, and Expert Parallelism</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#network-impact-2" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Network Impact</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#design-decision-matrix" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Design Decision Matrix</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#practical-tips-and-notes" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Practical Tips and Notes</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#operational-validation-checklist" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Operational Validation Checklist</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#chapter-summary" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Chapter Summary</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#key-terms" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Key Terms</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#questions" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Questions</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#answers" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Answers</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#references" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">References</span> </a>  </li> </ul></div></details></nav></mobile-starlight-toc><script type="module" src="/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.hwBsy0Mo.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-rl4sue7z"><div class="sl-container astro-rl4sue7z"><kb-graph-card> <button class="kb-graph-card" type="button" data-open aria-haspopup="dialog"> <span class="kb-graph-copy"> <span class="kb-graph-title">Knowledge graph</span> <span class="kb-graph-subtitle" data-count>Loading related docs</span> </span> <span class="kb-graph-thumb" aria-hidden="true" data-map></span> <span class="kb-graph-expand" aria-hidden="true">Expand</span> </button> <dialog class="kb-graph-dialog" aria-label="Knowledge graph" data-dialog> <div class="kb-graph-panel"> <div class="kb-graph-panel-header"> <div> <p>Knowledge graph</p> <h2 data-heading>Related documents</h2> </div> <div class="kb-graph-tabs" role="tablist" aria-label="Knowledge graph views"> <button type="button" role="tab" aria-selected="true" data-tab="page">This page</button> <button type="button" role="tab" aria-selected="false" data-tab="global">Full graph</button> </div> <button type="button" data-close aria-label="Close knowledge graph">×</button> </div> <div class="kb-graph-stage" data-stage data-view="page"> <div data-page-stage></div> <div data-global-stage hidden></div> </div> </div> </dialog> </kb-graph-card> <script type="module" src="/_astro/KnowledgeGraphCard.astro_astro_type_script_index_0_lang.C475L69c.js"></script><starlight-toc data-min-h="2" data-max-h="2"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">On this page</h2><ul class="astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#table-of-contents" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Table of Contents</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#goal" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Goal</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#why-parallelism-matters" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Why Parallelism Matters</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#parallelism-strategy-overview" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Parallelism Strategy Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#data-parallelism" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Data Parallelism</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#lossless-transport-and-restart-cost" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Lossless Transport and Restart Cost</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#pipeline-parallelism" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Pipeline Parallelism</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#tensor-parallelism" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Tensor Parallelism</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#tensor-parallelism-details-in-transformer-layers" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Tensor Parallelism Details in Transformer Layers</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#hybrid-parallelism" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Hybrid Parallelism</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#practical-extensions-zero-fsdp-and-expert-parallelism" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Practical Extensions: ZeRO, FSDP, and Expert Parallelism</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#network-impact-2" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Network Impact</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#design-decision-matrix" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Design Decision Matrix</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#practical-tips-and-notes" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Practical Tips and Notes</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#operational-validation-checklist" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Operational Validation Checklist</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#chapter-summary" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Chapter Summary</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#key-terms" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Key Terms</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#questions" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Questions</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#answers" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Answers</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#references" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">References</span> </a>  </li> </ul></nav></starlight-toc><script type="module" src="/_astro/TableOfContents.astro_astro_type_script_index_0_lang.FuRcXuRY.js"></script></div></div> </div> </aside> <div class="main-pane astro-67yu43on">  <main data-pagefind-body class="astro-bguv2lll" lang="en" dir="ltr">    <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <h1 id="_top" class="astro-j6tvhyss">Week 3: Parallelism Strategies in Deep Learning</h1> </div> </div> <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <starlight-image-zoom> <template class="astro-vjux6bgf"> <dialog class="starlight-image-zoom-dialog astro-vjux6bgf"> <button aria-label="Unzoom image" class="starlight-image-zoom-control astro-vjux6bgf"> <svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" class="astro-vjux6bgf"> <use href="#starlight-image-zoom-icon-unzoom" class="astro-vjux6bgf"></use> </svg> </button> <figure class="astro-vjux6bgf"></figure> </dialog> </template> <svg xmlns="http://www.w3.org/2000/svg" style="display:none" class="astro-vjux6bgf"> <symbol id="starlight-image-zoom-icon-zoom" viewBox="0 0 24 24" class="astro-vjux6bgf"> <path d="M9.79 12.79 4 18.59V17a1 1 0 0 0-2 0v4a1 1 0 0 0 .08.38 1 1 0 0 0 .54.54A1 1 0 0 0 3 22h4a1 1 0 0 0 0-2H5.41l5.8-5.79a1 1 0 0 0-1.42-1.42ZM21.92 2.62a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-4a1 1 0 0 0 0 2h1.59l-5.8 5.79a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V7a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z" class="astro-vjux6bgf"></path> </symbol> <symbol id="starlight-image-zoom-icon-unzoom" viewBox="0 0 24 24" class="astro-vjux6bgf"> <path d="M21.71 2.29a1 1 0 0 0-1.42 0l-5.79 5.8V6.5a1 1 0 0 0-2 0v4a1 1 0 0 0 .08.38 1 1 0 0 0 .54.54 1 1 0 0 0 .38.08h4a1 1 0 0 0 0-2h-1.59l5.8-5.79a1 1 0 0 0 0-1.42ZM10.88 12.58a1 1 0 0 0-.38-.08h-4a1 1 0 0 0 0 2h1.59l-5.8 5.79a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l5.79-5.8v1.59a1 1 0 0 0 2 0v-4a1 1 0 0 0-.08-.38 1 1 0 0 0-.54-.54Z" class="astro-vjux6bgf"></path> </symbol> </svg> </starlight-image-zoom>   <script type="module" src="/_astro/ImageZoom.astro_astro_type_script_index_0_lang.CZmBqK-T.js"></script> <div class="sl-markdown-content"> <div class="sl-heading-wrapper level-h2"><h2 id="table-of-contents">Table of Contents</h2><a class="sl-anchor-link" href="#table-of-contents"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Table of Contents”</span></a></div>
+<ul>
+<li><a href="#goal">Goal</a></li>
+<li><a href="#why-parallelism-matters">Why Parallelism Matters</a></li>
+<li><a href="#parallelism-strategy-overview">Parallelism Strategy Overview</a></li>
+<li><a href="#data-parallelism">Data Parallelism</a></li>
+<li><a href="#lossless-transport-and-restart-cost">Lossless Transport and Restart Cost</a></li>
+<li><a href="#pipeline-parallelism">Pipeline Parallelism</a></li>
+<li><a href="#tensor-parallelism">Tensor Parallelism</a></li>
+<li><a href="#tensor-parallelism-details-in-transformer-layers">Tensor Parallelism Details in Transformer Layers</a></li>
+<li><a href="#hybrid-parallelism">Hybrid Parallelism</a></li>
+<li><a href="#practical-extensions-zero-fsdp-and-expert-parallelism">Practical Extensions: ZeRO, FSDP, and Expert Parallelism</a></li>
+<li><a href="#network-impact">Network Impact</a></li>
+<li><a href="#design-decision-matrix">Design Decision Matrix</a></li>
+<li><a href="#practical-tips-and-notes">Practical Tips and Notes</a></li>
+<li><a href="#operational-validation-checklist">Operational Validation Checklist</a></li>
+<li><a href="#chapter-summary">Chapter Summary</a></li>
+<li><a href="#key-terms">Key Terms</a></li>
+<li><a href="#questions">Questions</a></li>
+<li><a href="#answers">Answers</a></li>
+<li><a href="#references">References</a></li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="goal">Goal</h2><a class="sl-anchor-link" href="#goal"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Goal”</span></a></div>
+<p>이번 주 목표는 <strong>대규모 deep learning training이 왜 parallelism을 필요로 하는지</strong>, 그리고 각 parallelization strategy가 GPU memory, GPU utilization, backend network design에 어떤 영향을 주는지 이해하는 것이다.</p>
+<p>핵심 아이디어는 다음과 같다.</p>
+<blockquote>
+<p>Deep learning parallelism은 단순한 model training 기법이 아니다.
+Network traffic pattern을 만들어내는 구조이기도 하다.</p>
+</blockquote>
+<p>책의 Chapter 8은 model, dataset, activation state, gradient, optimizer state가 단일 GPU 안에 효율적으로 들어가지 않을 때 사용하는 주요 parallelism strategy를 설명한다. 주요 전략은 <strong>Data Parallelism</strong>, <strong>Model/Pipeline Parallelism</strong>, <strong>Tensor Parallelism</strong>이다.</p>
+<p>MLOps, LLMOps, AI data center network 관점에서 가장 중요한 질문은 다음과 같다.</p>
+<blockquote>
+<p>무엇을 나누고, 무엇을 동기화해야 하는가?</p>
+</blockquote>
+<div class="sl-heading-wrapper level-h2"><h2 id="why-parallelism-matters">Why Parallelism Matters</h2><a class="sl-anchor-link" href="#why-parallelism-matters"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Why Parallelism Matters”</span></a></div>
+<p>Training 중 GPU는 model weight만 저장하는 것이 아니다. Weighted sum, activation value, error, local gradient, remote gradient, learning rate, weight adjustment value도 필요하다. Training dataset, test dataset, model code 역시 memory를 사용한다. Chapter 8은 이런 memory pressure에서 출발해, 단일 GPU가 모든 요소를 담기에 충분하지 않을 수 있다고 설명한다.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TB
+    classDef gpu fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef mem fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef net fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef warn fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    GPU[Single GPU]:::gpu
+
+    W[Weights]:::mem
+    A[Activations]:::mem
+    G[Gradients]:::mem
+    O[Optimizer States]:::mem
+    D[Mini-batch Data]:::mem
+    C[Model Code / Runtime]:::mem
+
+    GPU --> W
+    GPU --> A
+    GPU --> G
+    GPU --> O
+    GPU --> D
+    GPU --> C
+
+    P[Parallelism Required]:::warn
+    N[Backend Network Becomes Critical]:::net
+
+    W --> P
+    A --> P
+    G --> P
+    O --> P
+    D --> P
+    P --> N</pre>
+<p>단순하게 정리하면 다음과 같다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Pressure</th><th>발생 이유</th><th>일반적인 대응</th></tr></thead><tbody><tr><td>Dataset이 너무 큼</td><td>Sample 수가 많거나 mini-batch가 너무 큼</td><td>Data Parallelism</td></tr><tr><td>Model이 너무 깊음</td><td>Layer 수가 너무 많음</td><td>Pipeline Parallelism</td></tr><tr><td>단일 layer가 너무 큼</td><td>Matrix operation이 한 GPU에 들어가지 않음</td><td>Tensor Parallelism</td></tr><tr><td>Optimizer state가 너무 큼</td><td>Adam 계열 optimizer가 추가 state를 저장함</td><td>ZeRO / FSDP</td></tr><tr><td>MoE expert가 분산됨</td><td>Token을 expert로 routing해야 함</td><td>Expert Parallelism</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h2"><h2 id="parallelism-strategy-overview">Parallelism Strategy Overview</h2><a class="sl-anchor-link" href="#parallelism-strategy-overview"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Parallelism Strategy Overview”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Parallelism</th><th>무엇을 나누는가?</th><th>왜 사용하는가?</th><th>주요 communication pattern</th><th>주요 bottleneck</th></tr></thead><tbody><tr><td>Data Parallelism</td><td>Dataset / mini-batch</td><td>Dataset이 크고 model은 GPU별로 들어감</td><td>Gradient AllReduce</td><td>Bandwidth, latency, straggler</td></tr><tr><td>Pipeline Parallelism</td><td>Model layer / stage</td><td>Model이 너무 깊거나 큼</td><td>Activation과 gradient transfer</td><td>Pipeline bubble, micro-batch tuning</td></tr><tr><td>Tensor Parallelism</td><td>Layer 내부 matrix operation</td><td>단일 layer가 한 GPU에 들어가지 않음</td><td>AllGather, AllReduce, ReduceScatter</td><td>Ultra-low latency, NVLink/IB dependency</td></tr><tr><td>ZeRO / FSDP</td><td>Optimizer, gradient, parameter</td><td>Memory redundancy를 줄임</td><td>ReduceScatter, AllGather</td><td>Memory saving과 communication overhead의 tradeoff</td></tr><tr><td>Expert Parallelism</td><td>MoE expert와 token routing</td><td>Sparse model을 확장함</td><td>All-to-All</td><td>Load imbalance, hot expert, all-to-all congestion</td></tr></tbody></table>
+<p>책은 주로 Data, Pipeline, Tensor Parallelism을 다룬다. 실제 LLM training system에서는 여기에 ZeRO/FSDP와 Expert Parallelism이 함께 사용되는 경우가 많다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="data-parallelism">Data Parallelism</h2><a class="sl-anchor-link" href="#data-parallelism"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Data Parallelism”</span></a></div>
+<p>Data Parallelism은 가장 단순하고 가장 널리 쓰이는 distributed training strategy다.</p>
+<p>각 GPU는 model의 full copy를 가지고, 서로 다른 mini-batch를 처리한다. Backward pass가 끝나면 각 GPU는 자신만의 gradient 값을 갖게 된다. 모든 model replica가 동일하게 유지되려면 이 gradient들을 동기화해야 한다. 책에서는 이를 각 GPU가 model replica를 들고 서로 다른 mini-batch를 처리한 뒤, iteration 끝에서 gradient를 synchronize하는 방식으로 설명한다.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    classDef gpu fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef batch fill:#173f32,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef sync fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    B1[Mini-batch A]:::batch --> G1[GPU 0&#x3C;br/>Model Replica]:::gpu
+    B2[Mini-batch B]:::batch --> G2[GPU 1&#x3C;br/>Model Replica]:::gpu
+    B3[Mini-batch C]:::batch --> G3[GPU 2&#x3C;br/>Model Replica]:::gpu
+    B4[Mini-batch D]:::batch --> G4[GPU 3&#x3C;br/>Model Replica]:::gpu
+
+    G1 --> AR[Gradient AllReduce]:::sync
+    G2 --> AR
+    G3 --> AR
+    G4 --> AR
+
+    AR --> U1[Same Updated Weights]</pre>
+<div class="sl-heading-wrapper level-h3"><h3 id="training-flow">Training Flow</h3><a class="sl-anchor-link" href="#training-flow"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Training Flow”</span></a></div>
+<ol>
+<li>각 GPU가 서로 다른 mini-batch를 받는다.</li>
+<li>각 GPU가 local forward pass를 수행한다.</li>
+<li>각 GPU가 local backward pass를 수행한다.</li>
+<li>각 GPU가 local gradient를 계산한다.</li>
+<li>Gradient를 AllReduce로 동기화한다.</li>
+<li>각 GPU가 동일한 averaged gradient로 자신의 model replica를 update한다.</li>
+</ol>
+<div class="sl-heading-wrapper level-h3"><h3 id="network-impact">Network Impact</h3><a class="sl-anchor-link" href="#network-impact"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Network Impact”</span></a></div>
+<p>Data Parallelism은 bursty synchronization traffic을 만든다.</p>
+<p>Computation 중에는 network가 비교적 조용할 수 있다. 하지만 gradient synchronization 시점에는 backend network가 갑자기 포화될 수 있다. GPU utilization은 synchronization이 얼마나 빨리 끝나는지에 영향을 받기 때문에 이 pattern이 중요하다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Phase</th><th>GPU activity</th><th>Network activity</th></tr></thead><tbody><tr><td>Forward pass</td><td>높음</td><td>낮음</td></tr><tr><td>Backward pass</td><td>높음</td><td>낮음~중간</td></tr><tr><td>Gradient sync</td><td>대기 + communication</td><td>매우 높음</td></tr><tr><td>Weight update</td><td>중간</td><td>낮음</td></tr></tbody></table>
+<p>책은 뒤에서 이 동작을 AllReduce 같은 collective communication과 연결한다. AllReduce 내부에는 ReduceScatter와 AllGather 단계가 포함될 수 있다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="lossless-transport-and-restart-cost">Lossless Transport and Restart Cost</h2><a class="sl-anchor-link" href="#lossless-transport-and-restart-cost"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Lossless Transport and Restart Cost”</span></a></div>
+<p>Chapter 8에서 특히 강조하는 부분은 inter-GPU communication이 <strong>낮은 latency</strong>와 <strong>lossless transport</strong>를 요구한다는 점이다.</p>
+<p>GPU가 같은 server 안에 있으면 PCIe나 NVLink를 사용할 수 있고, server를 넘어가면 InfiniBand, Ethernet/RoCE 같은 backend network를 사용한다. 어떤 transport를 사용하든 synchronization 중 packet loss가 발생하면 training step이 멈추거나 재시도되어 전체 training 시간이 늘어난다. Checkpoint 또는 snapshot이 없다면 최악의 경우 training을 처음부터 다시 시작해야 한다.</p>
+<p><starlight-image-zoom-zoomable><img src="/courses/deep-learning-for-network-engineers/week03/assets/lossless-transport-restart-cost.svg" alt="Lossless transport and restart cost"><button aria-label="Zoom image: Lossless transport and restart cost" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<p>책은 이를 전력 비용 예제로 설명한다. 예를 들어 GPU 50,000개가 full load에서 각 350W를 사용한다고 하면 전체 전력은 다음과 같다.</p>
+<div class="expressive-code"><link rel="stylesheet" href="/_astro/ec.v4551.css"><script type="module" src="/_astro/ec.0vx5m.js"></script><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">350 W × 50,000 GPU</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">= 17,500,000 W</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">= 17.5 MW</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="350 W × 50,000 GPU= 17,500,000 W= 17.5 MW"><div></div></button></div></figure></div>
+<p>이 상태로 60일, 즉 1,440시간 training을 수행하면 전력 사용량은 다음과 같다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">17.5 MW × 1,440 hours</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">= 25,200 MWh</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">= 25,200,000 kWh</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="17.5 MW × 1,440 hours= 25,200 MWh= 25,200,000 kWh"><div></div></button></div></figure></div>
+<p>전기요금을 kWh당 0.10 USD로 잡으면 전력 비용만 약 2.52M USD가 된다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">25,200,000 kWh × 0.10 USD</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">= 2,520,000 USD</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="25,200,000 kWh × 0.10 USD= 2,520,000 USD"><div></div></button></div></figure></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="network-engineer-관점">Network Engineer 관점</h3><a class="sl-anchor-link" href="#network-engineer-관점"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Network Engineer 관점”</span></a></div>
+<p>Lossless 또는 near-lossless network가 중요한 이유는 단순히 packet drop counter를 깨끗하게 유지하기 위해서가 아니다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Packet loss</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ synchronization stall</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ GPU idle time 증가</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ step time 증가</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ training cost 증가</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ checkpoint가 없으면 restart risk</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Packet loss→ synchronization stall→ GPU idle time 증가→ step time 증가→ training cost 증가→ checkpoint가 없으면 restart risk"><div></div></button></div></figure></div>
+<p>따라서 AI training fabric에서는 bandwidth뿐 아니라 PFC/ECN/DCQCN, RDMA 안정성, congestion control, checkpoint 주기까지 함께 봐야 한다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="pipeline-parallelism">Pipeline Parallelism</h2><a class="sl-anchor-link" href="#pipeline-parallelism"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Pipeline Parallelism”</span></a></div>
+<p>Pipeline Parallelism은 model을 layer 또는 stage 단위로 나누는 방식이다.</p>
+<p>모든 GPU가 전체 model을 들고 있는 대신, 각 GPU가 model의 서로 다른 부분을 담당한다. 책에서는 Pipeline Parallelism을 model을 여러 GPU에 나누고, 각 GPU가 forward/backward pass의 한 stage를 처리하는 방식으로 설명한다. Pipeline을 계속 채워 GPU utilization을 높이기 위해 micro-batch를 사용한다.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    classDef gpu fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef act fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef grad fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    X[Input Micro-batch] --> G0[GPU 0&#x3C;br/>Layers 1-10]:::gpu
+    G0 -->|activation| G1[GPU 1&#x3C;br/>Layers 11-20]:::gpu
+    G1 -->|activation| G2[GPU 2&#x3C;br/>Layers 21-30]:::gpu
+    G2 -->|activation| G3[GPU 3&#x3C;br/>Layers 31-40]:::gpu
+    G3 --> Y[Loss]
+
+    Y -->|gradient| G3
+    G3 -->|gradient| G2
+    G2 -->|gradient| G1
+    G1 -->|gradient| G0</pre>
+<div class="sl-heading-wrapper level-h3"><h3 id="pipeline-bubble">Pipeline Bubble</h3><a class="sl-anchor-link" href="#pipeline-bubble"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Pipeline Bubble”</span></a></div>
+<p>가장 큰 문제는 <strong>pipeline bubble</strong>이다.</p>
+<p>처음에는 첫 번째 GPU만 active 상태다. 중간 구간에서는 모든 GPU가 active가 될 수 있다. 끝에서는 앞쪽 stage가 먼저 일을 끝내고 idle 상태가 된다. Chapter 8은 여러 time step을 따라가며 pipeline이 채워지고 비워지는 동안 GPU utilization이 어떻게 바뀌는지 설명한다.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+sequenceDiagram
+    participant G0 as GPU0 Stage 1
+    participant G1 as GPU1 Stage 2
+    participant G2 as GPU2 Stage 3
+    participant G3 as GPU3 Stage 4
+
+    G0->>G1: micro-batch 1 activation
+    G0->>G1: micro-batch 2 activation
+    G1->>G2: micro-batch 1 activation
+    G0->>G1: micro-batch 3 activation
+    G1->>G2: micro-batch 2 activation
+    G2->>G3: micro-batch 1 activation</pre>
+<div class="sl-heading-wrapper level-h3"><h3 id="why-micro-batches-matter">Why Micro-batches Matter</h3><a class="sl-anchor-link" href="#why-micro-batches-matter"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Why Micro-batches Matter”</span></a></div>
+<p>Micro-batching은 pipeline stage들이 idle 상태에 머무는 시간을 줄이기 위해 사용된다.</p>
+<p>Micro-batch가 없으면 다음처럼 동작한다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">GPU0 works → GPU1 works → GPU2 works → GPU3 works</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="GPU0 works → GPU1 works → GPU2 works → GPU3 works"><div></div></button></div></figure></div>
+<p>Micro-batch를 사용하면 다음처럼 겹쳐서 처리할 수 있다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">GPU0 works on MB4</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">GPU1 works on MB3</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">GPU2 works on MB2</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">GPU3 works on MB1</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="GPU0 works on MB4GPU1 works on MB3GPU2 works on MB2GPU3 works on MB1"><div></div></button></div></figure></div>
+<p>목표는 GPU idle time을 줄이는 것이다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="time-step-utilization-example">Time-Step Utilization Example</h3><a class="sl-anchor-link" href="#time-step-utilization-example"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Time-Step Utilization Example”</span></a></div>
+<p>책의 pipeline 예시는 두 host에 각각 두 GPU가 있고, 총 네 GPU가 layer-wise model parallelism을 수행하는 구조를 사용한다. 첫 번째 hidden layer는 GPU 0a, 두 번째 hidden layer는 GPU 1a, 세 번째 hidden layer는 GPU 0b, output layer는 GPU 1b에 배치된다.</p>
+<p>Forward pass 초반에는 pipeline이 아직 채워지지 않았기 때문에 GPU utilization이 낮다. 중간에는 forward pass와 backward pass가 겹치면서 utilization이 올라가고, 끝에서는 pipeline이 비워지면서 다시 낮아진다.</p>
+<p><starlight-image-zoom-zoomable><img src="/courses/deep-learning-for-network-engineers/week03/assets/pipeline-bubble-timeline.svg" alt="Pipeline bubble timeline"><button aria-label="Zoom image: Pipeline bubble timeline" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Time step</th><th>Active GPU 비율</th><th>상태 요약</th></tr></thead><tbody><tr><td>t1</td><td>25%</td><td>첫 GPU만 첫 micro-batch를 처리함</td></tr><tr><td>t2</td><td>50%</td><td>두 번째 GPU가 이전 activation을 받아 처리 시작</td></tr><tr><td>t3</td><td>75%</td><td>세 번째 GPU까지 pipeline에 참여</td></tr><tr><td>t4</td><td>100%</td><td>네 GPU가 모두 active, 첫 backward pass도 시작</td></tr><tr><td>t5</td><td>75%</td><td>앞쪽 stage가 일부 idle, forward/backward overlap</td></tr><tr><td>t6</td><td>75%</td><td>Backward pass가 여러 stage로 확산</td></tr><tr><td>t7</td><td>100%</td><td>Backward pass에서도 모든 GPU가 active</td></tr><tr><td>t8</td><td>75%</td><td>Pipeline drain 시작</td></tr><tr><td>t9</td><td>50%</td><td>두 GPU만 남은 backward work 수행</td></tr><tr><td>t10</td><td>25%</td><td>마지막 GPU가 마지막 micro-batch update 수행</td></tr></tbody></table>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    classDef active fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef idle fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef peak fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    T1[t1&#x3C;br/>25%]:::idle --> T2[t2&#x3C;br/>50%]:::idle
+    T2 --> T3[t3&#x3C;br/>75%]:::active
+    T3 --> T4[t4&#x3C;br/>100%]:::peak
+    T4 --> T5[t5&#x3C;br/>75%]:::active
+    T5 --> T6[t6&#x3C;br/>75%]:::active
+    T6 --> T7[t7&#x3C;br/>100%]:::peak
+    T7 --> T8[t8&#x3C;br/>75%]:::active
+    T8 --> T9[t9&#x3C;br/>50%]:::idle
+    T9 --> T10[t10&#x3C;br/>25%]:::idle</pre>
+<p>여기서 중요한 점은 pipeline parallelism이 memory 문제를 해결하더라도 자동으로 GPU utilization을 최대로 만들지는 않는다는 것이다. Micro-batch 수, stage 균형, layer별 계산량, activation transfer latency가 함께 맞아야 한다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="network-impact-1">Network Impact</h3><a class="sl-anchor-link" href="#network-impact-1"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Network Impact”</span></a></div>
+<p>Pipeline Parallelism은 Data Parallelism처럼 전체 GPU가 한꺼번에 동기화되는 global synchronization pattern을 만들지는 않는 경우가 많다. 대신 stage 사이에서 activation과 gradient transfer가 발생한다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Communication</th><th>Direction</th><th>Timing</th></tr></thead><tbody><tr><td>Activation transfer</td><td>Forward</td><td>앞 stage에서 뒤 stage로 이동</td></tr><tr><td>Gradient transfer</td><td>Backward</td><td>뒤 stage에서 앞 stage로 이동</td></tr><tr><td>Weight update</td><td>Local per stage</td><td>Gradient 계산 이후</td></tr></tbody></table>
+<p>성능 문제는 bandwidth만의 문제가 아니다. Scheduling도 중요하다. 한 stage가 느리면 전체 pipeline이 멈춘다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="tensor-parallelism">Tensor Parallelism</h2><a class="sl-anchor-link" href="#tensor-parallelism"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Tensor Parallelism”</span></a></div>
+<p>Tensor Parallelism은 개별 tensor operation을 여러 GPU에 나누는 방식이다.</p>
+<p>단일 layer가 너무 커서 한 GPU에 들어가지 않거나, 한 GPU에서 효율적으로 계산하기 어려울 때 필요하다. 책에서는 Tensor Parallelism을 매우 큰 model layer를 작은 slice로 나누어 각 GPU가 matrix operation의 일부를 계산하는 방식으로 설명한다.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TB
+    classDef gpu fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef mat fill:#173f32,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef sync fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    X[Input Tensor X]:::mat
+
+    X --> G0[GPU 0&#x3C;br/>W shard 0]:::gpu
+    X --> G1[GPU 1&#x3C;br/>W shard 1]:::gpu
+    X --> G2[GPU 2&#x3C;br/>W shard 2]:::gpu
+    X --> G3[GPU 3&#x3C;br/>W shard 3]:::gpu
+
+    G0 --> P0[Partial Output 0]:::mat
+    G1 --> P1[Partial Output 1]:::mat
+    G2 --> P2[Partial Output 2]:::mat
+    G3 --> P3[Partial Output 3]:::mat
+
+    P0 --> AG[AllGather / AllReduce]:::sync
+    P1 --> AG
+    P2 --> AG
+    P3 --> AG
+
+    AG --> Y[Complete Output Tensor]:::mat</pre>
+<div class="sl-heading-wrapper level-h3"><h3 id="tensor-parallelism-in-transformers">Tensor Parallelism in Transformers</h3><a class="sl-anchor-link" href="#tensor-parallelism-in-transformers"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Tensor Parallelism in Transformers”</span></a></div>
+<p>Transformer model에서는 Tensor Parallelism이 보통 다음 위치에 적용된다.</p>
+<ul>
+<li>Self-Attention layer</li>
+<li>Q, K, V projection matrix</li>
+<li>Attention output projection</li>
+<li>Feedforward layer</li>
+<li>Large matrix multiplication</li>
+</ul>
+<p>책은 self-attention과 feedforward layer에서 Tensor Parallelism을 설명한다. Feedforward 예시에서는 hidden layer와 output layer를 GPU들에 나누고, partial result를 AllGather 같은 operation으로 synchronize한다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="tensor-parallelism-details-in-transformer-layers">Tensor Parallelism Details in Transformer Layers</h2><a class="sl-anchor-link" href="#tensor-parallelism-details-in-transformer-layers"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Tensor Parallelism Details in Transformer Layers”</span></a></div>
+<p>Chapter 8은 Transformer layer 내부에서 Tensor Parallelism이 어떻게 communication을 만드는지 더 구체적으로 설명한다.</p>
+<p><starlight-image-zoom-zoomable><img src="/courses/deep-learning-for-network-engineers/week03/assets/tensor-parallel-qkv-sync.svg" alt="Tensor parallel QKV synchronization"><button aria-label="Zoom image: Tensor parallel QKV synchronization" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<div class="sl-heading-wrapper level-h3"><h3 id="embedding-placement">Embedding Placement</h3><a class="sl-anchor-link" href="#embedding-placement"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Embedding Placement”</span></a></div>
+<p>대부분의 경우 word embedding matrix는 하나의 GPU에 둘 수 있다. 책은 embedding matrix가 큰 Transformer layer에 비해 상대적으로 작고, lookup operation이 matrix multiplication보다 계산 부담이 낮기 때문이라고 설명한다.</p>
+<p>Embedding matrix를 여러 GPU에 나누면 vocabulary shard별 lookup을 위해 cross-GPU communication이 자주 발생할 수 있다. 그래서 단순한 구성에서는 embedding lookup을 한 GPU에서 수행하고, 생성된 embedding vector를 Transformer computation에 참여하는 GPU들로 broadcast한다.</p>
+<p>다만 GPT-3급 대규모 model처럼 embedding 자체가 커지는 경우에는 distributed embedding을 사용할 수 있다. 예를 들어 row-wise parallelism에서는 vocabulary row를 GPU들에 나누고, 각 GPU가 자신이 가진 token embedding lookup을 담당한다.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    classDef gpu fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef emb fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef sync fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    T[Token IDs] --> G0[GPU A1&#x3C;br/>Embedding Lookup]:::gpu
+    G0 --> E[Embedding Vectors]:::emb
+    E --> B[Broadcast]:::sync
+    B --> G1[GPU A1&#x3C;br/>Transformer Shard]:::gpu
+    B --> G2[GPU A2&#x3C;br/>Transformer Shard]:::gpu</pre>
+<div class="sl-heading-wrapper level-h3"><h3 id="q-k-v-synchronization">Q, K, V Synchronization</h3><a class="sl-anchor-link" href="#q-k-v-synchronization"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Q, K, V Synchronization”</span></a></div>
+<p>Self-Attention에서 Q, K, V projection matrix가 GPU A1과 GPU A2에 shard되어 있다고 하자. 각 GPU는 자신이 가진 shard로 local Q/K/V fragment를 계산한다.</p>
+<p>책의 예시에서 중요한 차이는 다음과 같다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Matrix</th><th>Forward pass communication</th><th>이유</th></tr></thead><tbody><tr><td>Q</td><td>AllGather</td><td>Attention score 계산에 complete Q가 필요함</td></tr><tr><td>K</td><td>AllGather</td><td>Attention score 계산에 complete K가 필요함</td></tr><tr><td>V</td><td>Local shard 유지</td><td>SoftMax 결과와 local V fragment를 곱함</td></tr></tbody></table>
+<p>Self-Attention의 SoftMax는 final token prediction이 아니라 attention weight를 계산하기 위한 SoftMax다. Final prediction은 보통 output projection 이후 vocabulary 전체에 대한 SoftMax에서 수행된다. 이 구분은 Chapter 7의 LLM pipeline과 연결해서 이해해야 한다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Self-Attention SoftMax</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ attention weight 계산</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ context vector 생성</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Final SoftMax</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ vocabulary probability 계산</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ next token prediction</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Self-Attention SoftMax→ attention weight 계산→ context vector 생성Final SoftMax→ vocabulary probability 계산→ next token prediction"><div></div></button></div></figure></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="feedforward-layer-placement">Feedforward Layer Placement</h3><a class="sl-anchor-link" href="#feedforward-layer-placement"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Feedforward Layer Placement”</span></a></div>
+<p>책의 feedforward 예시는 Tensor Parallelism과 Pipeline Parallelism을 함께 사용한다. 한 hidden layer 안에서는 neuron 또는 weight matrix shard를 같은 server의 GPU들에 나누고, GPU 간 partial output은 NVLink 같은 high-speed domain에서 AllGather한다. 다음 hidden layer 또는 output layer로 넘어갈 때는 backend network를 사용한다.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TB
+    classDef hsd fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef net fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef gpu fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    subgraph H1["Stage H1 - Same Server / HsD"]
+        A1[GPU A1&#x3C;br/>H1 shard]:::gpu
+        B1[GPU B1&#x3C;br/>H1 shard]:::gpu
+        A1 &#x3C;-->|NVLink AllGather| B1
+    end
+
+    subgraph H2["Stage H2 - Same Server / HsD"]
+        A2[GPU A2&#x3C;br/>H2 shard]:::gpu
+        B2[GPU B2&#x3C;br/>H2 shard]:::gpu
+        A2 &#x3C;-->|NVLink AllGather| B2
+    end
+
+    A1 -->|RDMA / Rail 1| A2
+    B1 -->|RDMA / Rail 2| B2</pre>
+<p>책은 같은 rail switch에 연결된 GPU 사이의 traffic은 backend network에서 짧은 path를 갖고, 다른 rail 사이 통신이 필요하면 spine switch를 거쳐야 한다고 설명한다. Network Engineer 관점에서는 tensor-parallel sync는 server 내부 HsD에, stage transfer는 가능한 한 같은 rail에 배치하는 것이 중요하다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="backpropagation-communication">Backpropagation Communication</h3><a class="sl-anchor-link" href="#backpropagation-communication"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Backpropagation Communication”</span></a></div>
+<p>Backward pass에서는 forward pass보다 communication dependency가 더 복잡해진다.</p>
+<p>FFNN weight가 여러 GPU에 shard되어 있으면 각 GPU가 local gradient를 계산한 뒤, weight update 전에 gradient를 AllReduce로 맞춰야 한다. Self-Attention으로 error가 되돌아오면 Q/K/V matrix에 대한 gradient도 계산해야 한다. 이때 Q와 K는 forward pass와 마찬가지로 missing fragment를 AllGather해 complete matrix를 만든 뒤 local gradient를 계산하고, 이후 AllReduce로 gradient를 synchronize한다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">FFNN backward</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ local gradient</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ AllReduce</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ weight update</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Self-Attention backward</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ Q/K AllGather</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ local gradient</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ AllReduce</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ weight update</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="FFNN backward→ local gradient→ AllReduce→ weight updateSelf-Attention backward→ Q/K AllGather→ local gradient→ AllReduce→ weight update"><div></div></button></div></figure></div>
+<p>Network 관점에서 Tensor Parallelism은 forward path뿐 아니라 backward path에서도 layer 내부 collective communication을 반복한다. 그래서 Data Parallelism보다 latency에 더 민감하다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="why-tensor-parallelism-is-network-sensitive">Why Tensor Parallelism Is Network-Sensitive</h3><a class="sl-anchor-link" href="#why-tensor-parallelism-is-network-sensitive"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Why Tensor Parallelism Is Network-Sensitive”</span></a></div>
+<p>Tensor Parallelism은 Data Parallelism보다 latency에 더 민감하다.</p>
+<p>Data Parallelism은 보통 iteration 단위 또는 gradient bucket 단위로 동기화한다. 반면 Tensor Parallelism은 forward pass와 backward pass 모두에서 layer 내부 communication이 필요할 수 있다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Layer computation</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ sync</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ next layer computation</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ sync</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ backward computation</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">→ sync</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Layer computation→ sync→ next layer computation→ sync→ backward computation→ sync"><div></div></button></div></figure></div>
+<p>따라서 Tensor Parallelism은 다음 요소의 영향을 크게 받는다.</p>
+<ul>
+<li>Server 내부 NVLink / NVSwitch</li>
+<li>Server 간 InfiniBand 또는 고품질 RoCE</li>
+<li>Low-latency collective communication</li>
+<li>Topology-aware GPU placement</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="hybrid-parallelism">Hybrid Parallelism</h2><a class="sl-anchor-link" href="#hybrid-parallelism"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Hybrid Parallelism”</span></a></div>
+<p>실제 LLM training은 한 가지 전략만 사용하지 않는 경우가 많다.</p>
+<p>대규모 training job은 보통 다음 전략들을 조합한다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Data Parallelism</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">+ Tensor Parallelism</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">+ Pipeline Parallelism</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">+ ZeRO/FSDP</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">+ sometimes Expert Parallelism</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Data Parallelism+ Tensor Parallelism+ Pipeline Parallelism+ ZeRO/FSDP+ sometimes Expert Parallelism"><div></div></button></div></figure></div>
+<p>책은 한 stage 안에서는 Tensor Parallelism을 사용하고, stage 사이에서는 Pipeline Parallelism을 사용하는 예를 든다. 또한 같은 server 안의 GPU는 NVLink로 통신하고, stage 사이의 GPU는 backend network로 통신할 수 있다고 설명한다.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TB
+    classDef server fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef gpu fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef nv fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef net fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    subgraph S1["Server 1: Pipeline Stage 1"]
+        A0[GPU A0&#x3C;br/>Tensor shard]:::gpu
+        B0[GPU B0&#x3C;br/>Tensor shard]:::gpu
+        A0 &#x3C;-->|NVLink&#x3C;br/>Tensor Parallel Sync| B0
+    end
+
+    subgraph S2["Server 2: Pipeline Stage 2"]
+        A1[GPU A1&#x3C;br/>Tensor shard]:::gpu
+        B1[GPU B1&#x3C;br/>Tensor shard]:::gpu
+        A1 &#x3C;-->|NVLink&#x3C;br/>Tensor Parallel Sync| B1
+    end
+
+    subgraph S3["Server 3: Pipeline Stage 3"]
+        A2[GPU A2&#x3C;br/>Tensor shard]:::gpu
+        B2[GPU B2&#x3C;br/>Tensor shard]:::gpu
+        A2 &#x3C;-->|NVLink&#x3C;br/>Tensor Parallel Sync| B2
+    end
+
+    S1 -->|Activation / Gradient&#x3C;br/>Backend Network| S2
+    S2 -->|Activation / Gradient&#x3C;br/>Backend Network| S3</pre>
+<div class="sl-heading-wrapper level-h3"><h3 id="key-design-rule">Key Design Rule</h3><a class="sl-anchor-link" href="#key-design-rule"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Key Design Rule”</span></a></div>
+<p>가장 자주 발생하는 communication은 가장 빠른 communication domain 안에 배치한다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Communication frequency</th><th>더 나은 placement</th></tr></thead><tbody><tr><td>매우 빈번한 layer 내부 sync</td><td>Same server, NVLink/NVSwitch</td></tr><tr><td>Stage-to-stage transfer</td><td>가능하면 same rack 또는 same rail</td></tr><tr><td>Data parallel gradient sync</td><td>High-bandwidth backend fabric</td></tr><tr><td>Expert all-to-all</td><td>Topology-aware expert placement</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h2"><h2 id="practical-extensions-zero-fsdp-and-expert-parallelism">Practical Extensions: ZeRO, FSDP, and Expert Parallelism</h2><a class="sl-anchor-link" href="#practical-extensions-zero-fsdp-and-expert-parallelism"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Practical Extensions: ZeRO, FSDP, and Expert Parallelism”</span></a></div>
+<p>Chapter 8은 주로 Data, Pipeline, Tensor Parallelism을 다룬다. 하지만 현대 LLM training에서는 다음 세 가지 개념도 중요하다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="zero">ZeRO</h3><a class="sl-anchor-link" href="#zero"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “ZeRO”</span></a></div>
+<p>ZeRO는 data-parallel training에서 model state를 data-parallel process들에 나누어 memory redundancy를 줄인다. DeepSpeed는 ZeRO를 optimizer state, gradient, parameter를 모든 process에 복제하지 않고 partitioning하는 방식으로 설명한다. (<a href="https://deepspeed.readthedocs.io/en/latest/zero3.html" title="ZeRO - DeepSpeed documentation">DeepSpeed</a>)</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>ZeRO Stage</th><th>무엇을 sharding하는가?</th><th>주요 이점</th></tr></thead><tbody><tr><td>ZeRO-1</td><td>Optimizer state</td><td>Optimizer memory 감소</td></tr><tr><td>ZeRO-2</td><td>Optimizer state + gradient</td><td>추가 memory 감소</td></tr><tr><td>ZeRO-3</td><td>Optimizer state + gradient + parameter</td><td>가장 큰 memory 감소</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h3"><h3 id="fsdp">FSDP</h3><a class="sl-anchor-link" href="#fsdp"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “FSDP”</span></a></div>
+<p>FSDP는 PyTorch의 Fully Sharded Data Parallel 방식이다. PyTorch는 FSDP가 classic DDP와 비교해 model parameter, gradient, optimizer state를 sharding함으로써 GPU memory footprint를 줄이고, 단일 GPU에 들어가지 않는 model도 training할 수 있게 한다고 설명한다. (<a href="https://docs.pytorch.org/tutorials/intermediate/FSDP_tutorial.html" title="Getting Started with Fully Sharded Data Parallel">PyTorch Documentation</a>)</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    classDef gpu fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef shard fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef sync fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    G0[GPU0]:::gpu --> S0[Param / Grad / Optim Shard 0]:::shard
+    G1[GPU1]:::gpu --> S1[Param / Grad / Optim Shard 1]:::shard
+    G2[GPU2]:::gpu --> S2[Param / Grad / Optim Shard 2]:::shard
+    G3[GPU3]:::gpu --> S3[Param / Grad / Optim Shard 3]:::shard
+
+    S0 --> AG[AllGather before compute]:::sync
+    S1 --> AG
+    S2 --> AG
+    S3 --> AG
+
+    AG --> RS[ReduceScatter after backward]:::sync</pre>
+<div class="sl-heading-wrapper level-h3"><h3 id="expert-parallelism">Expert Parallelism</h3><a class="sl-anchor-link" href="#expert-parallelism"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Expert Parallelism”</span></a></div>
+<p>Expert Parallelism은 Mixture-of-Experts, MoE model에서 사용된다.</p>
+<p>모든 token에 대해 전체 feedforward network를 활성화하는 대신, MoE model은 각 token을 하나 또는 소수의 expert로 routing한다. MoE 논문들은 이를 여러 expert subnetwork를 두고 input token마다 하나 또는 몇 개의 expert만 활성화하는 방식으로 설명한다. (<a href="https://papers.neurips.cc/paper_files/paper/2022/file/2f00ecd787b432c1d36f3de9800728eb-Paper-Conference.pdf" title="Mixture-of-Experts with Expert Choice Routing">NeurIPS Papers</a>)</p>
+<p>어려운 부분은 communication이다. Expert가 여러 GPU에 분산되어 있으면, token을 가진 GPU와 선택된 expert가 있는 GPU 사이에 token을 교환해야 한다. 이때 All-to-All communication이 발생한다.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart TB
+    classDef gpu fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef token fill:#5a3520,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef warn fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    T[Input Tokens]:::token --> R[Router / Gate]
+
+    R --> E0[Expert 0&#x3C;br/>GPU0]:::gpu
+    R --> E1[Expert 1&#x3C;br/>GPU1]:::gpu
+    R --> E2[Expert 2&#x3C;br/>GPU2]:::gpu
+    R --> E3[Expert 3&#x3C;br/>GPU3]:::gpu
+
+    E0 --> A2A[All-to-All Token Exchange]:::warn
+    E1 --> A2A
+    E2 --> A2A
+    E3 --> A2A</pre>
+<p>주요 문제는 다음과 같다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Problem</th><th>의미</th></tr></thead><tbody><tr><td>Hot expert</td><td>특정 expert로 너무 많은 token이 routing됨</td></tr><tr><td>Load imbalance</td><td>일부 GPU가 과부하되고 다른 GPU는 대기함</td></tr><tr><td>All-to-All congestion</td><td>여러 GPU pair 사이로 token이 이동함</td></tr><tr><td>Tail latency</td><td>가장 느린 expert path가 전체 step을 지연함</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h2"><h2 id="network-impact-2">Network Impact</h2><a class="sl-anchor-link" href="#network-impact-2"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Network Impact”</span></a></div>
+<p>Parallelism strategy는 traffic pattern을 결정한다.</p>
+<p>Network Engineer 입장에서 가장 중요한 포인트다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Strategy</th><th>Traffic pattern</th><th>Network stress</th></tr></thead><tbody><tr><td>Data Parallelism</td><td>주기적인 gradient AllReduce</td><td>High bandwidth burst</td></tr><tr><td>Pipeline Parallelism</td><td>Activation/gradient stage transfer</td><td>Latency + scheduling</td></tr><tr><td>Tensor Parallelism</td><td>Layer 내부 collective communication</td><td>Ultra-low latency</td></tr><tr><td>ZeRO/FSDP</td><td>Parameter/gradient sharding communication</td><td>Frequent AllGather/ReduceScatter</td></tr><tr><td>Expert Parallelism</td><td>Token All-to-All</td><td>Many-to-many congestion</td></tr></tbody></table>
+<p>AI training fabric은 GPU-to-GPU east-west traffic과 collective communication을 처리해야 한다. 따라서 bandwidth, latency, congestion control이 핵심 설계 요소가 된다.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    classDef compute fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef sync fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef net fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+
+    C1[Forward / Backward Compute]:::compute
+    S1[Collective Communication]:::sync
+    N1[Backend Network]:::net
+    C2[Next Training Step]:::compute
+
+    C1 --> S1
+    S1 --> N1
+    N1 --> C2</pre>
+<div class="sl-heading-wrapper level-h3"><h3 id="important-network-properties">Important Network Properties</h3><a class="sl-anchor-link" href="#important-network-properties"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Important Network Properties”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Property</th><th>왜 중요한가</th></tr></thead><tbody><tr><td>Bandwidth</td><td>Gradient, activation, parameter, token을 빠르게 이동시킴</td></tr><tr><td>Low latency</td><td>의존 관계가 있는 operation 사이에서 GPU 대기를 줄임</td></tr><tr><td>Low jitter</td><td>Training step time을 예측 가능하게 유지함</td></tr><tr><td>Lossless or near-lossless behavior</td><td>Retransmission, stall, RDMA failure를 줄임</td></tr><tr><td>Topology awareness</td><td>자주 통신하는 GPU를 가깝게 배치함</td></tr><tr><td>Congestion control</td><td>Incast와 egress buffer overflow를 방지함</td></tr><tr><td>Collective optimization</td><td>AllReduce, AllGather, ReduceScatter, All-to-All을 최적화함</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h2"><h2 id="design-decision-matrix">Design Decision Matrix</h2><a class="sl-anchor-link" href="#design-decision-matrix"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Design Decision Matrix”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Situation</th><th>Recommended strategy</th><th>Network implication</th></tr></thead><tbody><tr><td>Dataset이 크고 model은 한 GPU에 들어감</td><td>Data Parallelism</td><td>Gradient AllReduce bandwidth가 중요함</td></tr><tr><td>Model layer 수가 많음</td><td>Pipeline Parallelism</td><td>Stage 간 activation/gradient transfer 발생</td></tr><tr><td>단일 layer가 너무 큼</td><td>Tensor Parallelism</td><td>NVLink/NVSwitch 또는 매우 낮은 latency backend 필요</td></tr><tr><td>Optimizer state가 memory를 지배함</td><td>ZeRO-1 / ZeRO-2</td><td>Gradient/optimizer state communication 증가</td></tr><tr><td>Parameter도 들어가지 않음</td><td>ZeRO-3 / FSDP</td><td>잦은 parameter AllGather 발생</td></tr><tr><td>Expert가 많은 MoE model</td><td>Expert Parallelism</td><td>All-to-All과 load balancing이 중요해짐</td></tr><tr><td>Multi-node training</td><td>Hybrid parallelism</td><td>Fabric topology와 NCCL tuning이 중요함</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h2"><h2 id="practical-tips-and-notes">Practical Tips and Notes</h2><a class="sl-anchor-link" href="#practical-tips-and-notes"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Practical Tips and Notes”</span></a></div>
+<p>아래 내용은 책의 Chapter 8에 직접 나오는 설명은 아니지만, 실제 training cluster를 운영하거나 troubleshooting할 때 자주 마주치는 포인트다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="1-memory-breakdown부터-계산하기">1. Memory breakdown부터 계산하기</h3><a class="sl-anchor-link" href="#1-memory-breakdown부터-계산하기"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “1. Memory breakdown부터 계산하기”</span></a></div>
+<p>Parallelism strategy를 정하기 전에 parameter size만 보지 말고 다음 항목을 함께 계산한다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">parameter</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">+ gradient</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">+ optimizer state</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">+ activation</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">+ temporary buffer</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">+ fragmentation/headroom</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="parameter+ gradient+ optimizer state+ activation+ temporary buffer+ fragmentation/headroom"><div></div></button></div></figure></div>
+<p>Training에서는 activation과 optimizer state가 memory를 크게 차지하므로, “model parameter가 GPU에 들어간다”는 말만으로는 충분하지 않다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="2-tensor-parallel-group은-같은-high-speed-domain에-배치하기">2. Tensor Parallel group은 같은 high-speed domain에 배치하기</h3><a class="sl-anchor-link" href="#2-tensor-parallel-group은-같은-high-speed-domain에-배치하기"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “2. Tensor Parallel group은 같은 high-speed domain에 배치하기”</span></a></div>
+<p>Tensor Parallelism은 layer 내부에서 자주 통신하므로 latency에 민감하다. 가능하면 같은 server 안의 NVLink/NVSwitch domain에 먼저 배치한다.</p>
+<p>반면 Data Parallelism의 gradient sync는 비교적 큰 bucket 단위로 묶을 수 있어 backend fabric bandwidth의 영향을 더 많이 받는다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="3-nccl-문제는-topology부터-보기">3. NCCL 문제는 topology부터 보기</h3><a class="sl-anchor-link" href="#3-nccl-문제는-topology부터-보기"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3. NCCL 문제는 topology부터 보기”</span></a></div>
+<p>NCCL 성능 문제는 model code 문제가 아니라 topology 문제인 경우가 많다.</p>
+<p><code dir="auto">nvidia-smi topo -m</code>, PCIe/NIC locality, NUMA affinity, rail alignment를 먼저 확인한다. GPU가 올바른 NIC를 사용하지 않으면 bandwidth가 충분해 보여도 step time이 흔들릴 수 있다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="4-collective-benchmark는-workload별로-나누기">4. Collective benchmark는 workload별로 나누기</h3><a class="sl-anchor-link" href="#4-collective-benchmark는-workload별로-나누기"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “4. Collective benchmark는 workload별로 나누기”</span></a></div>
+<p>Data Parallelism은 AllReduce, FSDP/ZeRO는 AllGather와 ReduceScatter, MoE는 All-to-All이 중요하다.</p>
+<p><code dir="auto">all_reduce_perf</code> 하나만으로 전체 training network 성능을 판단하면 안 된다. 실제 병목 collective가 무엇인지 모르면 network tuning 방향도 틀릴 수 있다.</p>
+<aside aria-label="Caution" class="starlight-aside starlight-aside--caution"><p class="starlight-aside__title" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="starlight-aside__icon"><path d="M12 16C11.8022 16 11.6089 16.0587 11.4444 16.1686C11.28 16.2784 11.1518 16.4346 11.0761 16.6173C11.0004 16.8001 10.9806 17.0011 11.0192 17.1951C11.0578 17.3891 11.153 17.5673 11.2929 17.7071C11.4327 17.847 11.6109 17.9422 11.8049 17.9808C11.9989 18.0194 12.2 17.9996 12.3827 17.9239C12.5654 17.8482 12.7216 17.72 12.8315 17.5556C12.9413 17.3911 13 17.1978 13 17C13 16.7348 12.8946 16.4805 12.7071 16.2929C12.5196 16.1054 12.2652 16 12 16ZM22.67 17.47L14.62 3.47003C14.3598 3.00354 13.9798 2.61498 13.5192 2.3445C13.0586 2.07401 12.5341 1.9314 12 1.9314C11.4659 1.9314 10.9414 2.07401 10.4808 2.3445C10.0202 2.61498 9.64019 3.00354 9.38 3.47003L1.38 17.47C1.11079 17.924 0.966141 18.441 0.960643 18.9688C0.955144 19.4966 1.089 20.0166 1.34868 20.4761C1.60837 20.9356 1.9847 21.3185 2.43968 21.5861C2.89466 21.8536 3.41218 21.9964 3.94 22H20.06C20.5921 22.0053 21.1159 21.8689 21.5779 21.6049C22.0399 21.341 22.4234 20.9589 22.689 20.4978C22.9546 20.0368 23.0928 19.5134 23.0895 18.9814C23.0862 18.4493 22.9414 17.9277 22.67 17.47ZM20.94 19.47C20.8523 19.626 20.7245 19.7556 20.5697 19.8453C20.4149 19.935 20.2389 19.9815 20.06 19.98H3.94C3.76111 19.9815 3.5851 19.935 3.43032 19.8453C3.27553 19.7556 3.14765 19.626 3.06 19.47C2.97223 19.318 2.92602 19.1456 2.92602 18.97C2.92602 18.7945 2.97223 18.622 3.06 18.47L11.06 4.47003C11.1439 4.30623 11.2714 4.16876 11.4284 4.07277C11.5855 3.97678 11.766 3.92599 11.95 3.92599C12.134 3.92599 12.3145 3.97678 12.4716 4.07277C12.6286 4.16876 12.7561 4.30623 12.84 4.47003L20.89 18.47C20.9892 18.6199 21.0462 18.7937 21.055 18.9732C21.0638 19.1527 21.0241 19.3312 20.94 19.49V19.47ZM12 8.00003C11.7348 8.00003 11.4804 8.10538 11.2929 8.29292C11.1054 8.48046 11 8.73481 11 9.00003V13C11 13.2652 11.1054 13.5196 11.2929 13.7071C11.4804 13.8947 11.7348 14 12 14C12.2652 14 12.5196 13.8947 12.7071 13.7071C12.8946 13.5196 13 13.2652 13 13V9.00003C13 8.73481 12.8946 8.48046 12.7071 8.29292C12.5196 8.10538 12.2652 8.00003 12 8.00003Z"></path></svg>Caution</p><div class="starlight-aside__content"><p>Average step time만 보면 straggler를 놓치기 쉽다.</p><p>P50/P95/P99 step time, GPU별 iteration time, NCCL timeout, retransmission/drop counter를 함께 봐야 한다. Training job은 가장 느린 rank에 맞춰 진행되기 때문에 tail latency가 곧 전체 성능이다.</p></div></aside>
+<div class="sl-heading-wrapper level-h3"><h3 id="5-micro-batch-size는-utilization과-memory의-tradeoff다">5. Micro-batch size는 utilization과 memory의 tradeoff다</h3><a class="sl-anchor-link" href="#5-micro-batch-size는-utilization과-memory의-tradeoff다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “5. Micro-batch size는 utilization과 memory의 tradeoff다”</span></a></div>
+<p>Micro-batch를 늘리면 pipeline bubble은 줄어들 수 있지만 activation memory가 증가한다. 반대로 너무 작으면 memory는 줄어도 pipeline stage가 충분히 채워지지 않아 GPU가 idle 상태로 남는다.</p>
+<p>따라서 micro-batch size는 단순한 batch tuning 값이 아니라 GPU utilization, activation memory, pipeline bubble을 함께 바꾸는 parameter다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="6-checkpoint-주기는-reliability-parameter다">6. Checkpoint 주기는 reliability parameter다</h3><a class="sl-anchor-link" href="#6-checkpoint-주기는-reliability-parameter다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “6. Checkpoint 주기는 reliability parameter다”</span></a></div>
+<p>Checkpoint 주기는 storage 문제가 아니라 training reliability 문제이기도 하다.</p>
+<p>너무 자주 저장하면 storage/network I/O가 training을 방해하고, 너무 드물게 저장하면 장애 시 재계산 비용이 커진다. 대규모 job에서는 checkpoint write time, object storage throughput, restart time을 함께 측정한다.</p>
+<aside aria-label="Caution" class="starlight-aside starlight-aside--caution"><p class="starlight-aside__title" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="starlight-aside__icon"><path d="M12 16C11.8022 16 11.6089 16.0587 11.4444 16.1686C11.28 16.2784 11.1518 16.4346 11.0761 16.6173C11.0004 16.8001 10.9806 17.0011 11.0192 17.1951C11.0578 17.3891 11.153 17.5673 11.2929 17.7071C11.4327 17.847 11.6109 17.9422 11.8049 17.9808C11.9989 18.0194 12.2 17.9996 12.3827 17.9239C12.5654 17.8482 12.7216 17.72 12.8315 17.5556C12.9413 17.3911 13 17.1978 13 17C13 16.7348 12.8946 16.4805 12.7071 16.2929C12.5196 16.1054 12.2652 16 12 16ZM22.67 17.47L14.62 3.47003C14.3598 3.00354 13.9798 2.61498 13.5192 2.3445C13.0586 2.07401 12.5341 1.9314 12 1.9314C11.4659 1.9314 10.9414 2.07401 10.4808 2.3445C10.0202 2.61498 9.64019 3.00354 9.38 3.47003L1.38 17.47C1.11079 17.924 0.966141 18.441 0.960643 18.9688C0.955144 19.4966 1.089 20.0166 1.34868 20.4761C1.60837 20.9356 1.9847 21.3185 2.43968 21.5861C2.89466 21.8536 3.41218 21.9964 3.94 22H20.06C20.5921 22.0053 21.1159 21.8689 21.5779 21.6049C22.0399 21.341 22.4234 20.9589 22.689 20.4978C22.9546 20.0368 23.0928 19.5134 23.0895 18.9814C23.0862 18.4493 22.9414 17.9277 22.67 17.47ZM20.94 19.47C20.8523 19.626 20.7245 19.7556 20.5697 19.8453C20.4149 19.935 20.2389 19.9815 20.06 19.98H3.94C3.76111 19.9815 3.5851 19.935 3.43032 19.8453C3.27553 19.7556 3.14765 19.626 3.06 19.47C2.97223 19.318 2.92602 19.1456 2.92602 18.97C2.92602 18.7945 2.97223 18.622 3.06 18.47L11.06 4.47003C11.1439 4.30623 11.2714 4.16876 11.4284 4.07277C11.5855 3.97678 11.766 3.92599 11.95 3.92599C12.134 3.92599 12.3145 3.97678 12.4716 4.07277C12.6286 4.16876 12.7561 4.30623 12.84 4.47003L20.89 18.47C20.9892 18.6199 21.0462 18.7937 21.055 18.9732C21.0638 19.1527 21.0241 19.3312 20.94 19.49V19.47ZM12 8.00003C11.7348 8.00003 11.4804 8.10538 11.2929 8.29292C11.1054 8.48046 11 8.73481 11 9.00003V13C11 13.2652 11.1054 13.5196 11.2929 13.7071C11.4804 13.8947 11.7348 14 12 14C12.2652 14 12.5196 13.8947 12.7071 13.7071C12.8946 13.5196 13 13.2652 13 13V9.00003C13 8.73481 12.8946 8.48046 12.7071 8.29292C12.5196 8.10538 12.2652 8.00003 12 8.00003Z"></path></svg>Caution</p><div class="starlight-aside__content"><p>RoCE fabric에서는 “lossless 설정을 했다”와 “lossless로 동작한다”가 다르다.</p><p>PFC, ECN, DCQCN, buffer profile, MTU, QoS marking, switch counter를 실제 traffic 아래에서 확인해야 한다. 특히 incast 상황에서 pause frame storm이나 head-of-line blocking이 생기지 않는지 봐야 한다.</p></div></aside>
+<div class="sl-heading-wrapper level-h2"><h2 id="operational-validation-checklist">Operational Validation Checklist</h2><a class="sl-anchor-link" href="#operational-validation-checklist"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Operational Validation Checklist”</span></a></div>
+<p>대규모 training을 실행하기 전에 다음 항목을 확인한다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="gpu-and-runtime">GPU and Runtime</h3><a class="sl-anchor-link" href="#gpu-and-runtime"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “GPU and Runtime”</span></a></div>
+<ul class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled> GPU topology 확인: <code dir="auto">nvidia-smi topo -m</code></li>
+<li class="task-list-item"><input type="checkbox" disabled> NVLink/NVSwitch 연결 상태 확인</li>
+<li class="task-list-item"><input type="checkbox" disabled> CUDA / NCCL / PyTorch 버전 정합성 확인</li>
+<li class="task-list-item"><input type="checkbox" disabled> GPU별 PCIe/NIC locality 확인</li>
+<li class="task-list-item"><input type="checkbox" disabled> GPU memory headroom 확인</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="distributed-training">Distributed Training</h3><a class="sl-anchor-link" href="#distributed-training"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Distributed Training”</span></a></div>
+<ul class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled> Data Parallel group 확인</li>
+<li class="task-list-item"><input type="checkbox" disabled> Tensor Parallel group 확인</li>
+<li class="task-list-item"><input type="checkbox" disabled> Pipeline Parallel stage mapping 확인</li>
+<li class="task-list-item"><input type="checkbox" disabled> FSDP/ZeRO sharding policy 확인</li>
+<li class="task-list-item"><input type="checkbox" disabled> MoE expert placement 확인</li>
+<li class="task-list-item"><input type="checkbox" disabled> Global batch size / micro-batch size / gradient accumulation step 확인</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="network">Network</h3><a class="sl-anchor-link" href="#network"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Network”</span></a></div>
+<ul class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled> NIC bandwidth 확인: 200G/400G/800G</li>
+<li class="task-list-item"><input type="checkbox" disabled> RDMA/RoCE/InfiniBand 동작 확인</li>
+<li class="task-list-item"><input type="checkbox" disabled> MTU, PFC, ECN, DCQCN 설정 확인</li>
+<li class="task-list-item"><input type="checkbox" disabled> NCCL interface binding 확인: <code dir="auto">NCCL_SOCKET_IFNAME</code>, <code dir="auto">NCCL_IB_HCA</code></li>
+<li class="task-list-item"><input type="checkbox" disabled> Rail alignment 확인</li>
+<li class="task-list-item"><input type="checkbox" disabled> Cross-rail traffic 발생 여부 확인</li>
+<li class="task-list-item"><input type="checkbox" disabled> AllReduce / AllGather / ReduceScatter benchmark 수행</li>
+<li class="task-list-item"><input type="checkbox" disabled> Egress congestion 및 packet drop counter 확인</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="performance">Performance</h3><a class="sl-anchor-link" href="#performance"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Performance”</span></a></div>
+<ul class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled> GPU utilization 확인</li>
+<li class="task-list-item"><input type="checkbox" disabled> Step time variance 확인</li>
+<li class="task-list-item"><input type="checkbox" disabled> Communication/compute overlap 확인</li>
+<li class="task-list-item"><input type="checkbox" disabled> Straggler GPU 확인</li>
+<li class="task-list-item"><input type="checkbox" disabled> Pipeline bubble 비율 확인</li>
+<li class="task-list-item"><input type="checkbox" disabled> All-to-All 시간 확인</li>
+<li class="task-list-item"><input type="checkbox" disabled> Checkpoint 저장 주기 확인</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="chapter-summary">Chapter Summary</h2><a class="sl-anchor-link" href="#chapter-summary"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Chapter Summary”</span></a></div>
+<p>Chapter 8은 model, data, gradient, optimizer state가 단일 GPU의 capacity를 초과할 때 deep learning training을 왜 distributed 방식으로 수행해야 하는지 설명한다.</p>
+<p>Data Parallelism은 dataset을 나누고 model은 복제한다. 단순하지만 gradient synchronization이 필요하다.</p>
+<p>Pipeline Parallelism은 model을 stage 단위로 나눈다. Memory scalability를 높일 수 있지만 pipeline bubble이 생긴다.</p>
+<p>Tensor Parallelism은 큰 layer 내부의 matrix operation을 나눈다. 매우 큰 Transformer model에서는 필수적이지만 communication latency에 매우 민감하다.</p>
+<p>Chapter 8의 예시처럼 Self-Attention에서는 Q/K shard를 AllGather해야 하고, FFNN에서는 partial output과 gradient를 synchronize해야 한다. 따라서 Tensor Parallelism은 forward pass와 backward pass 모두에서 반복적인 collective communication을 만든다.</p>
+<p>Pipeline Parallelism은 time step에 따라 GPU utilization이 25%, 50%, 75%, 100%로 변한다. Micro-batch가 충분하지 않거나 stage balance가 맞지 않으면 pipeline bubble 때문에 GPU가 idle 상태로 남는다.</p>
+<p>Network 관점에서는 lossless transport도 중요하다. 장기간 training 중 synchronization failure가 발생하면 GPU idle time과 restart risk가 커지고, 이는 전력 비용과 전체 training cost로 이어진다.</p>
+<p>현대 LLM training에서는 이런 전략들이 보통 ZeRO, FSDP, 때로는 Expert Parallelism과 함께 사용된다.</p>
+<p>Network Engineer 관점에서 핵심 교훈은 다음과 같다.</p>
+<blockquote>
+<p>Parallelism strategy가 communication pattern을 결정하고, communication pattern이 AI fabric requirement를 결정한다.</p>
+</blockquote>
+<div class="sl-heading-wrapper level-h2"><h2 id="key-terms">Key Terms</h2><a class="sl-anchor-link" href="#key-terms"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Key Terms”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Term</th><th>Meaning</th></tr></thead><tbody><tr><td>Data Parallelism</td><td>각 GPU에 같은 model을 두고 서로 다른 mini-batch를 처리하는 방식</td></tr><tr><td>Model Parallelism</td><td>Model을 여러 GPU에 나누는 방식</td></tr><tr><td>Pipeline Parallelism</td><td>Model layer를 순차 stage로 나누는 방식</td></tr><tr><td>Tensor Parallelism</td><td>Tensor/matrix operation을 여러 GPU에 나누는 방식</td></tr><tr><td>Micro-batch</td><td>Pipeline stage를 채우기 위해 사용하는 더 작은 batch 단위</td></tr><tr><td>Pipeline Bubble</td><td>Pipeline fill/drain 과정에서 생기는 idle time</td></tr><tr><td>AllReduce</td><td>모든 rank의 값을 집계하고 결과를 모든 rank에 공유하는 collective operation</td></tr><tr><td>AllGather</td><td>모든 rank의 shard를 모아 각 rank에 complete result를 제공하는 operation</td></tr><tr><td>ReduceScatter</td><td>값을 reduce한 뒤 결과 shard를 각 rank에 나누어 주는 operation</td></tr><tr><td>ZeRO</td><td>Optimizer, gradient, parameter state를 partitioning하는 memory optimization</td></tr><tr><td>FSDP</td><td>PyTorch의 sharded data parallel training 방식</td></tr><tr><td>Expert Parallelism</td><td>MoE expert를 여러 device에 분산하는 방식</td></tr><tr><td>All-to-All</td><td>모든 rank가 다른 모든 rank와 data를 교환하는 communication pattern</td></tr><tr><td>Straggler</td><td>전체 training step을 지연시키는 느린 GPU 또는 rank</td></tr><tr><td>Backend Network</td><td>GPU-to-GPU east-west training fabric</td></tr><tr><td>HsD</td><td>High-speed Domain. 같은 server 안의 NVLink/NVSwitch 통신 영역</td></tr><tr><td>RDMA</td><td>CPU 개입을 줄이고 remote memory access를 수행하는 network mechanism</td></tr><tr><td>RoCEv2</td><td>Ethernet 위에서 RDMA를 제공하는 protocol</td></tr><tr><td>Rail</td><td>GPU/NIC/switch path를 정렬해 traffic locality를 높이는 network 설계 단위</td></tr><tr><td>DMA</td><td>GPU 또는 device memory 간 data copy를 CPU 개입 없이 수행하는 방식</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h2"><h2 id="questions">Questions</h2><a class="sl-anchor-link" href="#questions"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Questions”</span></a></div>
+<ol>
+<li>Data Parallelism은 왜 gradient synchronization을 필요로 하는가?</li>
+<li>Pipeline bubble은 왜 발생하는가?</li>
+<li>Tensor Parallelism은 왜 Data Parallelism보다 latency에 더 민감한가?</li>
+<li>AllReduce, AllGather, ReduceScatter의 차이는 무엇인가?</li>
+<li>ZeRO와 FSDP는 왜 memory 사용량을 줄이지만 communication을 늘리는가?</li>
+<li>MoE Expert Parallelism은 왜 All-to-All traffic을 만드는가?</li>
+<li>Parallelism strategy는 AI data center network design에 어떤 영향을 주는가?</li>
+<li>Server 내부 Tensor Parallelism에서 NVLink가 선호되는 이유는 무엇인가?</li>
+<li>단일 slow GPU가 왜 전체 training job을 지연시킬 수 있는가?</li>
+<li>MLOps engineer가 training job을 8 GPU에서 64 GPU로 확장하기 전에 무엇을 검증해야 하는가?</li>
+<li>Chapter 8의 전력 비용 예제가 network 설계와 연결되는 지점은 무엇인가?</li>
+<li>Self-Attention Tensor Parallelism에서 Q/K와 V의 communication 방식은 어떻게 다른가?</li>
+<li>Pipeline Parallelism에서 time step별 GPU utilization이 변하는 이유는 무엇인가?</li>
+<li>Tensor Parallelism의 backward pass에서는 어떤 collective communication이 중요한가?</li>
+</ol>
+<div class="sl-heading-wrapper level-h2"><h2 id="answers">Answers</h2><a class="sl-anchor-link" href="#answers"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Answers”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="1-data-parallelism은-왜-gradient-synchronization을-필요로-하는가">1. Data Parallelism은 왜 gradient synchronization을 필요로 하는가?</h3><a class="sl-anchor-link" href="#1-data-parallelism은-왜-gradient-synchronization을-필요로-하는가"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “1. Data Parallelism은 왜 gradient synchronization을 필요로 하는가?”</span></a></div>
+<p>각 GPU가 서로 다른 mini-batch를 처리하고 서로 다른 local gradient를 계산하기 때문이다. 각 GPU가 독립적으로 weight를 update하면 model replica가 서로 달라진다. Gradient synchronization은 모든 GPU가 같은 averaged gradient를 사용해 동일한 model weight를 유지하게 한다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="2-pipeline-bubble은-왜-발생하는가">2. Pipeline bubble은 왜 발생하는가?</h3><a class="sl-anchor-link" href="#2-pipeline-bubble은-왜-발생하는가"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “2. Pipeline bubble은 왜 발생하는가?”</span></a></div>
+<p>Pipeline bubble은 일부 pipeline stage가 idle 상태일 때 발생한다. Training step 초반에는 뒤쪽 stage가 activation을 기다린다. 끝에서는 앞쪽 stage가 먼저 끝나 idle 상태가 된다. Micro-batch는 이 idle time을 줄인다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="3-tensor-parallelism은-왜-data-parallelism보다-latency에-더-민감한가">3. Tensor Parallelism은 왜 Data Parallelism보다 latency에 더 민감한가?</h3><a class="sl-anchor-link" href="#3-tensor-parallelism은-왜-data-parallelism보다-latency에-더-민감한가"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3. Tensor Parallelism은 왜 Data Parallelism보다 latency에 더 민감한가?”</span></a></div>
+<p>Tensor Parallelism은 model layer 내부에서 communication을 필요로 한다. 다른 GPU의 partial result를 gather하거나 reduce하기 전에는 다음 계산으로 진행할 수 없는 경우가 많다. Data Parallelism은 보통 gradient synchronization 지점에서 통신하지만, Tensor Parallelism은 더 자주 통신한다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="4-allreduce-allgather-reducescatter의-차이는-무엇인가">4. AllReduce, AllGather, ReduceScatter의 차이는 무엇인가?</h3><a class="sl-anchor-link" href="#4-allreduce-allgather-reducescatter의-차이는-무엇인가"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “4. AllReduce, AllGather, ReduceScatter의 차이는 무엇인가?”</span></a></div>
+<p>AllReduce는 모든 rank의 값을 집계하고 full result를 모든 rank에 돌려준다. AllGather는 모든 rank의 shard를 모아 모든 rank가 complete result를 갖게 한다. ReduceScatter는 값을 reduce한 뒤 결과의 shard만 각 rank에 나누어 준다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="5-zero와-fsdp는-왜-memory-사용량을-줄이지만-communication을-늘리는가">5. ZeRO와 FSDP는 왜 memory 사용량을 줄이지만 communication을 늘리는가?</h3><a class="sl-anchor-link" href="#5-zero와-fsdp는-왜-memory-사용량을-줄이지만-communication을-늘리는가"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “5. ZeRO와 FSDP는 왜 memory 사용량을 줄이지만 communication을 늘리는가?”</span></a></div>
+<p>Parameter, gradient, optimizer state를 모든 GPU에 복제하지 않고 shard로 나누기 때문이다. Memory는 절약되지만, 계산 전에 parameter를 gather하고 backward computation 이후 gradient를 scatter/reduce하기 위해 GPU 간 communication이 필요하다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="6-moe-expert-parallelism은-왜-all-to-all-traffic을-만드는가">6. MoE Expert Parallelism은 왜 All-to-All traffic을 만드는가?</h3><a class="sl-anchor-link" href="#6-moe-expert-parallelism은-왜-all-to-all-traffic을-만드는가"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “6. MoE Expert Parallelism은 왜 All-to-All traffic을 만드는가?”</span></a></div>
+<p>Token이 서로 다른 expert로 routing되고, 그 expert들이 서로 다른 GPU에 있을 수 있기 때문이다. Token은 현재 위치한 GPU에서 선택된 expert가 있는 GPU로 이동해야 하며, 이 과정이 many-to-many communication을 만든다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="7-parallelism-strategy는-ai-data-center-network-design에-어떤-영향을-주는가">7. Parallelism strategy는 AI data center network design에 어떤 영향을 주는가?</h3><a class="sl-anchor-link" href="#7-parallelism-strategy는-ai-data-center-network-design에-어떤-영향을-주는가"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “7. Parallelism strategy는 AI data center network design에 어떤 영향을 주는가?”</span></a></div>
+<p>각 strategy는 서로 다른 traffic pattern을 만든다. Data Parallelism은 gradient sync 시 bandwidth를 압박한다. Tensor Parallelism은 latency를 압박한다. Pipeline Parallelism은 stage-to-stage scheduling에 민감하다. Expert Parallelism은 all-to-all congestion을 만든다. 따라서 network topology, rail design, congestion control, collective optimization을 training strategy에 맞춰야 한다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="8-server-내부-tensor-parallelism에서-nvlink가-선호되는-이유는-무엇인가">8. Server 내부 Tensor Parallelism에서 NVLink가 선호되는 이유는 무엇인가?</h3><a class="sl-anchor-link" href="#8-server-내부-tensor-parallelism에서-nvlink가-선호되는-이유는-무엇인가"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “8. Server 내부 Tensor Parallelism에서 NVLink가 선호되는 이유는 무엇인가?”</span></a></div>
+<p>Tensor Parallelism은 layer 내부에서 매우 자주 synchronization을 수행한다. NVLink/NVSwitch는 일반적인 server 간 network보다 latency가 낮고 bandwidth가 높기 때문에 layer-internal communication에 더 적합하다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="9-단일-slow-gpu가-왜-전체-training-job을-지연시킬-수-있는가">9. 단일 slow GPU가 왜 전체 training job을 지연시킬 수 있는가?</h3><a class="sl-anchor-link" href="#9-단일-slow-gpu가-왜-전체-training-job을-지연시킬-수-있는가"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “9. 단일 slow GPU가 왜 전체 training job을 지연시킬 수 있는가?”</span></a></div>
+<p>Distributed training step은 collective operation에서 동기화되는 경우가 많다. 한 GPU가 늦게 도착하면 다른 GPU들은 collective operation에서 기다린다. 이런 느린 rank를 straggler라고 한다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="10-mlops-engineer가-training-job을-8-gpu에서-64-gpu로-확장하기-전에-무엇을-검증해야-하는가">10. MLOps engineer가 training job을 8 GPU에서 64 GPU로 확장하기 전에 무엇을 검증해야 하는가?</h3><a class="sl-anchor-link" href="#10-mlops-engineer가-training-job을-8-gpu에서-64-gpu로-확장하기-전에-무엇을-검증해야-하는가"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “10. MLOps engineer가 training job을 8 GPU에서 64 GPU로 확장하기 전에 무엇을 검증해야 하는가?”</span></a></div>
+<p>GPU topology, NCCL communication, RDMA configuration, network counter, collective benchmark 결과, batch/micro-batch 설정, tensor/pipeline/data parallel group mapping, checkpoint 동작, step-time variance를 확인해야 한다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="11-chapter-8의-전력-비용-예제가-network-설계와-연결되는-지점은-무엇인가">11. Chapter 8의 전력 비용 예제가 network 설계와 연결되는 지점은 무엇인가?</h3><a class="sl-anchor-link" href="#11-chapter-8의-전력-비용-예제가-network-설계와-연결되는-지점은-무엇인가"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “11. Chapter 8의 전력 비용 예제가 network 설계와 연결되는 지점은 무엇인가?”</span></a></div>
+<p>대규모 training은 수만 GPU를 장기간 사용하므로 packet loss나 synchronization failure가 단순한 순간 장애로 끝나지 않는다. GPU가 idle 상태로 기다리거나 checkpoint 없이 job을 재시작하면 이미 사용한 전력과 시간이 비용으로 손실된다. 그래서 lossless transport, congestion control, checkpointing은 training economics와 직접 연결된다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="12-self-attention-tensor-parallelism에서-qk와-v의-communication-방식은-어떻게-다른가">12. Self-Attention Tensor Parallelism에서 Q/K와 V의 communication 방식은 어떻게 다른가?</h3><a class="sl-anchor-link" href="#12-self-attention-tensor-parallelism에서-qk와-v의-communication-방식은-어떻게-다른가"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “12. Self-Attention Tensor Parallelism에서 Q/K와 V의 communication 방식은 어떻게 다른가?”</span></a></div>
+<p>Q와 K는 attention score를 계산할 때 complete matrix가 필요하므로 GPU 간 AllGather가 필요하다. 반면 V는 local shard 상태로 SoftMax 결과와 곱해 partial context를 만들 수 있다. 구현에 따라 이후 output projection 또는 다음 단계에서 추가 synchronization이 필요할 수 있다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="13-pipeline-parallelism에서-time-step별-gpu-utilization이-변하는-이유는-무엇인가">13. Pipeline Parallelism에서 time step별 GPU utilization이 변하는 이유는 무엇인가?</h3><a class="sl-anchor-link" href="#13-pipeline-parallelism에서-time-step별-gpu-utilization이-변하는-이유는-무엇인가"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “13. Pipeline Parallelism에서 time step별 GPU utilization이 변하는 이유는 무엇인가?”</span></a></div>
+<p>Pipeline이 처음에는 비어 있고 끝에서는 다시 비워지기 때문이다. 초반에는 앞쪽 stage만 active이고, 중간에는 여러 micro-batch가 서로 다른 stage에서 동시에 처리되어 utilization이 올라간다. 마지막에는 앞쪽 stage가 먼저 일을 끝내면서 idle GPU가 다시 늘어난다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="14-tensor-parallelism의-backward-pass에서는-어떤-collective-communication이-중요한가">14. Tensor Parallelism의 backward pass에서는 어떤 collective communication이 중요한가?</h3><a class="sl-anchor-link" href="#14-tensor-parallelism의-backward-pass에서는-어떤-collective-communication이-중요한가"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “14. Tensor Parallelism의 backward pass에서는 어떤 collective communication이 중요한가?”</span></a></div>
+<p>FFNN에서는 각 GPU가 local gradient를 계산한 뒤 AllReduce로 gradient를 동기화한다. Self-Attention에서는 Q/K fragment를 AllGather해 gradient 계산에 필요한 complete matrix를 만든 뒤, 계산된 gradient를 AllReduce로 맞춘다. 이 반복적인 layer 내부 communication 때문에 latency가 중요하다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="references">References</h2><a class="sl-anchor-link" href="#references"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “References”</span></a></div>
+<ul>
+<li>Toni Pasanen, <em>Deep Learning for Network Engineers</em>, Chapter 8: Parallelism Strategies in Deep Learning.</li>
+<li>DeepSpeed, ZeRO documentation. (<a href="https://deepspeed.readthedocs.io/en/latest/zero3.html" title="ZeRO - DeepSpeed documentation">DeepSpeed</a>)</li>
+<li>PyTorch, Fully Sharded Data Parallel tutorial. (<a href="https://docs.pytorch.org/tutorials/intermediate/FSDP_tutorial.html" title="Getting Started with Fully Sharded Data Parallel">PyTorch Documentation</a>)</li>
+<li>Zhou et al., <em>Mixture-of-Experts with Expert Choice Routing</em>, NeurIPS 2022. (<a href="https://papers.neurips.cc/paper_files/paper/2022/file/2f00ecd787b432c1d36f3de9800728eb-Paper-Conference.pdf" title="Mixture-of-Experts with Expert Choice Routing">NeurIPS Papers</a>)</li>
+<li>Huang et al., <em>GPipe: Efficient Training of Giant Neural Networks using Pipeline Parallelism</em>. (<a href="https://arxiv.org/abs/1811.06965" title="GPipe: Efficient Training of Giant Neural Networks using Pipeline Parallelism">arXiv</a>)</li>
+<li>Narayanan et al., <em>Efficient Large-Scale Language Model Training on GPU Clusters using Megatron-LM</em>. (<a href="https://proceedings.mlsys.org/paper_files/paper/2021/hash/bf62768ca46b6c3b5bea9515d1a1fc45-Abstract.html" title="Efficient Large-Scale Language Model Training on GPU Clusters using Megatron-LM">MLSys</a>)</li>
+<li>Shoeybi et al., <em>Megatron-LM: Training Multi-Billion Parameter Language Models Using Model Parallelism</em>. (<a href="https://arxiv.org/abs/1909.08053" title="Megatron-LM: Training Multi-Billion Parameter Language Models Using Model Parallelism">arXiv</a>)</li>
+</ul> </div> <footer class="sl-flex astro-3yyafb3n"> <div class="meta sl-flex astro-3yyafb3n"> <a href="https://github.com/ziwon/ai-data-center-systems/edit/main/courses/deep-learning-for-network-engineers/week03/README.md" class="sl-flex print:hidden astro-eez2twj6"><svg aria-hidden="true" class="astro-eez2twj6 astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.2em;"><path d="M22 7.24a1 1 0 0 0-.29-.71l-4.24-4.24a1 1 0 0 0-1.1-.22 1 1 0 0 0-.32.22l-2.83 2.83L2.29 16.05a1 1 0 0 0-.29.71V21a1 1 0 0 0 1 1h4.24a1 1 0 0 0 .76-.29l10.87-10.93L21.71 8c.1-.1.17-.2.22-.33a1 1 0 0 0 0-.24v-.14l.07-.05ZM6.83 20H4v-2.83l9.93-9.93 2.83 2.83L6.83 20ZM18.17 8.66l-2.83-2.83 1.42-1.41 2.82 2.82-1.41 1.42Z"/></svg>Edit page</a> <p>Last updated: <time datetime="2026-07-22T12:47:10.000Z">Jul 22, 2026</time></p> </div> <div class="pagination-links print:hidden astro-u2l5gyhi" dir="ltr"> <a href="/courses/deep-learning-for-network-engineers/week02/" rel="prev" class="astro-u2l5gyhi"> <svg aria-hidden="true" class="astro-u2l5gyhi astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17 11H9.41l3.3-3.29a1.004 1.004 0 1 0-1.42-1.42l-5 5a1 1 0 0 0-.21.33 1 1 0 0 0 0 .76 1 1 0 0 0 .21.33l5 5a1.002 1.002 0 0 0 1.639-.325 1 1 0 0 0-.219-1.095L9.41 13H17a1 1 0 0 0 0-2Z"/></svg> <span class="astro-u2l5gyhi"> Previous <br class="astro-u2l5gyhi"> <span class="link-title astro-u2l5gyhi">Week 2: Large Language Model, LLM</span> </span> </a> <a href="/courses/deep-learning-for-network-engineers/week04/" rel="next" class="astro-u2l5gyhi"> <svg aria-hidden="true" class="astro-u2l5gyhi astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17.92 11.62a1.001 1.001 0 0 0-.21-.33l-5-5a1.003 1.003 0 1 0-1.42 1.42l3.3 3.29H7a1 1 0 0 0 0 2h7.59l-3.3 3.29a1.002 1.002 0 0 0 .325 1.639 1 1 0 0 0 1.095-.219l5-5a1 1 0 0 0 .21-.33 1 1 0 0 0 0-.76Z"/></svg> <span class="astro-u2l5gyhi"> Next <br class="astro-u2l5gyhi"> <span class="link-title astro-u2l5gyhi">Week 4: RDMA and GPU Cluster Communication</span> </span> </a> </div>  </footer> </div> </div>  </main> </div> </div> </div> <ask-docs-widget> <button class="ask-fab" type="button" data-open aria-label="Ask this docs"> <span class="ask-fab-icon" aria-hidden="true">?</span>
+Ask this docs
+</button> <div class="ask-panel" data-panel hidden> <div class="ask-resize-handle" data-resize aria-hidden="true"></div> <div class="ask-panel-inner"> <header class="ask-header"> <div> <p class="ask-eyebrow">AI Data Center Systems</p> <h2 class="ask-title">Ask this docs</h2> </div> <div class="ask-header-controls"> <button class="ask-mode-btn" data-mode-btn="right" title="오른쪽 패널" aria-label="오른쪽 패널"> <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="6" height="16" rx="1.5" opacity="0.35"></rect><rect x="8" y="0" width="8" height="16" rx="1.5"></rect></svg> </button> <button class="ask-mode-btn" data-mode-btn="bottom" title="하단 패널" aria-label="하단 패널"> <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="16" height="6" rx="1.5" opacity="0.35"></rect><rect x="0" y="8" width="16" height="8" rx="1.5"></rect></svg> </button> <button class="ask-mode-btn" data-mode-btn="expand" title="전체 확장" aria-label="전체 확장"> <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 5.5V1h4.5M10.5 1H15v4.5M15 10.5V15h-4.5M5.5 15H1v-4.5"></path></svg> </button> <button class="ask-close-btn" type="button" aria-label="닫기" data-close> <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13"></path></svg> </button> </div> </header> <div class="ask-body"> <label class="ask-field"> <span class="ask-field-row"> <span>Question</span> <span class="ask-char" data-char>0 / 800</span> </span> <textarea name="question" rows="3" maxlength="800" placeholder="이 문서에서 핵심 운영 체크포인트는 무엇인가요?" data-question></textarea> <span class="ask-hint">시간당 최대 20회 · 질문당 최대 800자</span> </label> <div class="ask-actions"> <button class="ask-submit" type="button" data-submit> <svg class="ask-spinner" viewBox="0 0 24 24" fill="none" aria-hidden="true" hidden> <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2.5" stroke-dasharray="56" stroke-dashoffset="14" stroke-linecap="round"></circle> </svg> <span data-submit-label>Ask</span> </button> <p class="ask-status" data-status></p> </div> <section class="ask-answer" data-answer hidden></section> <section class="ask-sources" data-sources hidden> <h3>Sources</h3> <ul class="ask-source-chips" data-source-list></ul> </section> </div> </div> </div> <div class="ask-backdrop" data-backdrop hidden></div> </ask-docs-widget> <script type="module" src="/_astro/AskDocs.astro_astro_type_script_index_0_lang.BbnAb04M.js"></script> </div> <script type="module">const r=document.documentElement,c=document.querySelector("#starlight__sidebar"),s=document.querySelector(".navigation-mode-toggle"),a=document.querySelector(".navigation-drawer-toggle"),u=window.matchMedia("(min-width: 50rem)");function d(){return r.dataset.navigationMode==="compact"}function o(){return r.dataset.navigationDrawer==="open"}function l(){const e=d(),t=e&&o();s?.setAttribute("aria-pressed",String(e)),s?.setAttribute("title",e?"Use normal navigation":"Use compact navigation"),a?.setAttribute("aria-expanded",String(t)),a?.setAttribute("title",t?"Close navigation":"Open navigation");const n=a?.querySelector(".navigation-drawer-label");n&&(n.textContent=t?"Close navigation":"Open navigation")}function i(e,t=!1){const n=!!(e&&d()&&u.matches);r.dataset.navigationDrawer=n?"open":"closed",l(),n?requestAnimationFrame(()=>{const g=c?.querySelector('a[aria-current="page"]'),m=c?.querySelector(".starlight-sidebar-topics-current");(g??m)?.focus()}):t&&a?.focus()}function p(e){r.dataset.navigationMode=e,i(!1);try{localStorage.setItem("adcs-navigation-mode",e)}catch{}l()}s?.addEventListener("click",()=>{p(d()?"normal":"compact")});a?.addEventListener("click",()=>{i(!o(),o())});document.addEventListener("keydown",e=>{e.key==="Escape"&&o()&&i(!1,!0)});document.addEventListener("pointerdown",e=>{!o()||!(e.target instanceof Node)||c?.contains(e.target)||i(!1)});u.addEventListener("change",()=>i(!1));r.dataset.navigationDrawer="closed";l();</script> </body></html>

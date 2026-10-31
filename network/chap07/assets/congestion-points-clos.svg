@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="640" viewBox="0 0 1120 640" role="img" aria-labelledby="title desc">
+  <title id="title">Congestion points in a RoCEv2 Clos fabric</title>
+  <desc id="desc">A leaf-spine-super-spine fabric showing local leaf, leaf-to-spine, spine-to-leaf, leaf-to-server, spine-to-super-spine, and super-spine-to-spine congestion points.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.4; }
+    .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; }
+    .hot { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.5; }
+    .hot-line { fill: none; stroke: #D9392E; stroke-width: 3; }
+    .muted-line { fill: none; stroke: #D8D1C7; stroke-width: 1.3; stroke-dasharray: 7 6; }
+    .label { font-family: Inter, Arial, sans-serif; font-size: 16px; font-weight: 700; fill: #050505; }
+    .small { font-family: Inter, Arial, sans-serif; font-size: 12px; fill: #6F6A63; }
+    .tag { font-family: Inter, Arial, sans-serif; font-size: 12px; font-weight: 700; fill: #D9392E; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#111111"/>
+    </marker>
+    <marker id="arrowHot" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#D9392E"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1120" height="640"/>
+
+  <g transform="translate(70 70)">
+    <rect class="soft" x="0" y="380" width="135" height="70" rx="6"/>
+    <text class="label" x="67.5" y="410" text-anchor="middle">Server A</text>
+    <text class="small" x="67.5" y="432" text-anchor="middle">source GPU</text>
+
+    <rect class="soft" x="180" y="380" width="135" height="70" rx="6"/>
+    <text class="label" x="247.5" y="410" text-anchor="middle">Server B</text>
+    <text class="small" x="247.5" y="432" text-anchor="middle">source GPU</text>
+
+    <rect class="box" x="90" y="250" width="160" height="82" rx="6"/>
+    <text class="label" x="170" y="284" text-anchor="middle">Leaf A</text>
+    <text class="small" x="170" y="307" text-anchor="middle">ingress / local</text>
+
+    <rect class="box" x="735" y="250" width="160" height="82" rx="6"/>
+    <text class="label" x="815" y="284" text-anchor="middle">Leaf D</text>
+    <text class="small" x="815" y="307" text-anchor="middle">egress</text>
+
+    <rect class="soft" x="760" y="380" width="135" height="70" rx="6"/>
+    <text class="label" x="827.5" y="410" text-anchor="middle">Destination</text>
+    <text class="small" x="827.5" y="432" text-anchor="middle">NIC / storage</text>
+
+    <rect class="box" x="350" y="145" width="150" height="74" rx="6"/>
+    <text class="label" x="425" y="176" text-anchor="middle">Spine A</text>
+    <text class="small" x="425" y="198" text-anchor="middle">selected path</text>
+
+    <rect class="box" x="565" y="145" width="150" height="74" rx="6"/>
+    <text class="label" x="640" y="176" text-anchor="middle">Spine B</text>
+    <text class="small" x="640" y="198" text-anchor="middle">alternate path</text>
+
+    <rect class="box" x="460" y="0" width="165" height="78" rx="6"/>
+    <text class="label" x="542.5" y="31" text-anchor="middle">Super-spine</text>
+    <text class="small" x="542.5" y="54" text-anchor="middle">five-stage fabric</text>
+
+    <path class="line" d="M67 380 V348 C67 330 85 318 90 309" marker-end="url(#arrow)"/>
+    <path class="hot-line" d="M247 380 V348 C247 330 229 318 250 303" marker-end="url(#arrowHot)"/>
+    <text class="tag" x="22" y="350">1 local leaf pressure</text>
+
+    <path class="hot-line" d="M250 278 C296 235 320 204 350 184" marker-end="url(#arrowHot)"/>
+    <text class="tag" x="258" y="236">2 leaf-to-spine hot spot</text>
+
+    <path class="line" d="M250 302 C330 306 485 310 735 302" marker-end="url(#arrow)"/>
+    <path class="hot-line" d="M500 184 C584 199 653 231 735 278" marker-end="url(#arrowHot)"/>
+    <text class="tag" x="530" y="236">3 spine-to-leaf incast</text>
+
+    <path class="hot-line" d="M815 332 V380" marker-end="url(#arrowHot)"/>
+    <text class="tag" x="850" y="358">4 leaf-to-server</text>
+
+    <path class="muted-line" d="M425 145 C438 108 456 87 492 78" marker-end="url(#arrow)"/>
+    <path class="hot-line" d="M625 78 C671 98 706 117 715 154" marker-end="url(#arrowHot)"/>
+    <text class="tag" x="648" y="103">5 super-spine downlink risk</text>
+
+    <path class="hot-line" d="M500 145 C498 111 500 92 518 78" marker-end="url(#arrowHot)"/>
+    <text class="tag" x="318" y="103">6 spine-to-super-spine risk</text>
+
+    <path class="muted-line" d="M565 184 C476 224 374 248 250 291"/>
+    <path class="muted-line" d="M715 184 C784 210 810 226 815 250"/>
+  </g>
+
+  <g transform="translate(76 562)">
+    <rect class="hot" x="0" y="-23" width="18" height="18" rx="3"/>
+    <text class="small" x="28" y="-9">Accent links are common queue build points. Dashed links are optional or alternate paths, not necessarily congested.</text>
+  </g>
+</svg>

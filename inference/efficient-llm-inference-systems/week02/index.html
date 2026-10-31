@@ -1,0 +1,794 @@
+<!DOCTYPE html><html lang="en" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-bguv2lll"> <head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Week 2 — Hardware Foundations for Inference | AI Data Center Systems</title><link rel="canonical" href="https://adcs.restack.tech/inference/efficient-llm-inference-systems/week02/"/><link rel="sitemap" href="/sitemap-index.xml"/><script async src="https://www.googletagmanager.com/gtag/js?id=G-76LFZJVBTE"></script><script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-76LFZJVBTE');
+      </script><script async crossorigin="anonymous" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8128231647578658"></script><link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v6.4.8"/><meta name="generator" content="Starlight v0.40.0"/><meta property="og:title" content="Week 2 — Hardware Foundations for Inference"/><meta property="og:url" content="https://adcs.restack.tech/inference/efficient-llm-inference-systems/week02/"/><meta property="og:locale" content="en"/><meta property="og:description" content="All inference optimization is one principle in disguise: keep data in the fastest memory you can, and minimize traffic to slower memory. Once you..."/><meta property="og:site_name" content="AI Data Center Systems"/><meta name="description" content="All inference optimization is one principle in disguise: keep data in the fastest memory you can, and minimize traffic to slower memory. Once you..."/><meta property="og:type" content="article"/><meta property="og:image" content="https://adcs.restack.tech/og/inference/efficient-llm-inference-systems/week02.png?v=2"/><meta property="og:image:width" content="1200"/><meta property="og:image:height" content="630"/><meta name="twitter:image" content="https://adcs.restack.tech/og/inference/efficient-llm-inference-systems/week02.png?v=2"/><meta name="twitter:card" content="summary_large_image"/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/_astro/print.DNXP8c50.css" media="print"><link rel="stylesheet" href="/_astro/common.DYbqSTpl.css"><script type="module" src="/_astro/page.CtJXHRyR.js"></script></head> <body class="astro-bguv2lll"> <a href="#_top" class="astro-7q3lir66">Skip to content</a> <script>
+  (() => {
+    try {
+      const savedMode = localStorage.getItem('adcs-navigation-mode');
+      document.documentElement.dataset.navigationMode = savedMode === 'compact' ? 'compact' : 'normal';
+    } catch {
+      document.documentElement.dataset.navigationMode = 'normal';
+    }
+  })();
+</script> <div class="page sl-flex astro-4toy2ex6"> <header class="header astro-4toy2ex6"><div class="header astro-3ef6ksr2"> <div class="title-wrapper sl-flex astro-3ef6ksr2"> <a href="/" class="site-title sl-flex astro-m46x6ez3">  <span class="astro-m46x6ez3" translate="no"> AI Data Center Systems </span> </a> <button class="navigation-mode-toggle print:hidden astro-3ef6ksr2" type="button" aria-label="Compact navigation" aria-pressed="false" title="Use compact navigation"> <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" class="astro-3ef6ksr2"> <rect x="3" y="4" width="18" height="16" rx="2" class="astro-3ef6ksr2"></rect> <path d="M9 4v16M6.5 10 4.5 12l2 2" class="astro-3ef6ksr2"></path> </svg> </button> </div> <div class="sl-flex print:hidden astro-3ef6ksr2"> <site-search class="astro-3ef6ksr2 astro-v37mnknz" data-translations="{&quot;placeholder&quot;:&quot;Search&quot;}"> <button data-open-modal disabled aria-label="Search" aria-keyshortcuts="Control+K" class="astro-v37mnknz"> <svg aria-hidden="true" class="astro-v37mnknz astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg> <span class="sl-hidden md:sl-block astro-v37mnknz" aria-hidden="true">Search</span> <kbd class="sl-hidden md:sl-flex astro-v37mnknz" style="display: none;"> <kbd class="astro-v37mnknz">Ctrl</kbd><kbd class="astro-v37mnknz">K</kbd> </kbd> </button> <dialog style="padding:0" aria-label="Search" class="astro-v37mnknz"> <div class="dialog-frame sl-flex astro-v37mnknz">  <button data-close-modal class="sl-flex md:sl-hidden astro-v37mnknz"> Cancel </button> <div class="search-container astro-v37mnknz"> <div id="starlight__search" class="astro-v37mnknz"></div> </div> </div> </dialog> </site-search>  <script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script> <script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.D1WXcfCt.js"></script>  </div> <div class="sl-hidden md:sl-flex print:hidden right-group astro-3ef6ksr2"> <div class="sl-flex social-icons astro-3ef6ksr2"> <a href="https://github.com/ziwon/ai-data-center-systems" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">GitHub</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script> <script type="module">const r="starlight-theme",o=e=>e==="auto"||e==="dark"||e==="light"?e:"auto",c=()=>o(typeof localStorage<"u"&&localStorage.getItem(r));function n(e){typeof localStorage<"u"&&localStorage.setItem(r,e==="light"||e==="dark"?e:"")}const l=()=>matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";function t(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e==="auto"?l():e,n(e)}matchMedia("(prefers-color-scheme: light)").addEventListener("change",()=>{c()==="auto"&&t("auto")});class s extends HTMLElement{constructor(){super(),t(c()),this.querySelector("select")?.addEventListener("change",a=>{a.currentTarget instanceof HTMLSelectElement&&t(o(a.currentTarget.value))})}}customElements.define("starlight-theme-select",s);</script> <script type="module">class s extends HTMLElement{constructor(){super();const e=this.querySelector("select");e&&(e.addEventListener("change",t=>{t.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=t.currentTarget.value)}),window.addEventListener("pageshow",t=>{if(!t.persisted)return;const n=e.querySelector("option[selected]")?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}}customElements.define("starlight-lang-select",s);</script> </div> </div></header> <nav class="sidebar print:hidden astro-4toy2ex6" aria-label="Main"> <starlight-menu-button class="print:hidden astro-jif73yzw"> <button aria-expanded="false" aria-label="Menu" aria-controls="starlight__sidebar" class="sl-flex md:sl-hidden astro-jif73yzw"> <svg aria-hidden="true" class="open-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg> <svg aria-hidden="true" class="close-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg> </button> </starlight-menu-button> <script type="module">class s extends HTMLElement{constructor(){super(),this.btn=this.querySelector("button"),this.btn.addEventListener("click",()=>this.toggleExpanded());const t=this.closest("nav");t&&t.addEventListener("keyup",e=>this.closeOnEscape(e))}setExpanded(t){this.setAttribute("aria-expanded",String(t)),document.body.toggleAttribute("data-mobile-menu-expanded",t)}toggleExpanded(){this.setExpanded(this.getAttribute("aria-expanded")!=="true")}closeOnEscape(t){t.code==="Escape"&&(this.setExpanded(!1),this.btn.focus())}}customElements.define("starlight-menu-button",s);</script>  <div id="starlight__sidebar" class="sidebar-pane astro-4toy2ex6"> <div class="navigation-controls astro-4toy2ex6"> <button class="navigation-drawer-toggle astro-4toy2ex6" type="button" aria-controls="starlight__sidebar-content" aria-expanded="false" title="Open navigation"> <svg class="navigation-menu-icon astro-4toy2ex6" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"> <path d="M4 6h16M4 12h16M4 18h16" class="astro-4toy2ex6"></path> </svg> <svg class="navigation-close-icon astro-4toy2ex6" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"> <path d="m6 6 12 12M18 6 6 18" class="astro-4toy2ex6"></path> </svg> <span class="navigation-drawer-label astro-4toy2ex6">Open navigation</span> </button> </div> <div id="starlight__sidebar-content" class="sidebar-content sl-flex astro-4toy2ex6"> <ul class="starlight-sidebar-topics astro-2fh6iaza"> <li class="astro-2fh6iaza"> <a aria-label="Network" title="Network" href="/network/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8.7 10a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-6.27-6.3a1 1 0 0 0-1.42 1.42ZM21 14a1 1 0 0 0-1 1v3.59L15.44 14A1 1 0 0 0 14 15.44L18.59 20H15a1 1 0 0 0 0 2h6a1 1 0 0 0 .38-.08 1 1 0 0 0 .54-.54A1 1 0 0 0 22 21v-6a1 1 0 0 0-1-1Zm.92-11.38a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-6a1 1 0 0 0 0 2h3.59L2.29 20.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V9a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z"/></svg> </div> <div class="astro-2fh6iaza"> Network  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="GPU &amp; Accelerator Systems" title="GPU &amp; Accelerator Systems" href="/gpu/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> </div> <div class="astro-2fh6iaza"> GPU &amp; Accelerator Systems  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Storage" title="Storage" href="/storage/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8 16.5a1 1 0 1 0 1 1 1 1 0 0 0-1-1M12 2C8 2 4 3.37 4 6v12c0 2.63 4 4 8 4s8-1.37 8-4V6c0-2.63-4-4-8-4m6 16c0 .71-2.28 2-6 2s-6-1.29-6-2v-3.27A13 13 0 0 0 12 16a13 13 0 0 0 6-1.27Zm0-6c0 .71-2.28 2-6 2s-6-1.29-6-2V8.73A13 13 0 0 0 12 10a13 13 0 0 0 6-1.27Zm-6-4C8.28 8 6 6.71 6 6s2.28-2 6-2 6 1.29 6 2-2.28 2-6 2m-4 2.5a1 1 0 1 0 1 1 1 1 0 0 0-1-1"/></svg> </div> <div class="astro-2fh6iaza"> Storage  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Training" title="Training" href="/training/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1 1v8a1 1 0 0 0 2 0v-8a1 1 0 0 0-1-1m5-10a1 1 0 0 0-1 1v18a1 1 0 0 0 2 0V3a1 1 0 0 0-1-1m10 14a1 1 0 0 0-1 1v4a1 1 0 0 0 2 0v-4a1 1 0 0 0-1-1m-5-8a1 1 0 0 0-1 1v12a1 1 0 0 0 2 0V9a1 1 0 0 0-1-1"/></svg> </div> <div class="astro-2fh6iaza"> Training  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Inference" title="Inference" data-topic-icon="brain" href="/inference/" class="starlight-sidebar-topics-current astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 22H5a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3h1a4 4 0 0 1 7.3-2.18c.448.64.692 1.4.7 2.18h3a1 1 0 0 1 1 1v3a4 4 0 0 1 2.18 7.3A3.86 3.86 0 0 1 18 18v3a1 1 0 0 1-1 1ZM5 8a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11v-3.18a1 1 0 0 1 1.33-.95 1.77 1.77 0 0 0 1.74-.23 2 2 0 0 0 .93-1.37 2 2 0 0 0-.48-1.59 1.89 1.89 0 0 0-2.17-.55 1 1 0 0 1-1.33-.95V8h-3.2a1 1 0 0 1-1-1.33 1.77 1.77 0 0 0-.23-1.74 1.939 1.939 0 0 0-3-.43A2 2 0 0 0 8 6c.002.23.046.456.13.67A1 1 0 0 1 7.18 8H5Z"/></svg> </div> <div class="astro-2fh6iaza"> Inference  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="MLOps" title="MLOps" data-topic-icon="cycle" href="/mlops/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8.7 10a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-6.27-6.3a1 1 0 0 0-1.42 1.42ZM21 14a1 1 0 0 0-1 1v3.59L15.44 14A1 1 0 0 0 14 15.44L18.59 20H15a1 1 0 0 0 0 2h6a1 1 0 0 0 .38-.08 1 1 0 0 0 .54-.54A1 1 0 0 0 22 21v-6a1 1 0 0 0-1-1Zm.92-11.38a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-6a1 1 0 0 0 0 2h3.59L2.29 20.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V9a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z"/></svg> </div> <div class="astro-2fh6iaza"> MLOps  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Systems Performance" title="Systems Performance" href="/systems-performance/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path fill-rule="evenodd" d="M1.44 8.855v-.001l3.527-3.516c.34-.344.802-.541 1.285-.548h6.649l.947-.947c3.07-3.07 6.207-3.072 7.62-2.868a1.821 1.821 0 0 1 1.557 1.557c.204 1.413.203 4.55-2.868 7.62l-.946.946v6.649a1.845 1.845 0 0 1-.549 1.286l-3.516 3.528a1.844 1.844 0 0 1-3.11-.944l-.858-4.275-4.52-4.52-2.31-.463-1.964-.394A1.847 1.847 0 0 1 .98 10.693a1.843 1.843 0 0 1 .46-1.838Zm5.379 2.017-3.873-.776L6.32 6.733h4.638l-4.14 4.14Zm8.403-5.655c2.459-2.46 4.856-2.463 5.89-2.33.134 1.035.13 3.432-2.329 5.891l-6.71 6.71-3.561-3.56 6.71-6.711Zm-1.318 15.837-.776-3.873 4.14-4.14v4.639l-3.364 3.374Z" clip-rule="evenodd"/><path d="M9.318 18.345a.972.972 0 0 0-1.86-.561c-.482 1.435-1.687 2.204-2.934 2.619a8.22 8.22 0 0 1-1.23.302c.062-.365.157-.79.303-1.229.415-1.247 1.184-2.452 2.62-2.935a.971.971 0 1 0-.62-1.842c-.12.04-.236.084-.35.13-2.02.828-3.012 2.588-3.493 4.033a10.383 10.383 0 0 0-.51 2.845l-.001.016v.063c0 .536.434.972.97.972H2.24a7.21 7.21 0 0 0 .878-.065c.527-.063 1.248-.19 2.02-.447 1.445-.48 3.205-1.472 4.033-3.494a5.828 5.828 0 0 0 .147-.407Z"/></svg> </div> <div class="astro-2fh6iaza"> Systems Performance  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Courses" title="Courses" href="/courses/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.17 2.06A13.1 13.1 0 0 0 19 1.87a12.94 12.94 0 0 0-7 2.05 12.94 12.94 0 0 0-7-2 13.1 13.1 0 0 0-2.17.19 1 1 0 0 0-.83 1v12a1 1 0 0 0 1.17 1 10.9 10.9 0 0 1 8.25 1.91l.12.07h.11a.91.91 0 0 0 .7 0h.11l.12-.07A10.899 10.899 0 0 1 20.83 16 1 1 0 0 0 22 15V3a1 1 0 0 0-.83-.94ZM11 15.35a12.87 12.87 0 0 0-6-1.48H4v-10c.333-.02.667-.02 1 0a10.86 10.86 0 0 1 6 1.8v9.68Zm9-1.44h-1a12.87 12.87 0 0 0-6 1.48V5.67a10.86 10.86 0 0 1 6-1.8c.333-.02.667-.02 1 0v10.04Zm1.17 4.15a13.098 13.098 0 0 0-2.17-.19 12.94 12.94 0 0 0-7 2.05 12.94 12.94 0 0 0-7-2.05c-.727.003-1.453.066-2.17.19A1 1 0 0 0 2 19.21a1 1 0 0 0 1.17.79 10.9 10.9 0 0 1 8.25 1.91 1 1 0 0 0 1.16 0A10.9 10.9 0 0 1 20.83 20a1 1 0 0 0 1.17-.79 1 1 0 0 0-.83-1.15Z"/></svg> </div> <div class="astro-2fh6iaza"> Courses  </div> </a> </li> </ul>  <doc-sidebar-controls hidden="true" class="astro-v3kklmrl"> <div class="tree-controls astro-v3kklmrl" role="group" aria-label="문서 목록 펼침 설정"> <button type="button" data-action="expand" aria-controls="document-tree" aria-label="모든 문서 분류 펼치기" class="astro-v3kklmrl">펼치기</button> <span aria-hidden="true" class="astro-v3kklmrl">/</span> <button type="button" data-action="collapse" aria-controls="document-tree" aria-label="모든 문서 분류 접기" class="astro-v3kklmrl">접기</button> </div> </doc-sidebar-controls> <script type="module">class d extends HTMLElement{connectedCallback(){const n=document.getElementById("document-tree");if(!n||this.dataset.initialized)return;this.dataset.initialized="true",this.hidden=!1;const e=Array.from(n.querySelectorAll("details")),r=this.querySelector('[data-action="expand"]'),i=this.querySelector('[data-action="collapse"]');for(const t of e)t.open=!1;let o=n.querySelector('[aria-current="page"]')?.closest("details");for(;o&&n.contains(o);)o.open=!0,o=o.parentElement?.closest("details")??null;const a=()=>{r?.setAttribute("aria-disabled",String(e.every(t=>t.open))),i?.setAttribute("aria-disabled",String(e.every(t=>!t.open)))};this.addEventListener("click",t=>{const s=t.target instanceof Element?t.target.closest("button[data-action]"):null;if(!s||s.getAttribute("aria-disabled")==="true")return;const l=s.dataset.action==="expand";for(const c of e)c.open=l;a()});for(const t of e)t.addEventListener("toggle",a);a()}}customElements.get("doc-sidebar-controls")||customElements.define("doc-sidebar-controls",d);</script> <div id="document-tree"> <sl-sidebar-state-persist data-hash="15y10hp" class="astro-kku4brbg"> <script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script>  <ul class="top-level astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/inference/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">Inference 목록</span>  </a> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">추론 시스템 강좌 · 6</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="0"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">강좌 안내</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/week01/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 1 — Understanding Performance Metrics</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/week02/" aria-current="page" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 2 — Hardware Foundations for Inference</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/week03/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 3 — Transformer Inference and the KV Cache</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/week04/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 4 — Quantization</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/week04/results/results/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 4 Lab Results</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/week05/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 5 — Speculative Decoding</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">FlashAttention · 2</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="1"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/inference/flashattention-from-first-principles/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">FlashAttention from First Principles · English</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/flashattention-from-first-principles/readme.ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">원리로 이해하는 FlashAttention · 한국어</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <a href="/inference/sglang-production-practices/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">SGLang in 2026: Engineering a Production-Grade LLM Serving Stack</span>  </a> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">기초 참고자료 · 2</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="2"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">참고자료 모아보기</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/llm-inference/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">LLM Inference</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/transformer/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Transformer</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">하드웨어 아키텍처 · 5</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="3"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/hardware-architectures/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">하드웨어 읽기 안내</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/hardware-architectures/domain-specific-architectures-for-ai-inference.ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Domain-Specific Architectures for AI Inference</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/hardware-architectures/gpus.ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">How to Think About GPUs</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/hardware-architectures/npus.ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">How to Think About NPUs</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/hardware-architectures/roofline.ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">All About Rooflines</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/hardware-architectures/tpus.ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">How to Think About TPUs</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">모델 아키텍처 · 2</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="4"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/inference/models/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">모델 문서 모아보기</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/models/kimi-k2-5-scaling/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">How We Scaled Kimi K2.5: 토큰 효율, 장문 컨텍스트, 에이전트 스웜</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/models/kimi-k3/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Kimi K3 기술 해부: 2.8T MoE, KDA, Attention Residuals, 그리고 64-GPU 서빙</span>  </a> </li> </ul> </details> </li> </ul>  <script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script> </sl-sidebar-state-persist> <div class="md:sl-hidden"> <div class="mobile-preferences sl-flex astro-wu23bvmt"> <div class="social-icons astro-wu23bvmt"> <a href="https://github.com/ziwon/ai-data-center-systems" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">GitHub</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script>   </div> </div> </div>  </div> </div> </nav> <div class="main-frame astro-4toy2ex6">  <script type="module">const a=document.getElementById("starlight__sidebar"),n=a?.querySelector("sl-sidebar-state-persist"),o="sl-sidebar-state",i=()=>{let t=[];const e=n?.dataset.hash||"";try{const s=sessionStorage.getItem(o),r=JSON.parse(s||"{}");Array.isArray(r.open)&&r.hash===e&&(t=r.open)}catch{}return{hash:e,open:t,scroll:a?.scrollTop||0}},c=t=>{try{sessionStorage.setItem(o,JSON.stringify(t))}catch{}},d=()=>c(i()),l=(t,e)=>{const s=i();s.open[e]=t,c(s)};n?.addEventListener("click",t=>{if(!(t.target instanceof Element))return;const e=t.target.closest("summary")?.closest("details");if(!e)return;const s=e.querySelector("sl-sidebar-restore"),r=parseInt(s?.dataset.index||"");isNaN(r)||l(!e.open,r)});addEventListener("visibilitychange",()=>{document.visibilityState==="hidden"&&d()});addEventListener("pageHide",d);</script> <div class="lg:sl-flex astro-67yu43on"> <aside class="right-sidebar-container print:hidden astro-67yu43on"> <div class="right-sidebar astro-67yu43on"> <div class="lg:sl-hidden astro-rl4sue7z"><mobile-starlight-toc data-min-h="2" data-max-h="2" class="astro-doynk5tl"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-doynk5tl"><details id="starlight__mobile-toc" class="astro-doynk5tl"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-doynk5tl"><span class="toggle sl-flex astro-doynk5tl">On this page<svg aria-hidden="true" class="caret astro-doynk5tl astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-doynk5tl"></span></summary><div class="dropdown astro-doynk5tl"><ul class="isMobile astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#tldr" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">TL;DR</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#1-gpu-memory-hierarchy-h100-sxm5" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">1. GPU Memory Hierarchy (H100 SXM5)</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#2-every-optimization-mapped-to-the-hierarchy" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">2. Every Optimization, Mapped to the Hierarchy</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#3-tensor-cores-and-precision" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">3. Tensor Cores and Precision</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#4-h100--b200-shift-matters-for-cluster-planning" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">4. H100 → B200 Shift (matters for cluster planning)</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#5-gemm-vs-gemv--reading-last-weeks-numbers-through-hardware" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">5. GEMM vs GEMV — Reading Last Week’s Numbers Through Hardware</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#6-nvlink-and-tensor-parallelism-communication-math" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">6. NVLink and Tensor Parallelism Communication Math</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#7-heterogeneous-hardware" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">7. Heterogeneous Hardware</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#8-what-to-do-with-this-before-the-lab" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">8. What to Do With This Before the Lab</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#9-lab-preview" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">9. Lab Preview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#recommended-reading" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Recommended Reading</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#headline-findings" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Headline Findings</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#lab-1a--kernel-inventory-probe_kernelspy" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Lab 1a — Kernel Inventory (probe_kernels.py)</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#lab-1b--ncu-speed-of-light-decode-steps-under-cudaprofilerstart" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Lab 1b — NCU Speed-of-Light (decode steps under cudaProfilerStart)</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#lab-2--roofline-roofline_benchmarkpy-ffn-gateup-shape-k2048-n11008" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Lab 2 — Roofline (roofline_benchmark.py, FFN gate/up shape: K=2048, N=11008)</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#cross-references-between-labs" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Cross-References Between Labs</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#what-this-calibrates-going-forward" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">What This Calibrates Going Forward</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#lab-3--nvlink-sweep" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Lab 3 — NVLink Sweep</span> </a>  </li> </ul></div></details></nav></mobile-starlight-toc><script type="module" src="/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.hwBsy0Mo.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-rl4sue7z"><div class="sl-container astro-rl4sue7z"><kb-graph-card> <button class="kb-graph-card" type="button" data-open aria-haspopup="dialog"> <span class="kb-graph-copy"> <span class="kb-graph-title">Knowledge graph</span> <span class="kb-graph-subtitle" data-count>Loading related docs</span> </span> <span class="kb-graph-thumb" aria-hidden="true" data-map></span> <span class="kb-graph-expand" aria-hidden="true">Expand</span> </button> <dialog class="kb-graph-dialog" aria-label="Knowledge graph" data-dialog> <div class="kb-graph-panel"> <div class="kb-graph-panel-header"> <div> <p>Knowledge graph</p> <h2 data-heading>Related documents</h2> </div> <div class="kb-graph-tabs" role="tablist" aria-label="Knowledge graph views"> <button type="button" role="tab" aria-selected="true" data-tab="page">This page</button> <button type="button" role="tab" aria-selected="false" data-tab="global">Full graph</button> </div> <button type="button" data-close aria-label="Close knowledge graph">×</button> </div> <div class="kb-graph-stage" data-stage data-view="page"> <div data-page-stage></div> <div data-global-stage hidden></div> </div> </div> </dialog> </kb-graph-card> <script type="module" src="/_astro/KnowledgeGraphCard.astro_astro_type_script_index_0_lang.C475L69c.js"></script><starlight-toc data-min-h="2" data-max-h="2"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">On this page</h2><ul class="astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#tldr" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">TL;DR</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#1-gpu-memory-hierarchy-h100-sxm5" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">1. GPU Memory Hierarchy (H100 SXM5)</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#2-every-optimization-mapped-to-the-hierarchy" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">2. Every Optimization, Mapped to the Hierarchy</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#3-tensor-cores-and-precision" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">3. Tensor Cores and Precision</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#4-h100--b200-shift-matters-for-cluster-planning" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">4. H100 → B200 Shift (matters for cluster planning)</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#5-gemm-vs-gemv--reading-last-weeks-numbers-through-hardware" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">5. GEMM vs GEMV — Reading Last Week’s Numbers Through Hardware</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#6-nvlink-and-tensor-parallelism-communication-math" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">6. NVLink and Tensor Parallelism Communication Math</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#7-heterogeneous-hardware" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">7. Heterogeneous Hardware</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#8-what-to-do-with-this-before-the-lab" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">8. What to Do With This Before the Lab</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#9-lab-preview" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">9. Lab Preview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#recommended-reading" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Recommended Reading</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#headline-findings" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Headline Findings</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#lab-1a--kernel-inventory-probe_kernelspy" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Lab 1a — Kernel Inventory (probe_kernels.py)</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#lab-1b--ncu-speed-of-light-decode-steps-under-cudaprofilerstart" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Lab 1b — NCU Speed-of-Light (decode steps under cudaProfilerStart)</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#lab-2--roofline-roofline_benchmarkpy-ffn-gateup-shape-k2048-n11008" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Lab 2 — Roofline (roofline_benchmark.py, FFN gate/up shape: K=2048, N=11008)</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#cross-references-between-labs" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Cross-References Between Labs</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#what-this-calibrates-going-forward" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">What This Calibrates Going Forward</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#lab-3--nvlink-sweep" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Lab 3 — NVLink Sweep</span> </a>  </li> </ul></nav></starlight-toc><script type="module" src="/_astro/TableOfContents.astro_astro_type_script_index_0_lang.FuRcXuRY.js"></script></div></div> </div> </aside> <div class="main-pane astro-67yu43on">  <main data-pagefind-body class="astro-bguv2lll" lang="en" dir="ltr">    <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <h1 id="_top" class="astro-j6tvhyss">Week 2 — Hardware Foundations for Inference</h1> </div> </div> <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <starlight-image-zoom> <template class="astro-vjux6bgf"> <dialog class="starlight-image-zoom-dialog astro-vjux6bgf"> <button aria-label="Unzoom image" class="starlight-image-zoom-control astro-vjux6bgf"> <svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" class="astro-vjux6bgf"> <use href="#starlight-image-zoom-icon-unzoom" class="astro-vjux6bgf"></use> </svg> </button> <figure class="astro-vjux6bgf"></figure> </dialog> </template> <svg xmlns="http://www.w3.org/2000/svg" style="display:none" class="astro-vjux6bgf"> <symbol id="starlight-image-zoom-icon-zoom" viewBox="0 0 24 24" class="astro-vjux6bgf"> <path d="M9.79 12.79 4 18.59V17a1 1 0 0 0-2 0v4a1 1 0 0 0 .08.38 1 1 0 0 0 .54.54A1 1 0 0 0 3 22h4a1 1 0 0 0 0-2H5.41l5.8-5.79a1 1 0 0 0-1.42-1.42ZM21.92 2.62a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-4a1 1 0 0 0 0 2h1.59l-5.8 5.79a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V7a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z" class="astro-vjux6bgf"></path> </symbol> <symbol id="starlight-image-zoom-icon-unzoom" viewBox="0 0 24 24" class="astro-vjux6bgf"> <path d="M21.71 2.29a1 1 0 0 0-1.42 0l-5.79 5.8V6.5a1 1 0 0 0-2 0v4a1 1 0 0 0 .08.38 1 1 0 0 0 .54.54 1 1 0 0 0 .38.08h4a1 1 0 0 0 0-2h-1.59l5.8-5.79a1 1 0 0 0 0-1.42ZM10.88 12.58a1 1 0 0 0-.38-.08h-4a1 1 0 0 0 0 2h1.59l-5.8 5.79a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l5.79-5.8v1.59a1 1 0 0 0 2 0v-4a1 1 0 0 0-.08-.38 1 1 0 0 0-.54-.54Z" class="astro-vjux6bgf"></path> </symbol> </svg> </starlight-image-zoom>   <script type="module" src="/_astro/ImageZoom.astro_astro_type_script_index_0_lang.CZmBqK-T.js"></script> <div class="sl-markdown-content"> <blockquote>
+<p>Pre-lab summary. Read this before running the hands-on exercises.</p>
+</blockquote>
+<div class="sl-heading-wrapper level-h2"><h2 id="tldr">TL;DR</h2><a class="sl-anchor-link" href="#tldr"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “TL;DR”</span></a></div>
+<p>All inference optimization is one principle in disguise: <strong>keep data in the fastest memory you can, and minimize traffic to slower memory.</strong> Once you internalize the GPU memory hierarchy in numbers, every technique in the rest of the course (FlashAttention, kernel fusion, KV cache, paging, quantization, tensor parallelism, disaggregated serving) collapses into the same logic — just applied to different layers of that hierarchy.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="1-gpu-memory-hierarchy-h100-sxm5">1. GPU Memory Hierarchy (H100 SXM5)</h2><a class="sl-anchor-link" href="#1-gpu-memory-hierarchy-h100-sxm5"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “1. GPU Memory Hierarchy (H100 SXM5)”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Level</th><th>Capacity</th><th>Bandwidth</th><th>Latency</th><th>Controlled by</th></tr></thead><tbody><tr><td>Registers</td><td>~256 KB / SM</td><td>>20 TB/s</td><td>~1 cycle</td><td>compiler</td></tr><tr><td>Shared memory (L1)</td><td>228 KB / SM</td><td>~10 TB/s</td><td>~20 cycles</td><td>kernel author</td></tr><tr><td>L2 cache</td><td>50 MB</td><td>~12 TB/s</td><td>~150 cycles</td><td>hardware</td></tr><tr><td>HBM3</td><td>80 GB</td><td>3.35 TB/s</td><td>~600 cycles</td><td>hardware (on miss)</td></tr><tr><td>NVLink 4 (cross-GPU)</td><td>—</td><td>900 GB/s bidi</td><td>μs</td><td>NCCL</td></tr><tr><td>PCIe gen5 (host)</td><td>—</td><td>128 GB/s bidi</td><td>μs</td><td>driver</td></tr></tbody></table>
+<p><strong>Mental model:</strong> every order-of-magnitude drop in bandwidth is also an order-of-magnitude jump in latency. Optimization = find the layer where you’re spending traffic and push it down to a faster layer.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="2-every-optimization-mapped-to-the-hierarchy">2. Every Optimization, Mapped to the Hierarchy</h2><a class="sl-anchor-link" href="#2-every-optimization-mapped-to-the-hierarchy"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “2. Every Optimization, Mapped to the Hierarchy”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Technique</th><th>Traffic it removes</th></tr></thead><tbody><tr><td>FlashAttention</td><td>n×n attention matrix → keep tiles in SRAM instead of HBM</td></tr><tr><td>Kernel fusion</td><td>intermediate tensors → registers/shared mem instead of HBM round-trip</td></tr><tr><td>KV cache</td><td>recomputing K,V from scratch → read once from HBM</td></tr><tr><td>Quantization (W4/W8)</td><td>fewer bytes per weight load from HBM</td></tr><tr><td>PagedAttention</td><td>KV fragmentation waste in HBM</td></tr><tr><td>Tensor parallelism</td><td>single-HBM capacity wall → spread across NVLink</td></tr><tr><td>Disaggregated serving</td><td>prefill choking decode in shared HBM → physical separation</td></tr></tbody></table>
+<p>Different layer, same idea.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="3-tensor-cores-and-precision">3. Tensor Cores and Precision</h2><a class="sl-anchor-link" href="#3-tensor-cores-and-precision"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3. Tensor Cores and Precision”</span></a></div>
+<p>H100 SXM Tensor Core peak by format:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Format</th><th align="right">Dense peak</th><th align="right">Sparse peak</th><th>Notes</th></tr></thead><tbody><tr><td>BF16 / FP16</td><td align="right">~990 TFLOPS</td><td align="right">1,979 TFLOPS</td><td>inference baseline</td></tr><tr><td>FP8 (E4M3)</td><td align="right">1,979 TFLOPS</td><td align="right">3,958 TFLOPS</td><td>exactly 2x BF16/FP16</td></tr><tr><td>INT8</td><td align="right">1,979 TOPS</td><td align="right">3,958 TOPS</td><td>same throughput as FP8</td></tr><tr><td>FP4</td><td align="right">none</td><td align="right">none</td><td>B200 adds FP4</td></tr></tbody></table>
+<p>Source: <a href="https://www.nvidia.com/en-us/data-center/h100/">NVIDIA H100 product specifications</a> list the H100 SXM Tensor Core figures with sparsity; the dense values are half of those sparse peaks.</p>
+<p><strong>Why exactly 2×:</strong> Tensor Cores process fixed-size tiles. Halve the bit-width, fit twice as many elements in the same silicon area.</p>
+<p><strong>Operational implication:</strong></p>
+<ul>
+<li>Decode is memory-bound → quantize <strong>weights</strong> (W4A16) to cut bandwidth.</li>
+<li>Prefill is compute-bound → quantize <strong>compute</strong> (W8A8 / FP8) to use the faster Tensor Core path.</li>
+<li>A serving system can mix both regimes (see disaggregation in Week 8).</li>
+</ul>
+<p><strong>FP8 vs INT8</strong> (same throughput, different properties):</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th></th><th>INT8</th><th>FP8 (E4M3)</th></tr></thead><tbody><tr><td>Range</td><td>-128 to 127</td><td>±448</td></tr><tr><td>Distribution</td><td>uniform</td><td>exponential, dense near zero</td></tr><tr><td>Outlier handling</td><td>hard (needs SmoothQuant etc.)</td><td>natural</td></tr><tr><td>Per-channel scaling</td><td>usually required</td><td>usually not</td></tr></tbody></table>
+<p>If you’re on H100+, default to FP8. INT8 is for Ampere and earlier.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="4-h100--b200-shift-matters-for-cluster-planning">4. H100 → B200 Shift (matters for cluster planning)</h2><a class="sl-anchor-link" href="#4-h100--b200-shift-matters-for-cluster-planning"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “4. H100 → B200 Shift (matters for cluster planning)”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Dim</th><th>H100 SXM</th><th>B200 SXM</th><th>What it changes</th></tr></thead><tbody><tr><td>HBM</td><td>80 GB @ 3.35 TB/s</td><td>180 GB @ 8 TB/s</td><td>decode ~2.4× faster</td></tr><tr><td>FP8 TFLOPS (dense / sparse)</td><td>1,979 / 3,958</td><td>4,500 / 9,000</td><td>prefill compute ~2.3× faster</td></tr><tr><td>FP4 TFLOPS (dense / sparse)</td><td>none</td><td>9,000 / 18,000</td><td>new quantization frontier</td></tr><tr><td>NVLink</td><td>gen 4, 900 GB/s</td><td>gen 5, 1,800 GB/s</td><td>TP scaling further</td></tr></tbody></table>
+<p>Bandwidth grew <strong>more than</strong> compute. This means <strong>decode-heavy workloads benefit disproportionately on B200</strong>. For prefill-heavy mixes, the gap is smaller. This is the exact technical reason mixed-generation clusters (H100 prefill nodes + B200 decode nodes) start to make economic sense.</p>
+<p>Sources: <a href="https://www.nvidia.com/en-us/data-center/h100/">NVIDIA H100 product specifications</a> and <a href="https://www.nvidia.com/en-us/data-center/dgx-b200/">NVIDIA DGX B200 specifications</a>. DGX B200 lists 72 PFLOPS FP8 Tensor Core sparse performance for 8 GPUs; dense performance is half, so per-GPU FP8 is 4.5 PFLOPS dense / 9 PFLOPS sparse.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="5-gemm-vs-gemv--reading-last-weeks-numbers-through-hardware">5. GEMM vs GEMV — Reading Last Week’s Numbers Through Hardware</h2><a class="sl-anchor-link" href="#5-gemm-vs-gemv--reading-last-weeks-numbers-through-hardware"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “5. GEMM vs GEMV — Reading Last Week’s Numbers Through Hardware”</span></a></div>
+<p>Last week’s batch sweep on a 3B model in 16 GB VRAM showed throughput-scaling efficiency dropping to ~47% at batch 128. Why?</p>
+<p><strong>Prefill (GEMM, compute-bound).</strong> A 3B model is too small to saturate H100’s tensor cores — tile sizes don’t fill, kernel-launch overhead is relatively large, FlashAttention efficiency degrades on small models. End-to-end MFU ends up around 2–5%. A 70B model on the same hardware would hit 30–50% MFU, because the work-per-launch ratio is much higher.</p>
+<p><strong>Decode (GEMV, memory-bound).</strong> Theoretical step time for a 3B BF16 model on H100: 6 GB / 3.35 TB/s ≈ 1.79 ms. Measured: ~12 ms. The gap is framework overhead — Python, sampler, kernel launches — which doesn’t scale with model size. On a 70B model the same overhead becomes negligible noise.</p>
+<p><strong>Takeaway:</strong> small models on big GPUs are an inefficient match. RTX 4090 / L4 / Jetson are often the right target for ≤ 7B; H100/B200 only earn their cost on ≥ 30B or high-concurrency batched serving.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="6-nvlink-and-tensor-parallelism-communication-math">6. NVLink and Tensor Parallelism Communication Math</h2><a class="sl-anchor-link" href="#6-nvlink-and-tensor-parallelism-communication-math"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “6. NVLink and Tensor Parallelism Communication Math”</span></a></div>
+<p>TP across N GPUs requires <strong>two AllReduces per transformer layer</strong> (one after attention output projection, one after FFN down projection).</p>
+<p>Per-AllReduce traffic (BF16): <code dir="auto">2 × batch × seq_len × d_model</code> bytes.</p>
+<p><strong>Worked example — 70B (d_model=8192), batch=32, seq=2048, BF16:</strong></p>
+<ul>
+<li>Per-AllReduce: 2.15 GB</li>
+<li>80 layers × 2 AllReduces = 344 GB per forward pass</li>
+<li>H100 NVLink-4 8-way ring, ~750 GB/s effective: ~460 ms communication</li>
+</ul>
+<p>That’s the same order of magnitude as compute — meaning communication is a real cost, not noise. It also means:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Model</th><th>Practical parallelism</th></tr></thead><tbody><tr><td>≤ 7B</td><td>TP=1, scale via DP</td></tr><tr><td>13–30B</td><td>TP=2–4 inside NVLink</td></tr><tr><td>70B</td><td>TP=8 single-node NVLink</td></tr><tr><td>175B+</td><td>TP=8 + PP across nodes (PP only sends activations — InfiniBand is fine)</td></tr><tr><td>405B+</td><td>TP=8 + PP + DP, or expert parallelism for MoE</td></tr></tbody></table>
+<p><strong>Rule of thumb:</strong> TP stays inside NVLink/NVSwitch. PP can cross InfiniBand. DP goes anywhere.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="7-heterogeneous-hardware">7. Heterogeneous Hardware</h2><a class="sl-anchor-link" href="#7-heterogeneous-hardware"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “7. Heterogeneous Hardware”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="apple-silicon--capacity-beats-bandwidth-sometimes">Apple Silicon — capacity beats bandwidth (sometimes)</h3><a class="sl-anchor-link" href="#apple-silicon--capacity-beats-bandwidth-sometimes"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Apple Silicon — capacity beats bandwidth (sometimes)”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Dim</th><th>A100 80GB</th><th>M3 Ultra 192GB</th></tr></thead><tbody><tr><td>Memory</td><td>80 GB HBM</td><td>192 GB unified</td></tr><tr><td>Bandwidth</td><td>2 TB/s</td><td>800 GB/s</td></tr><tr><td>FP16 TFLOPS</td><td>312</td><td>28</td></tr><tr><td>70B BF16 (140 GB)</td><td>won’t fit</td><td>fits comfortably</td></tr></tbody></table>
+<p>H100 can’t hold a 70B BF16 model alone; M3 Ultra can, and gets ~30 tok/s. For decode-bound workloads, <strong>fitting</strong> can matter more than peak FLOPS. Useful for dev laptops, on-prem demos, edge prototypes.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="jetson-orin--the-edge-inference-reality-check">Jetson Orin — the edge inference reality check</h3><a class="sl-anchor-link" href="#jetson-orin--the-edge-inference-reality-check"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Jetson Orin — the edge inference reality check”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Model</th><th>FP16 TFLOPS</th><th>Memory</th><th>Bandwidth</th><th>TDP</th></tr></thead><tbody><tr><td>Orin Nano 8GB</td><td>20</td><td>8 GB LPDDR5</td><td>68 GB/s</td><td>7–15 W</td></tr><tr><td>Orin NX 16GB</td><td>50</td><td>16 GB LPDDR5</td><td>102 GB/s</td><td>10–25 W</td></tr><tr><td>AGX Orin 64GB</td><td>138</td><td>64 GB LPDDR5</td><td>204 GB/s</td><td>15–60 W</td></tr><tr><td>Thor (2025+)</td><td>~700 (FP4)</td><td>128 GB</td><td>~273 GB/s</td><td>40–130 W</td></tr></tbody></table>
+<p>For reference: H100 SXM5 = 1,979 FP16 TFLOPS, 3.35 TB/s, 700 W.</p>
+<p>AGX Orin is roughly 14× slower than H100 in FP16 and 16× lower in bandwidth — but ~15× cheaper and ~12× lower TDP. Per-dollar and per-watt, Orin can win, <strong>but only if the model is small enough</strong> (≤ 3B comfortably, 7B with INT4).</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="specialty-silicon-know-of-not-deploy-now">Specialty silicon (know-of, not deploy-now)</h3><a class="sl-anchor-link" href="#specialty-silicon-know-of-not-deploy-now"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Specialty silicon (know-of, not deploy-now)”</span></a></div>
+<ul>
+<li><strong>Groq LPU</strong> — SRAM-only, deterministic single-stream latency. No batching → low concurrency. Wins on hard-latency, low-QPS scenarios.</li>
+<li><strong>Cerebras WSE-3</strong> — wafer-scale, 44 GB on-chip SRAM. If your model fits, the HBM bottleneck simply doesn’t exist.</li>
+</ul>
+<p>These exist as motivations: they answer “what would inference look like if we removed the HBM bottleneck entirely?“</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="8-what-to-do-with-this-before-the-lab">8. What to Do With This Before the Lab</h2><a class="sl-anchor-link" href="#8-what-to-do-with-this-before-the-lab"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “8. What to Do With This Before the Lab”</span></a></div>
+<p>Before running the hands-on exercises, make sure you can answer:</p>
+<ul>
+<li>For any given GPU + model size + precision, can I estimate decode step latency in 30 seconds on a napkin?</li>
+<li>Why is <code dir="auto">nvidia-smi</code>’s GPU-Util misleading for memory-bound decode? What should I look at instead?</li>
+<li>At what TP degree does NVLink communication become a meaningful fraction of forward-pass time?</li>
+<li>Where is the cost-efficient hardware target for a 3B model? A 70B model? A 405B model?</li>
+</ul>
+<p>If any of these are still fuzzy, re-read the relevant section above. The exercises will only land if the mental model is in place first.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="9-lab-preview">9. Lab Preview</h2><a class="sl-anchor-link" href="#9-lab-preview"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “9. Lab Preview”</span></a></div>
+<p>Three exercises in increasing return on time:</p>
+<ol>
+<li><strong>Roofline plot</strong> (highest ROI, ~1 hour) — measure GEMM/GEMV across shapes, plot achieved TFLOPS vs arithmetic intensity. The roofline emerges from your own data.</li>
+<li><strong>NCU on attention kernel</strong> (~1 hour) — read actual achieved HBM bandwidth from Nsight Compute. Compare to what <code dir="auto">nvidia-smi</code> says. Don’t trust GPU-Util again.</li>
+<li><strong>NVLink AllReduce sweep</strong> (multi-GPU only) — measure effective bandwidth as a function of message size; find the latency-vs-bandwidth knee.</li>
+</ol>
+<p>Start with #1.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="recommended-reading">Recommended Reading</h2><a class="sl-anchor-link" href="#recommended-reading"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Recommended Reading”</span></a></div>
+<ul>
+<li><a href="https://resources.nvidia.com/en-us-hopper-architecture/nvidia-h100-tensor-c">NVIDIA H100 Tensor Core GPU Architecture</a> (2022) — HBM, Tensor Core, NVLink와 Hopper의 inference 관련 hardware 기능을 설명합니다.</li>
+</ul>
+<hr>
+<div class="sl-heading-wrapper level-h1"><h1 id="lab-results">Lab Results</h1><a class="sl-anchor-link" href="#lab-results"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Lab Results”</span></a></div>
+<blockquote>
+<p>Measurements done on RTX 5080 (Blackwell, CC 12.0, 16 GB GDDR7, ~960 GB/s, ~113 TFLOPS dense BF16 with FP32 accumulate) with Qwen2.5-3B-Instruct in BF16, varying batch and sequence length. Three exercises were run; NVLink sweep was skipped (single-GPU). Sources: <a href="https://www.nvidia.com/en-us/geforce/graphics-cards/50-series/rtx-5080/">NVIDIA RTX 5080 specifications</a> and <a href="https://images.nvidia.com/aem-dam/Solutions/geforce/blackwell/nvidia-rtx-blackwell-gpu-architecture.pdf">NVIDIA RTX Blackwell GPU architecture</a>.</p>
+</blockquote>
+<div class="sl-heading-wrapper level-h2"><h2 id="headline-findings">Headline Findings</h2><a class="sl-anchor-link" href="#headline-findings"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Headline Findings”</span></a></div>
+<ol>
+<li><strong><code dir="auto">nvidia-smi</code> GPU-Util is misleading.</strong> At batch=1, GPU-Util reads 89% while NCU shows the attention kernel is using 1.13% of SM throughput and 1.75% of DRAM throughput. The kernel is <strong>launch-overhead-bound</strong>, not memory-bound. GPU-Util only measures “is any kernel running,” not “is anything productive happening.”</li>
+<li><strong>The cuBLAS kernel path changes between batch=16 and batch=32.</strong> At batch=1, FFN matmuls dispatch to CUDA-Core GEMV (<code dir="auto">gemvx</code>, 66% of CUDA time). At batch=32, they dispatch to Tensor-Core GEMM (<code dir="auto">cutlass_..._tensorop_bf16</code>, 81% of CUDA time). This is not a gradual transition — it is cuBLAS choosing a different algorithm because Tensor Core tiles (16×16) only fill efficiently from M=16+.</li>
+<li><strong>The textbook claim “decode = memory-bound” needs qualification.</strong> What we actually see is a four-stage transition:
+<ul>
+<li>tiny batch + short seq → <strong>launch-overhead-bound</strong></li>
+<li>small batch + long seq → <strong>L2 → HBM transition</strong></li>
+<li>medium batch (16–64) → <strong>HBM-bandwidth-bound</strong> (the textbook regime)</li>
+<li>large batch (128+) → <strong>compute-bound</strong> (Tensor Cores)</li>
+</ul>
+</li>
+<li><strong>Ridge point on this hardware is around AI ≈ 120 FLOP/byte, not the spec’s 234.</strong> The 234 figure assumed the sparse BF16 Tensor Core peak (225.1 TFLOPS). Dense BF16 with FP32 accumulate on RTX 5080 is 112.6 TFLOPS, putting the real ridge at 112.6 / 0.96 ≈ 117 FLOP/byte. Measurements deviate from the memory-ceiling at exactly M=128 (AI=119), confirming the dense peak.</li>
+</ol>
+<div class="sl-heading-wrapper level-h2"><h2 id="lab-1a--kernel-inventory-probe_kernelspy">Lab 1a — Kernel Inventory (<code dir="auto">probe_kernels.py</code>)</h2><a class="sl-anchor-link" href="#lab-1a--kernel-inventory-probe_kernelspy"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Lab 1a — Kernel Inventory (probe_kernels.py)”</span></a></div>
+<p>CUDA time distribution from <code dir="auto">torch.profiler</code> over a few decode steps. Two snapshots, batch=1 and batch=32:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th></th><th>Batch=1</th><th>Batch=32</th></tr></thead><tbody><tr><td>Top kernel</td><td><code dir="auto">gemvx</code> BF16 GEMV (47.2%, 725 calls)</td><td><code dir="auto">cutlass_..._tensorop_bf16</code> GEMM (34.4%, 432 calls)</td></tr><tr><td>#2</td><td><code dir="auto">gemvx</code> BF16 GEMV (19.3%, 540 calls)</td><td><code dir="auto">cutlass_..._tensorop_bf16</code> GEMM (23.1%, 433 calls)</td></tr><tr><td>#3</td><td><code dir="auto">cutlass_..._wmma</code> GEMM (14.3%, 181 calls)</td><td><code dir="auto">cutlass_..._tensorop_bf16</code> GEMM (15.2%, 432 calls)</td></tr><tr><td>Tensor-Core share of CUDA time</td><td>~14%</td><td>~81%</td></tr><tr><td>CUDA-Core GEMV share</td><td>~66%</td><td>~0% (gone)</td></tr><tr><td>FlashAttention share</td><td>1.7% (decode) + 0.5% (prefill)</td><td>1.2% (decode) + 2.2% (prefill)</td></tr></tbody></table>
+<p><strong>Reading.</strong> The 432-call clusters at batch=32 are the three FFN linear layers (<code dir="auto">gate_proj</code>, <code dir="auto">up_proj</code>, <code dir="auto">down_proj</code>) of Qwen2.5’s SwiGLU FFN, called once per layer per decode step. At batch=1 these collapse into GEMV calls on CUDA cores; at batch=32 they become Tensor-Core GEMMs because M=32 fills enough of a 16×16 Tensor-Core tile.</p>
+<p>Attention is never the bottleneck in this setup. KV-cache optimizations (GQA, MLA, paging) save <strong>memory</strong>, not decode latency on this kind of workload.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="lab-1b--ncu-speed-of-light-decode-steps-under-cudaprofilerstart">Lab 1b — NCU Speed-of-Light (decode steps under <code dir="auto">cudaProfilerStart</code>)</h2><a class="sl-anchor-link" href="#lab-1b--ncu-speed-of-light-decode-steps-under-cudaprofilerstart"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Lab 1b — NCU Speed-of-Light (decode steps under cudaProfilerStart)”</span></a></div>
+<p>The flash_fwd_kernel under NCU at two batch sizes:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Metric</th><th>Batch=1</th><th>Batch=32</th><th>Multiplier</th></tr></thead><tbody><tr><td>SM Busy</td><td>1.13%</td><td>31.5%</td><td>28×</td></tr><tr><td>DRAM Throughput (% of peak)</td><td>1.75%</td><td>8.5%</td><td>4.9×</td></tr><tr><td>Memory Throughput (GB/s)</td><td>16.5</td><td>80.2</td><td>4.9×</td></tr><tr><td>SM Active Cycles</td><td>340</td><td>10,961</td><td>32×</td></tr><tr><td>Elapsed Cycles</td><td>17,643</td><td>20,389</td><td>1.16×</td></tr><tr><td>Duration (μs)</td><td>6.78</td><td>7.90</td><td>1.16×</td></tr><tr><td>L2 Hit Rate</td><td>77.6%</td><td>36.9%</td><td>0.5×</td></tr></tbody></table>
+<p><strong>Reading.</strong> This is one of the cleanest demonstrations of batching’s mechanism we’ll see in the course. Going from batch=1 to batch=32:</p>
+<ul>
+<li>Work scales 32×: SM Active Cycles 340 → 10,961.</li>
+<li>Wall-clock scales only 1.16×: Duration 6.78 → 7.90 μs.</li>
+<li>The fixed cost (kernel launch + teardown, roughly 17,000 cycles) was already there at batch=1; batching just added compute on top of it.</li>
+<li>L2 hit rate halving is the signal that KV cache no longer fits in L2 (small KV at batch=1 fits in 64 MB L2; at batch=32, ~24 MB of KV pushes some traffic to HBM).</li>
+</ul>
+<p>Translation: at batch=1 the attention kernel is 98% idle (340 / 17,643 SM-active fraction). At batch=32 it is doing real work for ~54% of its wall-clock duration. That gap is exactly what continuous batching exploits.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="lab-2--roofline-roofline_benchmarkpy-ffn-gateup-shape-k2048-n11008">Lab 2 — Roofline (<code dir="auto">roofline_benchmark.py</code>, FFN gate/up shape: K=2048, N=11008)</h2><a class="sl-anchor-link" href="#lab-2--roofline-roofline_benchmarkpy-ffn-gateup-shape-k2048-n11008"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Lab 2 — Roofline (roofline_benchmark.py, FFN gate/up shape: K=2048, N=11008)”</span></a></div>
+<p><starlight-image-zoom-zoomable><img src="/inference/efficient-llm-inference-systems/week02/roofline.png" alt="Roofline"><button aria-label="Zoom image: Roofline" class="starlight-image-zoom-control"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><use href="#starlight-image-zoom-icon-zoom"></use></svg></button></starlight-image-zoom-zoomable></p>
+<p>Methodology:</p>
+<ul>
+<li>Timing uses CUDA events around repeated PyTorch BF16 matmul loops, reported as the median of 5 repeats × 200 iterations after warmup.</li>
+<li>Wall-clock time is also recorded by the script, but TFLOPS and roofline placement use GPU event time.</li>
+<li><code dir="auto">Effective GB/s</code> is computed analytically from BF16 tensor sizes (<code dir="auto">A</code>, <code dir="auto">B</code>, <code dir="auto">C</code>), not from hardware DRAM counters. Values above 960 GB/s are expected when L2/cache reuse serves part of the traffic.</li>
+<li>Peak references are RTX 5080 BF16 Tensor Core dense with FP32 accumulate = 112.6 TFLOPS, sparse spec = 225.1 TFLOPS, memory bandwidth = 960 GB/s.</li>
+</ul>
+<p>Raw measurements from <code dir="auto">roofline_data.json</code>:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>M</th><th align="right">GPU time (μs)</th><th align="right">Wall time (μs)</th><th align="right">TFLOPS</th><th align="right">%dense peak</th><th align="right">Effective GB/s</th><th align="right">%mem peak</th><th align="right">AI (FLOP/byte)</th></tr></thead><tbody><tr><td>1</td><td align="right">68.7</td><td align="right">68.8</td><td align="right">0.7</td><td align="right">0.6%</td><td align="right">656</td><td align="right">68%</td><td align="right">1.0</td></tr><tr><td>2</td><td align="right">39.5</td><td align="right">39.6</td><td align="right">2.3</td><td align="right">2.0%</td><td align="right">1,142</td><td align="right">119%</td><td align="right">2.0</td></tr><tr><td>4</td><td align="right">39.6</td><td align="right">39.8</td><td align="right">4.6</td><td align="right">4.0%</td><td align="right">1,142</td><td align="right">119%</td><td align="right">4.0</td></tr><tr><td>8</td><td align="right">40.9</td><td align="right">40.9</td><td align="right">8.8</td><td align="right">7.8%</td><td align="right">1,108</td><td align="right">115%</td><td align="right">8.0</td></tr><tr><td>16</td><td align="right">43.3</td><td align="right">44.0</td><td align="right">16.7</td><td align="right">14.8%</td><td align="right">1,052</td><td align="right">110%</td><td align="right">15.9</td></tr><tr><td>32</td><td align="right">36.0</td><td align="right">36.1</td><td align="right">40.0</td><td align="right">35.6%</td><td align="right">1,274</td><td align="right">133%</td><td align="right">31.4</td></tr><tr><td><strong>64</strong></td><td align="right"><strong>36.6</strong></td><td align="right"><strong>37.1</strong></td><td align="right"><strong>78.8</strong></td><td align="right"><strong>70.0%</strong></td><td align="right"><strong>1,276</strong></td><td align="right"><strong>133%</strong></td><td align="right"><strong>61.7</strong></td></tr><tr><td>128</td><td align="right">66.0</td><td align="right">67.1</td><td align="right">87.5</td><td align="right">77.7%</td><td align="right">734</td><td align="right">76%</td><td align="right">119.2</td></tr><tr><td>256</td><td align="right">123.0</td><td align="right">123.5</td><td align="right">93.9</td><td align="right">83.4%</td><td align="right">421</td><td align="right">44%</td><td align="right">222.9</td></tr><tr><td>512</td><td align="right">233.1</td><td align="right">233.6</td><td align="right">99.0</td><td align="right">88.0%</td><td align="right">251</td><td align="right">26%</td><td align="right">394.9</td></tr><tr><td>1024</td><td align="right">454.8</td><td align="right">454.9</td><td align="right">101.5</td><td align="right">90.2%</td><td align="right">158</td><td align="right">16%</td><td align="right">642.8</td></tr><tr><td>2048</td><td align="right">927.4</td><td align="right">928.8</td><td align="right">99.6</td><td align="right">88.4%</td><td align="right">106</td><td align="right">11%</td><td align="right">936.9</td></tr></tbody></table>
+<p><strong>Reading.</strong></p>
+<ul>
+<li><strong>The plateau lands at ~100–102 TFLOPS, not 225.1 TFLOPS.</strong> This rules out the sparse peak and confirms ~113 TFLOPS dense as the real BF16 ceiling for this PyTorch BF16 matmul. M=1024 hits 90.2% of dense peak, which is excellent for a generic PyTorch matmul.</li>
+<li><strong>Apparent bandwidth above peak (M=2 through M=64 reading 110–133% of 960 GB/s) is cache/reuse, not impossible HBM bandwidth.</strong> <code dir="auto">Effective GB/s</code> is computed from tensor sizes; in reality some of those bytes are served from L2 or reused within the GEMM kernel. NCU’s <code dir="auto">dram__bytes_read.sum</code> gives the true HBM number — that one stays under peak.</li>
+<li><strong>M=64 is the per-matmul efficiency sweet spot on this hardware</strong> (highest combined memory + compute utilization). This matches Week 1’s batch sweep, where batch=64 had the best balance of TPOT (19.4 ms) and throughput (3,297 tok/s) before efficiency collapsed at batch=128.</li>
+<li><strong>The measured ridge sits around AI ≈ 120,</strong> matching dense-peak / bandwidth = 112.6 / 0.96 ≈ 117. M=128 (AI=119) is the first point clearly off the memory-ceiling line; M=256+ is unambiguously on the compute ceiling.</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="cross-references-between-labs">Cross-References Between Labs</h2><a class="sl-anchor-link" href="#cross-references-between-labs"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Cross-References Between Labs”</span></a></div>
+<p>The three labs corroborate each other:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Observation</th><th>Lab 1a (probe)</th><th>Lab 1b (NCU)</th><th>Lab 2 (roofline)</th></tr></thead><tbody><tr><td>Batch=1 is launch-bound</td><td>GEMV dispatched (low arithmetic intensity)</td><td>SM Busy 1.13%, DRAM 1.75%</td><td>M=1 below memory ceiling</td></tr><tr><td>Tensor-Core path activates around M=16–32</td><td><code dir="auto">gemvx</code> → <code dir="auto">cutlass_tensorop</code> switch</td><td>SM Busy 1.13% → 31.5%</td><td>TFLOPS ramp from 16 → 35 → 75</td></tr><tr><td>Memory-bound regime occupies M=2–64</td><td>GEMV dominates at b=1; small GEMM at b=32</td><td>DRAM utilization rising</td><td>Points sit on the memory ceiling line</td></tr><tr><td>Ridge near AI=120</td><td>(n/a — measured by Lab 2)</td><td>(n/a)</td><td>Direct measurement: M=128 inflection</td></tr><tr><td>Compute ceiling ≈ 100 TFLOPS</td><td>(n/a)</td><td>(n/a)</td><td>M=1024 plateau at 101.5 TFLOPS</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h2"><h2 id="what-this-calibrates-going-forward">What This Calibrates Going Forward</h2><a class="sl-anchor-link" href="#what-this-calibrates-going-forward"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “What This Calibrates Going Forward”</span></a></div>
+<p>Concretely, this set of measurements gives operating numbers for the rest of the course:</p>
+<ul>
+<li><strong>Operating batch sweet spot for Qwen2.5-3B BF16 on RTX 5080: 64.</strong> Latency stays acceptable (TPOT 19 ms), throughput is 40× the batch=1 baseline, and per-matmul efficiency is at its peak (~70% of dense BF16 ceiling). Pushing to 128 buys throughput at a steep latency cost; beyond 128, ridge point is hit and additional batch buys little.</li>
+<li><strong>L2/cache effects matter at small batch / short sequence.</strong> Any benchmark that reports >100% effective HBM peak bandwidth is not lying about throughput — it is using an analytic byte count, while the kernel is getting some data from cache or reuse. NCU’s <code dir="auto">dram__bytes_read.sum</code> is the right metric to isolate true HBM traffic.</li>
+<li><strong>Decode-latency optimization on this kind of workload should target FFN GEMM/GEMV, not attention.</strong> Attention kernels are &#x3C;3% of CUDA time. Quantizing FFN weights (W4A16) saves bytes-loaded on the actual hot path; KV-cache compression saves memory but not latency.</li>
+<li><strong><code dir="auto">nvidia-smi</code> GPU-Util is permanently retired as a diagnostic metric</strong> for this course. Use NCU SOL throughputs (<code dir="auto">sm__throughput.avg.pct_of_peak_sustained_elapsed</code>, <code dir="auto">dram__throughput.avg.pct_of_peak_sustained_elapsed</code>) instead.</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="lab-3--nvlink-sweep">Lab 3 — NVLink Sweep</h2><a class="sl-anchor-link" href="#lab-3--nvlink-sweep"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Lab 3 — NVLink Sweep”</span></a></div>
+<p>Skipped: single-GPU homelab. Will revisit when running on a multi-GPU node where TP communication actually exists. The numerical model in §6 of this README still applies — the AllReduce volume calculation does not need the hardware to be sound.</p> </div> <footer class="sl-flex astro-3yyafb3n"> <div class="meta sl-flex astro-3yyafb3n"> <a href="https://github.com/ziwon/ai-data-center-systems/edit/main/inference/efficient-llm-inference-systems/week02/README.md" class="sl-flex print:hidden astro-eez2twj6"><svg aria-hidden="true" class="astro-eez2twj6 astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.2em;"><path d="M22 7.24a1 1 0 0 0-.29-.71l-4.24-4.24a1 1 0 0 0-1.1-.22 1 1 0 0 0-.32.22l-2.83 2.83L2.29 16.05a1 1 0 0 0-.29.71V21a1 1 0 0 0 1 1h4.24a1 1 0 0 0 .76-.29l10.87-10.93L21.71 8c.1-.1.17-.2.22-.33a1 1 0 0 0 0-.24v-.14l.07-.05ZM6.83 20H4v-2.83l9.93-9.93 2.83 2.83L6.83 20ZM18.17 8.66l-2.83-2.83 1.42-1.41 2.82 2.82-1.41 1.42Z"/></svg>Edit page</a> <p>Last updated: <time datetime="2026-08-30T05:34:22.000Z">Aug 30, 2026</time></p> </div> <div class="pagination-links print:hidden astro-u2l5gyhi" dir="ltr"> <a href="/inference/efficient-llm-inference-systems/week01/" rel="prev" class="astro-u2l5gyhi"> <svg aria-hidden="true" class="astro-u2l5gyhi astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17 11H9.41l3.3-3.29a1.004 1.004 0 1 0-1.42-1.42l-5 5a1 1 0 0 0-.21.33 1 1 0 0 0 0 .76 1 1 0 0 0 .21.33l5 5a1.002 1.002 0 0 0 1.639-.325 1 1 0 0 0-.219-1.095L9.41 13H17a1 1 0 0 0 0-2Z"/></svg> <span class="astro-u2l5gyhi"> Previous <br class="astro-u2l5gyhi"> <span class="link-title astro-u2l5gyhi">Week 1 — Understanding Performance Metrics</span> </span> </a> <a href="/inference/efficient-llm-inference-systems/week03/" rel="next" class="astro-u2l5gyhi"> <svg aria-hidden="true" class="astro-u2l5gyhi astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17.92 11.62a1.001 1.001 0 0 0-.21-.33l-5-5a1.003 1.003 0 1 0-1.42 1.42l3.3 3.29H7a1 1 0 0 0 0 2h7.59l-3.3 3.29a1.002 1.002 0 0 0 .325 1.639 1 1 0 0 0 1.095-.219l5-5a1 1 0 0 0 .21-.33 1 1 0 0 0 0-.76Z"/></svg> <span class="astro-u2l5gyhi"> Next <br class="astro-u2l5gyhi"> <span class="link-title astro-u2l5gyhi">Week 3 — Transformer Inference and the KV Cache</span> </span> </a> </div>  </footer> </div> </div>  </main> </div> </div> </div> <ask-docs-widget> <button class="ask-fab" type="button" data-open aria-label="Ask this docs"> <span class="ask-fab-icon" aria-hidden="true">?</span>
+Ask this docs
+</button> <div class="ask-panel" data-panel hidden> <div class="ask-resize-handle" data-resize aria-hidden="true"></div> <div class="ask-panel-inner"> <header class="ask-header"> <div> <p class="ask-eyebrow">AI Data Center Systems</p> <h2 class="ask-title">Ask this docs</h2> </div> <div class="ask-header-controls"> <button class="ask-mode-btn" data-mode-btn="right" title="오른쪽 패널" aria-label="오른쪽 패널"> <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="6" height="16" rx="1.5" opacity="0.35"></rect><rect x="8" y="0" width="8" height="16" rx="1.5"></rect></svg> </button> <button class="ask-mode-btn" data-mode-btn="bottom" title="하단 패널" aria-label="하단 패널"> <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="16" height="6" rx="1.5" opacity="0.35"></rect><rect x="0" y="8" width="16" height="8" rx="1.5"></rect></svg> </button> <button class="ask-mode-btn" data-mode-btn="expand" title="전체 확장" aria-label="전체 확장"> <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 5.5V1h4.5M10.5 1H15v4.5M15 10.5V15h-4.5M5.5 15H1v-4.5"></path></svg> </button> <button class="ask-close-btn" type="button" aria-label="닫기" data-close> <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13"></path></svg> </button> </div> </header> <div class="ask-body"> <label class="ask-field"> <span class="ask-field-row"> <span>Question</span> <span class="ask-char" data-char>0 / 800</span> </span> <textarea name="question" rows="3" maxlength="800" placeholder="이 문서에서 핵심 운영 체크포인트는 무엇인가요?" data-question></textarea> <span class="ask-hint">시간당 최대 20회 · 질문당 최대 800자</span> </label> <div class="ask-actions"> <button class="ask-submit" type="button" data-submit> <svg class="ask-spinner" viewBox="0 0 24 24" fill="none" aria-hidden="true" hidden> <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2.5" stroke-dasharray="56" stroke-dashoffset="14" stroke-linecap="round"></circle> </svg> <span data-submit-label>Ask</span> </button> <p class="ask-status" data-status></p> </div> <section class="ask-answer" data-answer hidden></section> <section class="ask-sources" data-sources hidden> <h3>Sources</h3> <ul class="ask-source-chips" data-source-list></ul> </section> </div> </div> </div> <div class="ask-backdrop" data-backdrop hidden></div> </ask-docs-widget> <script type="module" src="/_astro/AskDocs.astro_astro_type_script_index_0_lang.BbnAb04M.js"></script> </div> <script type="module">const r=document.documentElement,c=document.querySelector("#starlight__sidebar"),s=document.querySelector(".navigation-mode-toggle"),a=document.querySelector(".navigation-drawer-toggle"),u=window.matchMedia("(min-width: 50rem)");function d(){return r.dataset.navigationMode==="compact"}function o(){return r.dataset.navigationDrawer==="open"}function l(){const e=d(),t=e&&o();s?.setAttribute("aria-pressed",String(e)),s?.setAttribute("title",e?"Use normal navigation":"Use compact navigation"),a?.setAttribute("aria-expanded",String(t)),a?.setAttribute("title",t?"Close navigation":"Open navigation");const n=a?.querySelector(".navigation-drawer-label");n&&(n.textContent=t?"Close navigation":"Open navigation")}function i(e,t=!1){const n=!!(e&&d()&&u.matches);r.dataset.navigationDrawer=n?"open":"closed",l(),n?requestAnimationFrame(()=>{const g=c?.querySelector('a[aria-current="page"]'),m=c?.querySelector(".starlight-sidebar-topics-current");(g??m)?.focus()}):t&&a?.focus()}function p(e){r.dataset.navigationMode=e,i(!1);try{localStorage.setItem("adcs-navigation-mode",e)}catch{}l()}s?.addEventListener("click",()=>{p(d()?"normal":"compact")});a?.addEventListener("click",()=>{i(!o(),o())});document.addEventListener("keydown",e=>{e.key==="Escape"&&o()&&i(!1,!0)});document.addEventListener("pointerdown",e=>{!o()||!(e.target instanceof Node)||c?.contains(e.target)||i(!1)});u.addEventListener("change",()=>i(!1));r.dataset.navigationDrawer="closed";l();</script> </body></html>

@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 430" role="img" aria-labelledby="title desc">
+  <title id="title">CUDA 2D thread indexing to row-major memory</title>
+  <desc id="desc">A two-dimensional CUDA grid maps block and thread indices to row and column coordinates, then converts them to a row-major linear memory index.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .panel { fill: none; stroke: #111111; stroke-width: 1.5; }
+    .cell { fill: #F5F1EA; stroke: #D8D1C7; stroke-width: 1; }
+    .block { fill: none; stroke: #111111; stroke-width: 1.8; }
+    .active { fill: #F3EFE7; stroke: #D9392E; stroke-width: 2; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.8; marker-end: url(#arrow); }
+    .accent-line { fill: none; stroke: #D9392E; stroke-width: 2.1; marker-end: url(#accent-arrow); }
+    .label { fill: #050505; font: 600 18px Inter, Arial, sans-serif; }
+    .small { fill: #6F6A63; font: 13px Inter, Arial, sans-serif; }
+    .mono { fill: #050505; font: 14px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .accent { fill: #D9392E; font: 700 15px Inter, Arial, sans-serif; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#111111"/>
+    </marker>
+    <marker id="accent-arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#D9392E"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="980" height="430"/>
+
+  <rect class="panel" x="44" y="48" width="332" height="290" rx="6"/>
+  <text class="label" x="72" y="82">2D grid of thread blocks</text>
+  <text class="small" x="72" y="104">Each block is itself a 2D array of threads</text>
+
+  <g transform="translate(82 132)">
+    <rect class="block" x="0" y="0" width="96" height="96" rx="2"/>
+    <rect class="block" x="118" y="0" width="96" height="96" rx="2"/>
+    <rect class="block" x="0" y="118" width="96" height="96" rx="2"/>
+    <rect class="active" x="118" y="118" width="96" height="96" rx="2"/>
+    <text class="small" x="22" y="52">0,0</text>
+    <text class="small" x="140" y="52">1,0</text>
+    <text class="small" x="22" y="170">0,1</text>
+    <text class="small" x="140" y="170">1,1</text>
+    <text class="accent" x="132" y="202">blockIdx</text>
+  </g>
+
+  <rect class="panel" x="430" y="48" width="220" height="290" rx="6"/>
+  <text class="label" x="458" y="82">Active block</text>
+  <text class="small" x="458" y="104">threadIdx inside one block</text>
+  <g transform="translate(468 136)">
+    <rect class="cell" x="0" y="0" width="36" height="36"/>
+    <rect class="cell" x="36" y="0" width="36" height="36"/>
+    <rect class="cell" x="72" y="0" width="36" height="36"/>
+    <rect class="cell" x="108" y="0" width="36" height="36"/>
+    <rect class="cell" x="0" y="36" width="36" height="36"/>
+    <rect class="cell" x="36" y="36" width="36" height="36"/>
+    <rect class="active" x="72" y="36" width="36" height="36"/>
+    <rect class="cell" x="108" y="36" width="36" height="36"/>
+    <rect class="cell" x="0" y="72" width="36" height="36"/>
+    <rect class="cell" x="36" y="72" width="36" height="36"/>
+    <rect class="cell" x="72" y="72" width="36" height="36"/>
+    <rect class="cell" x="108" y="72" width="36" height="36"/>
+    <rect class="cell" x="0" y="108" width="36" height="36"/>
+    <rect class="cell" x="36" y="108" width="36" height="36"/>
+    <rect class="cell" x="72" y="108" width="36" height="36"/>
+    <rect class="cell" x="108" y="108" width="36" height="36"/>
+    <text class="accent" x="61" y="61">2,1</text>
+  </g>
+
+  <rect class="panel" x="704" y="48" width="232" height="290" rx="6"/>
+  <text class="label" x="732" y="82">Row-major address</text>
+  <text class="small" x="732" y="104">2D coordinate becomes one index</text>
+  <text class="mono" x="732" y="154">row = blockIdx.y</text>
+  <text class="mono" x="732" y="177">    * blockDim.y</text>
+  <text class="mono" x="732" y="200">    + threadIdx.y</text>
+  <text class="mono" x="732" y="239">col = blockIdx.x</text>
+  <text class="mono" x="732" y="262">    * blockDim.x</text>
+  <text class="mono" x="732" y="285">    + threadIdx.x</text>
+
+  <path class="line" d="M 314 250 C 370 250 390 226 430 208"/>
+  <path class="accent-line" d="M 614 208 C 666 208 676 208 704 208"/>
+
+  <rect class="panel" x="186" y="364" width="608" height="42" rx="6"/>
+  <text class="mono" x="232" y="390">linear_index = row * width + col</text>
+  <path class="accent-line" d="M 820 338 C 820 356 792 364 760 374"/>
+</svg>

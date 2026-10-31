@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="620" viewBox="0 0 1120 620" role="img" aria-labelledby="title desc">
+  <title id="title">NIXL KV cache routing for disaggregated inference</title>
+  <desc id="desc">A diagram showing prefill workers moving KV cache through NIXL to decode workers, CPU memory, NVMe, or object storage.</desc>
+  <defs>
+    <style>
+      text { font-family: Arial, sans-serif; }
+      .bg { fill: #F5F1EA; }
+      .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.4; }
+      .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; }
+      .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+      .line { fill: none; stroke: #111111; stroke-width: 1.8; }
+      .dash { fill: none; stroke: #6F6A63; stroke-width: 1.2; stroke-dasharray: 7 5; }
+      .label { fill: #050505; font-size: 17px; font-weight: 700; }
+      .small { fill: #6F6A63; font-size: 13px; }
+      .red { fill: #D9392E; font-size: 13px; font-weight: 700; }
+      .arrow { fill: #111111; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1120" height="620"/>
+
+  <rect class="box" x="78" y="94" width="230" height="150" rx="8"/>
+  <text class="label" x="124" y="132">Prefill workers</text>
+  <text class="small" x="116" y="164">compute-bound prompt</text>
+  <text class="small" x="116" y="190">build KV cache</text>
+
+  <rect class="accent" x="410" y="86" width="240" height="166" rx="8"/>
+  <text class="label" x="502" y="128">NIXL</text>
+  <text class="small" x="456" y="164">registerMem, prepXfer</text>
+  <text class="small" x="456" y="190">postXfer, checkXfer</text>
+  <text class="small" x="456" y="216">UCX / RDMA / GDS</text>
+
+  <rect class="box" x="762" y="94" width="230" height="150" rx="8"/>
+  <text class="label" x="814" y="132">Decode workers</text>
+  <text class="small" x="800" y="164">memory-bound generation</text>
+  <text class="small" x="800" y="190">consume KV chunks</text>
+
+  <line class="line" x1="308" y1="169" x2="410" y2="169"/>
+  <polygon class="arrow" points="410,169 398,163 398,175"/>
+  <line class="line" x1="650" y1="169" x2="762" y2="169"/>
+  <polygon class="arrow" points="762,169 750,163 750,175"/>
+
+  <rect class="soft" x="160" y="372" width="170" height="86" rx="8"/>
+  <text class="label" x="196" y="408">GPU HBM</text>
+  <text class="small" x="194" y="432">fastest tier</text>
+  <rect class="soft" x="410" y="372" width="170" height="86" rx="8"/>
+  <text class="label" x="448" y="408">CPU DRAM</text>
+  <text class="small" x="440" y="432">capacity tier</text>
+  <rect class="soft" x="660" y="372" width="170" height="86" rx="8"/>
+  <text class="label" x="710" y="408">NVMe</text>
+  <text class="small" x="702" y="432">offload tier</text>
+  <rect class="soft" x="888" y="372" width="170" height="86" rx="8"/>
+  <text class="label" x="926" y="408">Object store</text>
+  <text class="small" x="928" y="432">remote tier</text>
+
+  <path class="dash" d="M 530 252 C 498 310, 334 328, 245 372"/>
+  <path class="dash" d="M 530 252 C 520 306, 500 336, 495 372"/>
+  <path class="dash" d="M 530 252 C 585 314, 692 332, 745 372"/>
+  <path class="dash" d="M 530 252 C 676 304, 886 320, 973 372"/>
+
+  <text class="red" x="104" y="540">Use NCCL for collectives; use NIXL for asynchronous KV cache and memory-tier movement.</text>
+</svg>

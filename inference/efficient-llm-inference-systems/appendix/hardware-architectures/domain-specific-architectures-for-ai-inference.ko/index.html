@@ -1,0 +1,1008 @@
+<!DOCTYPE html><html lang="en" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-bguv2lll"> <head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Domain-Specific Architectures for AI Inference | AI Data Center Systems</title><link rel="canonical" href="https://adcs.restack.tech/inference/efficient-llm-inference-systems/appendix/hardware-architectures/domain-specific-architectures-for-ai-inference.ko/"/><link rel="sitemap" href="/sitemap-index.xml"/><script async src="https://www.googletagmanager.com/gtag/js?id=G-76LFZJVBTE"></script><script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-76LFZJVBTE');
+      </script><script async crossorigin="anonymous" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8128231647578658"></script><link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v6.4.8"/><meta name="generator" content="Starlight v0.40.0"/><meta property="og:title" content="Domain-Specific Architectures for AI Inference"/><meta property="og:url" content="https://adcs.restack.tech/inference/efficient-llm-inference-systems/appendix/hardware-architectures/domain-specific-architectures-for-ai-inference.ko/"/><meta property="og:locale" content="en"/><meta property="og:description" content="저자는 이 질문에 답하기 위해 Transformer inference의 병목을 먼저 분석하고, 거기서 하드웨어 설계 원칙을 끌어낸다. 결론은 다음과 같다."/><meta property="og:site_name" content="AI Data Center Systems"/><meta name="description" content="저자는 이 질문에 답하기 위해 Transformer inference의 병목을 먼저 분석하고, 거기서 하드웨어 설계 원칙을 끌어낸다. 결론은 다음과 같다."/><meta property="og:type" content="article"/><meta property="og:image" content="https://adcs.restack.tech/og/inference/efficient-llm-inference-systems/appendix/hardware-architectures/domain-specific-architectures-for-ai-inference.ko.png?v=2"/><meta property="og:image:width" content="1200"/><meta property="og:image:height" content="630"/><meta name="twitter:image" content="https://adcs.restack.tech/og/inference/efficient-llm-inference-systems/appendix/hardware-architectures/domain-specific-architectures-for-ai-inference.ko.png?v=2"/><meta name="twitter:card" content="summary_large_image"/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/_astro/print.DNXP8c50.css" media="print"><link rel="stylesheet" href="/_astro/common.DYbqSTpl.css"><script type="module" src="/_astro/page.CtJXHRyR.js"></script></head> <body class="astro-bguv2lll"> <a href="#_top" class="astro-7q3lir66">Skip to content</a> <script>
+  (() => {
+    try {
+      const savedMode = localStorage.getItem('adcs-navigation-mode');
+      document.documentElement.dataset.navigationMode = savedMode === 'compact' ? 'compact' : 'normal';
+    } catch {
+      document.documentElement.dataset.navigationMode = 'normal';
+    }
+  })();
+</script> <div class="page sl-flex astro-4toy2ex6"> <header class="header astro-4toy2ex6"><div class="header astro-3ef6ksr2"> <div class="title-wrapper sl-flex astro-3ef6ksr2"> <a href="/" class="site-title sl-flex astro-m46x6ez3">  <span class="astro-m46x6ez3" translate="no"> AI Data Center Systems </span> </a> <button class="navigation-mode-toggle print:hidden astro-3ef6ksr2" type="button" aria-label="Compact navigation" aria-pressed="false" title="Use compact navigation"> <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" class="astro-3ef6ksr2"> <rect x="3" y="4" width="18" height="16" rx="2" class="astro-3ef6ksr2"></rect> <path d="M9 4v16M6.5 10 4.5 12l2 2" class="astro-3ef6ksr2"></path> </svg> </button> </div> <div class="sl-flex print:hidden astro-3ef6ksr2"> <site-search class="astro-3ef6ksr2 astro-v37mnknz" data-translations="{&quot;placeholder&quot;:&quot;Search&quot;}"> <button data-open-modal disabled aria-label="Search" aria-keyshortcuts="Control+K" class="astro-v37mnknz"> <svg aria-hidden="true" class="astro-v37mnknz astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg> <span class="sl-hidden md:sl-block astro-v37mnknz" aria-hidden="true">Search</span> <kbd class="sl-hidden md:sl-flex astro-v37mnknz" style="display: none;"> <kbd class="astro-v37mnknz">Ctrl</kbd><kbd class="astro-v37mnknz">K</kbd> </kbd> </button> <dialog style="padding:0" aria-label="Search" class="astro-v37mnknz"> <div class="dialog-frame sl-flex astro-v37mnknz">  <button data-close-modal class="sl-flex md:sl-hidden astro-v37mnknz"> Cancel </button> <div class="search-container astro-v37mnknz"> <div id="starlight__search" class="astro-v37mnknz"></div> </div> </div> </dialog> </site-search>  <script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script> <script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.D1WXcfCt.js"></script>  </div> <div class="sl-hidden md:sl-flex print:hidden right-group astro-3ef6ksr2"> <div class="sl-flex social-icons astro-3ef6ksr2"> <a href="https://github.com/ziwon/ai-data-center-systems" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">GitHub</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script> <script type="module">const r="starlight-theme",o=e=>e==="auto"||e==="dark"||e==="light"?e:"auto",c=()=>o(typeof localStorage<"u"&&localStorage.getItem(r));function n(e){typeof localStorage<"u"&&localStorage.setItem(r,e==="light"||e==="dark"?e:"")}const l=()=>matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";function t(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e==="auto"?l():e,n(e)}matchMedia("(prefers-color-scheme: light)").addEventListener("change",()=>{c()==="auto"&&t("auto")});class s extends HTMLElement{constructor(){super(),t(c()),this.querySelector("select")?.addEventListener("change",a=>{a.currentTarget instanceof HTMLSelectElement&&t(o(a.currentTarget.value))})}}customElements.define("starlight-theme-select",s);</script> <script type="module">class s extends HTMLElement{constructor(){super();const e=this.querySelector("select");e&&(e.addEventListener("change",t=>{t.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=t.currentTarget.value)}),window.addEventListener("pageshow",t=>{if(!t.persisted)return;const n=e.querySelector("option[selected]")?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}}customElements.define("starlight-lang-select",s);</script> </div> </div></header> <nav class="sidebar print:hidden astro-4toy2ex6" aria-label="Main"> <starlight-menu-button class="print:hidden astro-jif73yzw"> <button aria-expanded="false" aria-label="Menu" aria-controls="starlight__sidebar" class="sl-flex md:sl-hidden astro-jif73yzw"> <svg aria-hidden="true" class="open-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg> <svg aria-hidden="true" class="close-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg> </button> </starlight-menu-button> <script type="module">class s extends HTMLElement{constructor(){super(),this.btn=this.querySelector("button"),this.btn.addEventListener("click",()=>this.toggleExpanded());const t=this.closest("nav");t&&t.addEventListener("keyup",e=>this.closeOnEscape(e))}setExpanded(t){this.setAttribute("aria-expanded",String(t)),document.body.toggleAttribute("data-mobile-menu-expanded",t)}toggleExpanded(){this.setExpanded(this.getAttribute("aria-expanded")!=="true")}closeOnEscape(t){t.code==="Escape"&&(this.setExpanded(!1),this.btn.focus())}}customElements.define("starlight-menu-button",s);</script>  <div id="starlight__sidebar" class="sidebar-pane astro-4toy2ex6"> <div class="navigation-controls astro-4toy2ex6"> <button class="navigation-drawer-toggle astro-4toy2ex6" type="button" aria-controls="starlight__sidebar-content" aria-expanded="false" title="Open navigation"> <svg class="navigation-menu-icon astro-4toy2ex6" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"> <path d="M4 6h16M4 12h16M4 18h16" class="astro-4toy2ex6"></path> </svg> <svg class="navigation-close-icon astro-4toy2ex6" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"> <path d="m6 6 12 12M18 6 6 18" class="astro-4toy2ex6"></path> </svg> <span class="navigation-drawer-label astro-4toy2ex6">Open navigation</span> </button> </div> <div id="starlight__sidebar-content" class="sidebar-content sl-flex astro-4toy2ex6"> <ul class="starlight-sidebar-topics astro-2fh6iaza"> <li class="astro-2fh6iaza"> <a aria-label="Network" title="Network" href="/network/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8.7 10a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-6.27-6.3a1 1 0 0 0-1.42 1.42ZM21 14a1 1 0 0 0-1 1v3.59L15.44 14A1 1 0 0 0 14 15.44L18.59 20H15a1 1 0 0 0 0 2h6a1 1 0 0 0 .38-.08 1 1 0 0 0 .54-.54A1 1 0 0 0 22 21v-6a1 1 0 0 0-1-1Zm.92-11.38a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-6a1 1 0 0 0 0 2h3.59L2.29 20.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V9a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z"/></svg> </div> <div class="astro-2fh6iaza"> Network  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="GPU &amp; Accelerator Systems" title="GPU &amp; Accelerator Systems" href="/gpu/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> </div> <div class="astro-2fh6iaza"> GPU &amp; Accelerator Systems  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Storage" title="Storage" href="/storage/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8 16.5a1 1 0 1 0 1 1 1 1 0 0 0-1-1M12 2C8 2 4 3.37 4 6v12c0 2.63 4 4 8 4s8-1.37 8-4V6c0-2.63-4-4-8-4m6 16c0 .71-2.28 2-6 2s-6-1.29-6-2v-3.27A13 13 0 0 0 12 16a13 13 0 0 0 6-1.27Zm0-6c0 .71-2.28 2-6 2s-6-1.29-6-2V8.73A13 13 0 0 0 12 10a13 13 0 0 0 6-1.27Zm-6-4C8.28 8 6 6.71 6 6s2.28-2 6-2 6 1.29 6 2-2.28 2-6 2m-4 2.5a1 1 0 1 0 1 1 1 1 0 0 0-1-1"/></svg> </div> <div class="astro-2fh6iaza"> Storage  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Training" title="Training" href="/training/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1 1v8a1 1 0 0 0 2 0v-8a1 1 0 0 0-1-1m5-10a1 1 0 0 0-1 1v18a1 1 0 0 0 2 0V3a1 1 0 0 0-1-1m10 14a1 1 0 0 0-1 1v4a1 1 0 0 0 2 0v-4a1 1 0 0 0-1-1m-5-8a1 1 0 0 0-1 1v12a1 1 0 0 0 2 0V9a1 1 0 0 0-1-1"/></svg> </div> <div class="astro-2fh6iaza"> Training  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Inference" title="Inference" data-topic-icon="brain" href="/inference/" class="starlight-sidebar-topics-current astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 22H5a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3h1a4 4 0 0 1 7.3-2.18c.448.64.692 1.4.7 2.18h3a1 1 0 0 1 1 1v3a4 4 0 0 1 2.18 7.3A3.86 3.86 0 0 1 18 18v3a1 1 0 0 1-1 1ZM5 8a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11v-3.18a1 1 0 0 1 1.33-.95 1.77 1.77 0 0 0 1.74-.23 2 2 0 0 0 .93-1.37 2 2 0 0 0-.48-1.59 1.89 1.89 0 0 0-2.17-.55 1 1 0 0 1-1.33-.95V8h-3.2a1 1 0 0 1-1-1.33 1.77 1.77 0 0 0-.23-1.74 1.939 1.939 0 0 0-3-.43A2 2 0 0 0 8 6c.002.23.046.456.13.67A1 1 0 0 1 7.18 8H5Z"/></svg> </div> <div class="astro-2fh6iaza"> Inference  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="MLOps" title="MLOps" data-topic-icon="cycle" href="/mlops/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M8.7 10a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-6.27-6.3a1 1 0 0 0-1.42 1.42ZM21 14a1 1 0 0 0-1 1v3.59L15.44 14A1 1 0 0 0 14 15.44L18.59 20H15a1 1 0 0 0 0 2h6a1 1 0 0 0 .38-.08 1 1 0 0 0 .54-.54A1 1 0 0 0 22 21v-6a1 1 0 0 0-1-1Zm.92-11.38a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-6a1 1 0 0 0 0 2h3.59L2.29 20.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V9a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z"/></svg> </div> <div class="astro-2fh6iaza"> MLOps  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Systems Performance" title="Systems Performance" href="/systems-performance/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path fill-rule="evenodd" d="M1.44 8.855v-.001l3.527-3.516c.34-.344.802-.541 1.285-.548h6.649l.947-.947c3.07-3.07 6.207-3.072 7.62-2.868a1.821 1.821 0 0 1 1.557 1.557c.204 1.413.203 4.55-2.868 7.62l-.946.946v6.649a1.845 1.845 0 0 1-.549 1.286l-3.516 3.528a1.844 1.844 0 0 1-3.11-.944l-.858-4.275-4.52-4.52-2.31-.463-1.964-.394A1.847 1.847 0 0 1 .98 10.693a1.843 1.843 0 0 1 .46-1.838Zm5.379 2.017-3.873-.776L6.32 6.733h4.638l-4.14 4.14Zm8.403-5.655c2.459-2.46 4.856-2.463 5.89-2.33.134 1.035.13 3.432-2.329 5.891l-6.71 6.71-3.561-3.56 6.71-6.711Zm-1.318 15.837-.776-3.873 4.14-4.14v4.639l-3.364 3.374Z" clip-rule="evenodd"/><path d="M9.318 18.345a.972.972 0 0 0-1.86-.561c-.482 1.435-1.687 2.204-2.934 2.619a8.22 8.22 0 0 1-1.23.302c.062-.365.157-.79.303-1.229.415-1.247 1.184-2.452 2.62-2.935a.971.971 0 1 0-.62-1.842c-.12.04-.236.084-.35.13-2.02.828-3.012 2.588-3.493 4.033a10.383 10.383 0 0 0-.51 2.845l-.001.016v.063c0 .536.434.972.97.972H2.24a7.21 7.21 0 0 0 .878-.065c.527-.063 1.248-.19 2.02-.447 1.445-.48 3.205-1.472 4.033-3.494a5.828 5.828 0 0 0 .147-.407Z"/></svg> </div> <div class="astro-2fh6iaza"> Systems Performance  </div> </a> </li><li class="astro-2fh6iaza"> <a aria-label="Courses" title="Courses" href="/courses/" class="astro-2fh6iaza"> <div class="starlight-sidebar-topics-icon astro-2fh6iaza"> <svg aria-hidden="true" class="astro-2fh6iaza astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.17 2.06A13.1 13.1 0 0 0 19 1.87a12.94 12.94 0 0 0-7 2.05 12.94 12.94 0 0 0-7-2 13.1 13.1 0 0 0-2.17.19 1 1 0 0 0-.83 1v12a1 1 0 0 0 1.17 1 10.9 10.9 0 0 1 8.25 1.91l.12.07h.11a.91.91 0 0 0 .7 0h.11l.12-.07A10.899 10.899 0 0 1 20.83 16 1 1 0 0 0 22 15V3a1 1 0 0 0-.83-.94ZM11 15.35a12.87 12.87 0 0 0-6-1.48H4v-10c.333-.02.667-.02 1 0a10.86 10.86 0 0 1 6 1.8v9.68Zm9-1.44h-1a12.87 12.87 0 0 0-6 1.48V5.67a10.86 10.86 0 0 1 6-1.8c.333-.02.667-.02 1 0v10.04Zm1.17 4.15a13.098 13.098 0 0 0-2.17-.19 12.94 12.94 0 0 0-7 2.05 12.94 12.94 0 0 0-7-2.05c-.727.003-1.453.066-2.17.19A1 1 0 0 0 2 19.21a1 1 0 0 0 1.17.79 10.9 10.9 0 0 1 8.25 1.91 1 1 0 0 0 1.16 0A10.9 10.9 0 0 1 20.83 20a1 1 0 0 0 1.17-.79 1 1 0 0 0-.83-1.15Z"/></svg> </div> <div class="astro-2fh6iaza"> Courses  </div> </a> </li> </ul>  <doc-sidebar-controls hidden="true" class="astro-v3kklmrl"> <div class="tree-controls astro-v3kklmrl" role="group" aria-label="문서 목록 펼침 설정"> <button type="button" data-action="expand" aria-controls="document-tree" aria-label="모든 문서 분류 펼치기" class="astro-v3kklmrl">펼치기</button> <span aria-hidden="true" class="astro-v3kklmrl">/</span> <button type="button" data-action="collapse" aria-controls="document-tree" aria-label="모든 문서 분류 접기" class="astro-v3kklmrl">접기</button> </div> </doc-sidebar-controls> <script type="module">class d extends HTMLElement{connectedCallback(){const n=document.getElementById("document-tree");if(!n||this.dataset.initialized)return;this.dataset.initialized="true",this.hidden=!1;const e=Array.from(n.querySelectorAll("details")),r=this.querySelector('[data-action="expand"]'),i=this.querySelector('[data-action="collapse"]');for(const t of e)t.open=!1;let o=n.querySelector('[aria-current="page"]')?.closest("details");for(;o&&n.contains(o);)o.open=!0,o=o.parentElement?.closest("details")??null;const a=()=>{r?.setAttribute("aria-disabled",String(e.every(t=>t.open))),i?.setAttribute("aria-disabled",String(e.every(t=>!t.open)))};this.addEventListener("click",t=>{const s=t.target instanceof Element?t.target.closest("button[data-action]"):null;if(!s||s.getAttribute("aria-disabled")==="true")return;const l=s.dataset.action==="expand";for(const c of e)c.open=l;a()});for(const t of e)t.addEventListener("toggle",a);a()}}customElements.get("doc-sidebar-controls")||customElements.define("doc-sidebar-controls",d);</script> <div id="document-tree"> <sl-sidebar-state-persist data-hash="15y10hp" class="astro-kku4brbg"> <script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script>  <ul class="top-level astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/inference/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">Inference 목록</span>  </a> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">추론 시스템 강좌 · 6</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="0"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">강좌 안내</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/week01/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 1 — Understanding Performance Metrics</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/week02/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 2 — Hardware Foundations for Inference</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/week03/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 3 — Transformer Inference and the KV Cache</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/week04/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 4 — Quantization</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/week04/results/results/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 4 Lab Results</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/week05/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Week 5 — Speculative Decoding</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">FlashAttention · 2</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="1"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/inference/flashattention-from-first-principles/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">FlashAttention from First Principles · English</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/flashattention-from-first-principles/readme.ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">원리로 이해하는 FlashAttention · 한국어</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <a href="/inference/sglang-production-practices/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">SGLang in 2026: Engineering a Production-Grade LLM Serving Stack</span>  </a> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">기초 참고자료 · 2</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="2"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">참고자료 모아보기</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/llm-inference/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">LLM Inference</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/transformer/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Transformer</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">하드웨어 아키텍처 · 5</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="3"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/hardware-architectures/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">하드웨어 읽기 안내</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/hardware-architectures/domain-specific-architectures-for-ai-inference.ko/" aria-current="page" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Domain-Specific Architectures for AI Inference</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/hardware-architectures/gpus.ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">How to Think About GPUs</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/hardware-architectures/npus.ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">How to Think About NPUs</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/hardware-architectures/roofline.ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">All About Rooflines</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/efficient-llm-inference-systems/appendix/hardware-architectures/tpus.ko/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">How to Think About TPUs</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">모델 아키텍처 · 2</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="4"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/inference/models/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">모델 문서 모아보기</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/models/kimi-k2-5-scaling/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">How We Scaled Kimi K2.5: 토큰 효율, 장문 컨텍스트, 에이전트 스웜</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/inference/models/kimi-k3/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Kimi K3 기술 해부: 2.8T MoE, KDA, Attention Residuals, 그리고 64-GPU 서빙</span>  </a> </li> </ul> </details> </li> </ul>  <script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script> </sl-sidebar-state-persist> <div class="md:sl-hidden"> <div class="mobile-preferences sl-flex astro-wu23bvmt"> <div class="social-icons astro-wu23bvmt"> <a href="https://github.com/ziwon/ai-data-center-systems" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">GitHub</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script>   </div> </div> </div>  </div> </div> </nav> <div class="main-frame astro-4toy2ex6">  <script type="module">const a=document.getElementById("starlight__sidebar"),n=a?.querySelector("sl-sidebar-state-persist"),o="sl-sidebar-state",i=()=>{let t=[];const e=n?.dataset.hash||"";try{const s=sessionStorage.getItem(o),r=JSON.parse(s||"{}");Array.isArray(r.open)&&r.hash===e&&(t=r.open)}catch{}return{hash:e,open:t,scroll:a?.scrollTop||0}},c=t=>{try{sessionStorage.setItem(o,JSON.stringify(t))}catch{}},d=()=>c(i()),l=(t,e)=>{const s=i();s.open[e]=t,c(s)};n?.addEventListener("click",t=>{if(!(t.target instanceof Element))return;const e=t.target.closest("summary")?.closest("details");if(!e)return;const s=e.querySelector("sl-sidebar-restore"),r=parseInt(s?.dataset.index||"");isNaN(r)||l(!e.open,r)});addEventListener("visibilitychange",()=>{document.visibilityState==="hidden"&&d()});addEventListener("pageHide",d);</script> <div class="lg:sl-flex astro-67yu43on"> <aside class="right-sidebar-container print:hidden astro-67yu43on"> <div class="right-sidebar astro-67yu43on"> <div class="lg:sl-hidden astro-rl4sue7z"><mobile-starlight-toc data-min-h="2" data-max-h="2" class="astro-doynk5tl"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-doynk5tl"><details id="starlight__mobile-toc" class="astro-doynk5tl"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-doynk5tl"><span class="toggle sl-flex astro-doynk5tl">On this page<svg aria-hidden="true" class="caret astro-doynk5tl astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-doynk5tl"></span></summary><div class="dropdown astro-doynk5tl"><ul class="isMobile astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#reading-map" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Reading Map</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#source-structure" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Source Structure</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#1-ai-inference에서는-compute보다-memory가-먼저다" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">1. AI Inference에서는 Compute보다 Memory가 먼저다</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#2-lower-precision-quantization은-모델-압축만이-아니다" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">2. Lower Precision: Quantization은 모델 압축만이 아니다</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#3-first-class-asynchronicity" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">3. First-Class Asynchronicity</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#4-tensor-aware-memory-transfer" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">4. Tensor-Aware Memory Transfer</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#5-cache-hierarchy-대신-scratchpad" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">5. Cache Hierarchy 대신 Scratchpad</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#6-kv-cache는-두-번째-model이다" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">6. KV Cache는 두 번째 Model이다</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#7-scale-out-opscomms-ratio" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">7. Scale-Out: Ops:Comms Ratio</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#8-test-time-compute-scaling이-바꾸는-것" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">8. Test-Time Compute Scaling이 바꾸는 것</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#9-domain-specific-architecture-사례" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">9. Domain-Specific Architecture 사례</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#10-hardwaresoftware-co-design-관점" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">10. Hardware/Software Co-Design 관점</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#11-domain-specific-accelerator를-평가하는-기준" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">11. Domain-Specific Accelerator를 평가하는 기준</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#12-이-레포에서의-실전-해석" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">12. 이 레포에서의 실전 해석</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#13-repository-connections" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">13. Repository Connections</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#14-check-questions" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">14. Check Questions</span> </a>  </li> </ul></div></details></nav></mobile-starlight-toc><script type="module" src="/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.hwBsy0Mo.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-rl4sue7z"><div class="sl-container astro-rl4sue7z"><kb-graph-card> <button class="kb-graph-card" type="button" data-open aria-haspopup="dialog"> <span class="kb-graph-copy"> <span class="kb-graph-title">Knowledge graph</span> <span class="kb-graph-subtitle" data-count>Loading related docs</span> </span> <span class="kb-graph-thumb" aria-hidden="true" data-map></span> <span class="kb-graph-expand" aria-hidden="true">Expand</span> </button> <dialog class="kb-graph-dialog" aria-label="Knowledge graph" data-dialog> <div class="kb-graph-panel"> <div class="kb-graph-panel-header"> <div> <p>Knowledge graph</p> <h2 data-heading>Related documents</h2> </div> <div class="kb-graph-tabs" role="tablist" aria-label="Knowledge graph views"> <button type="button" role="tab" aria-selected="true" data-tab="page">This page</button> <button type="button" role="tab" aria-selected="false" data-tab="global">Full graph</button> </div> <button type="button" data-close aria-label="Close knowledge graph">×</button> </div> <div class="kb-graph-stage" data-stage data-view="page"> <div data-page-stage></div> <div data-global-stage hidden></div> </div> </div> </dialog> </kb-graph-card> <script type="module" src="/_astro/KnowledgeGraphCard.astro_astro_type_script_index_0_lang.C475L69c.js"></script><starlight-toc data-min-h="2" data-max-h="2"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">On this page</h2><ul class="astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#reading-map" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Reading Map</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#source-structure" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Source Structure</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#1-ai-inference에서는-compute보다-memory가-먼저다" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">1. AI Inference에서는 Compute보다 Memory가 먼저다</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#2-lower-precision-quantization은-모델-압축만이-아니다" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">2. Lower Precision: Quantization은 모델 압축만이 아니다</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#3-first-class-asynchronicity" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">3. First-Class Asynchronicity</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#4-tensor-aware-memory-transfer" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">4. Tensor-Aware Memory Transfer</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#5-cache-hierarchy-대신-scratchpad" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">5. Cache Hierarchy 대신 Scratchpad</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#6-kv-cache는-두-번째-model이다" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">6. KV Cache는 두 번째 Model이다</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#7-scale-out-opscomms-ratio" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">7. Scale-Out: Ops:Comms Ratio</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#8-test-time-compute-scaling이-바꾸는-것" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">8. Test-Time Compute Scaling이 바꾸는 것</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#9-domain-specific-architecture-사례" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">9. Domain-Specific Architecture 사례</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#10-hardwaresoftware-co-design-관점" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">10. Hardware/Software Co-Design 관점</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#11-domain-specific-accelerator를-평가하는-기준" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">11. Domain-Specific Accelerator를 평가하는 기준</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#12-이-레포에서의-실전-해석" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">12. 이 레포에서의 실전 해석</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#13-repository-connections" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">13. Repository Connections</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#14-check-questions" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">14. Check Questions</span> </a>  </li> </ul></nav></starlight-toc><script type="module" src="/_astro/TableOfContents.astro_astro_type_script_index_0_lang.FuRcXuRY.js"></script></div></div> </div> </aside> <div class="main-pane astro-67yu43on">  <main data-pagefind-body class="astro-bguv2lll" lang="en" dir="ltr">    <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <h1 id="_top" class="astro-j6tvhyss">Domain-Specific Architectures for AI Inference</h1> </div> </div> <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <starlight-image-zoom> <template class="astro-vjux6bgf"> <dialog class="starlight-image-zoom-dialog astro-vjux6bgf"> <button aria-label="Unzoom image" class="starlight-image-zoom-control astro-vjux6bgf"> <svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24" class="astro-vjux6bgf"> <use href="#starlight-image-zoom-icon-unzoom" class="astro-vjux6bgf"></use> </svg> </button> <figure class="astro-vjux6bgf"></figure> </dialog> </template> <svg xmlns="http://www.w3.org/2000/svg" style="display:none" class="astro-vjux6bgf"> <symbol id="starlight-image-zoom-icon-zoom" viewBox="0 0 24 24" class="astro-vjux6bgf"> <path d="M9.79 12.79 4 18.59V17a1 1 0 0 0-2 0v4a1 1 0 0 0 .08.38 1 1 0 0 0 .54.54A1 1 0 0 0 3 22h4a1 1 0 0 0 0-2H5.41l5.8-5.79a1 1 0 0 0-1.42-1.42ZM21.92 2.62a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-4a1 1 0 0 0 0 2h1.59l-5.8 5.79a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V7a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38Z" class="astro-vjux6bgf"></path> </symbol> <symbol id="starlight-image-zoom-icon-unzoom" viewBox="0 0 24 24" class="astro-vjux6bgf"> <path d="M21.71 2.29a1 1 0 0 0-1.42 0l-5.79 5.8V6.5a1 1 0 0 0-2 0v4a1 1 0 0 0 .08.38 1 1 0 0 0 .54.54 1 1 0 0 0 .38.08h4a1 1 0 0 0 0-2h-1.59l5.8-5.79a1 1 0 0 0 0-1.42ZM10.88 12.58a1 1 0 0 0-.38-.08h-4a1 1 0 0 0 0 2h1.59l-5.8 5.79a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l5.79-5.8v1.59a1 1 0 0 0 2 0v-4a1 1 0 0 0-.08-.38 1 1 0 0 0-.54-.54Z" class="astro-vjux6bgf"></path> </symbol> </svg> </starlight-image-zoom>   <script type="module" src="/_astro/ImageZoom.astro_astro_type_script_index_0_lang.CZmBqK-T.js"></script> <div class="sl-markdown-content"> <blockquote>
+<p>Source: <a href="https://fleetwood.dev/posts/domain-specific-architectures">Domain specific architectures for AI inference</a>, published 2025-08-03.</p>
+<p>This is a Korean lecture-note adaptation, not a line-by-line full translation. The goal is to preserve the article’s main argument and connect it to this repository’s inference performance measurements.</p>
+</blockquote>
+<div class="sl-heading-wrapper level-h2"><h2 id="reading-map">Reading Map</h2><a class="sl-anchor-link" href="#reading-map"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Reading Map”</span></a></div>
+<p>이 글의 핵심 질문은 단순하다.</p>
+<blockquote>
+<p>Transformer inference만을 위해 가속기를 다시 설계한다면 GPU와 다른 어떤 구조가 필요할까?</p>
+</blockquote>
+<p>저자는 이 질문에 답하기 위해 Transformer inference의 병목을 먼저 분석하고, 거기서 하드웨어 설계 원칙을 끌어낸다. 결론은 다음과 같다.</p>
+<ol>
+<li>낮은 정밀도 데이터 타입을 하드웨어가 직접 지원해야 한다.</li>
+<li>메모리 전송은 처음부터 비동기적으로 설계해야 한다.</li>
+<li>tensor-aware memory transfer 전용 하드웨어가 필요하다.</li>
+<li>일반적인 cache hierarchy보다 큰 scratchpad가 유리하다.</li>
+<li>단일 가속기에서는 memory bandwidth가 매우 중요하다.</li>
+<li>scale-out을 처음부터 고려해야 한다.</li>
+<li>통신 전용 하드웨어가 compute hardware를 보완해야 한다.</li>
+</ol>
+<p>이 목록은 Week 2의 GPU memory hierarchy, Week 3의 KV cache, Week 4의 quantization을 하나의 관점으로 묶어준다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="source-structure">Source Structure</h2><a class="sl-anchor-link" href="#source-structure"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Source Structure”</span></a></div>
+<p>원문은 긴 essay 형태지만, 강의 노트로 읽으면 다음 흐름이다.</p>
+<ol>
+<li>AI inference의 최적화 목표를 energy와 capital efficiency로 둔다.</li>
+<li>Transformer inference를 memory movement 문제로 단순화한다.</li>
+<li>lower precision, async transfer, DMA/TMA, scratchpad 같은 단일 chip 설계 원칙을 도출한다.</li>
+<li>prefill/decode, matmul, attention, KV cache를 arithmetic intensity 관점에서 다시 분석한다.</li>
+<li>단일 accelerator를 넘어 model parallelism, MoE, AllToAll, communication hardware로 확장한다.</li>
+<li>test-time compute scaling이 hardware design target을 어떻게 바꿀지 추론한다.</li>
+<li>TPU, Tenstorrent, Groq, Cerebras 같은 DSA 사례를 설계 원칙에 비춰 읽는다.</li>
+</ol>
+<p>따라서 이 글은 “특정 accelerator 소개”라기보다 <strong>inference workload에서 hardware design constraint를 역산하는 글</strong>이다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="1-ai-inference에서는-compute보다-memory가-먼저다">1. AI Inference에서는 Compute보다 Memory가 먼저다</h2><a class="sl-anchor-link" href="#1-ai-inference에서는-compute보다-memory가-먼저다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “1. AI Inference에서는 Compute보다 Memory가 먼저다”</span></a></div>
+<p>글은 AI inference의 비용을 energy와 capital로 본다. 많은 사용자가 긴 시간 동안 모델을 계속 호출하는 세계에서는 FLOPS만 높이는 것으로 충분하지 않다. 시스템이 실제로 돈을 태우는 지점은 대개 data movement다.</p>
+<p>Transformer forward pass를 단순화하면 다음 패턴이 반복된다.</p>
+<div class="expressive-code"><link rel="stylesheet" href="/_astro/ec.v4551.css"><script type="module" src="/_astro/ec.0vx5m.js"></script><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">HBM/DRAM에서 큰 weight tensor를 읽는다.</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">가까운 memory 또는 compute unit으로 옮긴다.</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">activation과 곱한다.</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">중간 결과를 다시 저장한다.</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">다음 layer에서 반복한다.</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="HBM/DRAM에서 큰 weight tensor를 읽는다.가까운 memory 또는 compute unit으로 옮긴다.activation과 곱한다.중간 결과를 다시 저장한다.다음 layer에서 반복한다."><div></div></button></div></figure></div>
+<p>decode 단계에서는 batch가 작고 한 번에 생성하는 token 수가 적다. 따라서 GEMM보다는 GEMV에 가까워지고, weight를 읽는 bytes가 성능을 지배한다. 이 레포의 Week 2와 Week 4가 계속 강조하는 내용도 같다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">decode latency ~= model weight bytes / effective memory bandwidth + overhead</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="decode latency ~= model weight bytes / effective memory bandwidth + overhead"><div></div></button></div></figure></div>
+<p>그래서 inference accelerator의 첫 번째 설계 목표는 “더 많은 연산기”가 아니라 “필요 없는 data movement 제거”다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="11-memory-cost를-먼저-보는-이유">1.1 Memory Cost를 먼저 보는 이유</h3><a class="sl-anchor-link" href="#11-memory-cost를-먼저-보는-이유"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “1.1 Memory Cost를 먼저 보는 이유”</span></a></div>
+<p>AI accelerator 논의에서 흔한 실수는 peak FLOPS를 중심에 놓는 것이다. 하지만 inference에서 중요한 것은 “연산을 몇 개 할 수 있는가”가 아니라 “연산에 필요한 값을 얼마나 빨리, 얼마나 적은 에너지로 가져오는가”다.</p>
+<p>특히 decode에서는 한 token을 만들 때 layer마다 weight를 거의 한 번씩 읽는다. batch가 작으면 같은 weight를 여러 token에 재사용하는 정도가 낮다. 따라서 Tensor Core가 아무리 빨라도 HBM에서 weight를 가져오지 못하면 놀게 된다.</p>
+<p>간단한 예시는 다음과 같다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Model</th><th align="right">Precision</th><th align="right">Weight bytes</th><th align="right">3 TB/s HBM에서 읽는 최소 시간</th></tr></thead><tbody><tr><td>7B</td><td align="right">BF16</td><td align="right">14 GB</td><td align="right">4.7 ms</td></tr><tr><td>70B</td><td align="right">BF16</td><td align="right">140 GB</td><td align="right">46.7 ms</td></tr><tr><td>70B</td><td align="right">INT4</td><td align="right">35 GB</td><td align="right">11.7 ms</td></tr></tbody></table>
+<p>이 값은 이론적 하한이다. 실제 시스템에서는 kernel launch, dequantization, KV cache read, sampling, scheduler, network, framework overhead가 더 붙는다. 그래도 하한을 계산하면 무엇이 불가능한지 빨리 알 수 있다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="12-arithmetic-intensity로-보는-prefill과-decode">1.2 Arithmetic Intensity로 보는 Prefill과 Decode</h3><a class="sl-anchor-link" href="#12-arithmetic-intensity로-보는-prefill과-decode"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “1.2 Arithmetic Intensity로 보는 Prefill과 Decode”</span></a></div>
+<p>원문은 arithmetic intensity, 즉 <code dir="auto">operations / bytes moved</code>를 hardware ratio와 비교한다. 간단히 말하면 다음과 같다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">algorithm intensity > hardware ops:byte ratio  -> compute-bound 가능</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">algorithm intensity &#x3C; hardware ops:byte ratio  -> memory-bound 가능</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="algorithm intensity > hardware ops:byte ratio  -> compute-bound 가능algorithm intensity < hardware ops:byte ratio  -> memory-bound 가능"><div></div></button></div></figure></div>
+<p>Prefill은 prompt sequence를 병렬로 처리한다. 큰 matrix multiplication이 많고, 같은 weight tile을 여러 token activation에 재사용할 수 있다. 그래서 충분히 긴 prompt와 batch가 있으면 compute-bound에 가까워진다.</p>
+<p>Decode는 한 번에 다음 token 하나를 만든다. batch가 작으면 weight를 많이 읽는 데 비해 activation vector는 작고, 연산량도 작다. 그래서 memory-bound가 되기 쉽다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Phase</th><th>Typical shape</th><th>Reuse</th><th>First-order bottleneck</th></tr></thead><tbody><tr><td>Prefill</td><td>GEMM</td><td>높음</td><td>Tensor Core compute 또는 HBM tile supply</td></tr><tr><td>Decode</td><td>GEMV-like</td><td>낮음</td><td>HBM bandwidth, KV cache bandwidth, launch overhead</td></tr><tr><td>Batched decode</td><td>small/medium GEMM</td><td>중간</td><td>batch size에 따라 HBM 또는 compute</td></tr></tbody></table>
+<p>Week 2 lab에서 batch가 커질수록 cuBLAS path가 GEMV에서 Tensor Core GEMM으로 바뀐 것도 같은 현상이다. 알고리즘이 바뀐 것이 아니라 shape가 hardware를 먹일 수 있을 만큼 커진 것이다.</p>
+<pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"background": "#171717", "primaryColor": "#232323", "primaryTextColor": "#f5f5f5", "primaryBorderColor": "#d0d0d0", "lineColor": "#cfcfcf", "fontFamily": "Inter, Arial, sans-serif"}}}%%
+flowchart LR
+    A[Small batch decode] --> B[GEMV-like work]
+    B --> C[Low arithmetic intensity]
+    C --> D[HBM / overhead bound]
+    E[Long prefill] --> F[Large GEMM]
+    F --> G[High arithmetic intensity]
+    G --> H[Tensor Core bound]
+
+    classDef primary fill:#232323,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef secondary fill:#3b2f20,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef note fill:#52676b,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    classDef accent fill:#62164d,stroke:#d0d0d0,color:#f5f5f5,stroke-width:2px;
+    class A,E primary
+    class B,F secondary
+    class C,G note
+    class D,H accent</pre>
+<div class="sl-heading-wrapper level-h2"><h2 id="2-lower-precision-quantization은-모델-압축만이-아니다">2. Lower Precision: Quantization은 모델 압축만이 아니다</h2><a class="sl-anchor-link" href="#2-lower-precision-quantization은-모델-압축만이-아니다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “2. Lower Precision: Quantization은 모델 압축만이 아니다”</span></a></div>
+<p>낮은 정밀도는 세 가지 효과를 동시에 만든다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Effect</th><th>Meaning for inference</th></tr></thead><tbody><tr><td>Capacity</td><td>같은 HBM에 더 큰 모델 또는 더 긴 KV cache를 넣을 수 있다.</td></tr><tr><td>Bandwidth</td><td>같은 bandwidth에서 더 많은 weight/token을 읽을 수 있다.</td></tr><tr><td>Silicon area</td><td>작은 multiplier는 같은 die area에 더 많이 들어가거나 SRAM으로 면적을 돌릴 수 있다.</td></tr></tbody></table>
+<p>Week 4의 관점으로 바꾸면 다음과 같다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Format</th><th>Decode에서 의미</th><th>Prefill에서 의미</th></tr></thead><tbody><tr><td>BF16/FP16</td><td>weight bytes가 크다.</td><td>안정적 baseline이다.</td></tr><tr><td>FP8/INT8</td><td>bandwidth와 compute 양쪽을 줄일 수 있다.</td><td>Tensor Core path가 빨라질 수 있다.</td></tr><tr><td>INT4/W4A16</td><td>decode weight traffic을 크게 줄인다.</td><td>dequantization path가 병목이 될 수 있다.</td></tr><tr><td>FP4/NVFP4</td><td>Blackwell 이후 핵심 frontier다.</td><td>hardware support 여부가 중요하다.</td></tr></tbody></table>
+<p>중요한 해석은 이것이다.</p>
+<blockquote>
+<p>Quantization은 “메모리에 들어가게 하는 기술”인 동시에 “HBM에서 읽어야 하는 bytes를 줄이는 기술”이다.</p>
+</blockquote>
+<div class="sl-heading-wrapper level-h3"><h3 id="21-precision을-줄이면-silicon도-달라진다">2.1 Precision을 줄이면 Silicon도 달라진다</h3><a class="sl-anchor-link" href="#21-precision을-줄이면-silicon도-달라진다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “2.1 Precision을 줄이면 Silicon도 달라진다”</span></a></div>
+<p>원문에서 중요한 포인트는 precision 축소가 단지 memory optimization이 아니라는 점이다. multiplier는 bit width가 줄어들면 회로 면적과 에너지 비용이 크게 줄어든다. 따라서 hardware architect 입장에서는 두 선택지가 생긴다.</p>
+<ol>
+<li>같은 die area에 더 많은 compute unit을 넣는다.</li>
+<li>compute unit 일부를 줄이고 SRAM/scratchpad, DMA, communication engine에 면적을 준다.</li>
+</ol>
+<p>GPU는 범용성과 ecosystem 때문에 compute unit을 많이 유지하는 방향으로 진화했다. 반면 DSA는 target workload가 명확하다면 더 공격적으로 SRAM, data movement engine, low precision datapath에 면적을 줄 수 있다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="22-precision에는-하한이-있다">2.2 Precision에는 하한이 있다</h3><a class="sl-anchor-link" href="#22-precision에는-하한이-있다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “2.2 Precision에는 하한이 있다”</span></a></div>
+<p>낮은 bit width가 항상 좋은 것은 아니다. LLM weight와 activation은 정보량을 갖고 있고, 너무 낮은 precision은 모델 품질을 해친다. 그래서 DSA에서 중요한 질문은 “가장 낮은 precision이 무엇인가”가 아니라 “target quality를 만족하는 가장 낮은 precision과 그 format이 무엇인가”다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Question</th><th>Example</th></tr></thead><tbody><tr><td>Weight만 낮출 수 있는가?</td><td>W4A16, AWQ, GPTQ</td></tr><tr><td>Activation도 낮출 수 있는가?</td><td>W8A8, SmoothQuant, FP8</td></tr><tr><td>Accumulator precision은 충분한가?</td><td>INT8 multiply + FP16/FP32 accumulate</td></tr><tr><td>Outlier를 format이 감당하는가?</td><td>FP8 E4M3 vs INT8 scale</td></tr><tr><td>Kernel이 실제로 빠른가?</td><td>fused Marlin/AWQ vs slow dequant path</td></tr></tbody></table>
+<p>Week 4 lab의 결론처럼, bit width만 줄인다고 latency가 자동으로 줄지는 않는다. fused low-bit kernel과 hardware support가 없으면 dequantization overhead가 이득을 먹어버린다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="3-first-class-asynchronicity">3. First-Class Asynchronicity</h2><a class="sl-anchor-link" href="#3-first-class-asynchronicity"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3. First-Class Asynchronicity”</span></a></div>
+<p>가속기는 memory transfer를 기다리는 동안 compute unit이 놀지 않도록 설계되어야 한다. 이를 위해 double buffering, pipelining, prefetching, overlap이 필요하다.</p>
+<p>단순한 구조는 다음과 같다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">buffer A: compute 중</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">buffer B: 다음 tile을 memory에서 가져오는 중</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">swap</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">buffer B: compute 중</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">buffer A: 다음 tile을 가져오는 중</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="buffer A: compute 중buffer B: 다음 tile을 memory에서 가져오는 중swapbuffer B: compute 중buffer A: 다음 tile을 가져오는 중"><div></div></button></div></figure></div>
+<p>CUDA kernel, Tensor Memory Accelerator, TPU VMEM pipeline, NCCL overlap은 모두 같은 문제를 다른 계층에서 푸는 방식이다.</p>
+<p>Week 2 lab에서 roofline을 그릴 때, arithmetic intensity가 충분한데도 peak에 못 미치는 경우가 있다. 이때 원인은 단순 bandwidth 부족이 아니라 transfer와 compute overlap 실패일 수 있다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="31-async를-feature가-아니라-기본-구조로-보기">3.1 Async를 Feature가 아니라 기본 구조로 보기</h3><a class="sl-anchor-link" href="#31-async를-feature가-아니라-기본-구조로-보기"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3.1 Async를 Feature가 아니라 기본 구조로 보기”</span></a></div>
+<p>비동기성은 library optimization 하나가 아니다. Hardware가 처음부터 다음 질문에 답할 수 있어야 한다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Question</th><th>Why it matters</th></tr></thead><tbody><tr><td>compute와 HBM load를 동시에 할 수 있는가?</td><td>Tensor Core starvation을 줄인다.</td></tr><tr><td>local SRAM에 미리 가져올 수 있는가?</td><td>다음 tile의 latency를 숨긴다.</td></tr><tr><td>network receive와 local compute를 겹칠 수 있는가?</td><td>tensor parallelism과 MoE에서 중요하다.</td></tr><tr><td>copy engine이 compute unit과 독립적인가?</td><td>SM을 data movement에 낭비하지 않는다.</td></tr></tbody></table>
+<p>Hopper의 TMA, CUDA <code dir="auto">cp.async</code>, TPU의 VMEM pipeline, NCCL communication overlap은 모두 같은 요구에서 나온다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="4-tensor-aware-memory-transfer">4. Tensor-Aware Memory Transfer</h2><a class="sl-anchor-link" href="#4-tensor-aware-memory-transfer"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “4. Tensor-Aware Memory Transfer”</span></a></div>
+<p>일반적인 DMA는 bytes를 옮긴다. AI accelerator가 원하는 것은 tensor를 옮기는 것이다.</p>
+<p>Tensor-aware transfer는 다음 속성을 가져야 한다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Need</th><th>Why it matters</th></tr></thead><tbody><tr><td>Layout awareness</td><td>row-major, column-major, tile layout, packed low-bit format을 이해해야 한다.</td></tr><tr><td>Async scheduling</td><td>compute와 copy를 겹쳐야 한다.</td></tr><tr><td>Local and remote movement</td><td>chip 내부, chip 간, node 간 이동을 같은 mental model로 다뤄야 한다.</td></tr><tr><td>Optional transform</td><td>copy하면서 transpose, reduce, unpack, scale을 처리할 수 있으면 compute unit 낭비가 줄어든다.</td></tr></tbody></table>
+<p>NVIDIA H100의 TMA, RDMA, GPUDirect, SHARP, 그리고 DSA의 communication engine은 모두 이 방향으로 읽을 수 있다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="41-복사하면서-처리하기">4.1 “복사하면서 처리하기”</h3><a class="sl-anchor-link" href="#41-복사하면서-처리하기"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “4.1 “복사하면서 처리하기””</span></a></div>
+<p>DSA 관점에서 이상적인 memory movement는 단순 copy가 아니다. Tensor가 목적지에 도착했을 때 바로 compute에 들어갈 수 있어야 한다.</p>
+<p>가능한 변환은 다음과 같다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>During movement</th><th>Why useful</th></tr></thead><tbody><tr><td>unpack INT4/FP4</td><td>low-bit storage와 high-precision compute를 연결한다.</td></tr><tr><td>transpose / swizzle</td><td>Tensor Core tile layout에 맞춘다.</td></tr><tr><td>scale / zero-point apply</td><td>quantized tensor를 runtime format으로 바꾼다.</td></tr><tr><td>reduce / accumulate</td><td>AllReduce나 expert aggregation 일부를 offload한다.</td></tr><tr><td>gather / scatter</td><td>MoE routing이나 paged KV cache에서 중요하다.</td></tr></tbody></table>
+<p>DeepSeek V3 같은 MoE 시스템에서 일부 SM을 communication 관리에 쓰는 사례는, 이런 전용 hardware가 없을 때 compute silicon이 통신 orchestration에 빼앗길 수 있음을 보여준다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="5-cache-hierarchy-대신-scratchpad">5. Cache Hierarchy 대신 Scratchpad</h2><a class="sl-anchor-link" href="#5-cache-hierarchy-대신-scratchpad"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “5. Cache Hierarchy 대신 Scratchpad”</span></a></div>
+<p>CPU cache는 예측하기 어려운 workload에 맞춰져 있다. 하지만 Transformer inference는 매우 큰 tensor를 순차적으로 읽고, 곱하고, 다음 layer로 간다. 같은 weight tensor를 아주 가까운 시간 안에 다시 사용하는 일이 많지 않다.</p>
+<p>그래서 일반적인 cache policy는 비효율적일 수 있다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">CPU-like cache:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">"최근에 읽은 값은 곧 다시 쓸 가능성이 높다."</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Transformer decode:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">"방금 읽은 layer weight는 다음 token까지 다시 쓰지 않는다."</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="CPU-like cache:  &#x22;최근에 읽은 값은 곧 다시 쓸 가능성이 높다.&#x22;Transformer decode:  &#x22;방금 읽은 layer weight는 다음 token까지 다시 쓰지 않는다.&#x22;"><div></div></button></div></figure></div>
+<p>이때 더 적합한 구조가 scratchpad다. scratchpad는 hardware가 알아서 채우고 비우는 cache라기보다, software 또는 compiler가 명시적으로 관리하는 빠른 local memory다.</p>
+<p>TPU의 VMEM, GPU의 shared memory/SMEM, Tenstorrent Tensix core의 local SRAM은 모두 이 관점에서 볼 수 있다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="51-cache가-잘-맞는-경우와-안-맞는-경우">5.1 Cache가 잘 맞는 경우와 안 맞는 경우</h3><a class="sl-anchor-link" href="#51-cache가-잘-맞는-경우와-안-맞는-경우"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “5.1 Cache가 잘 맞는 경우와 안 맞는 경우”</span></a></div>
+<p>Cache가 항상 나쁜 것은 아니다. Attention tile, repeated metadata, hot routing tables, small activations처럼 재사용이 명확한 데이터에는 cache가 유용하다. 문제는 LLM weight처럼 거대한 tensor stream을 cache에 넣을 때다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Data</th><th>Cache usefulness</th><th>Better approach</th></tr></thead><tbody><tr><td>Layer weights in decode</td><td>낮음</td><td>stream + quantize + prefetch</td></tr><tr><td>Attention tile</td><td>높음</td><td>FlashAttention-style tiling</td></tr><tr><td>KV cache page metadata</td><td>중간/높음</td><td>cache-friendly layout</td></tr><tr><td>MoE routing table</td><td>높음</td><td>local cache 또는 SRAM</td></tr><tr><td>Large intermediate activation</td><td>낮음</td><td>fusion으로 HBM round-trip 제거</td></tr></tbody></table>
+<p>따라서 DSA는 cache를 없애자는 말보다, <strong>workload가 예측 가능한 부분을 scratchpad와 compiler/runtime control로 옮기자</strong>는 주장에 가깝다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="52-scratchpad의-비용">5.2 Scratchpad의 비용</h3><a class="sl-anchor-link" href="#52-scratchpad의-비용"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “5.2 Scratchpad의 비용”</span></a></div>
+<p>SRAM은 빠르지만 비싸다. Die area와 power를 많이 먹기 때문에 무한정 키울 수 없다. 그래서 scratchpad 설계는 다음 trade-off다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">더 큰 scratchpad</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> 더 많은 tile/weight/KV page를 on-chip에 유지</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> HBM traffic 감소</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-> 하지만 compute unit, IO, yield, cost와 면적 경쟁</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="더 큰 scratchpad  -> 더 많은 tile/weight/KV page를 on-chip에 유지  -> HBM traffic 감소  -> 하지만 compute unit, IO, yield, cost와 면적 경쟁"><div></div></button></div></figure></div>
+<p>DSA 스타트업의 핵심 차별점은 이 trade-off를 어디에 찍는가다. GPU는 broad workload를 위해 균형을 잡고, TPU나 inference DSA는 더 규칙적인 AI workload를 위해 SRAM과 data movement에 더 과감하게 투자할 수 있다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="6-kv-cache는-두-번째-model이다">6. KV Cache는 두 번째 Model이다</h2><a class="sl-anchor-link" href="#6-kv-cache는-두-번째-model이다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “6. KV Cache는 두 번째 Model이다”</span></a></div>
+<p>글은 attention과 KV cache를 통해 long-context inference의 병목을 설명한다.</p>
+<p>MHA에서는 layer마다 모든 head의 K와 V를 저장한다. context가 길어질수록 KV cache가 HBM capacity와 bandwidth를 동시에 압박한다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">KV cache bytes/token</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">~= 2(K,V) * layers * heads * head_dim * bytes_per_value</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="KV cache bytes/token  ~= 2(K,V) * layers * heads * head_dim * bytes_per_value"><div></div></button></div></figure></div>
+<p>MQA, GQA, MLA는 모두 이 항을 줄이려는 시도다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Method</th><th>What it reduces</th><th>Trade-off</th></tr></thead><tbody><tr><td>MQA</td><td>K/V head 수</td><td>model quality 또는 architecture constraint</td></tr><tr><td>GQA</td><td>K/V head 수를 group 단위로 축소</td><td>MHA와 MQA의 절충</td></tr><tr><td>MLA</td><td>K/V를 latent representation으로 압축</td><td>projection compute 증가</td></tr><tr><td>KV quantization</td><td>bytes per value</td><td>accuracy와 kernel support 검증 필요</td></tr></tbody></table>
+<p>Week 3의 KV cache 내용을 hardware 관점으로 다시 말하면 다음과 같다.</p>
+<blockquote>
+<p>Long context는 attention FLOPS 문제가 아니라 KV cache bytes/token 문제로 시작한다.</p>
+</blockquote>
+<div class="sl-heading-wrapper level-h3"><h3 id="61-kv-cache-capacity-계산">6.1 KV Cache Capacity 계산</h3><a class="sl-anchor-link" href="#61-kv-cache-capacity-계산"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “6.1 KV Cache Capacity 계산”</span></a></div>
+<p>Decoder-only Transformer에서 token당 KV cache는 대략 다음과 같다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">bytes/token = 2 * n_layers * n_kv_heads * head_dim * bytes_per_value</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="bytes/token = 2 * n_layers * n_kv_heads * head_dim * bytes_per_value"><div></div></button></div></figure></div>
+<p>여기서 <code dir="auto">2</code>는 K와 V를 의미한다. MHA에서는 <code dir="auto">n_kv_heads = n_attention_heads</code>이고, GQA/MQA에서는 훨씬 작아진다.</p>
+<p>예를 들어 BF16에서 80 layer, 64 KV heads, head_dim 128인 모델은:</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">2 * 80 * 64 * 128 * 2 bytes = 2,621,440 bytes/token ~= 2.5 MB/token</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="2 * 80 * 64 * 128 * 2 bytes = 2,621,440 bytes/token ~= 2.5 MB/token"><div></div></button></div></figure></div>
+<p>동시 요청 1,000개가 평균 4,000 token context를 가진다면 KV cache만 약 10 TB가 된다. 실제 serving system에서 paged KV cache, prefix caching, chunked prefill, disaggregation이 중요한 이유다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="62-kv-cache는-bandwidth-문제이기도-하다">6.2 KV Cache는 Bandwidth 문제이기도 하다</h3><a class="sl-anchor-link" href="#62-kv-cache는-bandwidth-문제이기도-하다"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “6.2 KV Cache는 Bandwidth 문제이기도 하다”</span></a></div>
+<p>Capacity만 문제가 아니다. Decode attention은 매 token마다 과거 KV cache를 읽어야 한다. Context가 길어질수록 per-token latency가 늘어날 수 있다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Optimization</th><th>Capacity effect</th><th>Bandwidth effect</th></tr></thead><tbody><tr><td>MQA/GQA</td><td>KV head 수 감소</td><td>read bytes 감소</td></tr><tr><td>MLA</td><td>latent cache로 압축</td><td>read bytes 감소, projection compute 증가</td></tr><tr><td>KV quantization</td><td>bytes/value 감소</td><td>read bytes 감소, quality/kernel 검증 필요</td></tr><tr><td>PagedAttention</td><td>fragmentation 감소</td><td>locality와 allocator 안정성 개선</td></tr><tr><td>Prefix caching</td><td>중복 prefill 감소</td><td>shared prefix 재사용</td></tr></tbody></table>
+<p>DSA 설계에서 KV cache를 별도 first-class workload로 보는 이유가 여기에 있다. Weight streaming만 빠르게 해도 long-context decode가 느리면 serving 품질은 나오지 않는다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="7-scale-out-opscomms-ratio">7. Scale-Out: Ops:Comms Ratio</h2><a class="sl-anchor-link" href="#7-scale-out-opscomms-ratio"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “7. Scale-Out: Ops:Comms Ratio”</span></a></div>
+<p>모델이 단일 accelerator에 들어가지 않으면 sharding이 필요하다. 이때 새 병목은 compute와 communication의 비율이다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">ops:comms ratio = accelerator compute throughput / interconnect bandwidth</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="ops:comms ratio = accelerator compute throughput / interconnect bandwidth"><div></div></button></div></figure></div>
+<p>Tensor parallelism은 layer 내부에서 activation을 주고받아야 한다. Expert parallelism은 token을 expert가 있는 device로 보내고 다시 모아야 한다. 이 통신이 compute로 가려지지 않으면 GPU나 accelerator는 놀게 된다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Parallelism</th><th>Main communication</th><th>Practical reading</th></tr></thead><tbody><tr><td>Tensor parallelism</td><td>AllReduce / AllGather / ReduceScatter</td><td>NVLink/NVSwitch 안에 묶는 것이 유리하다.</td></tr><tr><td>Pipeline parallelism</td><td>activation transfer</td><td>node 간으로 넘기기 상대적으로 쉽다.</td></tr><tr><td>Expert parallelism</td><td>AllToAll</td><td>fabric latency와 routing이 매우 중요하다.</td></tr><tr><td>Data parallelism</td><td>gradient AllReduce</td><td>training에서 중요하다.</td></tr></tbody></table>
+<p>MoE 모델에서는 Expert Parallelism의 AllToAll이 특히 중요하다. 통신 전용 하드웨어가 없으면 compute SM을 통신 처리에 써야 하고, 이는 곧 Tensor Core 낭비가 된다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="71-tensor-parallelism의-직관">7.1 Tensor Parallelism의 직관</h3><a class="sl-anchor-link" href="#71-tensor-parallelism의-직관"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “7.1 Tensor Parallelism의 직관”</span></a></div>
+<p>Tensor parallelism은 weight matrix를 여러 device에 나눈다. 그러면 각 device가 맡는 compute와 memory는 줄지만, layer boundary에서 activation을 맞추기 위한 communication이 생긴다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">benefit:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">per-device weight capacity pressure 감소</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">per-device compute 감소</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">cost:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">AllReduce / AllGather / ReduceScatter</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">latency and bandwidth overhead</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="benefit:  per-device weight capacity pressure 감소  per-device compute 감소cost:  AllReduce / AllGather / ReduceScatter  latency and bandwidth overhead"><div></div></button></div></figure></div>
+<p>Decode에서는 batch가 작아 compute가 communication을 가릴 여지가 적다. 그래서 TP degree를 무작정 키우면 오히려 느려질 수 있다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="72-expert-parallelism의-직관">7.2 Expert Parallelism의 직관</h3><a class="sl-anchor-link" href="#72-expert-parallelism의-직관"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “7.2 Expert Parallelism의 직관”</span></a></div>
+<p>MoE에서는 token마다 선택된 expert가 다르다. Expert가 device별로 나뉘어 있으면 token을 expert가 있는 device로 보내야 한다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">route tokens -> AllToAll -> expert FFN -> AllToAll/aggregate -> continue</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="route tokens -> AllToAll -> expert FFN -> AllToAll/aggregate -> continue"><div></div></button></div></figure></div>
+<p>이 traffic은 dense TP의 AllReduce보다 더 irregular하다. Token distribution이 균등하지 않으면 일부 expert/device가 병목이 된다. 따라서 MoE DSA는 단순 bandwidth뿐 아니라 다음 기능이 중요하다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Need</th><th>Reason</th></tr></thead><tbody><tr><td>Low-latency AllToAll</td><td>token dispatch가 decode latency에 직접 반영된다.</td></tr><tr><td>Efficient gather/scatter</td><td>token order와 expert order를 계속 바꿔야 한다.</td></tr><tr><td>Load balancing support</td><td>hot expert에 traffic이 몰리면 tail latency가 늘어난다.</td></tr><tr><td>Communication/computation overlap</td><td>expert FFN 중 다음 dispatch를 준비해야 한다.</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h2"><h2 id="8-test-time-compute-scaling이-바꾸는-것">8. Test-Time Compute Scaling이 바꾸는 것</h2><a class="sl-anchor-link" href="#8-test-time-compute-scaling이-바꾸는-것"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “8. Test-Time Compute Scaling이 바꾸는 것”</span></a></div>
+<p>원문 후반부는 inference paradigm이 고정되어 있지 않다는 점을 다룬다. Reasoning model, search, verifier, speculative decoding, multi-sample generation처럼 inference 중 compute를 더 쓰는 방식이 늘어나면 hardware target도 바뀐다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="81-serial-vs-parallel-test-time-compute">8.1 Serial vs Parallel Test-Time Compute</h3><a class="sl-anchor-link" href="#81-serial-vs-parallel-test-time-compute"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “8.1 Serial vs Parallel Test-Time Compute”</span></a></div>
+<p>Test-time compute는 크게 두 방향으로 늘어난다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Mode</th><th>Example</th><th>Hardware implication</th></tr></thead><tbody><tr><td>Serial</td><td>긴 chain-of-thought, multi-step reasoning</td><td>long decode latency, KV cache growth</td></tr><tr><td>Parallel</td><td>여러 후보 샘플링, verifier/reranker</td><td>batch와 throughput 증가, scheduling 중요</td></tr></tbody></table>
+<p>Serial scaling은 per-request latency와 KV cache capacity를 압박한다. Parallel scaling은 batch를 키워 hardware utilization을 높일 수 있지만, 동시에 더 많은 memory와 scheduler sophistication을 요구한다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="82-speculative-decoding과-dsa">8.2 Speculative Decoding과 DSA</h3><a class="sl-anchor-link" href="#82-speculative-decoding과-dsa"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “8.2 Speculative Decoding과 DSA”</span></a></div>
+<p>Speculative decoding은 draft model이 여러 token을 제안하고 target model이 한 번에 검증한다. Acceptance rate가 높으면 target model의 decode step 수를 줄일 수 있다.</p>
+<p>DSA 관점에서는 다음 질문이 생긴다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Question</th><th>Why it matters</th></tr></thead><tbody><tr><td>Draft model을 같은 accelerator에 둘 것인가?</td><td>memory capacity와 scheduling trade-off</td></tr><tr><td>Target verification은 prefill-like batch로 처리되는가?</td><td>Tensor Core utilization 개선 가능</td></tr><tr><td>Rejected token의 wasted compute는 얼마나 되는가?</td><td>acceptance rate가 낮으면 이득 감소</td></tr><tr><td>KV cache rollback/update가 빠른가?</td><td>serving runtime과 memory layout 문제</td></tr></tbody></table>
+<p>즉 speculative decoding은 algorithmic trick이지만, 실제 이득은 hardware와 runtime이 검증 batch를 얼마나 잘 처리하는지에 달려 있다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="83-reasoning-model-시대의-병목">8.3 Reasoning Model 시대의 병목</h3><a class="sl-anchor-link" href="#83-reasoning-model-시대의-병목"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “8.3 Reasoning Model 시대의 병목”</span></a></div>
+<p>Reasoning model이 긴 답변과 많은 internal token을 생성하면 decode token 수가 늘어난다. 이 경우 single-token latency뿐 아니라 tokens per joule, KV cache retention, multi-turn cache reuse가 중요해진다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Workload shift</th><th>Hardware pressure</th></tr></thead><tbody><tr><td>Longer outputs</td><td>decode bandwidth와 energy 증가</td></tr><tr><td>More parallel samples</td><td>scheduler, batch packing, memory capacity 압박</td></tr><tr><td>Verifier/reranker</td><td>heterogeneous model serving 필요</td></tr><tr><td>Tool use / agent loops</td><td>latency variance, CPU/GPU orchestration 증가</td></tr></tbody></table>
+<p>DSA를 설계하거나 구매할 때 현재 benchmark만 보면 위험하다. 앞으로의 workload가 serial reasoning인지, parallel sampling인지, MoE-heavy serving인지에 따라 좋은 accelerator가 달라질 수 있다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="9-domain-specific-architecture-사례">9. Domain-Specific Architecture 사례</h2><a class="sl-anchor-link" href="#9-domain-specific-architecture-사례"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “9. Domain-Specific Architecture 사례”</span></a></div>
+<p>원문은 몇 가지 architecture를 설계 원칙과 대조한다. 여기서는 공개적으로 알려진 특징을 기준으로 요약한다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="91-tpu">9.1 TPU</h3><a class="sl-anchor-link" href="#91-tpu"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “9.1 TPU”</span></a></div>
+<p>TPU는 matrix multiplication을 중심에 둔 대표적인 DSA다. MXU systolic array, VMEM scratchpad, HBM, ICI topology가 핵심이다.</p>
+<p>TPU가 원문의 설계 원칙과 잘 맞는 지점은 다음이다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Principle</th><th>TPU interpretation</th></tr></thead><tbody><tr><td>Low precision</td><td>BF16, INT8 등 generation별 lower precision support</td></tr><tr><td>Async transfer</td><td>HBM -> VMEM -> MXU pipeline</td></tr><tr><td>Scratchpad</td><td>VMEM이 programmer/compiler-controlled local memory 역할</td></tr><tr><td>Scale-out</td><td>ICI torus topology</td></tr><tr><td>Communication-aware</td><td>sharding axis와 topology matching이 중요</td></tr></tbody></table>
+<p>TPU는 regular large matmul과 compiler-managed workload에서 강하다. 대신 irregular kernel, custom CUDA ecosystem, dynamic serving feature에는 GPU보다 제약이 있을 수 있다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="92-tenstorrent">9.2 Tenstorrent</h3><a class="sl-anchor-link" href="#92-tenstorrent"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “9.2 Tenstorrent”</span></a></div>
+<p>Tenstorrent 계열 architecture는 많은 작은 compute tile과 local SRAM, NoC, Ethernet-oriented scale-out을 강조한다. 원문에서 흥미로운 지점은 compute core와 data movement core를 구분한다는 점이다.</p>
+<p>DSA 관점에서 읽으면 다음 메시지가 있다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">compute core만 많이 두는 것이 아니라</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">data movement를 관리하는 core/network를 함께 설계해야 한다.</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="compute core만 많이 두는 것이 아니라data movement를 관리하는 core/network를 함께 설계해야 한다."><div></div></button></div></figure></div>
+<p>이 접근은 MoE, AllToAll, distributed inference처럼 communication pattern이 복잡한 workload에 유리할 가능성이 있다. 다만 software stack과 compiler maturity가 실제 성능을 좌우한다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="93-groq">9.3 Groq</h3><a class="sl-anchor-link" href="#93-groq"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “9.3 Groq”</span></a></div>
+<p>Groq LPU는 deterministic execution과 SRAM 중심 설계로 알려져 있다. 큰 HBM bandwidth에 의존하기보다, compile-time scheduling과 predictable latency를 강조한다.</p>
+<p>이런 설계가 매력적인 workload는 다음과 같다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Good fit</th><th>Reason</th></tr></thead><tbody><tr><td>Low-latency single stream</td><td>deterministic scheduling이 tail latency를 줄일 수 있다.</td></tr><tr><td>Fixed model graph</td><td>compile-time optimization이 강해진다.</td></tr><tr><td>Small/medium model serving</td><td>on-chip memory와 predictable dataflow의 이득이 크다.</td></tr></tbody></table>
+<p>반대로 매우 큰 frontier model, dynamic routing, ecosystem integration에서는 제약이 생길 수 있다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="94-cerebras">9.4 Cerebras</h3><a class="sl-anchor-link" href="#94-cerebras"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “9.4 Cerebras”</span></a></div>
+<p>Cerebras WSE는 wafer-scale chip과 대용량 on-chip SRAM을 통해 “chip 밖으로 나가는 비용”을 줄이는 방향이다. 이는 원문의 memory movement axiom을 가장 극단적으로 밀어붙인 사례로 볼 수 있다.</p>
+<p>모델이나 working set이 on-chip에 잘 맞으면 HBM/scale-out traffic을 크게 줄일 수 있다. 하지만 wafer-scale hardware는 cost, packaging, software stack, workload fit이 모두 특수하다.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="95-gpu는-dsa가-아닌가">9.5 GPU는 DSA가 아닌가?</h3><a class="sl-anchor-link" href="#95-gpu는-dsa가-아닌가"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “9.5 GPU는 DSA가 아닌가?”</span></a></div>
+<p>현대 GPU는 원래 graphics용이었지만, Tensor Core, FP8, TMA, NVLink, NVSwitch, NCCL, Transformer Engine을 거치며 사실상 AI workload에 점점 특화되고 있다.</p>
+<p>GPU의 장점은 다음이다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Strength</th><th>Why it matters</th></tr></thead><tbody><tr><td>Ecosystem</td><td>PyTorch, CUDA, Triton, vLLM, TensorRT-LLM</td></tr><tr><td>Flexibility</td><td>새로운 architecture와 custom kernel에 빠르게 대응</td></tr><tr><td>Scale-up fabric</td><td>NVLink/NVSwitch로 TP에 강함</td></tr><tr><td>Procurement</td><td>cloud/on-prem availability가 좋음</td></tr></tbody></table>
+<p>단점은 범용성의 비용이다. 모든 workload에 맞추다 보니 특정 inference workload만 놓고 보면 SRAM, communication offload, deterministic scheduling에서 DSA가 이길 여지가 있다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="10-hardwaresoftware-co-design-관점">10. Hardware/Software Co-Design 관점</h2><a class="sl-anchor-link" href="#10-hardwaresoftware-co-design-관점"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “10. Hardware/Software Co-Design 관점”</span></a></div>
+<p>DSA 글을 hardware만의 이야기로 읽으면 절반만 읽은 것이다. 실제 inference 성능은 software stack이 hardware property를 얼마나 잘 드러내는지에 달려 있다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Layer</th><th>Required capability</th></tr></thead><tbody><tr><td>Compiler</td><td>graph fusion, layout transform, tiling, async scheduling</td></tr><tr><td>Runtime</td><td>batching, KV paging, prefill/decode scheduling</td></tr><tr><td>Kernel library</td><td>low-bit GEMM/GEMV, attention, MoE dispatch</td></tr><tr><td>Distributed runtime</td><td>collectives, topology-aware placement, overlap</td></tr><tr><td>Observability</td><td>bandwidth, queueing, memory pressure, tail latency</td></tr></tbody></table>
+<p>예를 들어 hardware가 INT4를 지원해도 runtime이 dequantization을 느린 kernel로 처리하면 latency가 줄지 않는다. Hardware가 fast interconnect를 제공해도 scheduler가 TP group을 topology에 맞게 배치하지 않으면 collective가 병목이 된다.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="11-domain-specific-accelerator를-평가하는-기준">11. Domain-Specific Accelerator를 평가하는 기준</h2><a class="sl-anchor-link" href="#11-domain-specific-accelerator를-평가하는-기준"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “11. Domain-Specific Accelerator를 평가하는 기준”</span></a></div>
+<p>이 글을 읽은 뒤 accelerator를 볼 때는 스펙표의 peak FLOPS부터 보지 않는 것이 좋다. 다음 순서가 더 실용적이다.</p>
+<ol>
+<li>Target workload가 prefill인지 decode인지 training인지 확인한다.</li>
+<li>HBM capacity와 bandwidth를 본다.</li>
+<li>SRAM/scratchpad 용량과 software control 방식을 본다.</li>
+<li>low precision format의 native support를 본다.</li>
+<li>host-device, device-device, rack-scale interconnect를 본다.</li>
+<li>collective와 AllToAll을 얼마나 잘 처리하는지 본다.</li>
+<li>compiler/runtime ecosystem이 실제 model graph를 잘 낮춰주는지 확인한다.</li>
+</ol>
+<div class="sl-heading-wrapper level-h3"><h3 id="111-구매도입-전-질문지">11.1 구매/도입 전 질문지</h3><a class="sl-anchor-link" href="#111-구매도입-전-질문지"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “11.1 구매/도입 전 질문지”</span></a></div>
+<p>실제 platform team 입장에서는 다음 질문이 더 직접적이다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Area</th><th>Question</th></tr></thead><tbody><tr><td>Model fit</td><td>target model과 KV cache가 들어가는가? 동시성까지 포함했는가?</td></tr><tr><td>Decode</td><td>batch=1, batch=8, batch=64에서 tok/s와 p99 latency는 어떤가?</td></tr><tr><td>Prefill</td><td>long prompt에서 TTFT가 어떻게 변하는가?</td></tr><tr><td>Quantization</td><td>어떤 format이 native이고, 어떤 kernel/runtime이 지원하는가?</td></tr><tr><td>MoE</td><td>AllToAll과 expert imbalance를 측정했는가?</td></tr><tr><td>Networking</td><td>scale-up과 scale-out topology가 serving parallelism과 맞는가?</td></tr><tr><td>Software</td><td>PyTorch/vLLM/TensorRT-LLM/JAX/XLA 중 무엇이 production-ready인가?</td></tr><tr><td>Operations</td><td>telemetry, failure handling, rolling deploy, isolation이 가능한가?</td></tr><tr><td>Cost</td><td>tokens/sec/$, tokens/sec/W, rack power, cooling을 함께 봤는가?</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h3"><h3 id="112-benchmark를-읽을-때-조심할-점">11.2 Benchmark를 읽을 때 조심할 점</h3><a class="sl-anchor-link" href="#112-benchmark를-읽을-때-조심할-점"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “11.2 Benchmark를 읽을 때 조심할 점”</span></a></div>
+<p>DSA vendor benchmark는 보통 가장 잘 맞는 workload를 보여준다. 따라서 다음을 확인해야 한다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Benchmark claim</th><th>Missing question</th></tr></thead><tbody><tr><td>High TOPS/FLOPS</td><td>memory bandwidth와 utilization은?</td></tr><tr><td>High tokens/sec</td><td>batch size와 latency SLA는?</td></tr><tr><td>Low latency</td><td>concurrency와 sequence length는?</td></tr><tr><td>INT4 speedup</td><td>quality와 exact quantization method는?</td></tr><tr><td>MoE support</td><td>AllToAll p99와 expert imbalance는?</td></tr><tr><td>Scale-out result</td><td>topology, collective algorithm, failure domain은?</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h2"><h2 id="12-이-레포에서의-실전-해석">12. 이 레포에서의 실전 해석</h2><a class="sl-anchor-link" href="#12-이-레포에서의-실전-해석"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “12. 이 레포에서의 실전 해석”</span></a></div>
+<p>이 appendix를 읽은 뒤 Week 2-4 실험은 다음처럼 해석할 수 있다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Measurement</th><th>DSA lens</th></tr></thead><tbody><tr><td>Week 2 GEMV/GEMM transition</td><td>batch shape가 arithmetic intensity를 바꾸고 hardware path를 바꾼다.</td></tr><tr><td>Week 2 GPU-Util mismatch</td><td>”kernel running”과 “useful roofline utilization”은 다르다.</td></tr><tr><td>Week 3 KV cache</td><td>context length는 memory capacity와 bandwidth를 동시에 압박한다.</td></tr><tr><td>Week 4 INT4 projection</td><td>edge device에서는 weight bytes 감소가 latency로 직접 이어질 가능성이 높다.</td></tr><tr><td>Week 4 bnb slowdown</td><td>low-bit format만으로는 부족하고 fused kernel/runtime이 필요하다.</td></tr></tbody></table>
+<p>핵심은 언제나 같다.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">1. workload phase를 확인한다.</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">2. bytes moved를 계산한다.</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">3. arithmetic intensity를 추정한다.</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">4. hardware ratio와 비교한다.</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">5. software overhead와 kernel path를 확인한다.</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">6. 그다음 optimization을 고른다.</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="1. workload phase를 확인한다.2. bytes moved를 계산한다.3. arithmetic intensity를 추정한다.4. hardware ratio와 비교한다.5. software overhead와 kernel path를 확인한다.6. 그다음 optimization을 고른다."><div></div></button></div></figure></div>
+<div class="sl-heading-wrapper level-h2"><h2 id="13-repository-connections">13. Repository Connections</h2><a class="sl-anchor-link" href="#13-repository-connections"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “13. Repository Connections”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Repository topic</th><th>Connection</th></tr></thead><tbody><tr><td>Week 2 hardware foundations</td><td>memory hierarchy, Tensor Core, HBM bandwidth를 DSA 설계 원칙으로 확장한다.</td></tr><tr><td>Week 3 KV cache</td><td>KV cache를 capacity와 bandwidth 양쪽에서 보는 근거를 제공한다.</td></tr><tr><td>Week 4 quantization</td><td>low precision이 bandwidth, capacity, silicon area에 모두 영향을 준다는 관점을 준다.</td></tr><tr><td>AI Systems Performance Engineering Chapter 4</td><td>scale-out, RDMA, collective, communication overlap과 직접 연결된다.</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h2"><h2 id="14-check-questions">14. Check Questions</h2><a class="sl-anchor-link" href="#14-check-questions"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “14. Check Questions”</span></a></div>
+<ol>
+<li>Decode 단계에서 peak FLOPS가 높아도 latency가 줄지 않는 이유는 무엇인가?</li>
+<li>Quantization이 memory capacity뿐 아니라 bandwidth optimization인 이유는 무엇인가?</li>
+<li>일반 cache hierarchy가 Transformer inference에 항상 적합하지 않은 이유는 무엇인가?</li>
+<li>MoE inference에서 AllToAll이 중요한 이유는 무엇인가?</li>
+<li>새 AI accelerator를 평가할 때 FLOPS보다 먼저 확인해야 할 항목은 무엇인가?</li>
+<li>Prefill과 decode는 arithmetic intensity 관점에서 어떻게 다른가?</li>
+<li>Scratchpad가 cache보다 유리한 조건은 무엇인가?</li>
+<li>Test-time compute scaling은 inference accelerator 설계 목표를 어떻게 바꾸는가?</li>
+<li>DSA benchmark를 볼 때 batch size와 latency SLA를 함께 확인해야 하는 이유는 무엇인가?</li>
+<li>Hardware support와 runtime/kernel support 중 하나라도 빠지면 low-bit inference가 실패하는 이유는 무엇인가?</li>
+</ol> </div> <footer class="sl-flex astro-3yyafb3n"> <div class="meta sl-flex astro-3yyafb3n"> <a href="https://github.com/ziwon/ai-data-center-systems/edit/main/inference/efficient-llm-inference-systems/appendix/hardware-architectures/domain-specific-architectures-for-ai-inference.ko.md" class="sl-flex print:hidden astro-eez2twj6"><svg aria-hidden="true" class="astro-eez2twj6 astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.2em;"><path d="M22 7.24a1 1 0 0 0-.29-.71l-4.24-4.24a1 1 0 0 0-1.1-.22 1 1 0 0 0-.32.22l-2.83 2.83L2.29 16.05a1 1 0 0 0-.29.71V21a1 1 0 0 0 1 1h4.24a1 1 0 0 0 .76-.29l10.87-10.93L21.71 8c.1-.1.17-.2.22-.33a1 1 0 0 0 0-.24v-.14l.07-.05ZM6.83 20H4v-2.83l9.93-9.93 2.83 2.83L6.83 20ZM18.17 8.66l-2.83-2.83 1.42-1.41 2.82 2.82-1.41 1.42Z"/></svg>Edit page</a> <p>Last updated: <time datetime="2026-07-26T08:06:10.000Z">Jul 26, 2026</time></p> </div> <div class="pagination-links print:hidden astro-u2l5gyhi" dir="ltr"> <a href="/inference/efficient-llm-inference-systems/appendix/hardware-architectures/" rel="prev" class="astro-u2l5gyhi"> <svg aria-hidden="true" class="astro-u2l5gyhi astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17 11H9.41l3.3-3.29a1.004 1.004 0 1 0-1.42-1.42l-5 5a1 1 0 0 0-.21.33 1 1 0 0 0 0 .76 1 1 0 0 0 .21.33l5 5a1.002 1.002 0 0 0 1.639-.325 1 1 0 0 0-.219-1.095L9.41 13H17a1 1 0 0 0 0-2Z"/></svg> <span class="astro-u2l5gyhi"> Previous <br class="astro-u2l5gyhi"> <span class="link-title astro-u2l5gyhi">하드웨어 읽기 안내</span> </span> </a> <a href="/inference/efficient-llm-inference-systems/appendix/hardware-architectures/gpus.ko/" rel="next" class="astro-u2l5gyhi"> <svg aria-hidden="true" class="astro-u2l5gyhi astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17.92 11.62a1.001 1.001 0 0 0-.21-.33l-5-5a1.003 1.003 0 1 0-1.42 1.42l3.3 3.29H7a1 1 0 0 0 0 2h7.59l-3.3 3.29a1.002 1.002 0 0 0 .325 1.639 1 1 0 0 0 1.095-.219l5-5a1 1 0 0 0 .21-.33 1 1 0 0 0 0-.76Z"/></svg> <span class="astro-u2l5gyhi"> Next <br class="astro-u2l5gyhi"> <span class="link-title astro-u2l5gyhi">How to Think About GPUs</span> </span> </a> </div>  </footer> </div> </div>  </main> </div> </div> </div> <ask-docs-widget> <button class="ask-fab" type="button" data-open aria-label="Ask this docs"> <span class="ask-fab-icon" aria-hidden="true">?</span>
+Ask this docs
+</button> <div class="ask-panel" data-panel hidden> <div class="ask-resize-handle" data-resize aria-hidden="true"></div> <div class="ask-panel-inner"> <header class="ask-header"> <div> <p class="ask-eyebrow">AI Data Center Systems</p> <h2 class="ask-title">Ask this docs</h2> </div> <div class="ask-header-controls"> <button class="ask-mode-btn" data-mode-btn="right" title="오른쪽 패널" aria-label="오른쪽 패널"> <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="6" height="16" rx="1.5" opacity="0.35"></rect><rect x="8" y="0" width="8" height="16" rx="1.5"></rect></svg> </button> <button class="ask-mode-btn" data-mode-btn="bottom" title="하단 패널" aria-label="하단 패널"> <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="16" height="6" rx="1.5" opacity="0.35"></rect><rect x="0" y="8" width="16" height="8" rx="1.5"></rect></svg> </button> <button class="ask-mode-btn" data-mode-btn="expand" title="전체 확장" aria-label="전체 확장"> <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 5.5V1h4.5M10.5 1H15v4.5M15 10.5V15h-4.5M5.5 15H1v-4.5"></path></svg> </button> <button class="ask-close-btn" type="button" aria-label="닫기" data-close> <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13"></path></svg> </button> </div> </header> <div class="ask-body"> <label class="ask-field"> <span class="ask-field-row"> <span>Question</span> <span class="ask-char" data-char>0 / 800</span> </span> <textarea name="question" rows="3" maxlength="800" placeholder="이 문서에서 핵심 운영 체크포인트는 무엇인가요?" data-question></textarea> <span class="ask-hint">시간당 최대 20회 · 질문당 최대 800자</span> </label> <div class="ask-actions"> <button class="ask-submit" type="button" data-submit> <svg class="ask-spinner" viewBox="0 0 24 24" fill="none" aria-hidden="true" hidden> <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2.5" stroke-dasharray="56" stroke-dashoffset="14" stroke-linecap="round"></circle> </svg> <span data-submit-label>Ask</span> </button> <p class="ask-status" data-status></p> </div> <section class="ask-answer" data-answer hidden></section> <section class="ask-sources" data-sources hidden> <h3>Sources</h3> <ul class="ask-source-chips" data-source-list></ul> </section> </div> </div> </div> <div class="ask-backdrop" data-backdrop hidden></div> </ask-docs-widget> <script type="module" src="/_astro/AskDocs.astro_astro_type_script_index_0_lang.BbnAb04M.js"></script> </div> <script type="module">const r=document.documentElement,c=document.querySelector("#starlight__sidebar"),s=document.querySelector(".navigation-mode-toggle"),a=document.querySelector(".navigation-drawer-toggle"),u=window.matchMedia("(min-width: 50rem)");function d(){return r.dataset.navigationMode==="compact"}function o(){return r.dataset.navigationDrawer==="open"}function l(){const e=d(),t=e&&o();s?.setAttribute("aria-pressed",String(e)),s?.setAttribute("title",e?"Use normal navigation":"Use compact navigation"),a?.setAttribute("aria-expanded",String(t)),a?.setAttribute("title",t?"Close navigation":"Open navigation");const n=a?.querySelector(".navigation-drawer-label");n&&(n.textContent=t?"Close navigation":"Open navigation")}function i(e,t=!1){const n=!!(e&&d()&&u.matches);r.dataset.navigationDrawer=n?"open":"closed",l(),n?requestAnimationFrame(()=>{const g=c?.querySelector('a[aria-current="page"]'),m=c?.querySelector(".starlight-sidebar-topics-current");(g??m)?.focus()}):t&&a?.focus()}function p(e){r.dataset.navigationMode=e,i(!1);try{localStorage.setItem("adcs-navigation-mode",e)}catch{}l()}s?.addEventListener("click",()=>{p(d()?"normal":"compact")});a?.addEventListener("click",()=>{i(!o(),o())});document.addEventListener("keydown",e=>{e.key==="Escape"&&o()&&i(!1,!0)});document.addEventListener("pointerdown",e=>{!o()||!(e.target instanceof Node)||c?.contains(e.target)||i(!1)});u.addEventListener("change",()=>i(!1));r.dataset.navigationDrawer="closed";l();</script> </body></html>

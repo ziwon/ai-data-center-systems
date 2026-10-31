@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="470" viewBox="0 0 980 470" role="img" aria-labelledby="title desc">
+  <title id="title">WR, WQE, CQE, WC flow</title>
+  <desc id="desc">User space work requests are converted to hardware work queue elements, processed by the HCA, and returned as completion queue entries and work completions.</desc>
+  <defs>
+    <marker id="arrow-dark" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#1f2937"/>
+    </marker>
+    <marker id="arrow-blue" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#2563eb"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#16a34a"/>
+    </marker>
+    <marker id="arrow-red" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#dc2626"/>
+    </marker>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#111827" flood-opacity="0.14"/>
+    </filter>
+    <style>
+      .label { font: 700 18px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #111827; }
+      .small { font: 600 14px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #374151; }
+      .tiny { font: 500 12px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #6b7280; }
+      .box { fill: #ffffff; stroke: #9ca3af; stroke-width: 1.5; rx: 10; filter: url(#shadow); }
+      .queue { fill: #f8fafc; stroke: #64748b; stroke-width: 1.8; rx: 8; }
+      .wqe-blue { fill: #eff6ff; stroke: #2563eb; stroke-width: 1.6; rx: 6; }
+      .wqe-green { fill: #ecfdf5; stroke: #16a34a; stroke-width: 1.6; rx: 6; }
+      .wqe-red { fill: #fef2f2; stroke: #dc2626; stroke-width: 1.6; rx: 6; }
+      .cqe { fill: #eef2ff; stroke: #4f46e5; stroke-width: 1.5; rx: 6; }
+      .wc { fill: #f0f9ff; stroke: #0284c7; stroke-width: 1.6; rx: 22; }
+      .wr { fill: #f8fafc; stroke: #111827; stroke-width: 1.8; rx: 26; }
+      .hardware { fill: #fff7ed; stroke: #ea580c; stroke-width: 2; }
+    </style>
+  </defs>
+
+  <rect width="980" height="470" fill="#ffffff"/>
+
+  <rect x="26" y="34" width="170" height="388" class="box"/>
+  <text x="111" y="66" text-anchor="middle" class="label">User space</text>
+  <text x="111" y="91" text-anchor="middle" class="tiny">libibverbs API</text>
+
+  <rect x="55" y="126" width="112" height="58" class="wr"/>
+  <text x="111" y="150" text-anchor="middle" class="label">WR</text>
+  <text x="111" y="170" text-anchor="middle" class="tiny">ibv_send_wr</text>
+
+  <rect x="47" y="322" width="128" height="58" class="wc"/>
+  <text x="111" y="346" text-anchor="middle" class="label">WC</text>
+  <text x="111" y="366" text-anchor="middle" class="tiny">ibv_wc</text>
+
+  <rect x="260" y="44" width="475" height="82" class="queue"/>
+  <text x="497" y="73" text-anchor="middle" class="label" fill="#16a34a">Send Queue / Work Queue</text>
+  <rect x="307" y="88" width="74" height="28" class="wqe-green"/>
+  <text x="344" y="108" text-anchor="middle" class="small">WQE</text>
+  <rect x="400" y="88" width="74" height="28" class="wqe-green"/>
+  <text x="437" y="108" text-anchor="middle" class="small">WQE</text>
+  <rect x="493" y="88" width="74" height="28" class="wqe-green"/>
+  <text x="530" y="108" text-anchor="middle" class="small">WQE</text>
+  <rect x="586" y="88" width="74" height="28" class="wqe-green"/>
+  <text x="623" y="108" text-anchor="middle" class="small">WQE</text>
+
+  <rect x="260" y="164" width="475" height="82" class="queue"/>
+  <text x="497" y="193" text-anchor="middle" class="label" fill="#2563eb">Receive Queue / Work Queue</text>
+  <rect x="307" y="208" width="74" height="28" class="wqe-blue"/>
+  <text x="344" y="228" text-anchor="middle" class="small">WQE</text>
+  <rect x="400" y="208" width="74" height="28" class="wqe-blue"/>
+  <text x="437" y="228" text-anchor="middle" class="small">WQE</text>
+  <rect x="493" y="208" width="74" height="28" class="wqe-blue"/>
+  <text x="530" y="228" text-anchor="middle" class="small">WQE</text>
+
+  <rect x="260" y="284" width="475" height="82" class="queue"/>
+  <text x="497" y="313" text-anchor="middle" class="label" fill="#4f46e5">Completion Queue</text>
+  <rect x="307" y="328" width="66" height="28" class="cqe"/>
+  <text x="340" y="348" text-anchor="middle" class="small">CQE</text>
+  <rect x="391" y="328" width="66" height="28" class="cqe"/>
+  <text x="424" y="348" text-anchor="middle" class="small">CQE</text>
+  <rect x="475" y="328" width="66" height="28" class="cqe"/>
+  <text x="508" y="348" text-anchor="middle" class="small">CQE</text>
+  <rect x="559" y="328" width="66" height="28" class="cqe"/>
+  <text x="592" y="348" text-anchor="middle" class="small">CQE</text>
+
+  <circle cx="846" cy="215" r="72" class="hardware"/>
+  <text x="846" y="206" text-anchor="middle" class="label">HCA</text>
+  <text x="846" y="231" text-anchor="middle" class="small">Hardware</text>
+  <text x="846" y="251" text-anchor="middle" class="tiny">DMA / transport</text>
+
+  <path d="M167 155 C202 155, 214 154, 248 145" fill="none" stroke="#1f2937" stroke-width="4" marker-end="url(#arrow-dark)"/>
+  <text x="214" y="132" text-anchor="middle" class="tiny">post_send / post_recv</text>
+
+  <path d="M660 102 C735 105, 778 131, 819 166" fill="none" stroke="#16a34a" stroke-width="4" marker-end="url(#arrow-green)"/>
+  <path d="M567 222 C685 224, 755 227, 809 223" fill="none" stroke="#2563eb" stroke-width="4" marker-end="url(#arrow-blue)"/>
+  <path d="M846 287 C820 328, 744 337, 637 342" fill="none" stroke="#dc2626" stroke-width="4" marker-end="url(#arrow-red)"/>
+  <text x="775" y="327" text-anchor="middle" class="tiny">CQE 생성</text>
+
+  <path d="M307 342 C245 345, 210 348, 177 351" fill="none" stroke="#1f2937" stroke-width="4" marker-end="url(#arrow-dark)"/>
+  <text x="235" y="381" text-anchor="middle" class="tiny">ibv_poll_cq()</text>
+
+  <text x="500" y="426" text-anchor="middle" class="small">WR/WC는 사용자 API 레벨, WQE/CQE는 드라이버와 HCA가 다루는 큐 엔트리 레벨임</text>
+</svg>

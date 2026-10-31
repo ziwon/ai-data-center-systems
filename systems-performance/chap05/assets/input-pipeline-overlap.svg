@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="600" viewBox="0 0 1120 600" role="img" aria-labelledby="title desc">
+  <title id="title">Double-buffered input pipeline overlap</title>
+  <desc id="desc">A timeline shows DataLoader preparation, asynchronous host-to-device copies, and GPU compute overlapping across consecutive batches.</desc>
+  <defs>
+    <style>
+      text { font-family: Arial, sans-serif; }
+      .bg { fill: #F5F1EA; }
+      .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.4; }
+      .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; }
+      .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+      .line { fill: none; stroke: #111111; stroke-width: 1.7; }
+      .dash { fill: none; stroke: #6F6A63; stroke-width: 1.2; stroke-dasharray: 6 5; }
+      .label { fill: #050505; font-size: 17px; font-weight: 700; }
+      .small { fill: #6F6A63; font-size: 13px; }
+      .red { fill: #D9392E; font-size: 13px; font-weight: 700; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1120" height="600"/>
+  <text class="small" x="198" y="72">time →</text>
+
+  <text class="label" x="56" y="142">Data workers</text>
+  <line class="line" x1="198" y1="136" x2="1050" y2="136"/>
+  <rect class="soft" x="198" y="106" width="210" height="60" rx="6"/>
+  <text class="small" x="249" y="141">prepare batch N</text>
+  <rect class="soft" x="426" y="106" width="210" height="60" rx="6"/>
+  <text class="small" x="470" y="141">prepare batch N+1</text>
+  <rect class="soft" x="654" y="106" width="210" height="60" rx="6"/>
+  <text class="small" x="698" y="141">prepare batch N+2</text>
+
+  <text class="label" x="56" y="280">Copy stream</text>
+  <line class="line" x1="198" y1="274" x2="1050" y2="274"/>
+  <rect class="accent" x="388" y="244" width="128" height="60" rx="6"/>
+  <text class="small" x="424" y="279">H2D N</text>
+  <rect class="accent" x="616" y="244" width="128" height="60" rx="6"/>
+  <text class="small" x="646" y="279">H2D N+1</text>
+  <rect class="accent" x="844" y="244" width="128" height="60" rx="6"/>
+  <text class="small" x="874" y="279">H2D N+2</text>
+
+  <text class="label" x="56" y="418">Compute stream</text>
+  <line class="line" x1="198" y1="412" x2="1050" y2="412"/>
+  <rect class="box" x="516" y="382" width="210" height="60" rx="6"/>
+  <text class="small" x="566" y="417">compute batch N</text>
+  <rect class="box" x="744" y="382" width="210" height="60" rx="6"/>
+  <text class="small" x="787" y="417">compute batch N+1</text>
+
+  <path class="dash" d="M 408 166 C 420 202, 446 214, 452 244"/>
+  <path class="dash" d="M 636 166 C 648 202, 674 214, 680 244"/>
+  <path class="dash" d="M 516 304 C 540 338, 590 346, 620 382"/>
+  <path class="dash" d="M 744 304 C 768 338, 818 346, 848 382"/>
+
+  <rect class="soft" x="198" y="500" width="852" height="58" rx="6"/>
+  <text class="small" x="228" y="525">Required: pinned source buffers, non-default copy stream, correct stream dependencies, and sufficient DMA engines.</text>
+  <text class="red" x="228" y="547">Only startup and final tail should remain exposed after the pipeline is warm.</text>
+</svg>

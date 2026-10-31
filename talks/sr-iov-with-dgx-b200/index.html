@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DGX B200 Networking in Practice · QuietFabric</title>
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<button id="themeToggle" type="button"><span class="dot"></span><span id="themeLabel">dark</span></button>
+
+<deck-stage width="1920" height="1080">
+  <section data-label="Cover">
+    <div class="slide glow cover">
+      <div>
+        <div class="eyebrow">DGX B200 · GPU fabric operations</div>
+        <h1>Making DGX B200<br>RDMA-ready.</h1>
+        <p class="lead">InfiniBand, SR-IOV, RDMA, and Kubernetes GPU networking lessons from an 8-node DGX B200 cluster.</p>
+        <div class="meta">
+          <div><b>8 DGX B200</b>cluster scale</div>
+          <div><b>400G IB</b>scale-out fabric</div>
+          <div><b>K8s + RDMA</b>workload plane</div>
+          <div><a href="https://github.com/ziwon" target="_blank" rel="noopener noreferrer"><b>github.com/ziwon</b></a>ai platform architect</div>
+        </div>
+      </div>
+      <div class="route" style="padding:20px;display:grid;place-items:center">
+        <img src="./assets/intro.png" alt="DGX B200 topology overview" style="display:block;width:100%;height:auto;border-radius:var(--r-lg)">
+      </div>
+    </div>
+  </section>
+
+  <section data-label="Agenda">
+    <div class="slide">
+      <div class="pad">
+        <div class="s-head"><span class="eyebrow">storyline</span></div>
+        <div class="s-title">Operational flow for GPU fabric</div>
+        <div class="grid g2" style="margin-top:68px">
+          <div class="layer"><div class="ic">01</div><div class="lt">Why different</div><div class="ld">Collective traffic exposes every weak link.</div></div>
+          <div class="layer"><div class="ic">02</div><div class="lt">DGX topology</div><div class="ld">Scale-up NVLink, scale-out IB rails.</div></div>
+          <div class="layer"><div class="ic">03</div><div class="lt">K8s + SR-IOV</div><div class="ld">NAD, Device Plugin, kubelet, CNI.</div></div>
+          <div class="layer"><div class="ic">04</div><div class="lt">Failure modes</div><div class="ld">Visible VF, missing RDMA state.</div></div>
+          <div class="layer"><div class="ic">05</div><div class="lt">Ownership</div><div class="ld">Host manager vs Kubernetes CNI.</div></div>
+          <div class="layer" style="border-style:dashed"><div class="ic">06</div><div class="lt">Takeaways</div><div class="ld">RDMA-ready criteria for DGX B200.</div></div>
+        </div>
+      </div>
+      <div class="foot"><span class="brand" data-brand></span><span class="grow"></span><span>Storyline</span><span class="num" data-num></span></div>
+    </div>
+  </section>
+
+  <section data-label="Thesis">
+    <div class="slide">
+      <div class="pad">
+        <div class="s-head"><span class="eyebrow">operational thesis</span></div>
+        <div class="s-title">AI networking is the job path</div>
+        <div class="principle">The network path is part of the GPU platform.</div>
+        <p class="s-sub">Ping and Pod IP are not enough. RDMA-ready means GPU locality, PF/VF mapping, GUID/LID, Subnet Manager state, and Kubernetes allocation all line up.</p>
+        <div class="grid g4" style="margin-top:62px">
+          <div class="tile"><div class="val">8<span class="u">nodes</span></div><div class="lab">DGX B200 cluster</div><div class="delta">64 B200 GPUs</div></div>
+          <div class="tile"><div class="val">8<span class="u">rails</span></div><div class="lab">per DGX network shape</div><div class="delta">GPU-local paths</div></div>
+          <div class="tile"><div class="val">400<span class="u">Gbps</span></div><div class="lab">scale-out IB target</div><div class="delta">NDR-class fabric</div></div>
+          <div class="tile"><div class="val">5<span class="u">checks</span></div><div class="lab">RDMA-ready VF state</div><div class="delta">GUID · LID · SM</div></div>
+        </div>
+        <div class="card soft" style="margin-top:54px">
+          <div class="big-quote" style="font-size:46px;max-width:none">The work is not buying GPUs. It is <span class="accent">opening a reliable path between them.</span></div>
+        </div>
+      </div>
+      <div class="foot"><span class="brand" data-brand></span><span class="grow"></span><span>DGX B200 networking in practice</span><span class="num" data-num></span></div>
+    </div>
+  </section>
+
+  <section data-label="Cluster shape">
+    <div class="slide">
+      <div class="pad">
+        <div class="s-head"><span class="eyebrow">cluster shape</span></div>
+        <div class="s-title">DGX B200 is topology, not port count</div>
+        <div class="grid g2" style="margin-top:54px;align-items:start">
+          <table class="qtable card soft">
+            <thead><tr><th>layer</th><th>role in the fabric</th></tr></thead>
+            <tbody>
+              <tr><td><b>Compute</b></td><td>8 DGX B200 nodes, 8 B200 GPUs per node</td></tr>
+              <tr><td><b>Scale-up</b></td><td>NVLink / NVSwitch inside each node</td></tr>
+              <tr><td><b>Scale-out</b></td><td>ConnectX-7 InfiniBand / Ethernet paths</td></tr>
+              <tr><td><b>Switching</b></td><td>QM9700 or QM8700-class IB fabric</td></tr>
+              <tr><td><b>Kubernetes</b></td><td>Cilium + Multus + SR-IOV CNI + Device Plugin</td></tr>
+            </tbody>
+          </table>
+          <div class="card soft">
+            <div class="eyebrow" style="font-size:20px">system view</div>
+            <div class="route" style="margin-top:22px">
+              <div class="track">
+                <span class="line"></span>
+                <div class="node"><div class="nm">DGX</div><div class="mt">GPU ×8</div></div>
+                <div class="node"><div class="nm">NIC</div><div class="mt">CX-7 · BF-3</div></div>
+                <div class="node"><div class="nm">IB</div><div class="mt">SM · LID</div></div>
+                <div class="node"><div class="nm">Pod</div><div class="mt">RDMA VF</div></div>
+              </div>
+            </div>
+            <ul class="q-list" style="margin-top:28px">
+              <li><b>GPU locality</b> and RDMA VF locality</li>
+              <li><b>OSFP, PCI bus, PF/VF, mlx5_x</b> mapping</li>
+              <li><b>Topology-aware scheduling</b> as a performance guardrail</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="foot"><span class="brand" data-brand></span><span class="grow"></span><span>Cluster shape</span><span class="num" data-num></span></div>
+    </div>
+  </section>
+
+  <section data-label="End-to-end path">
+    <div class="slide">
+      <div class="pad">
+        <div class="s-head"><span class="eyebrow">path model</span></div>
+        <div class="s-title">One fabric, end to end</div>
+        <div class="stack" style="margin-top:54px">
+          <div class="layer"><div class="ic">01</div><div class="lt">GPU</div><div class="ld">B200 GPU, NCCL collective traffic, local NVLink domain</div><span class="tag">compute</span></div>
+          <div class="layer"><div class="ic">02</div><div class="lt">PCIe / NVSwitch</div><div class="ld">GPU affinity and host topology decide the nearest network path</div><span class="tag">locality</span></div>
+          <div class="layer"><div class="ic">03</div><div class="lt">ConnectX-7 / BF-3</div><div class="ld">PF, VF, RDMA device, firmware, driver binding</div><span class="tag">mlx5</span></div>
+          <div class="layer"><div class="ic">04</div><div class="lt">InfiniBand fabric</div><div class="ld">Subnet Manager, GUID, LID, link width/speed, switch counters</div><span class="tag">fabric</span></div>
+          <div class="layer"><div class="ic">05</div><div class="lt">Kubernetes</div><div class="ld">Device Plugin, Multus, SR-IOV CNI, NAD, kubelet allocation</div><span class="tag">scheduler</span></div>
+          <div class="layer"><div class="ic">06</div><div class="lt">Pod / framework</div><div class="ld">ibv_devinfo, NCCL logs, PyTorch distributed job behavior</div><span class="tag">workload</span></div>
+        </div>
+      </div>
+      <div class="foot"><span class="brand" data-brand></span><span class="grow"></span><span>End-to-end path</span><span class="num" data-num></span></div>
+    </div>
+  </section>
+
+  <section data-label="Rail topology">
+    <div class="slide">
+      <div class="pad">
+        <div class="s-head"><span class="eyebrow">rail-optimized design</span></div>
+        <div class="s-title">Rail locality matters</div>
+        <div class="rails card soft" style="margin-top:40px;padding:24px 34px;gap:10px 20px">
+          <div class="rail-row"><div class="rail-cell">GPU0 · local NIC</div><div class="rail-line"></div><div class="rail-cell">Rail 0 · IB switch</div></div>
+          <div class="rail-row"><div class="rail-cell">GPU1 · local NIC</div><div class="rail-line"></div><div class="rail-cell">Rail 1 · IB switch</div></div>
+          <div class="rail-row"><div class="rail-cell">GPU2 · local NIC</div><div class="rail-line"></div><div class="rail-cell">Rail 2 · IB switch</div></div>
+          <div class="rail-row"><div class="rail-cell">GPU3 · local NIC</div><div class="rail-line"></div><div class="rail-cell">Rail 3 · IB switch</div></div>
+          <div class="rail-row"><div class="rail-cell">GPU4 · local NIC</div><div class="rail-line"></div><div class="rail-cell">Rail 4 · IB switch</div></div>
+          <div class="rail-row"><div class="rail-cell">GPU5 · local NIC</div><div class="rail-line"></div><div class="rail-cell">Rail 5 · IB switch</div></div>
+          <div class="rail-row"><div class="rail-cell">GPU6 · local NIC</div><div class="rail-line"></div><div class="rail-cell">Rail 6 · IB switch</div></div>
+          <div class="rail-row"><div class="rail-cell">GPU7 · local NIC</div><div class="rail-line"></div><div class="rail-cell">Rail 7 · IB switch</div></div>
+        </div>
+        <div class="grid g3" style="margin-top:22px">
+          <div class="tile" style="min-height:112px;padding:20px 30px"><div class="val" style="font-size:42px">1:1</div><div class="lab" style="font-size:21px;margin-top:9px">GPU-to-rail thinking</div></div>
+          <div class="tile" style="min-height:112px;padding:20px 30px"><div class="val" style="font-size:42px">PF/VF</div><div class="lab" style="font-size:21px;margin-top:9px">preserve locality</div></div>
+          <div class="tile" style="min-height:112px;padding:20px 30px"><div class="val" style="font-size:42px">NCCL</div><div class="lab" style="font-size:21px;margin-top:9px">exposes weak links</div></div>
+        </div>
+      </div>
+      <div class="foot"><span class="brand" data-brand></span><span class="grow"></span><span>Rail topology</span><span class="num" data-num></span></div>
+    </div>
+  </section>
+
+  <section data-label="Kubernetes integration">
+    <div class="slide">
+      <div class="pad">
+        <div class="s-head"><span class="eyebrow">kubernetes + rdma</span></div>
+        <div class="s-title">Kubernetes does not infer fabric</div>
+        <div class="route" style="margin-top:58px">
+          <div class="track">
+            <span class="line"></span>
+            <div class="node"><div class="nm">Cilium</div><div class="mt">primary Pod network</div></div>
+            <div class="node"><div class="nm">Multus</div><div class="mt">secondary interface attachment</div></div>
+            <div class="node"><div class="nm">SR-IOV CNI</div><div class="mt">VF injection into Pod</div></div>
+            <div class="node"><div class="nm">Device Plugin</div><div class="mt">resourceName allocation</div></div>
+            <div class="node"><div class="nm">Pod</div><div class="mt">ibv_devinfo visible</div></div>
+          </div>
+        </div>
+        <div class="grid g2" style="margin-top:48px">
+          <div class="card soft">
+            <div class="eyebrow" style="font-size:20px">failure pattern</div>
+            <p style="margin-top:18px;color:var(--ink-muted);font-size:29px;line-height:1.48"><span class="mono">nvidia.com/gpu</span> can be correct while the RDMA VF lands on the wrong NIC. The job may run, but performance will drift.</p>
+          </div>
+          <div class="card soft">
+            <div class="eyebrow" style="font-size:20px">operator view</div>
+            <ul class="q-list" style="margin-top:18px">
+              <li>NAD, resourceName, kubelet allocation</li>
+              <li>Pod visibility vs fabric visibility</li>
+              <li>Topology Manager and scheduler policy</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="foot"><span class="brand" data-brand></span><span class="grow"></span><span>Kubernetes integration</span><span class="num" data-num></span></div>
+    </div>
+  </section>
+
+  <section data-label="SR-IOV mental model">
+    <div class="slide">
+      <div class="pad">
+        <div class="s-head"><span class="eyebrow">sr-iov on kubernetes</span></div>
+        <div class="s-title">SR-IOV assigns a PCI function</div>
+        <div class="grid g2" style="margin-top:54px;align-items:start">
+          <div class="card soft">
+            <div class="vf-strip">
+              <div class="pf">PF<br>ens1f0</div>
+              <div>VF0</div>
+              <div>VF1</div>
+              <div class="selected">VF2</div>
+              <div>VF3</div>
+            </div>
+            <div class="route" style="margin-top:34px">
+              <div class="track">
+                <span class="line"></span>
+                <div class="node"><div class="nm">Host NIC</div><div class="mt">PF owns hardware</div></div>
+                <div class="node"><div class="nm">VF</div><div class="mt">lightweight PCIe function</div></div>
+                <div class="node"><div class="nm">Pod netns</div><div class="mt">secondary interface</div></div>
+                <div class="node"><div class="nm">IB fabric</div><div class="mt">RDMA data path</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="card soft">
+            <div class="eyebrow" style="font-size:20px">core terms</div>
+            <ul class="q-list" style="margin-top:22px">
+              <li><b>PF</b>: physical parent function and VF policy</li>
+              <li><b>VF</b>: lightweight PCIe function passed to the workload</li>
+              <li><b>SR-IOV CNI</b>: moves the selected VF into the Pod namespace</li>
+              <li><b>Device Plugin</b>: advertises VF resources to kubelet</li>
+              <li><b>Multus</b>: attaches the secondary network</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="foot"><span class="brand" data-brand></span><span class="grow"></span><span>SR-IOV mental model</span><span class="num" data-num></span></div>
+    </div>
+  </section>
+
+  <section data-label="SR-IOV flow">
+    <div class="slide">
+      <div class="pad">
+        <div class="s-head"><span class="eyebrow">sr-iov allocation flow</span></div>
+        <div class="s-title" style="font-size:50px">VF allocation flow</div>
+        <div class="image-frame">
+          <img src="./assets/figure-01.png" alt="How SR-IOV works in Kubernetes flow diagram">
+        </div>
+      </div>
+      <div class="foot"><span class="brand" data-brand></span><span class="grow"></span><span>SR-IOV flow</span><span class="num" data-num></span></div>
+    </div>
+  </section>
+
+  <section data-label="Allocation checks">
+    <div class="slide">
+      <div class="pad">
+        <div class="s-head"><span class="eyebrow">what to verify</span></div>
+        <div class="s-title">Attachment vs allocation</div>
+        <div class="grid g2" style="margin-top:56px">
+          <div class="card soft">
+            <div class="eyebrow" style="font-size:20px">network attachment path</div>
+            <ul class="q-list" style="margin-top:22px">
+              <li><b>NAD</b>: secondary network definition</li>
+              <li><b>Multus</b>: annotation parsing and CNI call</li>
+              <li><b>SR-IOV CNI</b>: VF move and IPAM handoff</li>
+            </ul>
+          </div>
+          <div class="card soft">
+            <div class="eyebrow" style="font-size:20px">device allocation path</div>
+            <ul class="q-list" style="margin-top:22px">
+              <li><b>Device Plugin</b>: extended resource advertisement</li>
+              <li><b>Scheduler</b>: node placement by resource</li>
+              <li><b>Kubelet Device Manager</b>: concrete PCI assignment</li>
+            </ul>
+          </div>
+        </div>
+        <div class="card" style="margin-top:42px;border-color:var(--hairline-strong)">
+          <p style="font-size:32px;color:var(--ink-muted);line-height:1.44"><b style="color:var(--ink)">DGX B200 / IB view:</b> Pod VF visibility still needs RDMA device, GUID, LID, SM, and <span class="mono">mlx5_ib</span> alignment.</p>
+        </div>
+      </div>
+      <div class="foot"><span class="brand" data-brand></span><span class="grow"></span><span>Allocation checks</span><span class="num" data-num></span></div>
+    </div>
+  </section>
+
+  <section data-label="Resource mapping">
+    <div class="slide">
+      <div class="pad">
+        <div class="s-head"><span class="eyebrow">resource mapping</span></div>
+        <div class="s-title" style="font-size:50px">Resource name alignment</div>
+        <div class="image-frame">
+          <img src="./assets/figure-02.png" alt="Kubernetes SR-IOV NAD Device Plugin Pod resource mapping diagram">
+        </div>
+      </div>
+      <div class="foot"><span class="brand" data-brand></span><span class="grow"></span><span>Resource mapping</span><span class="num" data-num></span></div>
+    </div>
+  </section>
+
+  <section data-label="Operational guardrails">
+    <div class="slide">
+      <div class="pad">
+        <div class="s-head"><span class="eyebrow">operational guardrails</span></div>
+        <div class="s-title">Four SR-IOV guardrails</div>
+        <div class="grid g2" style="margin-top:54px">
+          <div class="card soft">
+            <ul class="q-list">
+              <li><b>Network purpose split.</b> <span class="mono">eth0</span>: service/control, <span class="mono">net1</span>: RDMA path</li>
+              <li><b>Multus is an attachment caller.</b> It does not complete the fabric.</li>
+              <li><b>Whereabouts is IPAM.</b> It does not fix LID/GUID/SM state.</li>
+            </ul>
+          </div>
+          <div class="card soft">
+            <ul class="q-list">
+              <li><b>Device Plugin creates scheduling resources.</b> CNI follows kubelet allocation.</li>
+              <li><b>Visible VF is not RDMA-ready.</b> Check <span class="mono">ibv_devinfo</span>, LID, GUID, driver binding.</li>
+              <li><b>Locality still matters.</b> Match GPU, rail, and local NIC.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="card" style="margin-top:42px;border-color:var(--hairline-strong)">
+          <p style="font-size:34px;color:var(--ink-muted);line-height:1.42"><b style="color:var(--ink)">Summary:</b> NAD chooses the network. Device Plugin reserves the VF. Kubelet and CNI move it into the Pod.</p>
+        </div>
+      </div>
+      <div class="foot"><span class="brand" data-brand></span><span class="grow"></span><span>Operational guardrails</span><span class="num" data-num></span></div>
+    </div>
+  </section>
+
+  <section data-label="Troubleshooting">
+    <div class="slide">
+      <div class="pad">
+        <div class="s-head"><span class="eyebrow">troubleshooting case</span></div>
+        <div class="s-title">Visible VF ≠ usable RDMA</div>
+        <div class="grid g2" style="margin-top:38px;align-items:start">
+          <div class="term">
+            <div class="bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="name">pod@training-job:~</span></div>
+            <div class="body">
+              <span class="p">$</span> lspci | grep Mellanox<br>
+              <span class="ok">VF present</span><br>
+              <span class="p">$</span> kubectl describe node | grep rdma<br>
+              <span class="ok">resource exposed</span><br>
+              <span class="p">$</span> ibv_devinfo<br>
+              <span class="bad">no active LID / unusable RDMA path</span><br>
+              <span class="dim"># device exists, fabric membership is incomplete</span>
+            </div>
+          </div>
+          <div class="card soft">
+            <table class="qtable">
+              <thead><tr><th>check</th><th>why it matters</th></tr></thead>
+              <tbody>
+                <tr><td><b>GUID</b></td><td>Device identity on the InfiniBand fabric.</td></tr>
+                <tr><td><b>LID</b></td><td>Fabric address assigned by the Subnet Manager.</td></tr>
+                <tr><td><b>SM state</b></td><td>Subnet Manager: the IB control plane that admits endpoints.</td></tr>
+                <tr><td><b>mlx5_ib</b></td><td>Linux RDMA driver for NVIDIA/Mellanox NICs.</td></tr>
+                <tr><td><b>PF/VF mapping</b></td><td>Wrong port mapping creates false positives.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card" style="margin-top:28px;padding:28px 34px;border-color:color-mix(in srgb, var(--fault-red) 42%, var(--hairline));background:color-mix(in srgb, var(--fault-red) 5%, var(--surface-1));display:grid;grid-template-columns:0.36fr 0.64fr;gap:34px;align-items:center">
+          <div>
+            <div class="eyebrow" style="font-size:20px;color:var(--fault-red)">key lesson</div>
+            <p style="margin-top:12px;font-size:31px;color:var(--ink);line-height:1.28;font-weight:600"><span class="mono">VF Visible</span> ≠ <span class="mono">RDMA Ready</span></p>
+          </div>
+          <p style="font-size:24px;color:var(--ink-muted);line-height:1.42">Required path before distributed training<br><span class="mono">GUID → LID → mlx5_ib → Fabric Membership → Topology Validation</span></p>
+        </div>
+      </div>
+      <div class="foot"><span class="brand" data-brand></span><span class="grow"></span><span>Troubleshooting</span><span class="num" data-num></span></div>
+    </div>
+  </section>
+
+  <section data-label="Observability">
+    <div class="slide">
+      <div class="pad">
+        <div class="s-head"><span class="eyebrow">observability checklist</span></div>
+        <div class="s-title">Observe beyond GPU</div>
+        <div class="grid g3" style="margin-top:54px">
+          <div class="card soft">
+            <div class="eyebrow" style="font-size:20px">node / gpu</div>
+            <ul class="q-list" style="margin-top:18px">
+              <li><span class="mono">nvidia-smi topo -m</span></li>
+              <li><span class="mono">mst status</span></li>
+              <li><span class="mono">devlink dev show</span></li>
+            </ul>
+          </div>
+          <div class="card soft">
+            <div class="eyebrow" style="font-size:20px">infiniband / rdma</div>
+            <ul class="q-list" style="margin-top:18px">
+              <li><span class="mono">ibstat</span></li>
+              <li><span class="mono">ibv_devinfo</span></li>
+              <li><span class="mono">iblinkinfo</span></li>
+              <li><span class="mono">perfquery</span></li>
+            </ul>
+          </div>
+          <div class="card soft">
+            <div class="eyebrow" style="font-size:20px">kubernetes</div>
+            <ul class="q-list" style="margin-top:18px">
+              <li><span class="mono">kubectl describe node</span></li>
+              <li><span class="mono">kubectl get network-attachment-definitions</span></li>
+              <li><span class="mono">kubectl logs ds/sriov-device-plugin</span></li>
+            </ul>
+          </div>
+        </div>
+        <div class="grid g4" style="margin-top:42px">
+          <div class="tile"><div class="val">GPU</div><div class="lab">utilization and NCCL behavior</div></div>
+          <div class="tile"><div class="val">NIC</div><div class="lab">RDMA throughput and counters</div></div>
+          <div class="tile"><div class="val">IB</div><div class="lab">LID/GUID and switch health</div></div>
+          <div class="tile"><div class="val">Pod</div><div class="lab">actual device visibility</div></div>
+        </div>
+      </div>
+      <div class="foot"><span class="brand" data-brand></span><span class="grow"></span><span>Observability</span><span class="num" data-num></span></div>
+    </div>
+  </section>
+
+  <section data-label="Mellanox case">
+    <div class="slide">
+      <div class="pad">
+        <div class="s-head"><span class="eyebrow">case study</span></div>
+        <div class="s-title">VF ownership conflict</div>
+        <div class="grid g2" style="margin-top:52px;align-items:start">
+          <div class="card soft">
+            <div class="eyebrow" style="font-size:20px;color:var(--event-amber)">failure setup</div>
+            <ul class="q-list" style="margin-top:22px">
+              <li>New SR-IOV VF appears on the host as <span class="mono">ibp*</span></li>
+              <li>Multus + SR-IOV CNI tries to move it into the Pod namespace</li>
+              <li><span class="mono">systemd-networkd</span> claims the VF lifecycle first</li>
+            </ul>
+          </div>
+          <div class="card" style="border-color:color-mix(in srgb, var(--event-amber) 45%, var(--hairline));background:color-mix(in srgb, var(--event-amber) 6%, var(--surface-1))">
+            <div class="eyebrow" style="font-size:20px;color:var(--event-amber)">core message</div>
+            <div class="big-quote" style="margin-top:30px;max-width:none;font-size:54px;line-height:1.2">Host visibility is required.<br><span class="accent">Host management is not.</span></div>
+            <p style="margin-top:30px;font-size:27px;color:var(--ink-muted);line-height:1.48">Discovery belongs to the host. Ownership belongs to Multus, SR-IOV CNI, and IPAM.</p>
+          </div>
+        </div>
+      </div>
+      <div class="foot"><span class="brand" data-brand></span><span class="grow"></span><span>Mellanox case</span><span class="num" data-num></span></div>
+    </div>
+  </section>
+
+  <section data-label="VF ownership flow">
+    <div class="slide">
+      <div class="pad">
+        <div class="s-head"><span class="eyebrow">failure flow</span></div>
+        <div class="s-title">Host owns VF, Pod loses <span class="mono">net1</span></div>
+        <div class="grid g2" style="margin-top:42px;align-items:start">
+          <div class="term">
+            <div class="bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="name">vf-lifecycle.trace</span></div>
+            <div class="body" style="font-size:22px;line-height:1.53">
+              SR-IOV VF created<br>
+              <span class="dim">↓</span><br>
+              udev event emitted<br>
+              <span class="dim">↓</span><br>
+              <span class="bad">systemd-networkd detects VF</span><br>
+              <span class="dim">↓</span><br>
+              per-VF network unit activates<br>
+              <span class="dim">↓</span><br>
+              <span class="bad">Host OS claims VF</span><br>
+              <span class="dim">↓</span><br>
+              Multus / SR-IOV CNI tries Pod move<br>
+              <span class="dim">↓</span><br>
+              IPAM / netns handoff fails<br>
+              <span class="dim">↓</span><br>
+              <span class="bad">Pod net1 gets no VF IP</span>
+            </div>
+          </div>
+          <div class="card soft">
+            <div class="eyebrow" style="font-size:20px;color:var(--fault-red)">observed symptoms</div>
+            <ul class="q-list" style="margin-top:22px">
+              <li>VF visible on the host</li>
+              <li>Pod secondary interface not stable</li>
+              <li><span class="mono">Whereabouts</span> / IPAM does not assign the expected IP</li>
+              <li>Pod VF IP succeeds after disabling the host unit</li>
+            </ul>
+            <div class="card" style="margin-top:32px;padding:24px;border-color:color-mix(in srgb, var(--fault-red) 38%, var(--hairline));background:color-mix(in srgb, var(--fault-red) 5%, var(--surface-1))">
+              <p style="font-size:28px;color:var(--ink-muted);line-height:1.42"><b style="color:var(--ink)">Root cause:</b> VF lifecycle ownership conflict, not missing hardware.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="foot"><span class="brand" data-brand></span><span class="grow"></span><span>VF ownership flow</span><span class="num" data-num></span></div>
+    </div>
+  </section>
+
+  <section data-label="Lifecycle resolution">
+    <div class="slide">
+      <div class="pad">
+        <div class="s-head"><span class="eyebrow">resolution</span></div>
+        <div class="s-title">Keep VFs unmanaged on host</div>
+        <div class="grid g2" style="margin-top:50px;align-items:start">
+          <div class="card soft">
+            <div class="eyebrow" style="font-size:20px">operator fix</div>
+            <ul class="q-list" style="margin-top:22px">
+              <li>Exclude new SR-IOV VFs from host-side network managers</li>
+              <li>Block automatic management for <span class="mono">ibp*</span> and VF interfaces</li>
+              <li>Keep VFs visible but unmanaged on the host</li>
+              <li>Let Multus + SR-IOV CNI + IPAM own the final move</li>
+            </ul>
+          </div>
+          <div class="card soft">
+            <table class="qtable">
+              <thead><tr><th>state</th><th>result</th></tr></thead>
+              <tbody>
+                <tr><td><b>Host owns VF</b></td><td><span style="color:var(--fault-red)">Pod IP assignment fails</span></td></tr>
+                <tr><td><b>CNI owns VF</b></td><td><span style="color:var(--signal-green)">Pod secondary interface works</span></td></tr>
+              </tbody>
+            </table>
+            <div class="card" style="margin-top:34px;padding:28px;border-color:var(--hairline-strong)">
+              <p style="font-size:31px;color:var(--ink-muted);line-height:1.42"><b style="color:var(--ink)">Lifecycle rule:</b> High-performance networking includes device lifecycle ownership, not just bandwidth.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="foot"><span class="brand" data-brand></span><span class="grow"></span><span>Lifecycle resolution</span><span class="num" data-num></span></div>
+    </div>
+  </section>
+
+  <section data-label="Takeaways">
+    <div class="slide glow">
+      <div class="pad" style="justify-content:center">
+        <div class="eyebrow">closing messages</div>
+        <div class="s-title" style="font-size:70px;max-width:1320px">RDMA-ready is an end-to-end state</div>
+        <div class="grid g3" style="margin-top:58px">
+          <div class="card soft">
+            <div class="eyebrow" style="font-size:20px">fabric state</div>
+            <p style="margin-top:22px;font-size:31px;color:var(--ink-muted);line-height:1.42">GUID · LID · SM · <span class="mono">mlx5_ib</span></p>
+          </div>
+          <div class="card soft">
+            <div class="eyebrow" style="font-size:20px">device ownership</div>
+            <p style="margin-top:22px;font-size:31px;color:var(--ink-muted);line-height:1.42">VF visible, host unmanaged, CNI-owned move</p>
+          </div>
+          <div class="card soft">
+            <div class="eyebrow" style="font-size:20px">topology fit</div>
+            <p style="margin-top:22px;font-size:31px;color:var(--ink-muted);line-height:1.42">GPU path · rail · local NIC</p>
+          </div>
+        </div>
+        <div class="card" style="margin-top:42px;border-color:var(--hairline-strong)">
+          <p style="font-size:38px;color:var(--ink-muted);line-height:1.34"><b style="color:var(--ink)">Rule:</b> if any layer disagrees, the VF is not ready.</p>
+        </div>
+      </div>
+      <div class="foot"><span class="brand" data-brand></span><span class="grow"></span><span>Takeaways</span><span class="num" data-num></span></div>
+    </div>
+  </section>
+
+  <section data-label="Further reading">
+    <div class="slide">
+      <div class="pad">
+        <div class="s-head"><span class="eyebrow">further reading</span></div>
+        <div class="s-title">Implementation sources and vendor docs</div>
+        <div class="ref-grid">
+          <div class="ref-item">
+            <a href="https://docs.nvidia.com/networking/display/kubernetes2410/K8s%2Bon%2BBare%2BMetal%2B-%2BEthernet" target="_blank" rel="noopener noreferrer">NVIDIA K8s on Bare Metal - Ethernet</a>
+            <p>Bare-metal Kubernetes, SR-IOV, RDMA/RoCE, and NVIDIA NICs.</p>
+          </div>
+          <div class="ref-item">
+            <a href="https://docs.nvidia.com/dgx/dgxb200-user-guide/" target="_blank" rel="noopener noreferrer">NVIDIA DGX B200 User Guide</a>
+            <p>DGX B200 system overview, GPU, NVLink/NVSwitch, and networking hardware.</p>
+          </div>
+          <div class="ref-item">
+            <a href="https://docs.nvidia.com/dgx/dgxb200-user-guide/introduction-to-dgxb200.html" target="_blank" rel="noopener noreferrer">Introduction to NVIDIA DGX B200 Systems</a>
+            <p>Component descriptions for DGX B200 compute, storage, and network cards.</p>
+          </div>
+          <div class="ref-item">
+            <a href="https://docs.nvidia.com/networking/display/kubernetes2310/network%2Boperator" target="_blank" rel="noopener noreferrer">NVIDIA Network Operator</a>
+            <p>Kubernetes RDMA, GPUDirect, SR-IOV, and NVIDIA networking components.</p>
+          </div>
+          <div class="ref-item">
+            <a href="https://docs.nvidia.com/doca/archive/2-9-4/Kubernetes-Using-SR-IOV/index.html" target="_blank" rel="noopener noreferrer">NVIDIA DOCA: Kubernetes Using SR-IOV</a>
+            <p>SR-IOV CNI and RDMA device plugin concepts for Kubernetes Pods.</p>
+          </div>
+          <div class="ref-item">
+            <a href="https://github.com/k8snetworkplumbingwg/multus-cni" target="_blank" rel="noopener noreferrer">Multus CNI</a>
+            <p>Secondary network attachment and multi-homed Pods in Kubernetes.</p>
+          </div>
+          <div class="ref-item">
+            <a href="https://github.com/k8snetworkplumbingwg/sriov-network-device-plugin" target="_blank" rel="noopener noreferrer">SR-IOV Network Device Plugin</a>
+            <p>Advertising and allocating SR-IOV VF resources through Kubernetes.</p>
+          </div>
+          <div class="ref-item">
+            <a href="https://docs.nvidia.com/networking/display/gpudirectrdmav18" target="_blank" rel="noopener noreferrer">NVIDIA GPUDirect RDMA User Manual</a>
+            <p>Direct RDMA data paths between NVIDIA GPUs and network adapters.</p>
+          </div>
+        </div>
+      </div>
+      <div class="foot"><span class="brand" data-brand></span><span class="grow"></span><span>Further reading</span><span class="num" data-num></span></div>
+    </div>
+  </section>
+
+  <section data-label="Production profile">
+    <div class="slide">
+      <div class="pad">
+        <div class="outro-layout">
+          <div>
+            <div class="outro-photo">
+              <img src="./assets/outro.jpg" alt="AI platform architect profile photo in a server room">
+            </div>
+            <div class="outro-contact"><a href="https://github.com/ziwon" target="_blank" rel="noopener noreferrer">github.com/ziwon</a></div>
+          </div>
+          <div>
+            <div class="outro-title">AI Platform Architect</div>
+            <div class="outro-rule"></div>
+            <p class="outro-summary">Building reliable infrastructure for AI systems,<br>from GPU fabrics to agentic workflows.</p>
+            <div class="outro-focus">
+              <div>AI Infrastructure</div>
+              <div>Data Center Networking</div>
+              <div>LLMOps &amp; Model Serving</div>
+              <div>Agentic AI</div>
+            </div>
+            <div class="outro-note">The horizon keeps moving.<br><em>That's why I'm still learning, still building.</em></div>
+          </div>
+        </div>
+      </div>
+      <div class="foot"><span class="brand" data-brand></span><span class="grow"></span><span>Production profile</span><span class="num" data-num></span></div>
+    </div>
+  </section>
+</deck-stage>
+
+<script src="deck-stage.js"></script>
+<script>
+  const stage = document.querySelector("deck-stage");
+  const slides = [...stage.querySelectorAll("section")];
+  slides.forEach((section, index) => {
+    section.querySelectorAll("[data-brand]").forEach((brand) => {
+      brand.innerHTML = '<img src="./assets/quietfabric-mark.svg" alt="">QuietFabric';
+    });
+    section.querySelectorAll("[data-num]").forEach((num) => {
+      num.textContent = `${String(index + 1).padStart(2, "0")} / ${String(slides.length).padStart(2, "0")}`;
+    });
+  });
+
+  const themeToggle = document.getElementById("themeToggle");
+  const themeLabel = document.getElementById("themeLabel");
+  themeToggle.addEventListener("click", () => {
+    const root = document.documentElement;
+    const next = root.dataset.theme === "dark" ? "light" : "dark";
+    root.dataset.theme = next;
+    themeLabel.textContent = next;
+  });
+</script>
+</body>
+</html>

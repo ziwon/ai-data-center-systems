@@ -1,0 +1,202 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="760" viewBox="0 0 1400 760" role="img" aria-labelledby="title desc">
+  <title id="title">CUDA execution, scheduling, and memory hierarchy</title>
+  <desc id="desc">A CUDA grid of thread blocks is dynamically assigned by a hardware scheduler to streaming multiprocessors. Each streaming multiprocessor holds resident warps, execution units, registers, and per-block shared memory. Device global memory is reached through L2, while the host exchanges data with device memory over an explicit transfer path.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#111111"/>
+    </marker>
+    <marker id="arrow-accent" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#D9392E"/>
+    </marker>
+    <style>
+      .bg { fill: #F3EFE7; }
+      .panel { fill: none; stroke: #111111; stroke-width: 1.5; }
+      .subtle { fill: none; stroke: #D8D1C7; stroke-width: 1.25; }
+      .accent-box { fill: none; stroke: #D9392E; stroke-width: 2; }
+      .chip-fill { fill: #F5F1EA; stroke: #111111; stroke-width: 1.5; }
+      .ink-fill { fill: #111111; stroke: #111111; stroke-width: 1; }
+      .accent-fill { fill: #D9392E; stroke: #D9392E; stroke-width: 1; }
+      .line { fill: none; stroke: #111111; stroke-width: 1.5; marker-end: url(#arrow); }
+      .thin-line { fill: none; stroke: #111111; stroke-width: 1.1; marker-end: url(#arrow); }
+      .accent-line { fill: none; stroke: #D9392E; stroke-width: 2; marker-end: url(#arrow-accent); }
+      .dash { stroke-dasharray: 7 6; }
+      .label { fill: #050505; font-family: Inter, Arial, sans-serif; font-size: 16px; font-weight: 700; }
+      .body { fill: #050505; font-family: Inter, Arial, sans-serif; font-size: 14px; }
+      .small { fill: #6F6A63; font-family: Inter, Arial, sans-serif; font-size: 12px; }
+      .micro { fill: #6F6A63; font-family: Inter, Arial, sans-serif; font-size: 10px; }
+      .white { fill: #F5F1EA; font-family: Inter, Arial, sans-serif; font-size: 12px; font-weight: 700; }
+      .accent-text { fill: #D9392E; font-family: Inter, Arial, sans-serif; font-size: 13px; font-weight: 700; }
+      .section { fill: #6F6A63; font-family: Inter, Arial, sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 1.6px; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1400" height="760"/>
+
+  <text class="section" x="42" y="36">PROGRAMMING MODEL</text>
+  <rect class="panel" x="40" y="52" width="350" height="506" rx="4"/>
+  <text class="label" x="64" y="83">Grid: one kernel launch</text>
+  <text class="small" x="64" y="105">many logical blocks; more than the GPU can hold</text>
+
+  <g id="block-0" transform="translate(64 128)">
+    <rect class="panel" x="0" y="0" width="140" height="142" rx="3"/>
+    <text class="body" x="12" y="24">thread block 0</text>
+    <g transform="translate(13 42)">
+      <rect class="subtle" x="0" y="0" width="24" height="22"/><rect class="subtle" x="28" y="0" width="24" height="22"/>
+      <rect class="subtle" x="56" y="0" width="24" height="22"/><rect class="subtle" x="84" y="0" width="24" height="22"/>
+      <rect class="subtle" x="0" y="27" width="24" height="22"/><rect class="subtle" x="28" y="27" width="24" height="22"/>
+      <rect class="subtle" x="56" y="27" width="24" height="22"/><rect class="subtle" x="84" y="27" width="24" height="22"/>
+      <text class="micro" x="1" y="67">CUDA threads</text>
+    </g>
+    <rect class="subtle" x="13" y="116" width="114" height="15"/>
+    <text class="micro" x="20" y="127">shared allocation</text>
+  </g>
+
+  <g id="block-1" transform="translate(224 128)">
+    <rect class="panel" x="0" y="0" width="140" height="142" rx="3"/>
+    <text class="body" x="12" y="24">thread block 1</text>
+    <g transform="translate(13 42)">
+      <rect class="subtle" x="0" y="0" width="24" height="22"/><rect class="subtle" x="28" y="0" width="24" height="22"/>
+      <rect class="subtle" x="56" y="0" width="24" height="22"/><rect class="subtle" x="84" y="0" width="24" height="22"/>
+      <rect class="subtle" x="0" y="27" width="24" height="22"/><rect class="subtle" x="28" y="27" width="24" height="22"/>
+      <rect class="subtle" x="56" y="27" width="24" height="22"/><rect class="subtle" x="84" y="27" width="24" height="22"/>
+      <text class="micro" x="1" y="67">CUDA threads</text>
+    </g>
+    <rect class="subtle" x="13" y="116" width="114" height="15"/>
+    <text class="micro" x="20" y="127">shared allocation</text>
+  </g>
+
+  <g id="queued-blocks" transform="translate(64 292)">
+    <rect class="subtle" x="0" y="0" width="140" height="54" rx="3"/>
+    <text class="body" x="12" y="23">thread block 2</text>
+    <text class="small" x="12" y="42">ready / queued</text>
+    <rect class="subtle" x="160" y="0" width="140" height="54" rx="3"/>
+    <text class="body" x="172" y="23">thread block 3</text>
+    <text class="small" x="172" y="42">ready / queued</text>
+    <text class="label" x="139" y="86">···</text>
+  </g>
+
+  <rect class="accent-box" x="64" y="400" width="300" height="91" rx="3"/>
+  <text class="accent-text" x="82" y="427">Scheduling contract</text>
+  <text class="body" x="82" y="451">Blocks may run in any order.</text>
+  <text class="body" x="82" y="473">No dependence on another block's progress.</text>
+
+  <text class="section" x="438" y="36">DYNAMIC ASSIGNMENT</text>
+  <rect class="accent-box" x="436" y="200" width="150" height="166" rx="4"/>
+  <text class="label" x="456" y="229">GPU work</text>
+  <text class="label" x="456" y="251">scheduler</text>
+  <line x1="456" y1="270" x2="566" y2="270" stroke="#D8D1C7" stroke-width="1"/>
+  <text class="small" x="456" y="293">admit whole block</text>
+  <text class="small" x="456" y="315">when resources fit</text>
+  <text class="small" x="456" y="342">replace on finish</text>
+
+  <path class="accent-line" d="M 390 283 L 429 283"/>
+  <path class="line" d="M 586 247 C 612 247, 612 173, 638 173"/>
+  <path class="line" d="M 586 319 C 612 319, 612 431, 638 431"/>
+
+  <rect class="subtle" x="420" y="400" width="183" height="91" rx="3"/>
+  <text class="body" x="438" y="426">Block resource vector</text>
+  <text class="small" x="438" y="449">threads · warps · registers</text>
+  <text class="small" x="438" y="470">shared bytes · block limits</text>
+  <path class="thin-line dash" d="M 512 400 L 512 372"/>
+
+  <text class="section" x="642" y="36">HARDWARE EXECUTION</text>
+
+  <g id="sm-0">
+    <rect class="chip-fill" x="640" y="52" width="330" height="506" rx="4"/>
+    <text class="label" x="662" y="82">Streaming multiprocessor 0</text>
+    <text class="small" x="662" y="104">multiple resident blocks · many resident warps</text>
+
+    <rect class="panel" x="662" y="126" width="286" height="68" rx="3"/>
+    <text class="body" x="678" y="150">Warp schedulers + fetch/decode</text>
+    <rect class="ink-fill" x="678" y="163" width="49" height="14"/><rect class="ink-fill" x="737" y="163" width="49" height="14"/>
+    <rect class="ink-fill" x="796" y="163" width="49" height="14"/><rect class="ink-fill" x="855" y="163" width="49" height="14"/>
+    <text class="micro" x="914" y="174">×4</text>
+
+    <rect class="panel" x="662" y="210" width="286" height="104" rx="3"/>
+    <text class="body" x="678" y="234">Resident execution contexts</text>
+    <text class="small" x="678" y="256">scalar registers + program counters</text>
+    <rect class="subtle" x="678" y="270" width="54" height="25"/><rect class="subtle" x="739" y="270" width="54" height="25"/>
+    <rect class="subtle" x="800" y="270" width="54" height="25"/><rect class="subtle" x="861" y="270" width="54" height="25"/>
+    <text class="micro" x="688" y="287">warp 0</text><text class="micro" x="749" y="287">warp 1</text>
+    <text class="micro" x="810" y="287">warp 2</text><text class="micro" x="871" y="287">warp ···</text>
+
+    <rect class="panel" x="662" y="330" width="286" height="82" rx="3"/>
+    <text class="body" x="678" y="354">SIMT execution pipelines</text>
+    <rect class="ink-fill" x="678" y="369" width="46" height="21"/><rect class="ink-fill" x="730" y="369" width="46" height="21"/>
+    <rect class="ink-fill" x="782" y="369" width="46" height="21"/><rect class="ink-fill" x="834" y="369" width="46" height="21"/>
+    <rect class="accent-fill" x="886" y="369" width="40" height="21"/>
+    <text class="white" x="688" y="384">FP</text><text class="white" x="740" y="384">INT</text>
+    <text class="white" x="790" y="384">LD</text><text class="white" x="843" y="384">SFU</text>
+    <text class="white" x="894" y="384">TC</text>
+
+    <rect class="panel" x="662" y="428" width="286" height="103" rx="3"/>
+    <text class="body" x="678" y="453">Per-block shared memory + L1</text>
+    <rect class="subtle" x="678" y="469" width="116" height="42"/>
+    <rect class="subtle" x="810" y="469" width="116" height="42"/>
+    <text class="micro" x="696" y="493">block A region</text>
+    <text class="micro" x="828" y="493">block B region</text>
+  </g>
+
+  <g id="sm-1">
+    <rect class="chip-fill" x="1004" y="52" width="354" height="506" rx="4"/>
+    <text class="label" x="1026" y="82">Streaming multiprocessor N</text>
+    <text class="small" x="1026" y="104">same block-level placement and residency rules</text>
+
+    <rect class="panel" x="1026" y="126" width="310" height="68" rx="3"/>
+    <text class="body" x="1042" y="150">Warp schedulers + fetch/decode</text>
+    <rect class="ink-fill" x="1042" y="163" width="52" height="14"/><rect class="ink-fill" x="1104" y="163" width="52" height="14"/>
+    <rect class="ink-fill" x="1166" y="163" width="52" height="14"/><rect class="ink-fill" x="1228" y="163" width="52" height="14"/>
+
+    <rect class="panel" x="1026" y="210" width="310" height="104" rx="3"/>
+    <text class="body" x="1042" y="234">Resident execution contexts</text>
+    <text class="small" x="1042" y="256">ready warps hide memory and pipeline latency</text>
+    <rect class="subtle" x="1042" y="270" width="57" height="25"/><rect class="subtle" x="1106" y="270" width="57" height="25"/>
+    <rect class="subtle" x="1170" y="270" width="57" height="25"/><rect class="subtle" x="1234" y="270" width="57" height="25"/>
+    <text class="micro" x="1052" y="287">warp 0</text><text class="micro" x="1116" y="287">warp 1</text>
+    <text class="micro" x="1180" y="287">warp 2</text><text class="micro" x="1244" y="287">warp ···</text>
+
+    <rect class="panel" x="1026" y="330" width="310" height="82" rx="3"/>
+    <text class="body" x="1042" y="354">SIMT execution pipelines</text>
+    <rect class="ink-fill" x="1042" y="369" width="50" height="21"/><rect class="ink-fill" x="1099" y="369" width="50" height="21"/>
+    <rect class="ink-fill" x="1156" y="369" width="50" height="21"/><rect class="ink-fill" x="1213" y="369" width="50" height="21"/>
+    <rect class="accent-fill" x="1270" y="369" width="44" height="21"/>
+    <text class="white" x="1054" y="384">FP</text><text class="white" x="1111" y="384">INT</text>
+    <text class="white" x="1167" y="384">LD</text><text class="white" x="1222" y="384">SFU</text>
+    <text class="white" x="1279" y="384">TC</text>
+
+    <rect class="panel" x="1026" y="428" width="310" height="103" rx="3"/>
+    <text class="body" x="1042" y="453">Per-block shared memory + L1</text>
+    <rect class="subtle" x="1042" y="469" width="128" height="42"/>
+    <rect class="subtle" x="1186" y="469" width="128" height="42"/>
+    <text class="micro" x="1064" y="493">block C region</text>
+    <text class="micro" x="1208" y="493">free capacity</text>
+  </g>
+
+  <text class="section" x="42" y="612">MEMORY AND DATA MOVEMENT</text>
+  <rect class="panel" x="40" y="630" width="272" height="83" rx="4"/>
+  <text class="label" x="60" y="659">Host memory</text>
+  <text class="small" x="60" y="682">CPU address space · system DRAM</text>
+  <text class="small" x="60" y="700">allocation, input, output</text>
+
+  <path class="accent-line" d="M 312 672 L 508 672"/>
+  <text class="accent-text" x="349" y="654">explicit copy / PCIe</text>
+
+  <rect class="panel" x="516" y="630" width="178" height="83" rx="4"/>
+  <text class="label" x="538" y="659">Device HBM</text>
+  <text class="small" x="538" y="682">global memory</text>
+  <text class="small" x="538" y="700">all device threads</text>
+
+  <path class="line" d="M 694 672 L 786 672"/>
+  <rect class="panel" x="794" y="630" width="166" height="83" rx="4"/>
+  <text class="label" x="817" y="659">Shared L2</text>
+  <text class="small" x="817" y="682">chip-wide cache</text>
+  <text class="small" x="817" y="700">bandwidth aggregation</text>
+
+  <path class="thin-line" d="M 866 630 C 866 601, 821 595, 821 558"/>
+  <path class="thin-line" d="M 902 630 C 902 595, 1180 595, 1180 558"/>
+
+  <rect class="subtle" x="1004" y="630" width="354" height="83" rx="4"/>
+  <text class="body" x="1026" y="658">Locality gets faster and smaller toward the SM.</text>
+  <text class="small" x="1026" y="681">global HBM → L2 → shared/L1 → registers</text>
+  <text class="small" x="1026" y="701">scope and capacity constrain where work can reside</text>
+</svg>

@@ -1,0 +1,139 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 640" role="img" aria-labelledby="title desc">
+  <title id="title">GPU system bottleneck triage</title>
+  <desc id="desc">A flow-oriented diagnostic diagram for tracing low GPU goodput through CPU feeding, memory copy, OS jitter, runtime, container, Kubernetes, and network layers.</desc>
+  <style>
+    svg {
+      background: #F5F1EA;
+      color: #050505;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    .box {
+      fill: none;
+      stroke: #111111;
+      stroke-width: 1.6;
+    }
+    .soft {
+      fill: none;
+      stroke: #D8D1C7;
+      stroke-width: 1.4;
+    }
+    .dash {
+      fill: none;
+      stroke: #6F6A63;
+      stroke-width: 1.3;
+      stroke-dasharray: 7 7;
+    }
+    .arrow {
+      fill: none;
+      stroke: #111111;
+      stroke-width: 1.5;
+      marker-end: url(#arrow);
+    }
+    .arrow-soft {
+      fill: none;
+      stroke: #6F6A63;
+      stroke-width: 1.3;
+      marker-end: url(#arrow-soft);
+    }
+    .arrow-accent {
+      fill: none;
+      stroke: #D9392E;
+      stroke-width: 2.2;
+      marker-end: url(#arrow-accent);
+    }
+    .label {
+      fill: #050505;
+      font-size: 19px;
+      font-weight: 700;
+    }
+    .text {
+      fill: #050505;
+      font-size: 15px;
+      font-weight: 600;
+    }
+    .small {
+      fill: #6F6A63;
+      font-size: 13px;
+    }
+    .warn {
+      fill: #D9392E;
+      font-size: 14px;
+      font-weight: 700;
+    }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#111111"/>
+    </marker>
+    <marker id="arrow-soft" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#6F6A63"/>
+    </marker>
+    <marker id="arrow-accent" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#D9392E"/>
+    </marker>
+  </defs>
+
+  <rect x="70" y="54" width="250" height="112" class="box"/>
+  <text x="98" y="94" class="label">Symptom</text>
+  <text x="98" y="124" class="small">low or unstable goodput</text>
+  <text x="98" y="148" class="small">GPU util alone is not enough</text>
+
+  <rect x="435" y="54" width="250" height="112" class="box"/>
+  <text x="463" y="94" class="label">First split</text>
+  <text x="463" y="124" class="small">is GPU compute waiting?</text>
+  <text x="463" y="148" class="small">or is communication waiting?</text>
+
+  <rect x="800" y="54" width="250" height="112" class="box"/>
+  <text x="828" y="94" class="label">Fix target</text>
+  <text x="828" y="124" class="small">change the blocking layer</text>
+  <text x="828" y="148" class="small">then re-run same benchmark</text>
+
+  <path d="M320 110 H435" class="arrow"/>
+  <path d="M685 110 H800" class="arrow"/>
+
+  <rect x="70" y="236" width="210" height="118" class="soft"/>
+  <text x="96" y="274" class="text">CPU feeding</text>
+  <text x="96" y="304" class="small">dataloader wait</text>
+  <text x="96" y="328" class="small">tokenization, storage</text>
+
+  <rect x="326" y="236" width="210" height="118" class="soft"/>
+  <text x="352" y="274" class="text">Memory path</text>
+  <text x="352" y="304" class="small">H2D copy, page fault</text>
+  <text x="352" y="328" class="small">pinned memory, NUMA</text>
+
+  <rect x="582" y="236" width="210" height="118" class="soft"/>
+  <text x="608" y="274" class="text">OS jitter</text>
+  <text x="608" y="304" class="small">context switch, IRQ</text>
+  <text x="608" y="328" class="small">CPU frequency, daemon</text>
+
+  <rect x="838" y="236" width="210" height="118" class="soft"/>
+  <text x="864" y="274" class="text">GPU runtime</text>
+  <text x="864" y="304" class="small">cold start, allocator</text>
+  <text x="864" y="328" class="small">MPS, MIG, driver</text>
+
+  <path d="M560 166 V206" class="arrow-soft"/>
+  <path d="M175 206 H945" class="dash"/>
+  <path d="M175 206 V236" class="arrow-soft"/>
+  <path d="M431 206 V236" class="arrow-soft"/>
+  <path d="M687 206 V236" class="arrow-soft"/>
+  <path d="M943 206 V236" class="arrow-soft"/>
+
+  <rect x="198" y="432" width="250" height="112" class="soft"/>
+  <text x="226" y="470" class="text">Container / image</text>
+  <text x="226" y="500" class="small">runtime mounts, overlay</text>
+  <text x="226" y="524" class="small">image pull, shm limit</text>
+
+  <rect x="542" y="432" width="250" height="112" class="soft"/>
+  <text x="570" y="470" class="text">Placement / network</text>
+  <text x="570" y="500" class="small">K8s topology, RDMA</text>
+  <text x="570" y="524" class="small">NCCL interface, CNI</text>
+
+  <path d="M431 354 V394" class="arrow-soft"/>
+  <path d="M687 354 V394" class="arrow-soft"/>
+  <path d="M323 394 H667" class="dash"/>
+  <path d="M323 394 V432" class="arrow-soft"/>
+  <path d="M667 394 V432" class="arrow-soft"/>
+
+  <path d="M792 488 C900 488 946 422 946 354" class="arrow-accent"/>
+  <text x="806" y="576" class="warn">critical path: measure, change one layer, validate goodput again</text>
+</svg>

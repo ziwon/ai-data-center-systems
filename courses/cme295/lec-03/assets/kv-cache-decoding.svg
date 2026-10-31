@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="450" viewBox="0 0 980 450" role="img" aria-labelledby="title desc">
+  <title id="title">KV cache reuse during autoregressive decoding</title>
+  <desc id="desc">At each decoding step the model computes the current query, key, and value. Past keys and values are reused from the KV cache instead of recomputed.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .box { fill: none; stroke: #111111; stroke-width: 1.4; rx: 6; }
+    .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; rx: 6; }
+    .cache { fill: none; stroke: #D9392E; stroke-width: 2; rx: 6; }
+    .cell { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1; rx: 3; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.4; marker-end: url(#arrow); }
+    .hot { fill: none; stroke: #D9392E; stroke-width: 2; marker-end: url(#arrowRed); }
+    .muted { fill: none; stroke: #6F6A63; stroke-width: 1.1; marker-end: url(#arrowSoft); }
+    .text { fill: #050505; font-family: Arial, sans-serif; font-size: 16px; font-weight: 700; }
+    .small { fill: #6F6A63; font-family: Arial, sans-serif; font-size: 13px; }
+    .mono { fill: #050505; font-family: "Courier New", monospace; font-size: 13px; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#111111"/>
+    </marker>
+    <marker id="arrowSoft" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#6F6A63"/>
+    </marker>
+    <marker id="arrowRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#D9392E"/>
+    </marker>
+  </defs>
+  <rect class="bg" width="980" height="450"/>
+
+  <rect class="soft" x="45" y="70" width="160" height="64"/>
+  <text class="text" x="125" y="98" text-anchor="middle">Past tokens</text>
+  <text class="small" x="125" y="120" text-anchor="middle">already decoded</text>
+
+  <rect class="box" x="45" y="300" width="160" height="64"/>
+  <text class="text" x="125" y="328" text-anchor="middle">Current token</text>
+  <text class="small" x="125" y="350" text-anchor="middle">step t</text>
+
+  <rect class="cache" x="280" y="45" width="255" height="130"/>
+  <text class="text" x="407.5" y="75" text-anchor="middle">KV cache</text>
+  <rect class="cell" x="310" y="96" width="45" height="42"/><text class="mono" x="332.5" y="122" text-anchor="middle">K1</text>
+  <rect class="cell" x="360" y="96" width="45" height="42"/><text class="mono" x="382.5" y="122" text-anchor="middle">V1</text>
+  <rect class="cell" x="420" y="96" width="45" height="42"/><text class="mono" x="442.5" y="122" text-anchor="middle">K2</text>
+  <rect class="cell" x="470" y="96" width="45" height="42"/><text class="mono" x="492.5" y="122" text-anchor="middle">V2</text>
+
+  <rect class="box" x="280" y="260" width="255" height="120"/>
+  <text class="text" x="407.5" y="291" text-anchor="middle">Compute current</text>
+  <rect class="cell" x="310" y="316" width="55" height="38"/><text class="mono" x="337.5" y="340" text-anchor="middle">Q_t</text>
+  <rect class="cell" x="390" y="316" width="55" height="38"/><text class="mono" x="417.5" y="340" text-anchor="middle">K_t</text>
+  <rect class="cell" x="470" y="316" width="55" height="38"/><text class="mono" x="497.5" y="340" text-anchor="middle">V_t</text>
+
+  <rect class="box" x="625" y="170" width="170" height="95"/>
+  <text class="text" x="710" y="204" text-anchor="middle">Attention</text>
+  <text class="small" x="710" y="229" text-anchor="middle">Q_t attends to</text>
+  <text class="mono" x="710" y="250" text-anchor="middle">K_1...K_t</text>
+
+  <rect class="box" x="850" y="170" width="95" height="95"/>
+  <text class="text" x="897.5" y="207" text-anchor="middle">Next</text>
+  <text class="text" x="897.5" y="229" text-anchor="middle">token</text>
+
+  <path class="muted" d="M205 102 L280 102"/>
+  <path class="line" d="M205 332 L280 332"/>
+  <path class="hot" d="M535 110 C585 120 595 185 625 205"/>
+  <path class="line" d="M535 332 C585 315 595 245 625 230"/>
+  <path class="line" d="M795 218 L850 218"/>
+  <path class="hot" d="M420 380 C420 410 407 415 407 175"/>
+  <text class="small" x="505" y="420" text-anchor="middle">store K_t and V_t for later steps</text>
+</svg>

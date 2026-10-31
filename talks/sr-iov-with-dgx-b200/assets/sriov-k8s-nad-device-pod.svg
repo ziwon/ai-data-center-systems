@@ -1,0 +1,177 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1720 1040" role="img" aria-labelledby="title desc">
+  <title id="title">SR-IOV NAD, Device Plugin, and Pod resource mapping</title>
+  <desc id="desc">Kubernetes control plane objects and worker node components for SR-IOV allocation: NetworkAttachmentDefinition, device plugin resource, Pod spec, kubelet, Multus, SR-IOV CNI, PF, VFs, and final Pod RDMA device.</desc>
+  <style>
+    .bg { fill: #fbfcff; }
+    .frame { fill: #ffffff; stroke: #075bd6; stroke-width: 2; }
+    .worker { fill: #ffffff; stroke: #0d842f; stroke-width: 2; }
+    .labelBar { fill: #064fc2; }
+    .workerBar { fill: #0a7d26; }
+    .labelBarText { font: 800 22px Inter, Arial, sans-serif; fill: #ffffff; }
+    .title { font: 800 21px Inter, Arial, sans-serif; fill: #111111; }
+    .blueTitle { font: 800 18px Inter, Arial, sans-serif; fill: #064fc2; }
+    .small { font: 500 15px Inter, Arial, sans-serif; fill: #222222; }
+    .mono { font: 500 15px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fill: #111111; }
+    .monoSmall { font: 500 13px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fill: #111111; }
+    .hl { fill: #fff4b8; }
+    .red { fill: #e61515; font-weight: 800; }
+    .boxBlue { fill: #f6fbff; stroke: #0b5bd3; stroke-width: 1.7; }
+    .boxGold { fill: #fffdf4; stroke: #a97400; stroke-width: 1.7; }
+    .boxGreen { fill: #f6fff5; stroke: #258b23; stroke-width: 1.7; }
+    .boxPurple { fill: #fbf7ff; stroke: #6730c3; stroke-width: 1.7; }
+    .boxGray { fill: #fbfbfb; stroke: #555555; stroke-width: 1.5; }
+    .dashBlue { fill: #ffffff; stroke: #0b64dc; stroke-width: 1.8; stroke-dasharray: 8 6; }
+    .dashPurple { fill: #ffffff; stroke: #6730c3; stroke-width: 1.8; stroke-dasharray: 8 6; }
+    .arrow { fill: none; stroke: #0b64dc; stroke-width: 2.2; marker-end: url(#arrow); stroke-dasharray: 8 6; }
+    .arrowP { fill: none; stroke: #6730c3; stroke-width: 2.2; marker-end: url(#arrowP); stroke-dasharray: 8 6; }
+    .nic { fill: #3b9f47; stroke: #135e1f; stroke-width: 1.2; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#0b64dc"/>
+    </marker>
+    <marker id="arrowP" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#6730c3"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1720" height="1040"/>
+
+  <rect x="16" y="24" width="1688" height="542" rx="8" class="frame"/>
+  <rect x="36" y="8" width="276" height="36" rx="5" class="labelBar"/>
+  <text x="52" y="33" class="labelBarText">Kubernetes Control Plane</text>
+
+  <rect x="48" y="60" width="510" height="430" rx="6" class="boxBlue"/>
+  <text x="302" y="88" text-anchor="middle" class="blueTitle">NetworkAttachmentDefinition (NAD)</text>
+  <text class="mono" x="64" y="126">apiVersion: k8s.cni.cncf.io/v1</text>
+  <text class="mono" x="64" y="148">kind: NetworkAttachmentDefinition</text>
+  <text class="mono" x="64" y="170">metadata:</text>
+  <text class="mono" x="82" y="192">name: rdma-400g-net</text>
+  <text class="mono" x="82" y="214">namespace: default</text>
+  <text class="mono" x="64" y="236">spec:</text>
+  <text class="mono" x="82" y="258">config: |</text>
+  <text class="mono" x="100" y="280">{</text>
+  <text class="mono" x="120" y="302">"cniVersion": "0.4.0",</text>
+  <text class="mono" x="120" y="324">"name": "rdma-400g-net",</text>
+  <text class="mono" x="120" y="346">"type": "sriov",</text>
+  <text class="mono" x="120" y="368">"ipam": { "type": "whereabouts",</text>
+  <text class="mono" x="158" y="390">"range": "10.10.0.0/24",</text>
+  <text class="mono" x="158" y="412">"range_start": "10.10.0.100",</text>
+  <text class="mono" x="158" y="434">"range_end": "10.10.0.200" },</text>
+  <text class="mono" x="120" y="456">"master": "ens1f0",</text>
+  <rect x="116" y="462" width="418" height="24" rx="3" class="hl"/>
+  <text class="mono" x="120" y="480">"resourceName": "nvidia.com/rdma_shared_dev_400g"</text>
+
+  <rect x="646" y="62" width="294" height="340" rx="8" class="boxGold"/>
+  <text x="793" y="90" text-anchor="middle" class="title">Device Plugin</text>
+  <text x="793" y="116" text-anchor="middle" class="small">(sriov-device-plugin)</text>
+  <rect x="660" y="138" width="266" height="78" rx="6" fill="#fffef8" stroke="#111"/>
+  <text x="793" y="170" text-anchor="middle" class="title" font-size="16">Advertised Resource</text>
+  <text x="793" y="198" text-anchor="middle" class="monoSmall">nvidia.com/rdma_shared_dev_400g</text>
+  <rect x="660" y="216" width="266" height="144" rx="6" fill="#fffef8" stroke="#111"/>
+  <text x="793" y="248" text-anchor="middle" class="title" font-size="16">Available Devices</text>
+  <text x="793" y="288" text-anchor="middle" class="mono">0000:5e:10.2</text>
+  <text x="793" y="314" text-anchor="middle" class="mono">0000:5e:10.3</text>
+  <text x="793" y="340" text-anchor="middle" class="mono">0000:5e:10.4</text>
+  <text x="793" y="366" text-anchor="middle" class="mono">...</text>
+
+  <rect x="1052" y="62" width="498" height="390" rx="8" class="boxGreen"/>
+  <text x="1301" y="90" text-anchor="middle" class="title">Pod Spec</text>
+  <text class="mono" x="1074" y="132">apiVersion: v1</text>
+  <text class="mono" x="1074" y="154">kind: Pod</text>
+  <text class="mono" x="1074" y="176">metadata:</text>
+  <text class="mono" x="1092" y="198">name: rdma-pod</text>
+  <text class="mono" x="1092" y="220">namespace: default</text>
+  <text class="mono" x="1092" y="242">annotations:</text>
+  <text class="mono" x="1110" y="264">k8s.v1.cni.cncf.io/networks: rdma-400g-net</text>
+  <text class="mono" x="1074" y="298">spec:</text>
+  <text class="mono" x="1092" y="320">containers:</text>
+  <text class="mono" x="1092" y="342">- name: app</text>
+  <text class="mono" x="1110" y="364">image: nvcr.io/nvidia/pytorch:24.02-py3</text>
+  <text class="mono" x="1110" y="386">resources:</text>
+  <text class="mono" x="1128" y="408">limits:</text>
+  <rect x="1144" y="414" width="300" height="26" rx="3" class="hl"/>
+  <text class="mono red" x="1152" y="433">nvidia.com/rdma_shared_dev_400g: 1</text>
+
+  <rect x="420" y="512" width="730" height="88" rx="8" class="dashBlue"/>
+  <text x="506" y="574" class="small">kube-apiserver</text>
+  <text x="704" y="574" class="small">etcd</text>
+  <text x="835" y="574" class="small">scheduler</text>
+  <text x="1004" y="574" class="small">controller-manager</text>
+  <path class="arrow" d="M232 490v36h188"/>
+  <path class="arrow" d="M712 402v110"/>
+  <path class="arrow" d="M860 512v-108"/>
+  <path class="arrow" d="M1288 452v100h-138"/>
+
+  <rect x="16" y="650" width="1688" height="366" rx="8" class="worker"/>
+  <rect x="36" y="634" width="150" height="36" rx="5" class="workerBar"/>
+  <text x="52" y="659" class="labelBarText">Worker Node</text>
+
+  <rect x="42" y="712" width="202" height="258" rx="6" class="boxGreen"/>
+  <text x="144" y="748" text-anchor="middle" class="title" font-size="16">Physical NIC (PF)</text>
+  <rect x="72" y="808" width="112" height="46" rx="4" class="nic"/>
+  <rect x="86" y="822" width="14" height="18" fill="#1f6f2b"/>
+  <rect x="112" y="818" width="44" height="24" fill="#5fc66b"/>
+  <text x="144" y="904" text-anchor="middle" class="small">ens1f0</text>
+  <text x="144" y="930" text-anchor="middle" class="small">(400G IB / ConnectX-7)</text>
+
+  <rect x="300" y="712" width="162" height="258" rx="6" class="boxGreen"/>
+  <text x="381" y="748" text-anchor="middle" class="title" font-size="16">SR-IOV</text>
+  <g>
+    <rect x="330" y="770" width="78" height="30" rx="3" class="nic"/><text x="424" y="790" class="small">VF 0</text>
+    <rect x="330" y="824" width="78" height="30" rx="3" class="nic"/><text x="424" y="844" class="small">VF 1</text>
+    <rect x="330" y="878" width="78" height="30" rx="3" class="nic"/><text x="424" y="898" class="small">VF 2</text>
+    <rect x="330" y="932" width="78" height="30" rx="3" class="nic"/><text x="424" y="952" class="small">VF N</text>
+  </g>
+  <path d="M184 832c42-48 82-48 146-48M184 832c42 0 82 0 146 8M184 832c42 48 82 48 146 60M184 832c42 94 82 92 146 114" fill="none" stroke="#0a7d26" stroke-width="1.4" stroke-dasharray="5 4"/>
+
+  <rect x="544" y="710" width="256" height="234" rx="8" class="boxBlue"/>
+  <text x="672" y="740" text-anchor="middle" class="blueTitle">Kubelet</text>
+  <rect x="558" y="762" width="228" height="108" rx="6" fill="#eef6ff" stroke="#0b5bd3"/>
+  <text x="672" y="790" text-anchor="middle" class="small">Device Manager</text>
+  <rect x="574" y="810" width="196" height="46" rx="4" fill="#ffffff" stroke="#0b5bd3"/>
+  <text x="672" y="834" text-anchor="middle" class="small">Allocate</text>
+  <text x="672" y="852" text-anchor="middle" class="monoSmall">nvidia.com/rdma_shared_dev_400g</text>
+  <rect x="558" y="884" width="228" height="42" rx="6" fill="#eef6ff" stroke="#0b5bd3"/>
+  <text x="672" y="912" text-anchor="middle" class="small">Health Manager</text>
+
+  <rect x="882" y="710" width="206" height="230" rx="8" class="boxBlue"/>
+  <text x="985" y="742" text-anchor="middle" class="blueTitle">Multus CNI</text>
+  <rect x="896" y="778" width="178" height="58" rx="6" fill="#eef6ff" stroke="#0b5bd3"/>
+  <text x="985" y="804" text-anchor="middle" class="small">Read NAD</text>
+  <text x="985" y="826" text-anchor="middle" class="monoSmall">rdma-400g-net</text>
+  <rect x="896" y="866" width="178" height="58" rx="6" fill="#eef6ff" stroke="#0b5bd3"/>
+  <text x="985" y="890" text-anchor="middle" class="small">Invoke SR-IOV CNI</text>
+  <text x="985" y="912" text-anchor="middle" class="monoSmall">host-local/whereabouts IPAM</text>
+
+  <rect x="1158" y="712" width="184" height="230" rx="8" class="dashPurple"/>
+  <text x="1250" y="742" text-anchor="middle" fill="#5529aa" class="title">SR-IOV CNI</text>
+  <rect x="1172" y="774" width="156" height="42" rx="5" fill="#fbf7ff" stroke="#6730c3"/>
+  <text x="1250" y="801" text-anchor="middle" class="small">Create VF netdev</text>
+  <rect x="1172" y="836" width="156" height="42" rx="5" fill="#fbf7ff" stroke="#6730c3"/>
+  <text x="1250" y="863" text-anchor="middle" class="small">Assign IP</text>
+  <rect x="1172" y="898" width="156" height="42" rx="5" fill="#fbf7ff" stroke="#6730c3"/>
+  <text x="1250" y="923" text-anchor="middle" class="small">Move netdev to Pod</text>
+
+  <rect x="1428" y="696" width="244" height="284" rx="6" class="boxGray"/>
+  <text x="1550" y="728" text-anchor="middle" class="title" font-size="16">Pod (rdma-pod)</text>
+  <rect x="1442" y="748" width="216" height="210" rx="6" fill="#ffffff" stroke="#777"/>
+  <text x="1550" y="776" text-anchor="middle" class="small">Container</text>
+  <rect x="1464" y="808" width="172" height="78" rx="5" fill="#f8f8f8" stroke="#999"/>
+  <text x="1550" y="836" text-anchor="middle" class="small">RDMA / IB Device</text>
+  <text x="1550" y="858" text-anchor="middle" class="monoSmall">/dev/infiniband/uverbsX</text>
+  <rect x="1518" y="868" width="56" height="24" rx="3" class="nic"/>
+  <text x="1550" y="916" text-anchor="middle" class="small">IP: 10.10.0.x/24</text>
+  <text x="1550" y="940" text-anchor="middle" class="small">(from NAD IPAM)</text>
+
+  <path class="arrow" d="M944 600v110"/>
+  <path class="arrow" d="M1150 556h-348v156"/>
+  <path class="arrow" d="M800 824h80"/>
+  <path class="arrowP" d="M1088 894h70"/>
+  <path class="arrowP" d="M1342 920h86"/>
+  <path class="arrowP" d="M1342 798h86"/>
+
+  <rect x="218" y="960" width="670" height="54" rx="7" class="boxGold"/>
+  <text x="553" y="984" text-anchor="middle" class="title" font-size="16">sriov-device-plugin DaemonSet</text>
+  <text x="553" y="1006" text-anchor="middle" class="small">(Discover PF/VF, Report nvidia.com/rdma_shared_dev_400g to API Server)</text>
+</svg>

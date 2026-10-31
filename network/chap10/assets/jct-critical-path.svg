@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="560" viewBox="0 0 1120 560" role="img" aria-labelledby="title desc">
+  <title id="title">JCT critical path for distributed training</title>
+  <desc id="desc">A distributed training job timeline showing data loading, compute, synchronization, checkpointing, validation, and target quality completion.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .panel { fill: none; stroke: #D8D1C7; stroke-width: 1.2; }
+    .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.4; }
+    .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; }
+    .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.5; }
+    .accent-line { fill: none; stroke: #D9392E; stroke-width: 2.2; }
+    .muted-line { fill: none; stroke: #D8D1C7; stroke-width: 1.2; stroke-dasharray: 7 6; }
+    .head { font-family: Inter, Arial, sans-serif; font-size: 23px; font-weight: 700; fill: #050505; }
+    .label { font-family: Inter, Arial, sans-serif; font-size: 15px; font-weight: 700; fill: #050505; }
+    .small { font-family: Inter, Arial, sans-serif; font-size: 12px; fill: #6F6A63; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#111111"/>
+    </marker>
+    <marker id="arrowAccent" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#D9392E"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1120" height="560"/>
+  <rect class="panel" x="42" y="42" width="1036" height="468" rx="8"/>
+
+  <g transform="translate(78 88)">
+    <text class="head" x="482" y="0" text-anchor="middle">JCT is the whole training critical path</text>
+
+    <rect class="soft" x="0" y="78" width="124" height="82" rx="6"/>
+    <text class="label" x="62" y="112" text-anchor="middle">Data load</text>
+    <text class="small" x="62" y="136" text-anchor="middle">storage + CPU</text>
+
+    <rect class="box" x="154" y="78" width="124" height="82" rx="6"/>
+    <text class="label" x="216" y="112" text-anchor="middle">Forward</text>
+    <text class="small" x="216" y="136" text-anchor="middle">GPU kernels</text>
+
+    <rect class="box" x="308" y="78" width="124" height="82" rx="6"/>
+    <text class="label" x="370" y="112" text-anchor="middle">Backward</text>
+    <text class="small" x="370" y="136" text-anchor="middle">gradients</text>
+
+    <rect class="accent" x="462" y="78" width="124" height="82" rx="6"/>
+    <text class="label" x="524" y="112" text-anchor="middle">Sync</text>
+    <text class="small" x="524" y="136" text-anchor="middle">AllReduce</text>
+
+    <rect class="box" x="616" y="78" width="124" height="82" rx="6"/>
+    <text class="label" x="678" y="112" text-anchor="middle">Optimizer</text>
+    <text class="small" x="678" y="136" text-anchor="middle">update</text>
+
+    <rect class="accent" x="770" y="78" width="124" height="82" rx="6"/>
+    <text class="label" x="832" y="112" text-anchor="middle">Checkpoint</text>
+    <text class="small" x="832" y="136" text-anchor="middle">write pause</text>
+
+    <rect class="soft" x="924" y="78" width="124" height="82" rx="6"/>
+    <text class="label" x="986" y="112" text-anchor="middle">Validate</text>
+    <text class="small" x="986" y="136" text-anchor="middle">quality check</text>
+
+    <path class="line" d="M124 119 H154" marker-end="url(#arrow)"/>
+    <path class="line" d="M278 119 H308" marker-end="url(#arrow)"/>
+    <path class="line" d="M432 119 H462" marker-end="url(#arrow)"/>
+    <path class="accent-line" d="M586 119 H616" marker-end="url(#arrowAccent)"/>
+    <path class="line" d="M740 119 H770" marker-end="url(#arrow)"/>
+    <path class="accent-line" d="M894 119 H924" marker-end="url(#arrowAccent)"/>
+
+    <path class="muted-line" d="M986 160 C986 232 64 232 64 160" marker-end="url(#arrow)"/>
+    <text class="small" x="524" y="222" text-anchor="middle">repeat until target quality is reached</text>
+
+    <rect class="box" x="80" y="292" width="240" height="84" rx="6"/>
+    <text class="label" x="200" y="326" text-anchor="middle">Compute bottleneck</text>
+    <text class="small" x="200" y="350" text-anchor="middle">kernel efficiency, precision, memory</text>
+
+    <rect class="accent" x="404" y="292" width="240" height="84" rx="6"/>
+    <text class="label" x="524" y="326" text-anchor="middle">Fabric bottleneck</text>
+    <text class="small" x="524" y="350" text-anchor="middle">slow ranks, congestion, collectives</text>
+
+    <rect class="box" x="728" y="292" width="240" height="84" rx="6"/>
+    <text class="label" x="848" y="326" text-anchor="middle">Storage bottleneck</text>
+    <text class="small" x="848" y="350" text-anchor="middle">dataloader waits, checkpoint stalls</text>
+
+    <path class="muted-line" d="M216 160 C208 218 203 246 200 292" marker-end="url(#arrow)"/>
+    <path class="accent-line" d="M524 160 V292" marker-end="url(#arrowAccent)"/>
+    <path class="accent-line" d="M832 160 C845 214 848 247 848 292" marker-end="url(#arrowAccent)"/>
+  </g>
+</svg>

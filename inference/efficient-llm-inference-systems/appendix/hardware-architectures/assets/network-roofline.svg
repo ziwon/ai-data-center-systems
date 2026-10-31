@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="560" viewBox="0 0 960 560" role="img" aria-labelledby="title desc">
+  <title id="title">Network communication roofline</title>
+  <desc id="desc">A diagram showing that sharded matmul must compare local compute time with interconnect communication time.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .chip { fill: #F3EFE7; stroke: #111111; stroke-width: 2; }
+    .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2.5; }
+    .line { stroke: #111111; stroke-width: 2.5; fill: none; }
+    .dash { stroke: #D9392E; stroke-width: 2.5; stroke-dasharray: 8 8; fill: none; }
+    .text { fill: #050505; font-family: Arial, Helvetica, sans-serif; }
+    .muted { fill: #6F6A63; font-family: Arial, Helvetica, sans-serif; }
+    .label { font-size: 24px; font-weight: 700; }
+    .small { font-size: 18px; }
+    .formula { font-size: 20px; font-weight: 700; }
+  </style>
+  <rect class="bg" width="960" height="560" />
+
+  <rect class="chip" x="95" y="120" width="260" height="165" />
+  <text class="text label" x="175" y="155">Chip 0</text>
+  <text class="muted small" x="130" y="200">local shard</text>
+  <text class="muted small" x="130" y="230">partial result Z0</text>
+
+  <rect class="chip" x="605" y="120" width="260" height="165" />
+  <text class="text label" x="685" y="155">Chip 1</text>
+  <text class="muted small" x="640" y="200">local shard</text>
+  <text class="muted small" x="640" y="230">partial result Z1</text>
+
+  <path class="dash" d="M365 180 H595" />
+  <path class="dash" d="M595 225 H365" />
+  <text class="text label" x="420" y="162">interconnect</text>
+  <text class="muted small" x="397" y="265">send partial sums / activations</text>
+
+  <rect class="accent" x="145" y="355" width="300" height="80" />
+  <text class="text formula" x="175" y="388">T_math = local FLOPs / FLOPs/s</text>
+  <text class="muted small" x="175" y="418">compute roofline on each chip</text>
+
+  <rect class="accent" x="515" y="355" width="330" height="80" />
+  <text class="text formula" x="542" y="388">T_comms = network bytes / bandwidth</text>
+  <text class="muted small" x="542" y="418">NVLink / ICI / InfiniBand roofline</text>
+
+  <path class="line" d="M445 395 H505" />
+  <path class="line" d="M505 395 l-12 -8 M505 395 l-12 8" />
+  <text class="text label" x="350" y="500">Scaling works only when communication can be hidden or amortized.</text>
+</svg>
