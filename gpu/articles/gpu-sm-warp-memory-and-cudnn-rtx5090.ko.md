@@ -30,6 +30,7 @@ CUDA 실행 모델과 PyTorch 학습에 익숙한 독자를 가정한다.
 - [이번 사례에서 확인한 것과 확인하지 못한 것](#이번-사례에서-확인한-것과-확인하지-못한-것)
 - [비슷한 오류를 만났을 때 제안하는 접근](#비슷한-오류를-만났을-때-제안하는-접근)
 - [맺으며](#맺으며)
+- [참고 자료](#참고-자료)
 
 ## 사건 요약: 카드를 바꿔도 같은 SM에서 실패했다
 
@@ -60,7 +61,7 @@ FAULT_PDE ACCESS_TYPE_VIRT_READ
 
 로그의 `GPC 2, TPC 6, SM 1`은 하드웨어 계층을 따라 내려가는 좌표다. RTX Blackwell에서는 GPC(Graphics Processing Cluster) 안에 TPC(Texture Processing Cluster)가 있고, TPC마다 SM(Streaming Multiprocessor)이 두 개씩 들어 있다. RTX 5090은 GB202 칩의 SM 가운데 170개를 활성화한 제품이다.
 
-SM은 연산기만 모아 둔 곳이 아니다. RTX Blackwell 백서에 따르면 SM 하나에는 CUDA 코어 128개, Tensor Core 4개, 256KB 레지스터 파일, 128KB L1·shared memory가 들어 있다. RTX 5090의 L2 캐시는 GPU 전체가 공유하는 96MB이고, 장치 메모리는 32GB GDDR7이다. 다만 L1과 shared memory를 합친 128KB를 프로그램이 모두 shared memory로 쓸 수 있는 것은 아니다. (참고. [NVIDIA RTX Blackwell 아키텍처 백서](https://images.nvidia.com/aem-dam/Solutions/geforce/blackwell/nvidia-rtx-blackwell-gpu-architecture.pdf))
+SM은 연산기만 모아 둔 곳이 아니다. RTX Blackwell 백서에 따르면 SM 하나에는 CUDA 코어 128개, Tensor Core 4개, 256KB 레지스터 파일, 128KB L1·shared memory가 들어 있다. RTX 5090의 L2 캐시는 GPU 전체가 공유하는 96MB이고, 장치 메모리는 32GB GDDR7이다. 다만 L1과 shared memory를 합친 128KB를 프로그램이 모두 shared memory로 쓸 수 있는 것은 아니다.[^blackwell]
 
 ![CUDA 실행 단위와 SM의 메모리 자원](assets/gpu-sm-warp-sm-memory.svg)
 
@@ -70,7 +71,7 @@ CUDA 프로그램이 다루는 계층은 이와 다르다. 개발자는 grid와 
 
 Warp의 각 thread(lane)는 자기만의 레지스터와 실행 상태를 가진다. 그래서 warp를 "같은 값을 처리하는 하나의 거대한 thread"로 생각하면 주소 계산과 분기 동작을 잘못 이해하기 쉽다. 같은 load 명령을 실행하더라도 lane마다 쓰는 포인터와 인덱스는 다를 수 있다.
 
-Volta 이후의 NVIDIA GPU는 Independent Thread Scheduling으로 thread별 실행 상태를 관리한다. 같은 warp에 속한다고 해서 메모리 접근 순서나 동기화가 자동으로 보장되지는 않는다. 다른 thread가 쓴 shared memory를 읽는 코드에는 여전히 올바른 동기화가 필요하다. (참고. [CUDA의 SIMT 실행 및 스케줄링 모델](https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html#hardware-implementation))
+Volta 이후의 NVIDIA GPU는 Independent Thread Scheduling으로 thread별 실행 상태를 관리한다. 같은 warp에 속한다고 해서 메모리 접근 순서나 동기화가 자동으로 보장되지는 않는다. 다른 thread가 쓴 shared memory를 읽는 코드에는 여전히 올바른 동기화가 필요하다.[^simt]
 
 이 구조에서 기억할 점이 하나 있다. **로그의 SM 좌표는 잘못된 접근을 실행한 위치이지, 잘못된 주소가 만들어진 위치가 아니다.** lane 하나만 잘못된 주소에 접근해도 warp 단위 예외가 보고될 수 있다. 또 앞선 커널이 잘못된 인덱스를 메모리에 써 두고 다음 커널이 그 인덱스로 메모리를 읽는다면, fault는 값을 소비한 커널이 돌던 SM에서 보고된다. 값을 만든 커널은 전혀 다른 SM에서 실행됐을 수 있다.
 
@@ -88,7 +89,7 @@ GPU 메모리를 이해하려면 **누가 접근할 수 있는가**(논리적 �
 
 이 가운데 가장 헷갈리기 쉬운 것이 local memory다. 이름의 "local"은 해당 thread만 접근할 수 있다는 논리적 범위를 뜻할 뿐, SM 안에 따로 있는 작고 빠른 메모리라는 뜻이 아니다. 컴파일러는 레지스터에 담기 어려운 배열이나 구조체, 레지스터가 부족해 spill된 값을 local memory에 두며, 이 데이터는 장치 메모리에 놓인다.
 
-**Register spill 자체는 정상적인 컴파일 결과**다. spill이 일어나면 느려질 수는 있지만, 그 자체로 잘못된 메모리 접근이 생기지는 않는다. (참고. [CUDA의 메모리 공간과 local memory 설명](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#local-memory))
+**Register spill 자체는 정상적인 컴파일 결과**다. spill이 일어나면 느려질 수는 있지만, 그 자체로 잘못된 메모리 접근이 생기지는 않는다.[^local-memory]
 
 Shared memory는 성격이 다르다. 프로그램이 직접 데이터를 배치하고 동기화하는 공간이다. 합성곱이나 행렬곱 커널은 global memory에서 읽은 타일을 shared memory에 올려 두고 여러 thread가 재사용한다.
 
@@ -105,7 +106,7 @@ B_{\max}
 \right)
 $$
 
-여기서 $r$은 thread당 32비트 레지스터 수, $s$는 block당 shared memory 사용량이다. $R_{\mathrm{SM}}$, $S_{\mathrm{SM}}$, $T_{\mathrm{SM}}$은 각각 SM에서 쓸 수 있는 레지스터 수, shared memory 용량, 상주 thread 수의 한계이고, $B_{\max}$는 아키텍처가 정한 상주 block 수의 한계다. 실제 배치는 레지스터 할당 단위 같은 다른 제약도 받으므로 정확한 occupancy 계산을 대신하지는 못한다. 그래도 커널 구현이 바뀌면 이 네 항이 함께 바뀌고, 수학적으로 같은 연산이라도 GPU 위에서의 자원 배치와 메모리 접근 순서가 달라진다는 점은 분명히 보여준다. 뒤에서 cuDNN 커널을 비교할 때 이 식을 다시 쓴다. (참고. [CUDA의 SM 자원과 상주 block 설명](https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html#hardware-multithreading))
+여기서 $r$은 thread당 32비트 레지스터 수, $s$는 block당 shared memory 사용량이다. $R_{\mathrm{SM}}$, $S_{\mathrm{SM}}$, $T_{\mathrm{SM}}$은 각각 SM에서 쓸 수 있는 레지스터 수, shared memory 용량, 상주 thread 수의 한계이고, $B_{\max}$는 아키텍처가 정한 상주 block 수의 한계다. 실제 배치는 레지스터 할당 단위 같은 다른 제약도 받으므로 정확한 occupancy 계산을 대신하지는 못한다. 그래도 커널 구현이 바뀌면 이 네 항이 함께 바뀌고, 수학적으로 같은 연산이라도 GPU 위에서의 자원 배치와 메모리 접근 순서가 달라진다는 점은 분명히 보여준다. 뒤에서 cuDNN 커널을 비교할 때 이 식을 다시 쓴다.[^resident-blocks]
 
 Shared memory의 bank conflict는 오류와 구분해야 한다. 32비트 접근으로 단순화하면 bank 번호는 다음과 같이 정해진다.
 
@@ -115,7 +116,7 @@ $$
 \left\lfloor \frac{a}{4} \right\rfloor \bmod 32
 $$
 
-32×32 `float` 배열의 한 열을 lane 32개가 읽으면 접근 간격이 32 word가 되어, 요청이 모두 같은 bank의 서로 다른 주소로 몰린다. 행 길이를 33으로 늘리면 요청이 여러 bank로 흩어진다. 이런 bank conflict는 유효한 접근이 직렬화되는 성능 문제일 뿐이다. "메모리 접근이 비효율적이다"라는 설명으로는 SM Warp Exception을 설명할 수 없다. (참고. [CUDA의 shared memory bank 설명](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#shared-memory-access-patterns))
+32×32 `float` 배열의 한 열을 lane 32개가 읽으면 접근 간격이 32 word가 되어, 요청이 모두 같은 bank의 서로 다른 주소로 몰린다. 행 길이를 33으로 늘리면 요청이 여러 bank로 흩어진다. 이런 bank conflict는 유효한 접근이 직렬화되는 성능 문제일 뿐이다. "메모리 접근이 비효율적이다"라는 설명으로는 SM Warp Exception을 설명할 수 없다.[^bank-conflict]
 
 ## 같은 텐서, 다른 주소: channels-last와 메모리 coalescing
 
@@ -157,7 +158,7 @@ n s_N+c s_C+h s_H+w s_W
 \right)
 $$
 
-여기서는 storage 시작 주소를 $a_{\mathrm{base}}$로 두고, storage offset이 0인 텐서를 가정했다. $e$는 원소 크기로, BF16에서는 2byte다. 채널 인덱스가 하나 늘 때 주소는 contiguous에서 2,048byte, channels-last에서 2byte 증가한다. (참고. [PyTorch의 channels-last와 stride 설명](https://docs.pytorch.org/tutorials/intermediate/memory_format_tutorial.html))
+여기서는 storage 시작 주소를 $a_{\mathrm{base}}$로 두고, storage offset이 0인 텐서를 가정했다. $e$는 원소 크기로, BF16에서는 2byte다. 채널 인덱스가 하나 늘 때 주소는 contiguous에서 2,048byte, channels-last에서 2byte 증가한다.[^channels-last]
 
 $(n,h,w)$를 고정하고 lane 32개가 연속된 채널을 읽는 가상의 커널을 생각해 보자. base 주소가 적절히 정렬돼 있다고 가정하면 다음과 같은 차이가 생긴다.
 
@@ -170,7 +171,7 @@ $(n,h,w)$를 고정하고 lane 32개가 연속된 채널을 읽는 가상의 커
 
 *그림 2. shape이 같아도 stride가 달라지면 warp가 접근하는 32byte 영역의 수가 달라진다. 가정한 lane 배치에서 주소를 계산해 그린 예제다.*
 
-GPU는 warp 안의 주소들을 32byte 단위 영역(sector)으로 묶어 메모리 요청을 만든다. 같은 32개 원소를 읽더라도 2개 영역으로 끝나느냐 32개 영역이 필요하냐에 따라 메모리 트랜잭션 수가 크게 달라진다. 이것이 coalescing이다. (참고. [CUDA 메모리 coalescing 설명](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#coalesced-access-to-global-memory))
+GPU는 warp 안의 주소들을 32byte 단위 영역(sector)으로 묶어 메모리 요청을 만든다. 같은 32개 원소를 읽더라도 2개 영역으로 끝나느냐 32개 영역이 필요하냐에 따라 메모리 트랜잭션 수가 크게 달라진다. 이것이 coalescing이다.[^coalescing]
 
 물론 이 예제는 주소 계산을 보여주기 위한 것일 뿐, 실제 cuDNN 커널의 lane 배치를 역분석한 결과가 아니다. 실제 트래픽은 캐시 재사용, 벡터화, 타일 배치의 영향도 받는다. 또 입력 텐서의 채널이 적더라도 합성곱을 거친 중간 feature map은 채널이 많으므로, 입력 텐서 하나의 레이아웃만 보고 전체 학습의 메모리 접근을 판단할 수는 없다.
 
@@ -187,7 +188,7 @@ GPU는 warp 안의 주소들을 32byte 단위 영역(sector)으로 묶어 메모
 
 ### 연산 그래프에서 실행 계획까지
 
-cuDNN은 합성곱을 바로 특정 커널에 연결하지 않는다. 먼저 연산을 operation graph로 기술하고, 그 그래프를 실행할 수 있는 **engine** 후보를 찾는다. engine은 특정 형태의 연산을 실행하는 구현이고, 각 engine에는 타일 크기, split-K, workspace 사용 방식 같은 세부 설정인 **knob**이 있다. engine과 knob 값을 정한 것이 engine configuration이고, 이를 실제 handle과 tensor에 맞춰 확정한 것이 **execution plan**이다. (참고. [cuDNN의 engine과 execution plan 설명](https://docs.nvidia.com/cudnn/latest/developer/graph-api/))
+cuDNN은 합성곱을 바로 특정 커널에 연결하지 않는다. 먼저 연산을 operation graph로 기술하고, 그 그래프를 실행할 수 있는 **engine** 후보를 찾는다. engine은 특정 형태의 연산을 실행하는 구현이고, 각 engine에는 타일 크기, split-K, workspace 사용 방식 같은 세부 설정인 **knob**이 있다. engine과 knob 값을 정한 것이 engine configuration이고, 이를 실제 handle과 tensor에 맞춰 확정한 것이 **execution plan**이다.[^cudnn-graph]
 
 어떤 계획이 선택될지는 heuristic, 지원 조건, workspace 제한, 수치적 특성이 함께 결정한다. PyTorch에서 `torch.backends.cudnn.benchmark=False`(기본값)이면 heuristic이 추천한 후보를 쓰고, `True`이면 입력 shape마다 여러 후보를 실제로 실행해 본 뒤 가장 빠른 것을 골라 쓴다. 어느 쪽이든 shape, stride, 자료형, GPU 아키텍처, cuDNN 버전이 바뀌면 다른 계획이 선택될 수 있다.
 
@@ -195,7 +196,7 @@ cuDNN은 합성곱을 바로 특정 커널에 연결하지 않는다. 먼저 연
 
 ### 선택된 계획과 커널을 관찰하는 방법
 
-cuDNN이 실제로 무엇을 골랐는지는 로그와 프로파일러로 확인할 수 있다. cuDNN backend API 로그는 descriptor와 API 호출 문맥을, frontend 로그는 연산 그래프와 실행 계획을 보여준다.
+cuDNN이 실제로 무엇을 골랐는지는 로그와 프로파일러로 확인할 수 있다. cuDNN backend API 로그는 descriptor와 API 호출 문맥을, frontend 로그는 연산 그래프와 실행 계획을 보여준다.[^cudnn-logging][^cudnn-frontend]
 
 ```bash
 export CUDNN_LOGLEVEL_DBG=3                  # 0: 끔, 1: 오류, 2: 경고, 3: 정보
@@ -205,7 +206,7 @@ export CUDNN_FRONTEND_LOG_FILE=cudnn_frontend.log
 python repro.py
 ```
 
-로그 양이 많고 실행이 느려지므로 재현용 실행에서만 켜는 것이 좋다. (참고. [cuDNN API logging](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.10.2/reference/troubleshooting.html), [cuDNN frontend logging](https://github.com/NVIDIA/cudnn-frontend))
+로그 양이 많고 실행이 느려지므로 재현용 실행에서만 켜는 것이 좋다.
 
 실제로 실행된 GPU 커널의 이름과 launch 구성은 프로파일러 trace에 남는다. PyTorch profiler가 내보낸 trace의 커널 이벤트에는 grid, block, thread당 레지스터 수, shared memory 사용량이 함께 기록된다.
 
@@ -234,14 +235,12 @@ sudo ncu --profile-from-start off \
 ncu -i conv_report.ncu-rep --page source --print-source sass
 ```
 
-PyTorch 역전파를 Nsight Compute로 수집할 때는 다음을 알아 두면 시행착오를 줄일 수 있다.
+PyTorch 역전파를 Nsight Compute로 수집할 때는 다음을 알아 두면 시행착오를 줄일 수 있다.[^ncu-cli][^ncu-guide]
 
 - **역전파 커널은 다른 CPU thread에서 launch된다.** NVTX 범위는 thread마다 따로 관리되므로, forward를 감싼 NVTX 범위로 수집 대상을 거르면 역전파 커널이 빠진다. 이번 조사에서도 첫 시도에는 forward 커널 하나만 수집됐다. `--profile-from-start off`와 `torch.cuda.profiler.start()`/`stop()`(내부적으로 `cudaProfilerStart`/`cudaProfilerStop`)으로 구간을 지정하면 프로세스 전체에 적용된다.
 - **성능 카운터 권한이 필요할 수 있다.** GPU 성능 카운터가 관리자 전용으로 설정된 시스템(`RmProfilingAdminOnly: 1`)에서는 Nsight Compute를 root로 실행해야 한다. 그렇지 않으면 `ERR_NVGPUCTRPERM` 오류가 난다.
 - **측정 조건이 실제 학습과 다르다.** Nsight Compute는 기본적으로 커널을 재실행할 때마다 캐시를 비운다(`--cache-control all`). 그래서 캐시 지표는 cold cache 기준이고, 데이터가 캐시에 남아 있는 실제 학습과 다르다. 실행 시간도 계측 오버헤드와 클럭 설정(`--clock-control`)의 영향을 받으므로 학습 속도 비교 근거로 쓰지 않는다.
 - 이번에 쓴 Nsight Compute 2026.3은 기본 report 확장자가 `.ncu-repz`였다. 출력 파일 이름을 가정하는 스크립트는 이 점을 확인해야 한다.
-
-(참고. [Nsight Compute CLI](https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html), [Nsight Compute Profiling Guide](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html))
 
 ### 사례: cuDNN 9.10과 9.26·9.27의 선택 차이
 
@@ -365,13 +364,13 @@ N=4096에서는 occupancy가 그대로였지만 N=256에서는 10배로 뛰었�
 
 **9.26과 9.27은 SASS까지 같았다.** Nsight Compute report에 담긴 SASS에서 실행 시 주소(PC)를 함수 안의 상대 위치로 바꾸고 branch 대상 주소도 같은 방식으로 정규화한 뒤 비교했다. 두 batch 크기의 forward, dX, dW, reduction 8개 커널 모두 명령과 피연산자열의 해시가 같았다. 이름과 launch 정보가 같다는 것보다 강한 증거지만, cuDNN 전체 binary나 host 쪽의 계획 선택, workspace 관리까지 같다는 뜻은 아니다.
 
-정리하면 cuDNN 버전에 따라 타일 구성, 파이프라인 단계, 메모리 요청 패턴이 크게 달라진다. 같은 수학 연산이라도 오류를 드러내는 실행 조건이 달라질 여지는 충분하다. 다만 측정한 커널에서 spill은 없었고 occupancy 변화도 shape마다 달랐으므로, "레지스터 spill이나 낮은 occupancy가 원인"이라는 설명은 지지되지 않는다. (참고. [Nsight Compute의 occupancy와 warp 상태 설명](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html))
+정리하면 cuDNN 버전에 따라 타일 구성, 파이프라인 단계, 메모리 요청 패턴이 크게 달라진다. 같은 수학 연산이라도 오류를 드러내는 실행 조건이 달라질 여지는 충분하다. 다만 측정한 커널에서 spill은 없었고 occupancy 변화도 shape마다 달랐으므로, "레지스터 spill이나 낮은 occupancy가 원인"이라는 설명은 지지되지 않는다.[^ncu-guide]
 
 ### 실행 계획 이름만으로 판단하지 않기
 
 실행 계획 문자열과 실제 커널은 1:1로 대응하지 않는다. 이번 비교에서도 몇 가지 함정이 있었다.
 
-- `k25`는 공개 enum의 `CUDNN_KNOB_TYPE_WORKSPACE`에 해당하지만, `k25=0 → 2`가 workspace가 2byte로 늘었다는 뜻은 아니다. dX 실행 계획이 보고한 workspace는 두 경우 모두 0byte였다. (참고. [cuDNN의 backend knob 정의](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.27.0/api/cudnn-graph-library.html))
+- `k25`는 공개 enum의 `CUDNN_KNOB_TYPE_WORKSPACE`에 해당하지만, `k25=0 → 2`가 workspace가 2byte로 늘었다는 뜻은 아니다. dX 실행 계획이 보고한 workspace는 두 경우 모두 0byte였다.[^cudnn-knob]
 - dW는 knob 값이 `k25=1`에서 `k25=2`로 달라졌는데도 같은 주 커널(`cutlass_80_tensorop_s16816gemm_bf16_64x64_32x6_nt_align8`)과 split-K reduction을 실행했고, workspace도 1,880,320byte로 같았다.
 - 9.26과 9.27은 실행 계획, 커널 이름, launch 정보, SASS가 모두 같았다. 따라서 이 선택 변화는 9.27에서 처음 생긴 것이 아니다.
 
@@ -379,13 +378,13 @@ N=4096에서는 occupancy가 그대로였지만 N=256에서는 10배로 뛰었�
 
 이제 처음의 로그로 돌아가 보자. 이 로그에는 서로 다른 계층에서 나온 두 종류의 보고가 섞여 있다.
 
-첫 줄의 `Graphics SM Warp Exception: Out Of Range Address`는 SM이 명령을 실행하다가 발견한 예외다. CUDA-GDB 문서는 `Warp Out of range Address`를 warp 안의 어떤 thread가 local 또는 shared memory 영역의 유효 범위를 벗어난 주소에 접근한 경우로 설명한다. global memory까지 포함하는 잘못된 접근은 `Warp Illegal Address`로 따로 분류한다. 이 설명으로 조사할 주소 공간을 좁혀 볼 수는 있지만, 드라이버 로그(Xid)와 CUDA-GDB의 예외는 분류 체계가 달라서 Xid 문구만으로 정확한 명령, lane, 주소 공간까지 확정할 수는 없다. (참고. [CUDA-GDB의 GPU 예외 분류](https://docs.nvidia.com/cuda/cuda-gdb/index.html#gpu-error-reporting))
+첫 줄의 `Graphics SM Warp Exception: Out Of Range Address`는 SM이 명령을 실행하다가 발견한 예외다. CUDA-GDB 문서는 `Warp Out of range Address`를 warp 안의 어떤 thread가 local 또는 shared memory 영역의 유효 범위를 벗어난 주소에 접근한 경우로 설명한다. global memory까지 포함하는 잘못된 접근은 `Warp Illegal Address`로 따로 분류한다. 이 설명으로 조사할 주소 공간을 좁혀 볼 수는 있지만, 드라이버 로그(Xid)와 CUDA-GDB의 예외는 분류 체계가 달라서 Xid 문구만으로 정확한 명령, lane, 주소 공간까지 확정할 수는 없다.[^cuda-gdb-errors]
 
 여기서 "배열의 논리적 경계"와 "하드웨어가 검사하는 주소의 유효 범위"는 다르다는 점도 알아 둘 만하다. 텐서의 끝을 넘어선 주소라도 여전히 매핑된 메모리 안에 있을 수 있다. 그런 접근은 결과를 망가뜨리면서도 아무 예외 없이 지나갈 수 있다. 예외가 났다는 것은 하드웨어가 검사하는 범위까지 벗어났다는 뜻이다.
 
-둘째 줄의 `faulted @ 0x0_00000000`과 `FAULT_PDE`는 MMU가 보고한 GPU 메모리 page fault, 즉 Xid 31이다. GPU 명령이 쓰는 가상주소는 page table과 TLB를 거쳐 물리 메모리 위치로 변환되는데, 이 변환이 실패했다는 뜻이다. 주소가 `0x0`이라고 해서 GDDR 메모리의 0번지 셀이 고장 났다고 읽을 수는 없다. Null pointer, 손상된 포인터, 잘못된 주소 계산, 드라이버나 하드웨어 문제 가운데 무엇인지 가리려면 접근을 수행한 명령과 그 포인터가 만들어진 경로를 알아야 한다. `GPCCLIENT_T1_13` 역시 보고된 client 식별자일 뿐, 이 이름과 `GPC2/TPC6/SM1`의 정확한 물리적 대응 관계는 이번에 검증하지 않았다. (참고. [CUDA의 가상주소와 page table 설명](https://docs.nvidia.com/cuda/archive/12.8.1/cuda-c-programming-guide/index.html#virtual-memory))
+둘째 줄의 `faulted @ 0x0_00000000`과 `FAULT_PDE`는 MMU가 보고한 GPU 메모리 page fault, 즉 Xid 31이다. GPU 명령이 쓰는 가상주소는 page table과 TLB를 거쳐 물리 메모리 위치로 변환되는데, 이 변환이 실패했다는 뜻이다. 주소가 `0x0`이라고 해서 GDDR 메모리의 0번지 셀이 고장 났다고 읽을 수는 없다. Null pointer, 손상된 포인터, 잘못된 주소 계산, 드라이버나 하드웨어 문제 가운데 무엇인지 가리려면 접근을 수행한 명령과 그 포인터가 만들어진 경로를 알아야 한다. `GPCCLIENT_T1_13` 역시 보고된 client 식별자일 뿐, 이 이름과 `GPC2/TPC6/SM1`의 정확한 물리적 대응 관계는 이번에 검증하지 않았다.[^virtual-memory]
 
-자주 마주치는 Xid를 관측 계층별로 정리하면 다음과 같다.
+자주 마주치는 Xid를 관측 계층별로 정리하면 다음과 같다.[^xid]
 
 | Xid | 관측 계층 | 의미 | 읽을 때 주의할 점 |
 |---|---|---|---|
@@ -393,8 +392,6 @@ N=4096에서는 occupancy가 그대로였지만 N=256에서는 10배로 뛰었�
 | 31 | MMU의 주소 변환 | GPU 가상주소 변환 실패(page fault) | 보고된 주소는 가상주소다. 물리 메모리 셀 불량과 같은 뜻이 아니다 |
 | 109 | 드라이버의 context 전환 | Context switch timeout | 앞선 오류의 후속으로 나타날 수 있다. NVIDIA는 GPU reset을 안내한다 |
 | 79 | PCIe 연결 | GPU가 PCIe 버스에서 사라짐 | 장치 연결 문제로, SM 예외와는 다른 실패 양상이다 |
-
-(참고. [NVIDIA Xid 카탈로그](https://docs.nvidia.com/deploy/xid-errors/analyzing-xid-catalog.html))
 
 메모리 데이터의 비트 오류도 다른 체계에서 관측된다. RTX Blackwell 백서는 GDDR7의 on-die 단일 비트 오류 정정 기능을 소개하지만, 이런 보호 기능과 Xid의 주소 접근 예외는 별개다. Xid 13을 ECC 오류 카운터처럼 읽어서는 안 된다.
 
@@ -410,7 +407,7 @@ BF16을 의심할 때도 같은 구분이 필요하다. BF16의 반올림 오차
 
 "모든 SM에서 같은 확률로 독립적으로 오류가 난다면 한 SM에 73번 몰릴 확률은 극히 낮다"는 식의 계산은, 이 가정들부터 입증해야 성립한다.
 
-물리 좌표를 해석할 때도 주의해야 한다. PTX의 `%smid`는 값을 읽는 시점에 thread가 실행 중인 SM 번호를 알려주지만, 번호가 연속적이라는 보장은 없고 선점 뒤 재스케줄링 같은 상황에서는 값이 바뀔 수도 있다. 드라이버 로그의 GPC·TPC 기준 좌표를 `%smid` 같은 전역 SM 번호로 바꾸려면 따로 검증이 필요하다. (참고. [PTX의 `%smid` 정의](https://docs.nvidia.com/cuda/parallel-thread-execution/index.html#special-registers-smid))
+물리 좌표를 해석할 때도 주의해야 한다. PTX의 `%smid`는 값을 읽는 시점에 thread가 실행 중인 SM 번호를 알려주지만, 번호가 연속적이라는 보장은 없고 선점 뒤 재스케줄링 같은 상황에서는 값이 바뀔 수도 있다. 드라이버 로그의 GPC·TPC 기준 좌표를 `%smid` 같은 전역 SM 번호로 바꾸려면 따로 검증이 필요하다.[^smid]
 
 하드웨어 가설에 힘을 싣는 것은 반복 횟수보다 **조건을 바꿔도 같은 위치가 따라오는가**다. 서로 다른 workload에서, 매번 깨끗한 초기 상태에서, 소프트웨어 경로를 바꿔도 같은 SM에서 실패한다면 하드웨어 쪽 증거가 강해진다. 반대로 이번처럼 실행 경로를 바꾸자 실패가 사라졌다면, 소프트웨어 결함과 하드웨어의 특정 취약 경로를 모두 후보로 남겨 둬야 한다.
 
@@ -418,15 +415,15 @@ BF16을 의심할 때도 같은 구분이 필요하다. BF16의 반올림 오차
 
 ### 오류는 늦게 보고된다
 
-CUDA 연산은 기본적으로 비동기로 실행된다. Python이 GPU 연산을 요청한 시점과 GPU가 그 연산을 마치는 시점이 다르기 때문에, 오류가 한참 뒤의 API 호출에서야 드러날 수 있다. 이번에도 일반 실행에서는 오류와 관계없어 보이는 데이터 처리 쪽 스택이 찍혔지만, `CUDA_LAUNCH_BLOCKING=1`로 실행하자 `loss.backward()` 안의 cuDNN 실행 실패로 범위가 좁혀졌다. (참고. [PyTorch의 비동기 실행 설명](https://docs.pytorch.org/docs/2.10/notes/cuda.html#asynchronous-execution))
+CUDA 연산은 기본적으로 비동기로 실행된다. Python이 GPU 연산을 요청한 시점과 GPU가 그 연산을 마치는 시점이 다르기 때문에, 오류가 한참 뒤의 API 호출에서야 드러날 수 있다. 이번에도 일반 실행에서는 오류와 관계없어 보이는 데이터 처리 쪽 스택이 찍혔지만, `CUDA_LAUNCH_BLOCKING=1`로 실행하자 `loss.backward()` 안의 cuDNN 실행 실패로 범위가 좁혀졌다.[^pytorch-async]
 
 그렇다고 `loss.backward()`가 원인 위치인 것은 아니다. 역전파에는 여러 연산과 커널이 들어 있다. 또 동기화를 강제하면 실행 타이밍이 달라지므로, 동기 실행에서 본 결과를 원래 실행에 그대로 옮겨 해석해서도 안 된다. 같은 이유로 커널 launch API가 성공을 반환했다고 해서 그 커널이 GPU에서 실행됐다는 뜻도 아니다. 실제로 어느 합성곱인지까지 좁히려면 뒤에서 다룰 연산 단위 추적이 필요했다.
 
 ### 오류는 프로세스와 GPU에 남는다
 
-Illegal address 오류는 프로세스의 CUDA context를 일관성이 깨진 상태로 남기고, 이후의 CUDA 호출도 같은 오류를 반환하게 만든다. 이 상태에서는 프로세스를 종료하고 다시 시작하는 수밖에 없다. 여기에 Xid 109 같은 후속 이벤트가 이어지면 NVIDIA는 GPU reset까지 안내한다. (참고. [CUDA Runtime의 cudaErrorIllegalAddress 설명](https://docs.nvidia.com/cuda/cuda-runtime-api/cuda_runtime_api/group__CUDART__TYPES.html))
+Illegal address 오류는 프로세스의 CUDA context를 일관성이 깨진 상태로 남기고, 이후의 CUDA 호출도 같은 오류를 반환하게 만든다. 이 상태에서는 프로세스를 종료하고 다시 시작하는 수밖에 없다. 여기에 Xid 109 같은 후속 이벤트가 이어지면 NVIDIA는 GPU reset까지 안내한다.[^illegal-address]
 
-프로세스 재시작과 GPU reset은 다르다. `nvidia-smi` 조회가 성공하거나 간단한 연산이 통과했다고 해서 앞선 오류의 영향이 모두 사라졌다고 볼 수는 없다. `nvidia-smi`의 `GPU Recovery Action` 필드도 지금 필요한 조치를 알려줄 뿐, 과거 특정 시점의 상태를 되짚어 주지는 않는다. (참고. [nvidia-smi의 GPU Recovery Action 설명](https://docs.nvidia.com/deploy/nvidia-smi/index.html))
+프로세스 재시작과 GPU reset은 다르다. `nvidia-smi` 조회가 성공하거나 간단한 연산이 통과했다고 해서 앞선 오류의 영향이 모두 사라졌다고 볼 수는 없다. `nvidia-smi`의 `GPU Recovery Action` 필드도 지금 필요한 조치를 알려줄 뿐, 과거 특정 시점의 상태를 되짚어 주지는 않는다.[^nvidia-smi]
 
 ### 초기 상태도 실험 조건이다
 
@@ -440,7 +437,7 @@ Illegal address 오류는 프로세스의 CUDA context를 일관성이 깨진 �
 
 ### 실패한 프로세스의 trace는 쉽게 사라진다
 
-Nsight Systems는 CUDA API와 GPU 실행 기록을 버퍼에 모았다가 파일로 저장한다. GPU 오류로 프로세스가 비정상 종료되면 이 버퍼가 저장되지 않을 수 있다. 첫 시도에서 정상 실행(9.27)은 GPU 커널 기록이 수천 건 남았지만, 실패 실행(9.10)에는 초기 CUDA API 기록 몇 건만 남고 GPU 커널 기록은 하나도 없었다. 주기적으로 저장하는 옵션(`--cuda-flush-interval=100`, `--flush-on-cudaprofilerstop=true`)을 켜도 마찬가지였다. 이 옵션이 아직 다 차지 않은 버퍼까지 강제로 저장해 주지는 않는다. (참고. [Nsight Systems User Guide](https://docs.nvidia.com/nsight-systems/UserGuide/index.html))
+Nsight Systems는 CUDA API와 GPU 실행 기록을 버퍼에 모았다가 파일로 저장한다. GPU 오류로 프로세스가 비정상 종료되면 이 버퍼가 저장되지 않을 수 있다. 첫 시도에서 정상 실행(9.27)은 GPU 커널 기록이 수천 건 남았지만, 실패 실행(9.10)에는 초기 CUDA API 기록 몇 건만 남고 GPU 커널 기록은 하나도 없었다. 주기적으로 저장하는 옵션(`--cuda-flush-interval=100`, `--flush-on-cudaprofilerstop=true`)을 켜도 마찬가지였다. 이 옵션이 아직 다 차지 않은 버퍼까지 강제로 저장해 주지는 않는다.[^nsys]
 
 ### 연산마다 checkpoint를 둔다
 
@@ -561,7 +558,7 @@ $$
 
 ## 이번 사례에서 확인한 것과 확인하지 못한 것
 
-9.27 릴리스 노트에도 illegal-address 관련 수정이 있다. runtime compilation으로 만든 커널 코드가 CUDA Graph에서 아직 쓰일 수 있는데도 너무 일찍 unload되던 문제다. 하지만 이번 비교는 모두 eager 실행이었고 CUDA Graph를 쓰지 않았다. 오류 이름이 같다는 이유만으로 같은 버그가 고쳐졌다고 연결할 수는 없다. 9.10과 9.27 사이의 다른 변경 사항(9.11의 convolution heuristics 정렬 조건 수정, 9.21의 Blackwell용 TensorIR GEMM fusion 경로 등)도 이번 선택 차이와 연결할 증거는 찾지 못했다. (참고. [cuDNN 9.27 릴리스 노트](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.27.0/release-notes.html))
+9.27 릴리스 노트에도 illegal-address 관련 수정이 있다. runtime compilation으로 만든 커널 코드가 CUDA Graph에서 아직 쓰일 수 있는데도 너무 일찍 unload되던 문제다. 하지만 이번 비교는 모두 eager 실행이었고 CUDA Graph를 쓰지 않았다. 오류 이름이 같다는 이유만으로 같은 버그가 고쳐졌다고 연결할 수는 없다. 9.10과 9.27 사이의 다른 변경 사항(9.11의 convolution heuristics 정렬 조건 수정, 9.21의 Blackwell용 TensorIR GEMM fusion 경로 등)도 이번 선택 차이와 연결할 증거는 찾지 못했다.[^cudnn-release]
 
 새 환경에서 학습을 끝까지 마친 뒤에는 같은 평가 데이터로 정확도도 비교했다. 뚜렷한 차이는 없었지만, 허용 오차를 미리 정하지 않았고 반복 학습 사이의 변동을 반영하지 않았으므로 두 환경이 동등하다는 증명은 아니다. 커널이 바뀌면 연산 순서와 reduction 방식이 바뀌므로, seed가 같아도 같은 학습 궤적을 기대할 수는 없다.
 
@@ -629,7 +626,7 @@ with open("/proc/self/maps") as f:
 compute-sanitizer --tool memcheck python repro.py
 ```
 
-다만 도구마다 검사 범위가 다르다. `memcheck`는 범위·정렬 오류와 하드웨어 예외를, `racecheck`는 shared memory의 데이터 hazard를, `initcheck`는 초기화되지 않은 메모리 읽기를, `synccheck`는 동기화 primitive의 잘못된 사용을 본다. `racecheck`를 통과했다고 global memory race까지 없다고 볼 수는 없다. 또 계측 때문에 실행이 크게 느려지고 타이밍이 바뀌므로, 도구 아래에서 재현되지 않았다고 원래 실행이 정상이라는 뜻도 아니다. 실제로 이번 조사에서 수집한 `memcheck` 기록에는 정확한 load·store 위치 없이 API 수준의 illegal-address 오류만 남았다. (참고. [Compute Sanitizer의 도구별 검사 범위](https://docs.nvidia.com/compute-sanitizer/ComputeSanitizer/index.html))
+다만 도구마다 검사 범위가 다르다. `memcheck`는 범위·정렬 오류와 하드웨어 예외를, `racecheck`는 shared memory의 데이터 hazard를, `initcheck`는 초기화되지 않은 메모리 읽기를, `synccheck`는 동기화 primitive의 잘못된 사용을 본다. `racecheck`를 통과했다고 global memory race까지 없다고 볼 수는 없다. 또 계측 때문에 실행이 크게 느려지고 타이밍이 바뀌므로, 도구 아래에서 재현되지 않았다고 원래 실행이 정상이라는 뜻도 아니다. 실제로 이번 조사에서 수집한 `memcheck` 기록에는 정확한 load·store 위치 없이 API 수준의 illegal-address 오류만 남았다.[^sanitizer]
 
 **GPU core dump**는 계측 없이 원래 속도로 실행하다가, 예외가 난 순간의 GPU 상태를 파일로 남긴다. 타이밍에 민감해 sanitizer 아래에서는 재현되지 않는 오류에 특히 유용하다.
 
@@ -642,7 +639,7 @@ cuda-gdb
 (cuda-gdb) target cudacore gpu_core_<pid>.nvcudmp
 ```
 
-core dump를 열면 예외가 난 커널, 명령 위치, block·thread 좌표, 레지스터 값을 볼 수 있다. cuDNN처럼 소스가 공개되지 않은 라이브러리 커널이라도 어느 커널의 어느 명령에서 멈췄는지는 남는다. (참고. [CUDA-GDB의 GPU core dump 지원](https://docs.nvidia.com/cuda/cuda-gdb/index.html))
+core dump를 열면 예외가 난 커널, 명령 위치, block·thread 좌표, 레지스터 값을 볼 수 있다. cuDNN처럼 소스가 공개되지 않은 라이브러리 커널이라도 어느 커널의 어느 명령에서 멈췄는지는 남는다.[^cuda-gdb-coredump]
 
 최소 재현은 trace로 좁힌 연산을 대상으로 만들고, 떼어 낸 뒤에도 같은 실행 계획과 커널이 선택되는지 확인한다. 이렇게 모은 정보는 그대로 라이브러리 개발사에 보고할 수 있는 자료가 된다. 정확한 shape·stride·자료형을 담은 최소 재현 코드, 버전 정보, cuDNN 로그, core dump를 함께 전달하면 내부 구현을 아는 쪽에서 원인을 훨씬 빨리 좁힐 수 있다.
 
@@ -658,7 +655,7 @@ core dump를 열면 예외가 난 커널, 명령 위치, block·thread 좌표, �
 
 원인을 모르더라도 통과하는 환경을 찾았다면 우선 그 환경으로 학습을 이어 갈 수 있다. 이때 몇 가지를 함께 챙기는 것이 좋다.
 
-- **버전 고정은 최상위 프로젝트에서 한다.** PyTorch가 선언한 cuDNN 의존성과 다른 버전을 쓰려면 패키지 관리자의 override가 필요하다. uv의 `override-dependencies`는 라이브러리 저장소에 두면 그 라이브러리를 설치하는 프로젝트로 전파되지 않으므로, 실제 학습 프로젝트의 최상위 설정에 둬야 한다. (참고. [uv의 dependency override 적용 범위](https://docs.astral.sh/uv/reference/settings/#override-dependencies))
+- **버전 고정은 최상위 프로젝트에서 한다.** PyTorch가 선언한 cuDNN 의존성과 다른 버전을 쓰려면 패키지 관리자의 override가 필요하다. uv의 `override-dependencies`는 라이브러리 저장소에 두면 그 라이브러리를 설치하는 프로젝트로 전파되지 않으므로, 실제 학습 프로젝트의 최상위 설정에 둬야 한다.[^uv-override]
 - **실행 시점에 확인한다.** 학습 시작 시 로딩된 cuDNN 버전을 검사해, 의도와 다르면 바로 멈추게 한다.
 
   ```python
@@ -688,3 +685,31 @@ core dump를 열면 예외가 난 커널, 명령 위치, block·thread 좌표, �
 같은 SM에서 반복되는 오류는 조사를 시작할 이유이지 결론은 아니다. 로그의 좌표는 잘못된 접근을 실행한 위치일 뿐이다. 그 주소를 만든 코드, 그 코드를 고른 라이브러리, 실행 직전의 GPU 상태는 각각 따로 확인해야 한다.
 
 이번 사례에서는 cuDNN 버전만 바꿨는데도 같은 합성곱이 타일 크기, 파이프라인 단계, 레지스터, shared memory 구성이 전혀 다른 커널로 실행됐다. 실패한 실행을 추적하자 범위는 한 합성곱의 dW 경로까지 좁혀졌고, 9.27은 그 연산을 GEMM과 split-K reduction이라는 다른 경로로 계산했다. 그 변화가 결함을 고친 것인지, 하드웨어의 취약한 조건을 피한 것인지는 아직 모른다. 다만 다음에 무엇을 해야 하는지는 분명해졌다. 깨끗한 GPU 상태에서 그 dW 연산을 떼어 내 재현하고, 최초의 잘못된 접근을 붙잡는 것이다.
+
+## 참고 자료
+
+[^blackwell]: [NVIDIA, RTX Blackwell GPU 아키텍처 백서](https://images.nvidia.com/aem-dam/Solutions/geforce/blackwell/nvidia-rtx-blackwell-gpu-architecture.pdf)
+[^simt]: [CUDA Programming Guide, SIMT 실행과 스케줄링](https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html#hardware-implementation)
+[^local-memory]: [CUDA Programming Guide, local memory](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#local-memory)
+[^resident-blocks]: [CUDA Programming Guide, SM 자원과 상주 block](https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html#hardware-multithreading)
+[^bank-conflict]: [CUDA Programming Guide, shared memory 접근 패턴과 bank](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#shared-memory-access-patterns)
+[^channels-last]: [PyTorch Tutorials, channels-last 메모리 형식](https://docs.pytorch.org/tutorials/intermediate/memory_format_tutorial.html)
+[^coalescing]: [CUDA C++ Best Practices Guide, global memory coalescing](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#coalesced-access-to-global-memory)
+[^cudnn-graph]: [cuDNN Developer Guide, Graph API의 engine과 execution plan](https://docs.nvidia.com/cudnn/latest/developer/graph-api/)
+[^cudnn-logging]: [cuDNN 9.10.2 문서, API logging](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.10.2/reference/troubleshooting.html)
+[^cudnn-frontend]: [NVIDIA cuDNN Frontend 저장소, logging 설정](https://github.com/NVIDIA/cudnn-frontend)
+[^ncu-cli]: [Nsight Compute CLI 문서](https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html)
+[^ncu-guide]: [Nsight Compute Profiling Guide, replay·캐시·occupancy·warp 상태](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html)
+[^cudnn-knob]: [cuDNN 9.27 Graph API 문서, backend knob 정의](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.27.0/api/cudnn-graph-library.html)
+[^cuda-gdb-errors]: [CUDA-GDB 문서, GPU 예외 분류](https://docs.nvidia.com/cuda/cuda-gdb/index.html#gpu-error-reporting)
+[^virtual-memory]: [CUDA C++ Programming Guide 12.8.1, 가상주소와 page table](https://docs.nvidia.com/cuda/archive/12.8.1/cuda-c-programming-guide/index.html#virtual-memory)
+[^xid]: [NVIDIA Xid 오류 카탈로그](https://docs.nvidia.com/deploy/xid-errors/analyzing-xid-catalog.html)
+[^smid]: [PTX ISA, `%smid` 특수 레지스터](https://docs.nvidia.com/cuda/parallel-thread-execution/index.html#special-registers-smid)
+[^pytorch-async]: [PyTorch 2.10 문서, CUDA 비동기 실행](https://docs.pytorch.org/docs/2.10/notes/cuda.html#asynchronous-execution)
+[^illegal-address]: [CUDA Runtime API, `cudaErrorIllegalAddress`](https://docs.nvidia.com/cuda/cuda-runtime-api/cuda_runtime_api/group__CUDART__TYPES.html)
+[^nvidia-smi]: [nvidia-smi 문서, GPU Recovery Action](https://docs.nvidia.com/deploy/nvidia-smi/index.html)
+[^nsys]: [Nsight Systems User Guide](https://docs.nvidia.com/nsight-systems/UserGuide/index.html)
+[^cudnn-release]: [cuDNN 9.27 릴리스 노트](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.27.0/release-notes.html)
+[^sanitizer]: [Compute Sanitizer 문서, 도구별 검사 범위](https://docs.nvidia.com/compute-sanitizer/ComputeSanitizer/index.html)
+[^cuda-gdb-coredump]: [CUDA-GDB 문서, GPU core dump](https://docs.nvidia.com/cuda/cuda-gdb/index.html)
+[^uv-override]: [uv 문서, `override-dependencies`](https://docs.astral.sh/uv/reference/settings/#override-dependencies)
