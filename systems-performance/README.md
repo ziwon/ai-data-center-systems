@@ -7,6 +7,17 @@
 - [Chapter 5: GPU-Based Storage I/O Optimizations](./chap05/README.md)
 - [Chapter 6: GPU Architecture, CUDA Programming, and Maximizing Occupancy](./chap06/README.md)
 
+## 기술 아티클
+
+GPU 시스템의 성능 문제를 운영 관점에서 다룬 글입니다. [전체 아티클](../articles/README.md)
+
+<!-- articles:start (generated from article frontmatter by `npm run articles:index` in .site; do not edit by hand) -->
+
+- [Keeping GPU Workloads NUMA-Local in Kubernetes](../articles/keeping-gpu-workloads-numa-local-in-kubernetes.ko.md)
+- [Never Underestimate Memory Architecture](../articles/never-underestimate-memory-architecture.ko.md)
+
+<!-- articles:end -->
+
 ## Resources
 
 ### Books
@@ -18,8 +29,6 @@
 
 - [Making Deep Learning Go Brrrr From First Principles](https://horace.io/brrr_intro.html)
 - [Hardware Architectures for LLM Inference](../inference/efficient-llm-inference-systems/appendix/hardware-architectures/README.md)
-- [Never Underestimate Memory Architecture](./articles/never-underestimate-memory-architecture.ko.md): NUMA, cloud VM topology, Kubernetes CPU Manager, uncore bottlenecks
-- [Keeping GPU Workloads NUMA-Local in Kubernetes](./articles/keeping-gpu-workloads-numa-local-in-kubernetes.ko.md): GPU-local CPU placement, kubelet topology policies, NUMA-aware scheduling
 
 ### Talks
 

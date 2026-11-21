@@ -10,6 +10,8 @@ const errors = [];
 
 const canonicalRoutes = [
   '/',
+  '/articles/',
+  '/articles/gpu-sm-warp-memory-and-cudnn-rtx5090.ko/',
   '/network/',
   '/network/chap01/',
   '/gpu/',
@@ -75,6 +77,7 @@ for (const { from, to } of legacyMappings) {
 await validateTalkDeck('/talks/sr-iov-with-dgx-b200/');
 
 await expectFile(path.join(distRoot, 'CNAME'), 'custom-domain CNAME');
+await expectFile(path.join(distRoot, 'articles', 'rss.xml'), 'articles RSS feed');
 await expectFile(path.join(distRoot, 'llms.txt'), 'llms.txt');
 await expectFile(path.join(distRoot, 'llms-full.txt'), 'llms-full.txt');
 await expectFile(path.join(distRoot, 'kb', 'dcs-kb-graph.json'), 'global knowledge graph');

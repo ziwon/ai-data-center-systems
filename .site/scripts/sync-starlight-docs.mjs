@@ -2,6 +2,7 @@ import { copyFile, mkdir, readdir, readFile, rm, stat, writeFile } from 'node:fs
 import { execFile } from 'node:child_process';
 import path from 'node:path';
 import { promisify } from 'node:util';
+import { articleTopics, loadArticles, parseFrontmatter, topicLabels } from './lib/articles.mjs';
 import { embedDocuments, isEmbeddingEnabled } from './lib/embeddings.mjs';
 
 const execFileAsync = promisify(execFile);
@@ -17,6 +18,7 @@ const ogImageRevision = '2';
 const repositoryEditBase = 'https://github.com/ziwon/ai-data-center-systems/edit/main/';
 
 const docRoots = [
+  'articles',
   'network',
   'gpu',
   'training',
@@ -73,6 +75,7 @@ const ignoredDirs = new Set([
 
 const publishedAssetRoots = [
   'fabric.svg',
+  'articles',
   'network',
   'gpu',
   'training',
@@ -98,6 +101,10 @@ const generatedPublicRoots = [...new Set([...publishedAssetRoots, ...staleGenera
 const pages = [];
 
 const defaultDescriptionsBySource = new Map([
+  [
+    'articles/README.md',
+    'Technical articles on AI data center systems: GPU operations, failure analysis, networking, and performance engineering.',
+  ],
   [
     'network/README.md',
     'AI data center networking study notes covering RDMA, InfiniBand, RoCEv2, Clos fabrics, telemetry, congestion control, and AI fabric operations.',
@@ -222,9 +229,14 @@ const weakSingleHitAliases = new Set([
   'tail latency',
 ]);
 
+// Articles are sorted newest first; their position drives the sidebar order and the RSS feed.
+const articles = await loadArticles(sourceRoot);
+const articleByRelative = new Map(articles.map((article, index) => [article.relative, { ...article, order: index + 1 }]));
+
 await cleanGeneratedOutput();
 await walk(sourceRoot);
 await writeLlmsFiles();
+await writeArticleFeed();
 await writeKnowledgeGraph();
 
 async function cleanGeneratedOutput() {
@@ -301,9 +313,13 @@ function shouldPublishBundleFile(relative) {
 
 async function publishMarkdown(absolute, relative) {
   const source = await readFile(absolute, 'utf8');
+  const { body: content } = parseFrontmatter(source);
   const isSiteHome = relative === 'README.md';
-  const title = extractTitle(source, relative);
-  const body = isSiteHome ? siteHomeBody() : rewriteMarkdown(stripLeadingTitle(source), relative);
+  const article = articleByRelative.get(relative);
+  const title = extractTitle(content, relative);
+  const body = isSiteHome
+    ? siteHomeBody()
+    : `${articleMetaLine(article)}${rewriteMarkdown(stripLeadingTitle(content), relative)}`;
   const description = isSiteHome
     ? 'A study wiki for AI data center networking, LLM inference, distributed training, MLOps, storage, and systems performance engineering.'
     : descriptionFrom(source, title, relative);
@@ -326,6 +342,7 @@ async function publishMarkdown(absolute, relative) {
       ...frontmatterHeadLines(head),
       ...(isSiteHome ? ['template: splash'] : []),
       `lastUpdated: ${lastUpdated}`,
+      ...sidebarFrontmatterLines(relative, article),
       '---',
       '',
       body.trimStart(),
@@ -357,6 +374,71 @@ async function sourceLastUpdated(relative, absolute) {
 
   const sourceStats = await stat(absolute);
   return sourceStats.mtime.toISOString();
+}
+
+// The articles index leads the Articles sidebar; articles follow newest first.
+function sidebarFrontmatterLines(relative, article) {
+  if (relative === 'articles/README.md') return ['sidebar:', '  order: 0', '  label: "전체 아티클"'];
+  if (article) {
+    // Sidebar labels are plain text, so drop inline-code backticks from the title.
+    const label = article.title.includes('`') ? [`  label: ${JSON.stringify(article.title.replaceAll('`', ''))}`] : [];
+    return ['sidebar:', `  order: ${article.order}`, ...label];
+  }
+  return [];
+}
+
+// Date and topics under an article's title, with each topic linking to its topic page.
+function articleMetaLine(article) {
+  if (!article) return '';
+  const topics = article.topics
+    .map((topic) => `<a href="/${topic}/">${escapeHtml(articleTopics.get(topic) ?? topic)}</a>`)
+    .join(', ');
+  return `<p class="adcs-article-meta"><time datetime="${article.date}">${article.date}</time> · ${topics}</p>\n\n`;
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;');
+}
+
+async function writeArticleFeed() {
+  const items = articles.map((article) => {
+    const url = `${siteUrl}${routeFromOutput(markdownOutputPath(article.relative))}`;
+    // Articles carry a date only; publish them at 09:00 KST.
+    const published = new Date(`${article.date}T09:00:00+09:00`).toUTCString();
+    return [
+      '    <item>',
+      `      <title>${escapeHtml(article.title)}</title>`,
+      `      <link>${url}</link>`,
+      `      <guid isPermaLink="true">${url}</guid>`,
+      `      <pubDate>${published}</pubDate>`,
+      ...topicLabels(article.topics).map((label) => `      <category>${escapeHtml(label)}</category>`),
+      `      <description>${escapeHtml(article.description)}</description>`,
+      '    </item>',
+    ].join('\n');
+  });
+
+  const feed = [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">',
+    '  <channel>',
+    '    <title>AI Data Center Systems · Articles</title>',
+    `    <link>${siteUrl}/articles/</link>`,
+    `    <atom:link href="${siteUrl}/articles/rss.xml" rel="self" type="application/rss+xml"/>`,
+    '    <description>Technical articles on AI data center systems: GPU operations, failure analysis, networking, and performance engineering.</description>',
+    '    <language>ko</language>',
+    ...(articles[0] ? [`    <lastBuildDate>${new Date(`${articles[0].date}T09:00:00+09:00`).toUTCString()}</lastBuildDate>`] : []),
+    ...items,
+    '  </channel>',
+    '</rss>',
+    '',
+  ].join('\n');
+
+  await mkdir(path.join(publicOut, 'articles'), { recursive: true });
+  await writeFile(path.join(publicOut, 'articles', 'rss.xml'), feed);
 }
 
 function pageHeadEntries(route, isSiteHome) {
@@ -402,6 +484,10 @@ function siteHomeBody() {
 </section>
 
 <section class="adcs-track-grid" aria-label="Study tracks">
+  <a class="adcs-track-card" href="/articles/">
+    <span>Articles</span>
+    <small>Field notes on GPU operations, failure analysis, networking, and performance.</small>
+  </a>
   <a class="adcs-track-card" href="/network/">
     <span>Network</span>
     <small>RDMA, InfiniBand, RoCE, Clos fabrics, telemetry, and congestion control.</small>

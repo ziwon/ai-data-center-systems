@@ -131,6 +131,13 @@ export default defineConfig({
         starlightSidebarTopics(
           [
             {
+              label: 'Articles',
+              link: '/articles/',
+              icon: 'pencil',
+              attrs: { 'aria-label': 'Articles', title: 'Articles' },
+              items: [{ autogenerate: { directory: 'articles' } }],
+            },
+            {
               label: 'Network',
               link: '/network/',
               icon: 'random',
@@ -213,6 +220,15 @@ export default defineConfig({
       },
       head: [
         ...googleAnalyticsHeadEntries(googleAnalyticsId),
+        {
+          tag: 'link',
+          attrs: {
+            rel: 'alternate',
+            type: 'application/rss+xml',
+            title: 'AI Data Center Systems · Articles',
+            href: '/articles/rss.xml',
+          },
+        },
         ...googleAdSenseHeadEntries(googleAdSenseClient),
         {
           tag: 'meta',

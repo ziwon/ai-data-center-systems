@@ -1,3 +1,9 @@
+---
+date: 2026-10-28
+topics: [gpu]
+description: "How a DGX B200 node that lost its system files to an accidental rm -rf was brought back with a DGX OS rescue environment and chroot."
+---
+
 # Recovering a DGX B200 Node After an Accidental rm -rf
 
 **English** | [한국어](dgx-b200-rm-rf-recovery.ko.md)

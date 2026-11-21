@@ -1,3 +1,9 @@
+---
+date: 2026-07-07
+topics: [gpu]
+description: "Kubernetes DRA가 맡는 GPU 할당과, HAMi가 맡는 GPU 안의 메모리·연산 제한을 나눠서 비교한다."
+---
+
 # DRA와 HAMi로 보는 Kubernetes GPU 분할
 
 Kubernetes에서 GPU를 나누어 쓰려면 두 가지 문제를 풀어야 한다.

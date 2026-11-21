@@ -4,7 +4,6 @@ type SidebarEntry = App.Locals['starlightRoute']['sidebar'][number];
 type SidebarLink = Extract<SidebarEntry, { type: 'link' }>;
 
 const sections = [
-  ['articles', '기술 아티클'],
   ['cs149', 'CS149 · 병렬 컴퓨팅'],
   ['pmpp', 'PMPP · CUDA 프로그래밍'],
   ['appendix', '참고자료'],
@@ -48,7 +47,7 @@ function gpuSidebar(entries: SidebarEntry[]): SidebarEntry[] {
       collapsed: true,
       entries: result.entries.map((child) =>
         child.type === 'link' && child.href === indexHref
-          ? { ...child, label: directory === 'articles' ? '아티클 모아보기' : '강좌 안내' }
+          ? { ...child, label: '강좌 안내' }
           : child,
       ),
     };
@@ -113,11 +112,10 @@ function inferenceSidebar(entries: SidebarEntry[]): SidebarEntry[] {
 export const onRequest = defineRouteMiddleware(({ locals }) => {
   const route = locals.starlightRoute;
   const topic = route.id.split('/')[0];
-  if (topic !== 'gpu' && topic !== 'inference') return;
-
-  route.sidebar = topic === 'gpu'
-    ? gpuSidebar(route.sidebar)
-    : inferenceSidebar(route.sidebar);
+  if (topic === 'articles') route.sidebar = route.sidebar.map(simplify);
+  else if (topic === 'gpu') route.sidebar = gpuSidebar(route.sidebar);
+  else if (topic === 'inference') route.sidebar = inferenceSidebar(route.sidebar);
+  else return;
 
   // Keep next/previous links in the same order as the visible navigation.
   const documents = links(route.sidebar);

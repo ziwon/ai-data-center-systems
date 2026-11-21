@@ -34,6 +34,10 @@ jobs:
         run: npm ci
         working-directory: .site
 
+      - name: Check article lists
+        run: npm run articles:check
+        working-directory: .site
+
       - name: Build site
         run: npm run build
         working-directory: .site

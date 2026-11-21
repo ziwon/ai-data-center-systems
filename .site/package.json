@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "sync:docs": "node scripts/sync-starlight-docs.mjs",
+    "articles:index": "node scripts/article-index.mjs",
+    "articles:check": "node scripts/article-index.mjs --check",
     "dev": "npm run sync:docs && astro dev",
     "build": "npm run sync:docs && astro build",
     "postbuild": "node scripts/postprocess-pages.mjs",

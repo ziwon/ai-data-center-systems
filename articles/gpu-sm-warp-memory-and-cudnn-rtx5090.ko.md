@@ -1,3 +1,9 @@
+---
+date: 2026-11-01
+topics: [gpu]
+description: "RTX 5090 학습 장애를 따라가며 SM·warp 실행 구조, GPU 메모리 계층, cuDNN의 커널 선택과 Nsight로 실패 지점을 좁히는 방법을 살펴본다."
+---
+
 # 같은 SM에서 반복되는 GPU 오류는 하드웨어 불량의 증거일까?
 
 RTX 5090 학습 장애로 살펴본 GPU 실행 구조, 메모리 계층, cuDNN의 커널 선택

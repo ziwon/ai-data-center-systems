@@ -1,3 +1,9 @@
+---
+date: 2026-06-28
+topics: [systems-performance, gpu]
+description: "kubelet 정책, topology-aware scheduling, workload sizing으로 Kubernetes에서 GPU workload의 NUMA locality를 지키는 방법을 다룬다."
+---
+
 # Keeping GPU Workloads NUMA-Local in Kubernetes
 
 > Ronak Nathani, "Keeping GPU Workloads NUMA-Local in Kubernetes" 요약 노트.

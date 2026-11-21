@@ -1,3 +1,9 @@
+---
+date: 2026-07-07
+topics: [gpu]
+description: "HAMi-core의 libvgpu.so가 CUDA·NVML 호출에 개입해 컨테이너가 보는 GPU 메모리와 연산 자원을 나누는 방식을 따라간다."
+---
+
 # HAMi-core 심층 분석: `libvgpu.so`는 GPU를 어떻게 나누는가
 
 HAMi의 Kubernetes 구성 요소는 Pod를 배치하고 GPU 메모리·코어 quota를 정한 뒤,

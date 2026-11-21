@@ -1,3 +1,9 @@
+---
+date: 2026-06-28
+topics: [systems-performance]
+description: "Grafana Cloud 사례를 바탕으로 NUMA와 shared uncore 자원이 대형 서버와 cloud VM의 성능을 어떻게 좌우하는지 정리한다."
+---
+
 # Never Underestimate Memory Architecture
 
 > Bryan Boreham, Grafana Labs, CNCF 발표 요약 노트.

@@ -21,6 +21,11 @@ export const legacyMappings = [
     from: '/deep-learning-for-network-engineers',
     to: '/courses/deep-learning-for-network-engineers',
   },
+
+  // Articles moved from the topic folders into the top-level Articles section.
+  { from: '/gpu/articles', to: '/articles' },
+  { from: '/network/articles', to: '/articles' },
+  { from: '/systems-performance/articles', to: '/articles' },
 ];
 
 export const legacyRoutePrefixes = legacyMappings.map(({ from }) => from);

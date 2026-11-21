@@ -1,3 +1,9 @@
+---
+date: 2026-10-28
+topics: [gpu]
+description: "rm -rf 실수로 시스템 파일이 지워진 DGX B200 노드를 DGX OS 복구 환경과 chroot로 되살린 과정을 돌아본다."
+---
+
 # rm -rf 사고로 손상된 DGX B200 노드 복구기
 
 [English](dgx-b200-rm-rf-recovery.md) | **한국어**
