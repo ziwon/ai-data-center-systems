@@ -88,7 +88,7 @@
         position: relative;
         z-index: 5;
         display: grid;
-        grid-template-columns: minmax(14rem, 1fr) minmax(16rem, 34rem) auto;
+        grid-template-columns: minmax(14rem, 1fr) minmax(20rem, 40rem) auto;
         gap: 0.75rem;
         align-items: center;
         border-bottom: 1px solid var(--line);
@@ -120,6 +120,82 @@
         line-height: 1.2;
         text-overflow: ellipsis;
         white-space: nowrap;
+      }
+
+      .search-row {
+        display: flex;
+        gap: 0.45rem;
+        min-width: 0;
+      }
+
+      .search-box {
+        position: relative;
+        flex: 1;
+        min-width: 0;
+      }
+
+      .search-results {
+        position: absolute;
+        z-index: 8;
+        top: calc(100% + 0.35rem);
+        left: 0;
+        right: 0;
+        display: grid;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 0.25rem;
+        background: var(--panel-strong);
+        backdrop-filter: blur(14px);
+      }
+
+      .search-results[hidden] {
+        display: none;
+      }
+
+      .search-results button,
+      .search-results span {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: 0;
+        border-radius: 6px;
+        padding: 0.45rem 0.55rem;
+        color: var(--soft);
+        background: transparent;
+        font-size: 0.82rem;
+        text-align: left;
+      }
+
+      .search-results button {
+        cursor: pointer;
+      }
+
+      .search-results button:hover,
+      .search-results button:first-child {
+        color: var(--text);
+        background: rgba(37, 244, 255, 0.1);
+      }
+
+      .search-results small {
+        margin-left: auto;
+        color: var(--muted);
+        font-size: 0.7rem;
+        white-space: nowrap;
+      }
+
+      .search-results span {
+        color: var(--muted);
+      }
+
+      .dot {
+        flex: none;
+        width: 0.6rem;
+        height: 0.6rem;
+        border-radius: 999px;
+      }
+
+      .dot[data-kind="concept"] {
+        border-radius: 2px;
       }
 
       .search {
@@ -203,10 +279,42 @@
         z-index: 4;
         left: max(1rem, env(safe-area-inset-left));
         bottom: max(1rem, env(safe-area-inset-bottom));
+        display: grid;
+        gap: 0.5rem;
+        max-width: min(62rem, calc(100vw - 27rem));
+      }
+
+      .hud-row {
         display: flex;
         flex-wrap: wrap;
         gap: 0.5rem;
-        max-width: min(54rem, calc(100vw - 2rem));
+      }
+
+      .track {
+        cursor: pointer;
+      }
+
+      .track b {
+        color: var(--muted);
+        font-weight: 600;
+      }
+
+      .track[aria-pressed="true"] {
+        border-color: currentColor;
+        color: var(--text);
+      }
+
+      .hud-row[data-filtered="true"] .track[aria-pressed="false"] {
+        opacity: 0.45;
+      }
+
+      .metric-button {
+        cursor: pointer;
+      }
+
+      .metric-button[aria-pressed="true"] {
+        border-color: rgba(37, 244, 255, 0.78);
+        color: var(--cyan);
       }
 
       .metric,
@@ -231,7 +339,7 @@
       }
 
       .legend .doc {
-        background: var(--cyan);
+        background: var(--soft);
       }
 
       .legend .concept {
@@ -240,7 +348,8 @@
       }
 
       .legend .selected {
-        background: var(--red);
+        border: 2px solid #fff5e6;
+        background: transparent;
       }
 
       .details {
@@ -251,11 +360,47 @@
         display: grid;
         gap: 0.8rem;
         width: min(24rem, calc(100vw - 2rem));
+        max-height: calc(100% - 2rem);
+        overflow: auto;
         border: 1px solid var(--line);
         border-radius: var(--radius);
         padding: 0.95rem;
         background: var(--panel);
         backdrop-filter: blur(14px);
+      }
+
+      .details-head {
+        display: flex;
+        align-items: start;
+        justify-content: space-between;
+        gap: 0.75rem;
+      }
+
+      .details-close {
+        display: inline-grid;
+        flex: none;
+        place-items: center;
+        width: 1.75rem;
+        height: 1.75rem;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 0;
+        color: var(--soft);
+        background: transparent;
+        cursor: pointer;
+      }
+
+      .details-close[hidden] {
+        display: none;
+      }
+
+      .details-close svg {
+        width: 0.9rem;
+        height: 0.9rem;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        fill: none;
       }
 
       .details h2 {
@@ -279,14 +424,30 @@
       }
 
       .detail-meta span,
-      .neighbor-list a {
+      .neighbor-list button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
         border: 1px solid rgba(216, 209, 199, 0.18);
         border-radius: 999px;
         padding: 0.28rem 0.5rem;
         color: var(--soft);
         background: rgba(2, 8, 23, 0.54);
         font-size: 0.72rem;
-        text-decoration: none;
+      }
+
+      .neighbor-list button {
+        cursor: pointer;
+      }
+
+      .neighbor-list button:hover {
+        border-color: rgba(37, 244, 255, 0.6);
+        color: var(--text);
+      }
+
+      .neighbor-list .more {
+        border-style: dashed;
+        color: var(--muted);
       }
 
       .open-link {
@@ -345,30 +506,65 @@
 
       @media (max-width: 56rem) {
         .topbar {
-          grid-template-columns: 1fr;
+          grid-template-columns: minmax(0, 1fr) auto;
+          gap: 0.5rem;
+          padding-block: 0.55rem;
         }
 
-        .brand h1 {
-          white-space: normal;
+        .brand span {
+          display: none;
         }
 
-        .controls {
-          justify-content: start;
+        .search-row {
+          grid-column: 1 / -1;
+          grid-row: 2;
+        }
+
+        .select {
+          width: 7rem;
+        }
+
+        /* Legend sits under the top bar as one scrollable row. */
+        .hud {
+          top: 0.6rem;
+          bottom: auto;
+          right: 0;
+          left: 0;
+          max-width: none;
+          gap: 0.4rem;
+        }
+
+        .hud-row {
+          flex-wrap: nowrap;
           overflow-x: auto;
-          padding-bottom: 0.15rem;
+          padding-inline: 1rem;
+          scrollbar-width: none;
         }
 
+        .hud-row > * {
+          flex: none;
+        }
+
+        .hud .hint {
+          display: none;
+        }
+
+        /* Details become a bottom sheet that only appears for a selection. */
         .details {
           top: auto;
-          right: 1rem;
-          bottom: 4.4rem;
-          width: calc(100vw - 2rem);
-          max-height: 38vh;
-          overflow: auto;
+          right: 0;
+          bottom: 0;
+          left: 0;
+          width: auto;
+          max-height: 46%;
+          border-width: 1px 0 0;
+          border-radius: 14px 14px 0 0;
+          padding-bottom: max(0.95rem, env(safe-area-inset-bottom));
+          background: var(--panel-strong);
         }
 
-        .hud {
-          max-width: calc(100vw - 2rem);
+        .details[data-open="false"] {
+          display: none;
         }
       }
     </style>
@@ -380,18 +576,26 @@
           <span>AI Data Center Systems</span>
           <h1>Full Knowledge Graph 3D</h1>
         </a>
-        <label class="search" aria-label="Search nodes">
-          <input id="search" type="search" placeholder="Search documents or concepts" autocomplete="off" />
-        </label>
-        <div class="controls" aria-label="Graph controls">
+        <div class="search-row">
+          <div class="search-box">
+            <label class="search" aria-label="Search nodes">
+              <input
+                id="search"
+                type="search"
+                placeholder="Search documents or concepts"
+                autocomplete="off"
+                aria-controls="search-results"
+              />
+            </label>
+            <div class="search-results" id="search-results" hidden></div>
+          </div>
           <select class="select" id="kind-filter" aria-label="Node kind filter">
             <option value="all">All nodes</option>
             <option value="doc">Documents</option>
             <option value="concept">Concepts</option>
           </select>
-          <select class="select" id="group-filter" aria-label="Track filter">
-            <option value="all">All tracks</option>
-          </select>
+        </div>
+        <div class="controls" aria-label="Graph controls">
           <button class="icon-button" id="rotate" type="button" data-active="true" aria-label="Toggle rotation">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M21 12a9 9 0 0 1-15.4 6.4" />
@@ -425,20 +629,28 @@
 
       <section class="stage" aria-label="3D knowledge graph">
         <canvas id="graph-canvas"></canvas>
-        <aside class="details" id="details" aria-live="polite">
-          <h2>Full Knowledge Graph</h2>
-          <p id="detail-copy">Select a node to inspect its strongest neighbors.</p>
+        <aside class="details" id="details" aria-live="polite" data-open="false">
+          <div class="details-head">
+            <h2>Knowledge Graph</h2>
+            <button class="details-close" id="details-close" type="button" aria-label="Clear selection" hidden>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+            </button>
+          </div>
+          <p id="detail-copy">Click a node to see what it connects to, or a track to isolate it.</p>
           <div class="detail-meta" id="detail-meta"></div>
           <a class="open-link" id="open-link" href="/">Open document</a>
           <div class="neighbor-list" id="neighbors"></div>
         </aside>
-        <div class="hud" aria-label="Graph metrics">
-          <span class="metric" id="node-count">0 nodes</span>
-          <span class="metric" id="edge-count">0 edges</span>
-          <span class="legend"><i class="doc"></i>Document</span>
-          <span class="legend"><i class="concept"></i>Concept</span>
-          <span class="legend"><i class="selected"></i>Selected</span>
-          <span class="metric">Zoom in to reveal more labels</span>
+        <div class="hud" aria-label="Graph legend and metrics">
+          <div class="hud-row" id="track-legend" role="group" aria-label="Tracks"></div>
+          <div class="hud-row">
+            <span class="metric" id="node-count">0 nodes</span>
+            <button class="metric metric-button" id="edge-count" type="button" aria-pressed="false">0 links</button>
+            <span class="legend"><i class="doc"></i>Document</span>
+            <span class="legend"><i class="concept"></i>Concept</span>
+            <span class="legend"><i class="selected"></i>Selected</span>
+            <span class="metric hint">Zoom in to reveal more labels</span>
+          </div>
         </div>
         <div class="status" id="status">
           <div class="status-box">
@@ -461,7 +673,10 @@
       const status = document.querySelector('#status');
       const searchInput = document.querySelector('#search');
       const kindFilter = document.querySelector('#kind-filter');
-      const groupFilter = document.querySelector('#group-filter');
+      const searchResults = document.querySelector('#search-results');
+      const trackLegend = document.querySelector('#track-legend');
+      const details = document.querySelector('#details');
+      const detailsClose = document.querySelector('#details-close');
       const rotateButton = document.querySelector('#rotate');
       const labelsButton = document.querySelector('#labels');
       const resetButton = document.querySelector('#reset');
@@ -494,9 +709,22 @@
           showStatus('Viewer error', String(event.reason?.message ?? event.reason ?? 'Unexpected error.'));
       });
 
-      const palette = ['#25f4ff', '#1684ff', '#34d399', '#fbbf24', '#f472b6', '#c084fc', '#7dd3fc', '#fb7185'];
+      // Tracks with only a few nodes share one neutral colour so every colour on
+      // screen maps to exactly one legend entry.
+      const trackColors = {
+        network: '#25f4ff',
+        inference: '#4c8dff',
+        gpu: '#34d399',
+        'systems-performance': '#fbbf24',
+        courses: '#f472b6',
+        blog: '#fb923c',
+        storage: '#a3e635',
+      };
+      const spareTrackColors = ['#7dd3fc', '#fb7185', '#c084fc'];
+      const otherTrackColor = '#8b93a3';
+      const minTrackSize = 4;
       const conceptColor = '#735cff';
-      const selectedColor = '#d9392e';
+      const neighborPreview = 8;
       const inactiveOpacity = 0.08;
       const bgmVideoId = 'eo1gKGt6h9M';
       const bgmIconOn =
@@ -507,12 +735,19 @@
         graph: null,
         nodes: [],
         edges: [],
-        groupColors: new Map(),
+        tracks: [],
+        clusterLabels: [],
         nodeObjects: new Map(),
         labelObjects: new Map(),
         labelOrder: [],
         selected: null,
         neighborIds: new Set(),
+        neighborList: [],
+        neighborsExpanded: false,
+        matches: [],
+        rotate: true,
+        showAllEdges: false,
+        focusDistance: null,
         hovered: null,
         focusPoint: null,
         labelVisible: true,
@@ -523,10 +758,15 @@
 
       const scene = new THREE.Scene();
       scene.background = new THREE.Color(0x020817);
-      scene.fog = new THREE.FogExp2(0x020817, 0.002);
+      scene.fog = new THREE.FogExp2(0x020817, 0.0012);
 
       const camera = new THREE.PerspectiveCamera(48, 1, 0.1, 2800);
-      camera.position.set(0, 80, 500);
+      camera.position.set(0, 120, 760);
+
+      // Narrow (portrait) viewports need more distance to fit the graph.
+      function homeDistance() {
+        return window.innerWidth < window.innerHeight ? 1150 : 760;
+      }
 
       let renderer;
       try {
@@ -572,9 +812,13 @@
       const labelGroup = new THREE.Group();
       graphGroup.add(nodeGroup, labelGroup);
 
+      const selectionRing = makeSelectionRing();
+      graphGroup.add(selectionRing);
+
       const raycaster = new THREE.Raycaster();
       const pointer = new THREE.Vector2();
       const pointerDown = new THREE.Vector2();
+      const cameraOffset = new THREE.Vector3();
       let pointerMoved = false;
       let pointerDirty = false;
 
@@ -585,6 +829,7 @@
         addAmbientScene();
         setupBgm();
         resize();
+        resetCamera();
 
         try {
           const response = await fetch('/kb/dcs-kb-graph.json', { headers: { accept: 'application/json' } });
@@ -616,22 +861,78 @@
           setHovered(null);
         });
         renderer.domElement.addEventListener('click', onCanvasClick);
+        // Dragging or zooming by hand cancels an in-flight camera move.
+        controls.addEventListener('start', () => {
+          state.focusPoint = null;
+          state.focusDistance = null;
+        });
 
         searchInput.addEventListener('input', () => {
           state.query = searchInput.value.trim().toLowerCase();
           applyFilters();
+          renderSearchResults();
+        });
+        searchInput.addEventListener('focus', renderSearchResults);
+        searchInput.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter' && state.matches.length) {
+            event.preventDefault();
+            pickSearchResult(state.matches[0]);
+          }
+        });
+        searchInput.addEventListener('blur', () => {
+          // Let a click on a result land before the list disappears.
+          window.setTimeout(() => { searchResults.hidden = true; }, 150);
+        });
+        searchResults.addEventListener('click', (event) => {
+          const button = event.target instanceof Element ? event.target.closest('button[data-id]') : null;
+          const node = button && state.nodes.find((item) => item.id === button.dataset.id);
+          if (node) pickSearchResult(node);
         });
         kindFilter.addEventListener('change', () => {
           state.kind = kindFilter.value;
           applyFilters();
+          renderSearchResults();
         });
-        groupFilter.addEventListener('change', () => {
-          state.group = groupFilter.value;
+        trackLegend.addEventListener('click', (event) => {
+          const button = event.target instanceof Element ? event.target.closest('button[data-track]') : null;
+          if (!button) return;
+          state.group = state.group === button.dataset.track ? 'all' : button.dataset.track;
+          syncTrackLegend();
+          applyFilters();
+          frameTrack();
+        });
+        edgeCount.addEventListener('click', () => {
+          state.showAllEdges = !state.showAllEdges;
+          syncEdgeCount();
           applyFilters();
         });
+        neighbors.addEventListener('click', (event) => {
+          const button = event.target instanceof Element ? event.target.closest('button') : null;
+          if (!button) return;
+          if (button.dataset.more) {
+            state.neighborsExpanded = true;
+            renderNeighbors();
+            return;
+          }
+          const node = state.nodes.find((item) => item.id === button.dataset.id);
+          if (node) selectNode(node);
+        });
+        detailsClose.addEventListener('click', () => selectNode(null));
+        window.addEventListener('keydown', (event) => {
+          const typing = event.target instanceof HTMLElement && event.target.matches('input, select, textarea');
+          if (event.key === 'Escape') {
+            if (state.query) clearSearch();
+            else if (state.selected) selectNode(null);
+            searchInput.blur();
+          } else if (event.key === '/' && !typing) {
+            event.preventDefault();
+            searchInput.focus();
+          }
+        });
         rotateButton.addEventListener('click', () => {
-          controls.autoRotate = !controls.autoRotate;
-          rotateButton.dataset.active = String(controls.autoRotate);
+          state.rotate = !state.rotate;
+          rotateButton.dataset.active = String(state.rotate);
+          syncRotation();
         });
         labelsButton.addEventListener('click', () => {
           state.labelVisible = !state.labelVisible;
@@ -793,45 +1094,100 @@
           })
           .filter((edge) => edge.source && edge.target);
 
-        const groups = [...new Set(state.nodes.map((node) => node.group).filter(Boolean))].sort();
-        groups.forEach((group, index) => state.groupColors.set(group, palette[index % palette.length]));
-        for (const group of groups) {
-          const option = document.createElement('option');
-          option.value = group;
-          option.textContent = groupLabel(group);
-          groupFilter.append(option);
-        }
-
-        seedLayout(state.nodes, state.edges, groups);
-        renderEdges(state.edges);
+        assignTracks(state.nodes);
+        markBackbone(state.nodes, state.edges);
+        seedLayout(state.nodes, state.edges);
+        renderEdges(state.edges.filter((edge) => edge.backbone), 'edges');
+        renderEdges(state.edges.filter((edge) => !edge.backbone), 'edges-weak');
         renderNodes(state.nodes);
         renderLabels(state.nodes);
+        renderClusterLabels();
+        renderTrackLegend();
         nodeCount.textContent = `${state.nodes.length} nodes`;
-        edgeCount.textContent = `${state.edges.length} edges`;
+        syncEdgeCount();
         applyFilters();
       }
 
-      function seedLayout(nodes, edges, groups) {
-        const groupIndex = new Map(groups.map((group, index) => [group, index]));
-        const clusterCount = Math.max(groups.length, 1);
-        const clusterRadius = 240;
+      // A track is the top-level folder of a document. Tracks too small to read
+      // as a cluster are merged into "Other".
+      function assignTracks(nodes) {
+        const family = (node) => {
+          const top = String(node.group || 'other').split('/')[0];
+          return top === 'distributed-training' ? 'training' : top;
+        };
+        const counts = new Map();
+        for (const node of nodes) counts.set(family(node), (counts.get(family(node)) || 0) + 1);
+
+        const spare = [...spareTrackColors];
+        const tracks = [...counts.entries()]
+          .filter(([key, count]) => key !== 'other' && count >= minTrackSize)
+          .sort((a, b) => b[1] - a[1])
+          .map(([key, count]) => ({
+            key,
+            count,
+            label: groupLabel(key),
+            color: trackColors[key] || spare.shift() || otherTrackColor,
+          }));
+        const named = new Set(tracks.map((track) => track.key));
+        const otherCount = nodes.filter((node) => !named.has(family(node))).length;
+        if (otherCount) tracks.push({ key: 'other', count: otherCount, label: 'Other', color: otherTrackColor });
+
+        const byKey = new Map(tracks.map((track) => [track.key, track]));
+        for (const node of nodes) {
+          node.track = named.has(family(node)) ? family(node) : 'other';
+          node.color = byKey.get(node.track).color;
+        }
+        state.tracks = tracks;
+      }
+
+      // Only the backbone is drawn by default: every explicit link, plus each
+      // node's two strongest edges so nothing floats free. The rest (mostly
+      // shared-keyword edges) shows up for a selected node or on demand.
+      function markBackbone(nodes, edges) {
+        const strength = (edge) => edge.weight + (edge.type.includes('link') ? 1 : 0);
+        const touching = new Map(nodes.map((node) => [node.id, []]));
+        for (const edge of edges) {
+          edge.backbone = edge.type.includes('link');
+          touching.get(edge.source.id).push(edge);
+          touching.get(edge.target.id).push(edge);
+        }
+        for (const list of touching.values()) {
+          list.sort((a, b) => strength(b) - strength(a));
+          for (const edge of list.slice(0, 2)) edge.backbone = true;
+        }
+      }
+
+      function seedLayout(nodes, edges) {
+        const clusters = state.tracks.filter((track) => track.key !== 'other');
+        const home = new Map();
+        clusters.forEach((track, index) => {
+          const angle = (index / Math.max(clusters.length, 1)) * Math.PI * 2;
+          home.set(track.key, {
+            x: Math.cos(angle) * 250,
+            y: (index % 2 === 0 ? 1 : -1) * 55,
+            z: Math.sin(angle) * 250,
+          });
+        });
 
         for (const node of nodes) {
-          const cluster = groupIndex.get(node.group) ?? 0;
-          const clusterAngle = (cluster / clusterCount) * Math.PI * 2;
-          const clusterY = ((cluster % 3) - 1) * 115;
-          const local = fibonacciPoint(node.index, nodes.length, node.kind === 'concept' ? 120 : 64);
-          node.x = Math.cos(clusterAngle) * clusterRadius + local.x;
-          node.y = clusterY + local.y;
-          node.z = Math.sin(clusterAngle) * clusterRadius + local.z;
+          // Concepts and small tracks start in the middle and settle between
+          // the clusters that reference them.
+          const anchor = (node.kind !== 'concept' && home.get(node.track)) || { x: 0, y: 0, z: 0 };
+          const local = fibonacciPoint(node.index, nodes.length, node.kind === 'concept' ? 90 : 70);
+          node.x = anchor.x + local.x;
+          node.y = anchor.y + local.y;
+          node.z = anchor.z + local.z;
+          node.vx = 0;
+          node.vy = 0;
+          node.vz = 0;
         }
 
-        const linked = edges.filter((edge) => edge.weight >= 0.28 || edge.type.includes('mentions'));
-        for (let step = 0; step < 170; step += 1) {
+        const springs = edges.filter((edge) => edge.backbone || edge.type.includes('mentions'));
+        for (let step = 0; step < 220; step += 1) {
           for (const node of nodes) {
-            node.vx = (node.vx || 0) * 0.72;
-            node.vy = (node.vy || 0) * 0.72;
-            node.vz = (node.vz || 0) * 0.72;
+            node.vx *= 0.7;
+            node.vy *= 0.7;
+            node.vz *= 0.7;
           }
 
           for (let i = 0; i < nodes.length; i += 1) {
@@ -842,7 +1198,7 @@
               const dy = a.y - b.y;
               const dz = a.z - b.z;
               const distSq = Math.max(dx * dx + dy * dy + dz * dz, 120);
-              const force = 1800 / distSq;
+              const force = 2600 / distSq;
               a.vx += dx * force;
               a.vy += dy * force;
               a.vz += dz * force;
@@ -852,15 +1208,17 @@
             }
           }
 
-          for (const edge of linked) {
+          for (const edge of springs) {
             const a = edge.source;
             const b = edge.target;
+            const mention = edge.type.includes('mentions');
+            const sameTrack = a.track === b.track;
             const dx = b.x - a.x;
             const dy = b.y - a.y;
             const dz = b.z - a.z;
             const dist = Math.max(Math.sqrt(dx * dx + dy * dy + dz * dz), 1);
-            const preferred = edge.type.includes('mentions') ? 78 : 128 - edge.weight * 32;
-            const force = (dist - preferred) * (edge.type.includes('mentions') ? 0.0028 : 0.0014);
+            const preferred = mention ? 120 : sameTrack ? 62 : 150;
+            const force = (dist - preferred) * (mention ? 0.0007 : sameTrack ? 0.004 : 0.0007);
             const fx = (dx / dist) * force;
             const fy = (dy / dist) * force;
             const fz = (dz / dist) * force;
@@ -873,20 +1231,23 @@
           }
 
           for (const node of nodes) {
-            const home = groupIndex.get(node.group) ?? 0;
-            const angle = (home / clusterCount) * Math.PI * 2;
-            const targetX = Math.cos(angle) * clusterRadius;
-            const targetZ = Math.sin(angle) * clusterRadius;
-            node.vx += (targetX - node.x) * 0.002;
-            node.vy += -node.y * 0.0012;
-            node.vz += (targetZ - node.z) * 0.002;
+            const anchor = node.kind !== 'concept' && home.get(node.track);
+            if (anchor) {
+              node.vx += (anchor.x - node.x) * 0.022;
+              node.vy += (anchor.y - node.y) * 0.022;
+              node.vz += (anchor.z - node.z) * 0.022;
+            } else {
+              node.vx += -node.x * 0.012;
+              node.vy += -node.y * 0.012;
+              node.vz += -node.z * 0.012;
+            }
             node.x += node.vx;
             node.y += node.vy;
             node.z += node.vz;
           }
         }
 
-        normalizeLayout(nodes, 235);
+        normalizeLayout(nodes, 290);
       }
 
       function normalizeLayout(nodes, targetRadius) {
@@ -903,23 +1264,34 @@
         center.y /= Math.max(nodes.length, 1);
         center.z /= Math.max(nodes.length, 1);
 
-        let maxDistance = 1;
+        const distances = [];
         for (const node of nodes) {
           node.x -= center.x;
           node.y -= center.y;
           node.z -= center.z;
-          maxDistance = Math.max(maxDistance, Math.hypot(node.x, node.y, node.z));
+          distances.push(Math.hypot(node.x, node.y, node.z));
         }
 
-        const scale = targetRadius / maxDistance;
+        // Scale by the 90th percentile, not the maximum: a few loosely linked
+        // nodes drift far out and would otherwise shrink everything else.
+        distances.sort((a, b) => a - b);
+        const reference = Math.max(distances[Math.floor(distances.length * 0.9)] || 1, 1);
+        const scale = targetRadius / reference;
+        const limit = targetRadius * 1.2;
         for (const node of nodes) {
           node.x *= scale;
           node.y *= scale;
           node.z *= scale;
+          const distance = Math.hypot(node.x, node.y, node.z);
+          if (distance > limit) {
+            node.x *= limit / distance;
+            node.y *= limit / distance;
+            node.z *= limit / distance;
+          }
         }
       }
 
-      function renderEdges(edges) {
+      function renderEdges(edges, name) {
         const positions = new Float32Array(edges.length * 6);
         const colors = new Float32Array(edges.length * 6);
         const color = new THREE.Color();
@@ -943,7 +1315,9 @@
           blending: THREE.AdditiveBlending,
         });
         const lines = new THREE.LineSegments(geometry, material);
-        lines.name = 'edges';
+        lines.name = name;
+        lines.userData.edges = edges;
+        lines.userData.baseColors = colors.slice();
         graphGroup.add(lines);
       }
 
@@ -952,7 +1326,7 @@
         const box = new THREE.BoxGeometry(1, 1, 1);
 
         for (const node of nodes) {
-          const color = node.kind === 'concept' ? conceptColor : state.groupColors.get(node.group) || '#25f4ff';
+          const color = node.kind === 'concept' ? conceptColor : node.color;
           const material = new THREE.MeshStandardMaterial({
             color,
             emissive: color,
@@ -968,11 +1342,34 @@
           if (node.kind === 'concept') mesh.scale.y *= 0.72;
           mesh.position.set(node.x, node.y, node.z);
           mesh.userData.node = node;
-          mesh.userData.baseColor = color;
           mesh.userData.baseScale = mesh.scale.clone();
+          mesh.userData.baseEmissive = material.emissiveIntensity;
           nodeGroup.add(mesh);
           state.nodeObjects.set(node.id, mesh);
         }
+      }
+
+      // The selection marker is a ring around the node, so the node keeps its
+      // track colour and the marker cannot be mistaken for one.
+      function makeSelectionRing() {
+        const size = 128;
+        const ringCanvas = document.createElement('canvas');
+        ringCanvas.width = size;
+        ringCanvas.height = size;
+        const context = ringCanvas.getContext('2d');
+        context.strokeStyle = '#fff5e6';
+        context.lineWidth = 7;
+        context.beginPath();
+        context.arc(size / 2, size / 2, size / 2 - 8, 0, Math.PI * 2);
+        context.stroke();
+        const texture = new THREE.CanvasTexture(ringCanvas);
+        texture.colorSpace = THREE.SRGBColorSpace;
+        const ring = new THREE.Sprite(
+          new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false, depthTest: false, toneMapped: false }),
+        );
+        ring.renderOrder = 3;
+        ring.visible = false;
+        return ring;
       }
 
       // Labels reveal by camera distance, like map zoom levels: hub nodes are
@@ -998,6 +1395,27 @@
           label.visible = false;
           labelGroup.add(label);
           state.labelObjects.set(node.id, label);
+        }
+      }
+
+      // One caption per track, floating above its cluster. They name the
+      // clusters in the overview and fade out once the camera moves in.
+      function renderClusterLabels() {
+        for (const track of state.tracks) {
+          if (track.key === 'other') continue;
+          const members = state.nodes.filter((node) => node.track === track.key && node.kind !== 'concept');
+          if (!members.length) continue;
+          const sum = members.reduce(
+            (acc, node) => ({ x: acc.x + node.x, y: acc.y + node.y, z: acc.z + node.z, top: Math.max(acc.top, node.y) }),
+            { x: 0, y: 0, z: 0, top: -Infinity },
+          );
+          const centerY = sum.y / members.length;
+          const label = makeLabel(track.label.toUpperCase(), track.color);
+          label.position.set(sum.x / members.length, centerY + (sum.top - centerY) * 0.7 + 16, sum.z / members.length);
+          label.material.opacity = 0;
+          label.visible = false;
+          labelGroup.add(label);
+          state.clusterLabels.push({ label, track: track.key });
         }
       }
 
@@ -1043,12 +1461,47 @@
         const viewHeight = Math.max(renderer.domElement.clientHeight, 1);
         const viewWidth = Math.max(renderer.domElement.clientWidth, 1);
         const screenFactor = (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))) / viewHeight;
-
-        // Highest-priority labels claim screen space first; overlapping lower
-        // ones stay hidden until zooming makes room, like map label placement.
-        const order = [state.selected?.id, state.hovered?.id, ...(state.labelOrder || [])];
-        const seen = new Set();
         const placed = [];
+
+        // Fades a label toward `target`, hiding it instead when it would cover a
+        // label that already claimed the space (unless `force` is set).
+        const place = (label, target, heightPx, force) => {
+          const dist = camera.position.distanceTo(label.position);
+          if (target > 0) {
+            labelProjection.copy(label.position).project(camera);
+            if (labelProjection.z > 1) {
+              target = 0;
+            } else {
+              const x = ((labelProjection.x + 1) / 2) * viewWidth;
+              const y = ((1 - labelProjection.y) / 2) * viewHeight;
+              const halfWidth = (heightPx * label.userData.aspect) / 2;
+              const halfHeight = heightPx / 2 + 3;
+              const rect = { x1: x - halfWidth, x2: x + halfWidth, y1: y - halfHeight, y2: y + halfHeight };
+              const collides = placed.some(
+                (other) => rect.x1 < other.x2 && rect.x2 > other.x1 && rect.y1 < other.y2 && rect.y2 > other.y1,
+              );
+              if (collides && !force) target = 0;
+              else placed.push(rect);
+            }
+          }
+          const opacity = label.material.opacity + (target - label.material.opacity) * 0.18;
+          label.material.opacity = opacity;
+          label.visible = opacity > 0.03;
+          if (label.visible) {
+            const worldHeight = dist * screenFactor * heightPx;
+            label.scale.set(worldHeight * label.userData.aspect, worldHeight, 1);
+          }
+        };
+
+        // Priority: the selection, the hovered node, the selection's neighbours
+        // (strongest first), then everything else by importance.
+        const order = [
+          state.selected?.id,
+          state.hovered?.id,
+          ...state.neighborList.map((node) => node.id),
+          ...(state.labelOrder || []),
+        ];
+        const seen = new Set();
 
         for (const id of order) {
           if (id == null || seen.has(id)) continue;
@@ -1059,86 +1512,200 @@
           const mesh = state.nodeObjects.get(id);
           const hovered = state.hovered?.id === id;
           const selected = state.selected?.id === id;
-          const neighbor = state.selected ? state.neighborIds.has(id) : true;
           const dist = camera.position.distanceTo(label.position);
 
           let target = 0;
           if (mesh?.visible && (state.labelVisible || hovered || selected)) {
             if (hovered || selected) {
               target = 1;
-            } else if (!state.selected || neighbor) {
+            } else if (state.selected) {
+              // With a selection, name its neighbours regardless of zoom level.
+              target = state.neighborIds.has(id) ? 1 : 0;
+            } else {
               const limit = labelTierDistance[node.labelTier ?? 2];
               target = Math.min(1, (limit - dist) / labelFadeRange);
-              target = Math.min(target, Math.max(0, (900 - dist) / 150));
+              target = Math.min(target, Math.max(0, (homeDistance() * 1.5 - dist) / 150));
               target = Math.max(target, 0);
             }
           }
 
-          if (target > 0) {
-            labelProjection.copy(label.position).project(camera);
-            if (labelProjection.z > 1) {
-              target = 0;
-            } else {
-              const x = ((labelProjection.x + 1) / 2) * viewWidth;
-              const y = ((1 - labelProjection.y) / 2) * viewHeight;
-              const halfWidth = (labelScreenHeight * label.userData.aspect) / 2;
-              const halfHeight = labelScreenHeight / 2 + 3;
-              const rect = { x1: x - halfWidth, x2: x + halfWidth, y1: y - halfHeight, y2: y + halfHeight };
-              const collides = placed.some(
-                (other) => rect.x1 < other.x2 && rect.x2 > other.x1 && rect.y1 < other.y2 && rect.y2 > other.y1,
-              );
-              if (collides && !hovered && !selected) target = 0;
-              else placed.push(rect);
-            }
-          }
-
-          const opacity = label.material.opacity + (target - label.material.opacity) * 0.18;
-          label.material.opacity = opacity;
-          label.visible = opacity > 0.03;
-          if (label.visible) {
-            const worldHeight =
-              dist * screenFactor * labelScreenHeight * (hovered || selected ? 1.3 : node.labelTier === 0 ? 1.08 : 1);
-            label.scale.set(worldHeight * label.userData.aspect, worldHeight, 1);
-          }
+          const heightPx = labelScreenHeight * (hovered || selected ? 1.3 : node.labelTier === 0 ? 1.08 : 1);
+          place(label, target, heightPx, hovered || selected);
         }
+
+        for (const { label, track } of state.clusterLabels) {
+          const dist = camera.position.distanceTo(label.position);
+          const shown =
+            state.labelVisible && !state.selected && !state.query && (state.group === 'all' || state.group === track);
+          const target = shown ? Math.min(0.9, Math.max(0, (dist - 300) / 120)) : 0;
+          place(label, target, labelScreenHeight * 1.15, false);
+        }
+      }
+
+      function matchesFilters(node) {
+        const text = `${node.title} ${node.group || ''} ${node.description || ''}`.toLowerCase();
+        return (
+          (state.kind === 'all' || node.kind === state.kind) &&
+          (state.group === 'all' || node.track === state.group) &&
+          (!state.query || text.includes(state.query))
+        );
       }
 
       function applyFilters() {
         const matchingIds = new Set();
         for (const node of state.nodes) {
-          const text = `${node.title} ${node.group || ''} ${node.description || ''}`.toLowerCase();
-          const visible =
-            (state.kind === 'all' || node.kind === state.kind) &&
-            (state.group === 'all' || node.group === state.group) &&
-            (!state.query || text.includes(state.query));
+          const visible = matchesFilters(node);
           const mesh = state.nodeObjects.get(node.id);
           if (mesh) {
             mesh.visible = visible;
             const emphasized =
               !state.selected || node.id === state.selected.id || state.neighborIds.has(node.id);
-            mesh.material.opacity = visible ? (emphasized ? 0.95 : 0.12) : inactiveOpacity;
+            mesh.material.opacity = visible ? (emphasized ? 0.95 : 0.05) : inactiveOpacity;
+            mesh.material.depthWrite = emphasized;
+            mesh.material.emissiveIntensity = emphasized ? mesh.userData.baseEmissive : 0.03;
           }
           if (visible) matchingIds.add(node.id);
         }
 
-        const edges = graphGroup.getObjectByName('edges');
-        if (edges) {
-          const filtered = state.query || state.kind !== 'all' || state.group !== 'all';
-          edges.material.opacity = state.selected ? 0.08 : filtered ? 0.2 : 0.42;
+        // An edge is drawn only while both of its ends pass the filters. The
+        // lines blend additively, so a black vertex colour hides the edge.
+        for (const name of ['edges', 'edges-weak']) {
+          const lines = graphGroup.getObjectByName(name);
+          if (!lines) continue;
+          const colors = lines.geometry.getAttribute('color');
+          const base = lines.userData.baseColors;
+          lines.userData.edges.forEach((edge, index) => {
+            const shown = matchingIds.has(edge.source.id) && matchingIds.has(edge.target.id);
+            for (let i = index * 6; i < index * 6 + 6; i += 1) colors.array[i] = shown ? base[i] : 0;
+          });
+          colors.needsUpdate = true;
+        }
+        const backbone = graphGroup.getObjectByName('edges');
+        if (backbone) backbone.material.opacity = state.selected ? 0.07 : 0.5;
+        const weak = graphGroup.getObjectByName('edges-weak');
+        if (weak) {
+          weak.visible = state.showAllEdges;
+          weak.material.opacity = state.selected ? 0.04 : 0.26;
         }
 
         if (state.selected && !matchingIds.has(state.selected.id)) selectNode(null);
       }
 
-      function selectNode(node) {
-        if (state.selected) {
-          const previous = state.nodeObjects.get(state.selected.id);
-          if (previous) {
-            previous.material.color.set(previous.userData.baseColor);
-            previous.material.emissive.set(previous.userData.baseColor);
-          }
-        }
+      function renderTrackLegend() {
+        trackLegend.innerHTML = state.tracks
+          .map(
+            (track) =>
+              `<button class="legend track" type="button" data-track="${escapeHtml(track.key)}" aria-pressed="false"><i style="background:${track.color}"></i>${escapeHtml(track.label)} <b>${track.count}</b></button>`,
+          )
+          .join('');
+      }
 
+      // Centre the camera on the isolated track, or on the whole graph again.
+      function frameTrack() {
+        if (state.selected) return;
+        const members = state.group === 'all' ? [] : state.nodes.filter((node) => node.track === state.group);
+        const center = new THREE.Vector3();
+        for (const node of members) center.add(new THREE.Vector3(node.x, node.y, node.z));
+        if (members.length) center.divideScalar(members.length);
+        const spread = Math.max(0, ...members.map((node) => center.distanceTo(new THREE.Vector3(node.x, node.y, node.z))));
+        state.focusPoint = center;
+        state.focusDistance = members.length ? THREE.MathUtils.clamp(spread * 2.6, 300, homeDistance()) : homeDistance();
+      }
+
+      function syncTrackLegend() {
+        trackLegend.dataset.filtered = String(state.group !== 'all');
+        for (const button of trackLegend.querySelectorAll('button[data-track]')) {
+          button.setAttribute('aria-pressed', String(button.dataset.track === state.group));
+        }
+      }
+
+      function syncEdgeCount() {
+        const total = state.edges.length;
+        const backbone = state.edges.filter((edge) => edge.backbone).length;
+        edgeCount.textContent = state.showAllEdges ? `All ${total} links` : `${backbone} of ${total} links`;
+        edgeCount.title = state.showAllEdges ? 'Show only the strongest links' : 'Show every link, including weak ones';
+        edgeCount.setAttribute('aria-pressed', String(state.showAllEdges));
+      }
+
+      function renderSearchResults() {
+        if (!state.query) {
+          state.matches = [];
+          searchResults.hidden = true;
+          return;
+        }
+        const inTitle = (node) => node.title.toLowerCase().includes(state.query);
+        state.matches = state.nodes
+          .filter(matchesFilters)
+          .sort(
+            (a, b) =>
+              Number(inTitle(b)) - Number(inTitle(a)) ||
+              (b.weightedDegree || b.degree || 0) - (a.weightedDegree || a.degree || 0),
+          );
+        const shown = state.matches.slice(0, 6);
+        searchResults.innerHTML = shown.length
+          ? shown
+              .map(
+                (node) =>
+                  `<button type="button" data-id="${escapeHtml(node.id)}">${nodeDot(node)}${escapeHtml(shortTitle(node.title))}<small>${escapeHtml(node.kind === 'concept' ? 'Concept' : trackLabel(node.track))}</small></button>`,
+              )
+              .join('') +
+            (state.matches.length > shown.length
+              ? `<span>${state.matches.length - shown.length} more match${state.matches.length - shown.length === 1 ? '' : 'es'} in the graph</span>`
+              : '')
+          : '<span>No matching nodes</span>';
+        searchResults.hidden = false;
+      }
+
+      function clearSearch() {
+        searchInput.value = '';
+        state.query = '';
+        state.matches = [];
+        searchResults.hidden = true;
+        applyFilters();
+      }
+
+      // Picking a result drops the text filter, so the node's neighbours are
+      // not hidden by the query that found it.
+      function pickSearchResult(node) {
+        clearSearch();
+        searchInput.blur();
+        selectNode(node);
+      }
+
+      function nodeDot(node) {
+        const color = node.kind === 'concept' ? conceptColor : node.color;
+        return `<i class="dot" data-kind="${node.kind}" style="background:${color}"></i>`;
+      }
+
+      function trackLabel(key) {
+        return state.tracks.find((track) => track.key === key)?.label || groupLabel(key);
+      }
+
+      function syncRotation() {
+        controls.autoRotate = state.rotate && !state.hovered && !state.selected;
+      }
+
+      function syncUrl(node) {
+        const url = new URL(window.location.href);
+        if (node) url.searchParams.set('focus', node.route || node.id);
+        else url.searchParams.delete('focus');
+        window.history.replaceState(null, '', url);
+      }
+
+      function renderNeighbors() {
+        const list = state.neighborsExpanded ? state.neighborList : state.neighborList.slice(0, neighborPreview);
+        const hiddenCount = state.neighborList.length - list.length;
+        neighbors.innerHTML =
+          list
+            .map(
+              (node) =>
+                `<button type="button" data-id="${escapeHtml(node.id)}">${nodeDot(node)}${escapeHtml(shortTitle(node.title))}</button>`,
+            )
+            .join('') +
+          (hiddenCount > 0 ? `<button class="more" type="button" data-more="true">+${hiddenCount} more</button>` : '');
+      }
+
+      function selectNode(node) {
         const previousHighlight = graphGroup.getObjectByName('edges-highlight');
         if (previousHighlight) {
           graphGroup.remove(previousHighlight);
@@ -1148,44 +1715,56 @@
 
         state.selected = node;
         state.neighborIds = new Set();
+        state.neighborList = [];
+        state.neighborsExpanded = false;
+        details.dataset.open = String(Boolean(node));
+        detailsClose.hidden = !node;
+        selectionRing.visible = Boolean(node);
+        syncRotation();
+        syncUrl(node);
 
         if (!node) {
           state.focusPoint = null;
+          state.focusDistance = null;
           applyFilters();
-          detailTitle.textContent = 'Full Knowledge Graph';
-          detailCopy.textContent = 'Select a node to inspect its strongest neighbors.';
+          detailTitle.textContent = 'Knowledge Graph';
+          detailCopy.textContent = 'Click a node to see what it connects to, or a track to isolate it.';
           detailMeta.innerHTML = '';
           neighbors.innerHTML = '';
           openLink.dataset.visible = 'false';
           return;
         }
 
-        for (const edge of state.edges) {
-          if (edge.source.id === node.id) state.neighborIds.add(edge.target.id);
-          else if (edge.target.id === node.id) state.neighborIds.add(edge.source.id);
+        const touching = state.edges
+          .filter((edge) => edge.source.id === node.id || edge.target.id === node.id)
+          .sort((a, b) => b.weight - a.weight);
+        for (const edge of touching) {
+          const other = edge.source.id === node.id ? edge.target : edge.source;
+          if (state.neighborIds.has(other.id)) continue;
+          state.neighborIds.add(other.id);
+          state.neighborList.push(other);
         }
 
-        const mesh = state.nodeObjects.get(node.id);
-        if (mesh) {
-          mesh.material.color.set(selectedColor);
-          mesh.material.emissive.set(selectedColor);
-        }
+        selectionRing.position.set(node.x, node.y, node.z);
+        selectionRing.scale.setScalar(nodeRadius(node) * 3.6);
         renderHighlightEdges(node);
         applyFilters();
-        state.focusPoint = new THREE.Vector3(node.x, node.y, node.z);
 
-        const related = state.edges
-          .filter((edge) => edge.source.id === node.id || edge.target.id === node.id)
-          .sort((a, b) => b.weight - a.weight)
-          .slice(0, 8)
-          .map((edge) => (edge.source.id === node.id ? edge.target : edge.source));
+        // Fly to the node and stop at a distance that keeps most of its
+        // neighbours in frame.
+        state.focusPoint = new THREE.Vector3(node.x, node.y, node.z);
+        const reach = state.neighborList
+          .map((other) => Math.hypot(other.x - node.x, other.y - node.y, other.z - node.z))
+          .sort((a, b) => a - b);
+        const spread = reach[Math.floor(reach.length * 0.75)] || 120;
+        state.focusDistance = THREE.MathUtils.clamp(spread * 2.1, 260, 640);
 
         detailTitle.textContent = node.title;
-        detailCopy.textContent = node.description || groupLabel(node.group || node.kind);
+        detailCopy.textContent = node.description || trackLabel(node.track);
         detailMeta.innerHTML = [
-          node.kind,
-          node.group ? groupLabel(node.group) : '',
-          `${node.degree || 0} links`,
+          node.kind === 'concept' ? 'Concept' : 'Document',
+          trackLabel(node.track),
+          `${state.neighborList.length} connections`,
         ]
           .filter(Boolean)
           .map((item) => `<span>${escapeHtml(item)}</span>`)
@@ -1196,12 +1775,7 @@
         } else {
           openLink.dataset.visible = 'false';
         }
-        neighbors.innerHTML = related
-          .map((neighbor) => {
-            const href = neighbor.route || '#';
-            return `<a href="${escapeHtml(href)}">${escapeHtml(shortTitle(neighbor.title))}</a>`;
-          })
-          .join('');
+        renderNeighbors();
       }
 
       function renderHighlightEdges(node) {
@@ -1251,6 +1825,8 @@
           const mesh = state.nodeObjects.get(node.id);
           if (mesh) mesh.scale.copy(mesh.userData.baseScale).multiplyScalar(1.22);
         }
+        // A still target is easier to click than a rotating one.
+        syncRotation();
         renderer.domElement.style.cursor = node ? 'pointer' : 'grab';
       }
 
@@ -1292,21 +1868,31 @@
           state.nodes.find((node) => node.id === focus);
         if (!target) return;
         selectNode(target);
-        controls.autoRotate = false;
-        rotateButton.dataset.active = 'false';
       }
 
       function resetCamera() {
         state.focusPoint = null;
+        state.focusDistance = null;
         controls.target.set(0, 0, 0);
-        camera.position.set(0, 80, 500);
+        camera.position.set(0, homeDistance() * 0.16, homeDistance());
+        scene.fog.density = 0.9 / homeDistance();
         controls.update();
       }
 
       function animate() {
         if (state.focusPoint) {
+          // Move the camera with the target so the viewing angle stays put.
+          cameraOffset.copy(controls.target);
           controls.target.lerp(state.focusPoint, 0.08);
-          if (controls.target.distanceTo(state.focusPoint) < 0.5) state.focusPoint = null;
+          camera.position.add(cameraOffset.subVectors(controls.target, cameraOffset));
+          if (state.focusDistance) {
+            cameraOffset.copy(camera.position).sub(controls.target);
+            const current = Math.max(cameraOffset.length(), 1);
+            const next = current + (state.focusDistance - current) * 0.07;
+            camera.position.copy(controls.target).add(cameraOffset.multiplyScalar(next / current));
+            if (Math.abs(next - state.focusDistance) < 1) state.focusDistance = null;
+          }
+          if (!state.focusDistance && controls.target.distanceTo(state.focusPoint) < 0.5) state.focusPoint = null;
         }
         controls.update();
         updateHover();
