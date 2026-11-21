@@ -93,15 +93,23 @@ FAULT_PDE ACCESS_TYPE_VIRT_READ
 
 로그의 `GPC 2, TPC 6, SM 1`은 하드웨어 계층을 따라 내려가는 좌표다. RTX Blackwell에서는 GPC(Graphics Processing Cluster) 안에 TPC(Texture Processing Cluster)가 있고, TPC마다 SM(Streaming Multiprocessor)이 두 개씩 들어 있다. GB202 칩 전체는 GPC 12개 × GPC당 TPC 8개 × TPC당 SM 2개로 SM이 192개이고, RTX 5090은 그 가운데 170개를 활성화한 제품이다. 백서의 칩 구성도에 그려진 SM을 모두 실제 장치의 활성 SM으로 세면 안 된다.
 
+![GB202 칩 구성도. 위아래로 GPC 여섯 개씩, 가운데에 L2 캐시, 양옆에 메모리 컨트롤러](assets/gpu-sm-warp-gb202-chip.png)
+
+*그림 1. GB202 칩 전체 구성. 위아래로 늘어선 큰 묶음이 GPC이고, GPC마다 TPC 8개, TPC마다 SM 2개가 들어 있다. 가운데의 L2 캐시는 모든 SM이 공유하고, 양옆의 메모리 컨트롤러는 칩 밖의 GDDR7과 연결된다. 그림에는 SM이 192개 그려져 있지만 RTX 5090에서 활성화된 것은 170개다. 출처: NVIDIA RTX Blackwell 아키텍처 백서.[^blackwell]*
+
 SM에는 연산기와 함께 메모리 자원도 들어 있다. RTX Blackwell 백서에 따르면 SM 하나에 CUDA 코어 128개, Tensor Core 4개, 256KB 레지스터 파일, 128KB L1·shared memory가 있다. RTX 5090의 L2 캐시는 GPU 전체가 공유하는 96MB이고, 장치 메모리는 32GB GDDR7이다. 128KB는 L1과 shared memory를 합친 용량이라, 프로그램이 전부를 shared memory로 쓸 수는 없다.[^blackwell]
 
 SM 안은 다시 네 구획(processing block)으로 나뉜다. 구획마다 L0 명령어 캐시, warp scheduler와 dispatch unit, 레지스터 파일, FP32/INT32 연산 유닛, Tensor Core, load/store 유닛이 있다. Scheduler는 실행 준비가 된 warp의 다음 명령을 고르고, dispatch unit은 그 명령을 실행 유닛으로 보낸다. L1 data cache와 shared memory는 네 구획이 함께 쓰는 SM 수준의 자원이다.
 
 구획이 넷이라고 warp가 네 개씩 실행되는 것은 아니다. SM 하나에는 여러 warp의 실행 상태가 함께 상주하고, scheduler는 그 가운데 준비된 warp를 골라 명령을 발행한다. 예를 들어 128-thread block은 warp 네 개로 나뉘지만, 이 warp들이 구획마다 하나씩 고정 배치되지는 않는다. 상주할 수 있는 block과 warp의 수는 레지스터와 shared memory 사용량, 장치의 한도에 따라 정해진다.[^resident-blocks]
 
+![SM 하나의 내부 구성도. 네 구획과 그 아래의 L1 data cache·shared memory](assets/gpu-sm-warp-gb202-sm.png)
+
+*그림 2. SM 하나의 내부. 구획마다 L0 명령어 캐시·warp scheduler·dispatch, 레지스터 파일, FP32/INT32 유닛, Tensor Core, load/store(LD/ST) 유닛이 있고, 맨 아래 128KB L1 data cache·shared memory는 네 구획이 함께 쓴다. 구획마다 32비트 레지스터가 16,384개씩 있어 SM 전체로는 65,536개, 즉 256KB다. 출처: NVIDIA RTX Blackwell 아키텍처 백서.[^blackwell]*
+
 ![CUDA 실행 단위와 SM의 메모리 자원](assets/gpu-sm-warp-sm-memory.svg)
 
-*그림 1. 위쪽은 실행 단위 사이의 관계를, 아래쪽은 명령이 실행될 때 쓰는 메모리 자원을 보여준다. 캐시 경로는 단순화해 그렸으며, 모든 접근이 L1을 거치지는 않는다.*
+*그림 3. 위쪽은 실행 단위 사이의 관계를, 아래쪽은 명령이 실행될 때 쓰는 메모리 자원을 보여준다. 캐시 경로는 단순화해 그렸으며, 모든 접근이 L1을 거치지는 않는다.*
 
 CUDA 프로그램이 다루는 계층은 이와 다르다. 개발자는 grid와 thread block을 구성하고 block 안에 thread를 배치한다. GPU는 각 block을 SM 하나에 할당하고, block 안의 thread를 32개씩 묶은 warp 단위로 실행한다.
 
@@ -224,7 +232,7 @@ $(n,h,w)$를 고정하고 lane 32개가 연속된 채널을 읽는 가상의 커
 
 ![NCHW와 channels-last에서 채널을 읽는 warp의 주소 간격](assets/gpu-sm-warp-channels-last.svg)
 
-*그림 2. shape이 같아도 stride가 달라지면 warp가 접근하는 32byte 영역의 수가 달라진다. 가정한 lane 배치에서 주소를 계산해 그린 예제다.*
+*그림 4. shape이 같아도 stride가 달라지면 warp가 접근하는 32byte 영역의 수가 달라진다. 가정한 lane 배치에서 주소를 계산해 그린 예제다.*
 
 GPU는 warp 안의 주소들을 32byte 단위 영역(sector)으로 묶어 메모리 요청을 만든다. 같은 32개 원소를 읽더라도 2개 영역으로 끝나느냐 32개 영역이 필요하냐에 따라 메모리 트랜잭션 수가 크게 달라진다. 이것이 coalescing이다.[^coalescing]
 
@@ -358,7 +366,7 @@ dX, dW = autograd.grad(Y, (X, W), dY)
 
 ![cuDNN 버전에 따른 forward와 backward-data 실행 경로](assets/gpu-sm-warp-cudnn-plans.svg)
 
-*그림 3. batch 4096 최소 연산에서 직접 관측한 선택이다. dW 단계는 그림에서 생략했다. engine 번호가 같아도 configuration에 따라 다른 커널이 실행될 수 있다.*
+*그림 5. batch 4096 최소 연산에서 직접 관측한 선택이다. dW 단계는 그림에서 생략했다. engine 번호가 같아도 configuration에 따라 다른 커널이 실행될 수 있다.*
 
 Forward는 engine 22의 XMMA 구현에서 engine 58의 CUTLASS WMMA 구현으로 바뀌었다. Backward-data는 engine 번호가 63으로 같았지만 실제로는 다른 커널이 실행됐다.
 
@@ -603,7 +611,7 @@ dX 커널은 끝났고, 그 뒤에 요청된 작업은 GPU 실행 기록이 없�
 
 ![cuDNN 9.10과 9.27에서 같은 역전파 연산의 관측 경계](assets/gpu-sm-warp-backward-boundary.svg)
 
-*그림 4. 장애 서버에서 같은 역전파 연산을 cuDNN 9.10과 9.27로 실행했을 때의 관측 경계. 실선은 관측한 실행 순서이고, 점선은 두 경로를 비교해 얻은 추론이다.*
+*그림 6. 장애 서버에서 같은 역전파 연산을 cuDNN 9.10과 9.27로 실행했을 때의 관측 경계. 실선은 관측한 실행 순서이고, 점선은 두 경로를 비교해 얻은 추론이다.*
 
 ### 9.27은 같은 연산을 어떻게 계산했나
 
@@ -690,11 +698,11 @@ BF16 학습의 실패와 같은 GPC, 같은 client, 같은 주소 형태의 MMU 
 
 ![Nsight Systems의 NVTX 범위 표. 직전 backward 행이 선택돼 있고 그 RangeId는 1057이다](assets/gpu-sm-warp-nsight-tf32-ranges.png)
 
-*그림 5. 장애 서버에서 기록한 TF32 sweep의 실패 직전 구간(Nsight Systems). 같은 화면에서 필요한 부분만 잘랐다. 위 타임라인은 가운데 구간을 생략했고(이중선), 아래 표는 Start, Duration, Name, TID, RangeId 열만 골랐다. `SWEEP_CP_1057`은 계측 코드가 연산마다 붙인 일련번호로, 본문의 14번째 TF32 forward다. 청록색 구간이 이 forward의 NVTX 구간(13.244ms)이고, 그 안에 `cudaDeviceSynchronize` 호출이 보인다. backward는 `pt_autograd_0` thread에서, forward는 `python` thread에서 실행된다(표의 TID). 표에서 파랗게 선택된 행은 직전 backward(`SWEEP_CP_1056`)인데, 이 행의 RangeId가 1057이라 찾는 checkpoint로 착각하기 쉽다. 이 화면에는 GPU 커널 행이 표시되지 않으므로, GPU 실행 기록이 없다는 판단은 CUDA API 기록과 커널 로그를 대조해 내렸다.*
+*그림 7. 장애 서버에서 기록한 TF32 sweep의 실패 직전 구간(Nsight Systems). 같은 화면에서 필요한 부분만 잘랐다. 위 타임라인은 가운데 구간을 생략했고(이중선), 아래 표는 Start, Duration, Name, TID, RangeId 열만 골랐다. `SWEEP_CP_1057`은 계측 코드가 연산마다 붙인 일련번호로, 본문의 14번째 TF32 forward다. 청록색 구간이 이 forward의 NVTX 구간(13.244ms)이고, 그 안에 `cudaDeviceSynchronize` 호출이 보인다. backward는 `pt_autograd_0` thread에서, forward는 `python` thread에서 실행된다(표의 TID). 표에서 파랗게 선택된 행은 직전 backward(`SWEEP_CP_1056`)인데, 이 행의 RangeId가 1057이라 찾는 checkpoint로 착각하기 쉽다. 이 화면에는 GPU 커널 행이 표시되지 않으므로, GPU 실행 기록이 없다는 판단은 CUDA API 기록과 커널 로그를 대조해 내렸다.*
 
 Nsight 기록을 읽을 때 두 가지를 조심했다.
 
-- **NVTX 표의 `RangeId`는 애플리케이션이 붙인 번호가 아니다.** checkpoint 번호는 NVTX 이름에 넣은 값으로 찾아야 한다. RangeId는 Nsight가 붙이는 별도 식별자인데, 이번에는 직전 backward 행의 RangeId가 마침 찾던 checkpoint 번호와 같아 헷갈리기 쉬웠다(그림 5의 아래 표).
+- **NVTX 표의 `RangeId`는 애플리케이션이 붙인 번호가 아니다.** checkpoint 번호는 NVTX 이름에 넣은 값으로 찾아야 한다. RangeId는 Nsight가 붙이는 별도 식별자인데, 이번에는 직전 backward 행의 RangeId가 마침 찾던 checkpoint 번호와 같아 헷갈리기 쉬웠다(그림 7의 아래 표).
 - **기록이 없다고 실행되지 않은 것은 아니다.** report에는 타임스탬프를 얻지 못한 CUPTI 이벤트 하나를 버렸다는 진단이 남아 있었다. 마지막 동기화의 반환 값 필드도 애플리케이션의 오류 기록과 맞지 않아서, 한 필드만 믿지 않고 완료 표시, 프로세스 오류, 커널 로그를 함께 대조했다.
 
 ### 드라이버를 올리고 새로 부팅해도 실패했다
@@ -712,7 +720,7 @@ Nsight Systems 화면에서 긴 막대를 찾았다고 병목이나 장애 원�
 | 장애 서버, 첫 TF32 forward | 58.255ms | 0.221ms | 첫 호출의 준비·로딩 비용 포함. 연산은 완료 |
 | 같은 실행, 두 번째 TF32 forward | 3.133ms | 0.212ms | profiler stop 호출 약 2.8ms 포함 |
 | 비교 서버, 첫 TF32 forward | 58.393ms | 0.215ms | 비교 서버에서도 같은 첫 호출 비용 |
-| 장애 서버, 실패한 14번째 forward | 13.244ms | 기록 없음 | 동기화에서 오류(그림 5). GPU 실행 시간은 알 수 없음 |
+| 장애 서버, 실패한 14번째 forward | 13.244ms | 기록 없음 | 동기화에서 오류(그림 7). GPU 실행 시간은 알 수 없음 |
 
 첫 forward에서는 launch 호출이 시작되기까지 56.102ms가 걸렸다. 이 사이에 `cuLibraryLoadData` 4번(합계 24.658ms)과 `cuKernelGetFunction`(4.113ms)이 기록됐다. 처음 쓰는 커널의 코드를 불러오는 비용이다. 나머지 CPU 시간은 특정 작업으로 분류하지 못했다. 같은 구간에 JIT 컴파일 기록은 없었으므로, 58ms 전체를 "JIT 컴파일 시간"이라고 부를 수도 없다.
 
