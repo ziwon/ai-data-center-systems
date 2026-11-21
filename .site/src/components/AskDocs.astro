@@ -158,6 +158,7 @@
       panel.hidden    = false;
       backdrop.hidden = this.mode !== 'expand';
       requestAnimationFrame(() => { panel.dataset.open = ''; });
+      this.syncPageInset(true);
       setTimeout(() => question.focus(), 260);
     }
 
@@ -166,6 +167,7 @@
       const backdrop = this.querySelector<HTMLElement>('[data-backdrop]')!;
       delete panel.dataset.open;
       backdrop.hidden = true;
+      this.syncPageInset(false);
       panel.addEventListener('transitionend', () => { panel.hidden = true; }, { once: true });
     }
 
@@ -176,6 +178,17 @@
       const backdrop = this.querySelector<HTMLElement>('[data-backdrop]')!;
       const panel    = this.querySelector<HTMLElement>('[data-panel]')!;
       if (!panel.hidden) backdrop.hidden = mode !== 'expand';
+      this.syncPageInset(!panel.hidden);
+    }
+
+    // Side and bottom panels push the page aside instead of covering it.
+    private syncPageInset(open: boolean) {
+      const root  = document.documentElement;
+      const panel = this.querySelector<HTMLElement>('[data-panel]')!;
+      if (!open || this.mode === 'expand') { delete root.dataset.askOpen; return; }
+      const size = this.mode === 'right' ? panel.offsetWidth : panel.offsetHeight;
+      root.style.setProperty('--ask-inset', `${size}px`);
+      root.dataset.askOpen = this.mode;
     }
 
     private applyMode() {
@@ -204,6 +217,7 @@
           const h = Math.max(200, Math.min(window.innerHeight * 0.85, startH - (e.clientY - startY)));
           this.style.setProperty('--ask-h', `${h}px`);
         }
+        this.syncPageInset(true);
       };
 
       const onUp = () => {
@@ -326,40 +340,66 @@
   // ── Markdown renderer ──────────────────────────────────────
 
   function parseMarkdown(markdown: string): Node[] {
-    return markdown.trim().split(/\n{2,}/).flatMap((block) => {
-      const lines = block.split('\n').map((l) => l.trim()).filter(Boolean);
-      if (!lines.length) return [];
+    const nodes: Node[] = [];
+    let list: HTMLOListElement | HTMLUListElement | null = null;
+    let item: HTMLLIElement | null = null;
+    let para: string[] = [];
 
-      if (lines[0].match(/^\d+\. /)) {
-        const ol = document.createElement('ol');
-        let li: HTMLLIElement | null = null;
-        for (const line of lines) {
-          const m = line.match(/^(\d+)\. (.*)/);
-          if (m) { li = document.createElement('li'); li.append(...parseInline(m[2])); ol.append(li); }
-          else if (li) li.append(document.createTextNode(' '), ...parseInline(line));
-        }
-        return [ol];
-      }
-
-      if (lines[0].match(/^[-*] /)) {
-        const ul = document.createElement('ul');
-        let li: HTMLLIElement | null = null;
-        for (const line of lines) {
-          const m = line.match(/^[-*] (.*)/);
-          if (m) { li = document.createElement('li'); li.append(...parseInline(m[1])); ul.append(li); }
-          else if (li) li.append(document.createTextNode(' '), ...parseInline(line));
-        }
-        return [ul];
-      }
-
+    const flushPara = () => {
+      if (!para.length) return;
       const p = document.createElement('p');
-      p.append(...parseInline(lines.join(' ')));
-      return [p];
-    });
+      p.append(...parseInline(para.join(' ')));
+      nodes.push(p);
+      para = [];
+    };
+    const closeList = () => { list = null; item = null; };
+
+    for (const raw of markdown.trim().split('\n')) {
+      const line = raw.trim();
+      if (!line) { flushPara(); item = null; continue; }
+
+      if (/^(-{3,}|\*{3,}|_{3,})$/.test(line)) {
+        flushPara(); closeList();
+        nodes.push(document.createElement('hr'));
+        continue;
+      }
+
+      const heading = line.match(/^#{1,6}\s+(.*)/);
+      if (heading) {
+        flushPara(); closeList();
+        const h = document.createElement('h4');
+        h.append(...parseInline(heading[1]));
+        nodes.push(h);
+        continue;
+      }
+
+      const ordered = line.match(/^(\d+)\.\s+(.*)/);
+      const bullet  = ordered ? null : line.match(/^[-*+]\s+(.*)/);
+      if (ordered || bullet) {
+        flushPara();
+        const tag = ordered ? 'OL' : 'UL';
+        if (!list || list.tagName !== tag) {
+          list = document.createElement(ordered ? 'ol' : 'ul');
+          if (ordered) (list as HTMLOListElement).start = Number(ordered[1]);
+          nodes.push(list);
+        }
+        item = document.createElement('li');
+        item.append(...parseInline(ordered ? ordered[2] : bullet![1]));
+        list.append(item);
+        continue;
+      }
+
+      if (item) { item.append(document.createTextNode(' '), ...parseInline(line)); continue; }
+      closeList();
+      para.push(line);
+    }
+    flushPara();
+    return nodes;
   }
 
   function parseInline(text: string): (Text | HTMLElement)[] {
     const result: (Text | HTMLElement)[] = [];
+    text = text.replace(/\$\\(?:right)?arrow\$|\$\\to\$/g, '→');
     const re = /\*\*(.+?)\*\*|\*(.+?)\*|`(.+?)`/g;
     let last = 0, m: RegExpExecArray | null;
     while ((m = re.exec(text)) !== null) {

@@ -593,6 +593,12 @@ ask-docs-widget[data-mode="expand"] .ask-panel[data-open] {
 }
 ask-docs-widget[data-mode="expand"] .ask-resize-handle { display: none; }
 
+/* Side and bottom panels push the page aside so the document stays readable. */
+@media (min-width: 50em) {
+  html[data-ask-open="right"] body { padding-inline-end: var(--ask-inset, 420px); }
+}
+html[data-ask-open="bottom"] body { padding-block-end: var(--ask-inset, 46vh); }
+
 /* Backdrop (expand only) */
 .ask-backdrop {
   position: fixed;
@@ -773,6 +779,8 @@ ask-docs-widget[data-mode="expand"] .ask-resize-handle { display: none; }
 .ask-answer li { margin: 0; color: var(--sl-color-gray-1); line-height: 1.7; font-size: var(--sl-text-sm); }
 .ask-answer ol,
 .ask-answer ul { margin: 0; padding-inline-start: 1.35rem; display: grid; gap: 0.38rem; }
+.ask-answer h4 { margin: 0.35rem 0 0; color: var(--sl-color-white); font-size: var(--sl-text-base); font-weight: 700; line-height: 1.4; }
+.ask-answer hr { width: 100%; margin: 0.2rem 0; border: 0; border-top: 1px solid var(--sl-color-gray-6); }
 .ask-answer strong { color: var(--sl-color-white); font-weight: 700; }
 .ask-answer em { color: var(--sl-color-gray-2); font-style: italic; }
 .ask-answer code {

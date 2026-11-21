@@ -322,7 +322,9 @@ async function askModel({ env, question, sources }) {
 
   const result = await env.AI.run(env.WORKERS_AI_MODEL || DEFAULT_MODEL, {
     temperature: 0.2,
-    max_tokens: 1400,
+    // Hidden reasoning shares this budget and used to cut answers off mid-sentence.
+    max_tokens: 3000,
+    chat_template_kwargs: { enable_thinking: false },
     messages: [
       {
         role: 'system',
@@ -334,6 +336,7 @@ async function askModel({ env, question, sources }) {
           'Do not fabricate document-specific claims, numbers, commands, product behavior, or citations that are not in the sources.',
           'Prefer teaching: define key terms, explain why they matter, connect cause and effect, then give practical checks or examples.',
           'If the sources are thin, say that the document only gives limited evidence and then provide a careful general explanation.',
+          'Start directly with the answer: no greeting and no closing pleasantries.',
         ].join(' '),
       },
       {
@@ -357,6 +360,9 @@ async function askModel({ env, question, sources }) {
 
   const answer = extractAnswer(result);
   if (!answer) throw new Error('Workers AI returned an empty answer');
+  if (result?.choices?.[0]?.finish_reason === 'length') {
+    return `${answer}\n\n*(답변이 길이 제한에 걸려 여기서 끊겼습니다. 질문을 더 좁혀서 다시 물어보세요.)*`;
+  }
   return answer;
 }
 
