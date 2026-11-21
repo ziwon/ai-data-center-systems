@@ -13,7 +13,7 @@ const docsOut = path.join(projectRoot, 'src', 'content', 'docs');
 const pagesOut = path.join(projectRoot, 'src', 'pages');
 const publicOut = path.join(projectRoot, 'public');
 const conceptsPath = path.join(projectRoot, 'kb', 'concepts.json');
-const siteUrl = 'https://adcs.restack.tech';
+const siteUrl = 'https://aidc.restack.tech';
 const ogImageRevision = '2';
 const repositoryEditBase = 'https://github.com/ziwon/ai-data-center-systems/edit/main/';
 

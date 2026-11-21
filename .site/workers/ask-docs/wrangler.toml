@@ -3,12 +3,14 @@ main = "src/index.js"
 compatibility_date = "2026-06-28"
 
 routes = [
-  { pattern = "adcs.restack.tech/api/ask*", zone_name = "restack.tech" },
-  { pattern = "adcs.restack.tech/api/kb*", zone_name = "restack.tech" }
+  { pattern = "aidc.restack.tech/api/ask*", zone_name = "restack.tech" },
+  { pattern = "aidc.restack.tech/api/kb*", zone_name = "restack.tech" },
+  # Former hostname: every request is redirected to the new one.
+  { pattern = "adcs.restack.tech/*", zone_name = "restack.tech" }
 ]
 
 [vars]
-ALLOWED_ORIGIN = "https://adcs.restack.tech"
+ALLOWED_ORIGIN = "https://aidc.restack.tech"
 WORKERS_AI_MODEL = "@cf/google/gemma-4-26b-a4b-it"
 RATE_LIMIT_REQUESTS = "20"
 RATE_LIMIT_WINDOW_SECONDS = "3600"

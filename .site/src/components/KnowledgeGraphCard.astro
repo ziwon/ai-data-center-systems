@@ -253,13 +253,13 @@
 
   function graphUrls(route: string) {
     const staticUrl = pageGraphUrl(route);
-    if (window.location.hostname !== 'adcs.restack.tech') return [staticUrl];
+    if (window.location.hostname !== 'aidc.restack.tech') return [staticUrl];
     return [`/api/kb/page?route=${encodeURIComponent(route)}`, staticUrl];
   }
 
   function globalGraphUrls() {
     const staticUrl = '/kb/dcs-kb-graph.json';
-    if (window.location.hostname !== 'adcs.restack.tech') return [staticUrl];
+    if (window.location.hostname !== 'aidc.restack.tech') return [staticUrl];
     return ['/api/kb/graph', staticUrl];
   }
 

@@ -2,7 +2,7 @@
 
 AI 데이터센터 시스템을 다루는 기술 블로그입니다. 분야별 학습 노트가 개념을 체계적으로 쌓아 가는 문서라면, 블로그 글은 운영 사례, 장애 분석, 설계 판단을 한 편씩 완결된 글로 다룹니다.
 
-새 글은 [RSS 피드](https://adcs.restack.tech/blog/rss.xml)로 받아 볼 수 있습니다.
+새 글은 [RSS 피드](https://aidc.restack.tech/blog/rss.xml)로 받아 볼 수 있습니다.
 
 ## 전체 글
 

@@ -3,13 +3,13 @@
 > AI data center networking, LLM inference/training, MLOps, storage, and systems performance engineering — study notes.
 
 <p align="center">
-  <a href="https://adcs.restack.tech/">
+  <a href="https://aidc.restack.tech/">
     <img width="1024" alt="Animated AI performance fabric" src="./fabric.svg" />
   </a>
 </p>
 
 <p align="center">
-  <a href="https://adcs.restack.tech/"><strong>Read on the web → adcs.restack.tech</strong></a>
+  <a href="https://aidc.restack.tech/"><strong>Read on the web → aidc.restack.tech</strong></a>
 </p>
 
 ## Contents
@@ -23,4 +23,4 @@
 - [Systems Performance](./systems-performance/README.md) — GPU/CUDA/PyTorch performance engineering
 - [Courses](./courses/cme295/README.md) · [Talks](./talks/)
 
-The web wiki adds an AI Q&A panel over these docs and a bilingual (KO/EN) [knowledge graph](https://adcs.restack.tech/) ([3D view](https://adcs.restack.tech/knowledge-graph-3d/)) and plays focus background music 🎧.
+The web wiki adds an AI Q&A panel over these docs and a bilingual (KO/EN) [knowledge graph](https://aidc.restack.tech/) ([3D view](https://aidc.restack.tech/knowledge-graph-3d/)) and plays focus background music 🎧.

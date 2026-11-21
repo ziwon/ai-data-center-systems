@@ -1,12 +1,19 @@
 const memoryBuckets = new Map();
 const PAGE_SIZE = 20;
 const DEFAULT_MODEL = '@cf/google/gemma-4-26b-a4b-it';
+const LEGACY_HOST = 'adcs.restack.tech';
+const SITE_HOST = 'aidc.restack.tech';
 
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    if (url.hostname === LEGACY_HOST) {
+      url.hostname = SITE_HOST;
+      url.protocol = 'https:';
+      return Response.redirect(url.toString(), 301);
+    }
     const origin = request.headers.get('origin') || '';
-    const allowedOrigin = env.ALLOWED_ORIGIN || 'https://adcs.restack.tech';
+    const allowedOrigin = env.ALLOWED_ORIGIN || 'https://aidc.restack.tech';
     const corsHeaders = {
       'access-control-allow-origin': allowedOrigin,
       'access-control-allow-methods': 'GET, POST, OPTIONS',

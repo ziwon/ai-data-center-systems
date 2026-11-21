@@ -91,7 +91,7 @@ function googleAdSenseHeadEntries(client) {
 }
 
 export default defineConfig({
-  site: 'https://adcs.restack.tech',
+  site: 'https://aidc.restack.tech',
   trailingSlash: 'always',
   redirects: legacyRedirects,
   markdown: {
@@ -232,7 +232,7 @@ export default defineConfig({
         ...googleAdSenseHeadEntries(googleAdSenseClient),
         {
           tag: 'meta',
-          attrs: { property: 'og:image', content: 'https://adcs.restack.tech/og.png' },
+          attrs: { property: 'og:image', content: 'https://aidc.restack.tech/og.png' },
         },
         {
           tag: 'meta',
@@ -248,7 +248,7 @@ export default defineConfig({
         },
         {
           tag: 'meta',
-          attrs: { name: 'twitter:image', content: 'https://adcs.restack.tech/og.png' },
+          attrs: { name: 'twitter:image', content: 'https://aidc.restack.tech/og.png' },
         },
         {
           tag: 'meta',
