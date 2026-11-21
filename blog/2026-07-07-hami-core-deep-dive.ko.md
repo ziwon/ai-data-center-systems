@@ -1,5 +1,4 @@
 ---
-date: 2026-07-07
 topics: [gpu]
 description: "HAMi-core의 libvgpu.so가 CUDA·NVML 호출에 개입해 컨테이너가 보는 GPU 메모리와 연산 자원을 나누는 방식을 따라간다."
 ---

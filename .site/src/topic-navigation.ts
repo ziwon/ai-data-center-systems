@@ -112,7 +112,7 @@ function inferenceSidebar(entries: SidebarEntry[]): SidebarEntry[] {
 export const onRequest = defineRouteMiddleware(({ locals }) => {
   const route = locals.starlightRoute;
   const topic = route.id.split('/')[0];
-  if (topic === 'articles') route.sidebar = route.sidebar.map(simplify);
+  if (topic === 'blog') route.sidebar = route.sidebar.map(simplify);
   else if (topic === 'gpu') route.sidebar = gpuSidebar(route.sidebar);
   else if (topic === 'inference') route.sidebar = inferenceSidebar(route.sidebar);
   else return;

@@ -1,28 +1,28 @@
-// Regenerates the article lists from article frontmatter.
-//   npm run articles:index   rewrite articles/README.md and the topic README sections
-//   npm run articles:check   fail (for CI) when any list is out of date
+// Regenerates the blog post lists from post frontmatter.
+//   npm run blog:index   rewrite blog/README.md and the topic README sections
+//   npm run blog:check   fail (for CI) when any list is out of date
 //
-// Each list lives between <!-- articles:start ... --> and <!-- articles:end --> markers, so the
-// hand-written text around it is kept. A topic README needs the markers once it has an article.
+// Each list lives between <!-- blog:start ... --> and <!-- blog:end --> markers, so the
+// hand-written text around it is kept. A topic README needs the markers once it has a post.
 import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   articleTopics,
-  articlesDirectory,
+  blogDirectory,
   groupArticles,
   loadArticles,
   topicLabels,
-} from './lib/articles.mjs';
+} from './lib/blog.mjs';
 
 const sourceRoot = fileURLToPath(new URL('../..', import.meta.url));
 const checkOnly = process.argv.includes('--check');
-const startMarker = /<!-- articles:start[^>]*-->/;
-const endMarker = '<!-- articles:end -->';
+const startMarker = /<!-- blog:start[^>]*-->/;
+const endMarker = '<!-- blog:end -->';
 
 const groups = groupArticles(await loadArticles(sourceRoot));
 const targets = [
-  { file: `${articlesDirectory}/README.md`, list: indexList(groups), required: true },
+  { file: `${blogDirectory}/README.md`, list: indexList(groups), required: true },
   ...[...articleTopics.keys()].map((topic) => {
     const related = groups.filter((group) => group.topics.includes(topic));
     return { file: `${topic}/README.md`, list: topicList(related), required: related.length > 0 };
@@ -35,7 +35,7 @@ for (const target of targets) {
   const absolute = path.join(sourceRoot, target.file);
   const current = await readFile(absolute, 'utf8').catch(() => null);
   if (current === null || !startMarker.test(current) || !current.includes(endMarker)) {
-    if (target.required) problems.push(`${target.file} needs the article list markers.`);
+    if (target.required) problems.push(`${target.file} needs the blog list markers.`);
     continue;
   }
   const next = replaceList(current, target.list);
@@ -49,13 +49,13 @@ if (problems.length) {
   process.exit(1);
 }
 if (checkOnly && stale.length) {
-  console.error(`Article lists are out of date: ${stale.join(', ')}\nRun \`npm run articles:index\` in .site.`);
+  console.error(`Blog lists are out of date: ${stale.join(', ')}\nRun \`npm run blog:index\` in .site.`);
   process.exit(1);
 }
 console.log(
   checkOnly
-    ? `Article lists are up to date (${groups.length} articles).`
-    : `Updated ${stale.length} file(s) for ${groups.length} articles${stale.length ? `: ${stale.join(', ')}` : '.'}`,
+    ? `Blog lists are up to date (${groups.length} posts).`
+    : `Updated ${stale.length} file(s) for ${groups.length} posts${stale.length ? `: ${stale.join(', ')}` : '.'}`,
 );
 
 function replaceList(markdown, list) {
@@ -81,10 +81,10 @@ function indexList(entries) {
     .join('\n\n');
 }
 
-// Topic README: compact list linking into ../articles/.
+// Topic README: compact list linking into ../blog/.
 function topicList(entries) {
-  if (!entries.length) return '_아직 이 분야의 아티클이 없습니다._';
-  const prefix = `../${articlesDirectory}/`;
+  if (!entries.length) return '_아직 이 분야의 블로그 글이 없습니다._';
+  const prefix = `../${blogDirectory}/`;
   return entries
     .map((group) =>
       [`- [${group.title}](${prefix}${group.file})`, ...alternateLinks(group, prefix)].join(' · '),

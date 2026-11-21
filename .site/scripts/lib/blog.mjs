@@ -1,9 +1,18 @@
-// Shared reader for the repository's articles/ folder.
-// Used by article-index.mjs (README lists) and sync-starlight-docs.mjs (site pages and RSS).
+// Shared reader for the repository's blog/ folder (one Markdown file per post).
+// Used by blog-index.mjs (README lists) and sync-starlight-docs.mjs (site pages and RSS).
 import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 
-export const articlesDirectory = 'articles';
+export const blogDirectory = 'blog';
+
+// Post files are named YYYY-MM-DD-slug.md (or .ko.md); the date is the publish date.
+const postFilePattern = /^(\d{4}-\d{2}-\d{2})-(.+?)(\.ko)?\.md$/;
+
+// The site URL drops the date: blog/2026-11-01-x.ko.md is served at /blog/x.ko/.
+export function postSlug(fileName) {
+  const match = fileName.match(postFilePattern);
+  return match ? `${match[2]}${match[3] ?? ''}` : fileName.replace(/\.md$/, '');
+}
 
 // Article `topics` must name one of the site's topic folders.
 export const articleTopics = new Map([
@@ -18,7 +27,7 @@ export const articleTopics = new Map([
 
 const frontmatterPattern = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/;
 
-// Reads the small frontmatter subset that articles use: scalars, "quoted strings", and [a, b] lists.
+// Reads the small frontmatter subset that blog posts use: scalars, "quoted strings", and [a, b] lists.
 export function parseFrontmatter(markdown) {
   const match = markdown.match(frontmatterPattern);
   if (!match) return { data: {}, body: markdown };
@@ -56,7 +65,7 @@ export function articleTitle(body) {
 
 // Loads every article, newest first. Throws one error that lists every invalid file.
 export async function loadArticles(sourceRoot) {
-  const directory = path.join(sourceRoot, articlesDirectory);
+  const directory = path.join(sourceRoot, blogDirectory);
   const files = (await readdir(directory))
     .filter((name) => name.endsWith('.md') && name !== 'README.md')
     .sort();
@@ -68,9 +77,15 @@ export async function loadArticles(sourceRoot) {
     const { data, body } = parseFrontmatter(markdown);
     const title = articleTitle(body);
     const topics = Array.isArray(data.topics) ? data.topics : [];
-    const where = `${articlesDirectory}/${file}`;
+    const where = `${blogDirectory}/${file}`;
+    const named = file.match(postFilePattern);
 
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(data.date ?? '')) problems.push(`${where}: date must be YYYY-MM-DD`);
+    if (!named || Number.isNaN(Date.parse(named[1]))) {
+      problems.push(`${where}: file name must start with the publish date, e.g. 2026-11-01-slug.md`);
+    }
+    if (data.date !== undefined) {
+      problems.push(`${where}: remove the date field; the publish date comes from the file name`);
+    }
     if (!topics.length) problems.push(`${where}: topics must list at least one topic`);
     for (const topic of topics) {
       if (!articleTopics.has(topic)) {
@@ -83,17 +98,17 @@ export async function loadArticles(sourceRoot) {
     articles.push({
       file,
       relative: where,
-      key: file.replace(/(\.ko)?\.md$/, ''),
+      key: named ? named[2] : file,
       language: file.endsWith('.ko.md') ? 'ko' : 'en',
       title,
-      date: data.date,
+      date: named?.[1],
       topics,
       description: data.description,
     });
   }
 
   if (problems.length) {
-    throw new Error(`Invalid article frontmatter:\n${problems.map((line) => `  - ${line}`).join('\n')}`);
+    throw new Error(`Invalid blog post frontmatter:\n${problems.map((line) => `  - ${line}`).join('\n')}`);
   }
   return articles.sort(compareArticles);
 }

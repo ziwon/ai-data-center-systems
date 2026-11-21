@@ -1090,8 +1090,8 @@ Ronak Nathani의 ["Keeping GPU Workloads NUMA-Local in Kubernetes"](https://rona
 
 Related articles:
 
-* [Keeping GPU Workloads NUMA-Local in Kubernetes](../../articles/keeping-gpu-workloads-numa-local-in-kubernetes.ko.md)는 이 case study의 kubelet policy, failure mode, topology-aware scheduling을 더 자세히 정리한다.
-* [Never Underestimate Memory Architecture](../../articles/never-underestimate-memory-architecture.ko.md)는 Grafana의 production NUMA 사례, cloud VM topology, Kubernetes CPU Manager, uncore bottleneck을 더 넓게 정리한다.
+* [Keeping GPU Workloads NUMA-Local in Kubernetes](../../blog/2026-06-28-keeping-gpu-workloads-numa-local-in-kubernetes.ko.md)는 이 case study의 kubelet policy, failure mode, topology-aware scheduling을 더 자세히 정리한다.
+* [Never Underestimate Memory Architecture](../../blog/2026-06-28-never-underestimate-memory-architecture.ko.md)는 Grafana의 production NUMA 사례, cloud VM topology, Kubernetes CPU Manager, uncore bottleneck을 더 넓게 정리한다.
 
 핵심은 GPU workload가 GPU 안에서만 실행되지 않는다는 점이다. CPU는 training에서는 dataloader, preprocessing, pinned memory staging, kernel launch를 담당하고, inference에서는 tokenization, request batching, input formatting, postprocessing, server event loop를 담당한다. 이 CPU thread와 host memory가 GPU가 붙은 PCIe root complex와 다른 NUMA node에 있으면 H2D/DMA 경로가 socket interconnect를 건너게 된다. workload는 정상처럼 보이지만 step time, p99 latency, dataloader wait time이 조용히 나빠질 수 있다.
 

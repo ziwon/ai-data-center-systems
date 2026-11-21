@@ -1,12 +1,11 @@
 ---
-date: 2026-10-28
 topics: [gpu]
 description: "How a DGX B200 node that lost its system files to an accidental rm -rf was brought back with a DGX OS rescue environment and chroot."
 ---
 
 # Recovering a DGX B200 Node After an Accidental rm -rf
 
-**English** | [한국어](dgx-b200-rm-rf-recovery.ko.md)
+**English** | [한국어](2026-10-28-dgx-b200-rm-rf-recovery.ko.md)
 
 One day in 2025, I deleted a wide swath of system files on one node of a DGX B200 cluster I was running. A delete command meant for `/tmp/sriov_cni_env.txt` accidentally included a standalone `*`, and the shell that ran it had `/` as its current directory.
 
@@ -305,7 +304,7 @@ If you are designing the criteria for putting a GPU node back into service, you 
 | Kubernetes | Are the node’s identity and resource registration correct? | kubelet status, advertised device resources, a restricted test Pod |
 | Storage and workloads | Can it access data, and can a real job produce results? | Reads and writes on the intended paths, a small representative job |
 
-Verification should be scoped to the extent of the failure and the node’s role. If you start from basic reachability and widen the checks toward the paths real workloads use, it becomes easier to explain at which stage a problem remains. This layering also ties into the node return-to-service criteria discussed in [GPU Infrastructure Operations and Platform Design](https://adcs.restack.tech/gpu/articles/gpu-infrastructure-operations-and-platform-design.ko/) (in Korean).
+Verification should be scoped to the extent of the failure and the node’s role. If you start from basic reachability and widen the checks toward the paths real workloads use, it becomes easier to explain at which stage a problem remains. This layering also ties into the node return-to-service criteria discussed in [GPU Infrastructure Operations and Platform Design](2026-10-21-gpu-infrastructure-operations-and-platform-design.ko.md) (in Korean).
 
 ## 10. Turning the lessons into operating procedures
 
@@ -347,8 +346,8 @@ In this incident, the existing SSH session bought time to assess the situation a
 
 ### Related articles
 
-- [GPU Infrastructure Operations and Platform Design: From Hardware Failure Analysis to Multi-Tenancy](https://adcs.restack.tech/gpu/articles/gpu-infrastructure-operations-and-platform-design.ko/) (in Korean)
-- [GPU Articles](https://adcs.restack.tech/gpu/articles/)
+- [GPU Infrastructure Operations and Platform Design: From Hardware Failure Analysis to Multi-Tenancy](2026-10-21-gpu-infrastructure-operations-and-platform-design.ko.md) (in Korean)
+- [All blog posts](README.md)
 
 ### Technical references
 

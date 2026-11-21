@@ -1,12 +1,11 @@
 ---
-date: 2026-10-28
 topics: [gpu]
 description: "rm -rf 실수로 시스템 파일이 지워진 DGX B200 노드를 DGX OS 복구 환경과 chroot로 되살린 과정을 돌아본다."
 ---
 
 # rm -rf 사고로 손상된 DGX B200 노드 복구기
 
-[English](dgx-b200-rm-rf-recovery.md) | **한국어**
+[English](2026-10-28-dgx-b200-rm-rf-recovery.md) | **한국어**
 
 2025년 어느 날, 운영하던 DGX B200 클러스터의 한 노드에서 시스템 파일을 대거 삭제했다. `/tmp/sriov_cni_env.txt` 하나만 지우려던 명령에 실수로 따로 떨어진 `*`가 들어갔고, 그 명령을 실행한 셸의 현재 디렉터리는 `/`였다.
 
@@ -317,7 +316,7 @@ GPU 노드를 운영에 다시 투입하는 기준을 세운다면 부팅 뒤에
 | 스토리지와 워크로드 | 데이터에 접근하고 실제 작업이 결과를 만들 수 있는가       | 의도한 경로의 읽기·쓰기와 작은 대표 작업          |
 
 
-검증 항목은 장애 범위와 노드 역할에 맞게 정해야 한다. 접속이 되는지부터 시작해 실제 작업이 쓰는 경로까지 확인 범위를 넓혀 가면, 어느 단계에 문제가 남았는지 설명하기 쉽다. 이런 단계 구분은 [GPU 인프라 운영과 플랫폼 설계](https://adcs.restack.tech/gpu/articles/gpu-infrastructure-operations-and-platform-design.ko/)에서 다룬 노드 복귀 기준과도 이어진다.
+검증 항목은 장애 범위와 노드 역할에 맞게 정해야 한다. 접속이 되는지부터 시작해 실제 작업이 쓰는 경로까지 확인 범위를 넓혀 가면, 어느 단계에 문제가 남았는지 설명하기 쉽다. 이런 단계 구분은 [GPU 인프라 운영과 플랫폼 설계](2026-10-21-gpu-infrastructure-operations-and-platform-design.ko.md)에서 다룬 노드 복귀 기준과도 이어진다.
 
 ## 10. 이 사고를 운영 절차에 반영한다면
 
@@ -359,8 +358,8 @@ tmux 동기 입력은 편리하지만, 각 pane의 작업 조건이 같은지까
 
 ### 관련 글
 
-- [GPU 인프라 운영과 플랫폼 설계: 하드웨어 장애 분석부터 멀티테넌시까지](https://adcs.restack.tech/gpu/articles/gpu-infrastructure-operations-and-platform-design.ko/)
-- [GPU 기술 아티클 목록](https://adcs.restack.tech/gpu/articles/)
+- [GPU 인프라 운영과 플랫폼 설계: 하드웨어 장애 분석부터 멀티테넌시까지](2026-10-21-gpu-infrastructure-operations-and-platform-design.ko.md)
+- [블로그 전체 글](README.md)
 
 ### 기술 문서
 

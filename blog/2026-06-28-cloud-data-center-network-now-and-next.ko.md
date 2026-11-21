@@ -1,5 +1,4 @@
 ---
-date: 2026-06-28
 topics: [network]
 description: "web-scale 클라우드 네트워크에서 AI/ML용 backend fabric으로 넘어가는 흐름을 compute와 storage 구조의 변화에서 짚는다."
 ---

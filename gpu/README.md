@@ -1,30 +1,30 @@
 # GPU Systems
 
 GPU 아키텍처와 CUDA 프로그래밍부터 Kubernetes GPU 플랫폼 운영까지 다루는 문서 모음입니다.
-강좌는 실행 원리를 익히는 데, 참고자료는 세부 동작을 확인하는 데, 실습과 기술 아티클은 성능 분석과 운영 판단에 활용할 수 있습니다.
+강좌는 실행 원리를 익히는 데, 참고자료는 세부 동작을 확인하는 데, 실습과 블로그 글은 성능 분석과 운영 판단에 활용할 수 있습니다.
 
 | 찾고 있는 내용 | 바로가기 |
 | --- | --- |
-| GPU 공유·격리·플랫폼 운영 | [기술 아티클](#기술-아티클) |
+| GPU 공유·격리·플랫폼 운영 | [블로그](#블로그) |
 | 병렬 컴퓨팅과 CUDA 학습 | [강좌와 강의 노트](#강좌와-강의-노트) |
 | 아키텍처와 CUDA 동작 확인 | [참고자료](#참고자료) |
 | 프로파일링과 커널 구현 | [실습](#실습) |
 | 처음 시작할 때의 학습 순서 | [추천 학습 순서](#추천-학습-순서) |
 
-## 기술 아티클
+## 블로그
 
-GPU 자원 공유와 격리, 장애 분석, 반복 가능한 플랫폼 운영을 다룹니다. 다른 분야의 글까지 모두 보려면 [전체 아티클](../articles/README.md)을 확인하세요.
+GPU 자원 공유와 격리, 장애 분석, 반복 가능한 플랫폼 운영을 다룬 글입니다. 다른 분야의 글까지 모두 보려면 [블로그 전체 글](../blog/README.md)을 확인하세요.
 
-<!-- articles:start (generated from article frontmatter by `npm run articles:index` in .site; do not edit by hand) -->
+<!-- blog:start (generated from post frontmatter by `npm run blog:index` in .site; do not edit by hand) -->
 
-- [같은 SM에서 반복되는 GPU 오류는 하드웨어 불량의 증거일까?](../articles/gpu-sm-warp-memory-and-cudnn-rtx5090.ko.md)
-- [rm -rf 사고로 손상된 DGX B200 노드 복구기](../articles/dgx-b200-rm-rf-recovery.ko.md) · [English](../articles/dgx-b200-rm-rf-recovery.md)
-- [GPU 인프라 운영과 플랫폼 설계: 하드웨어 장애 분석부터 멀티테넌시까지](../articles/gpu-infrastructure-operations-and-platform-design.ko.md)
-- [HAMi-core 심층 분석: `libvgpu.so`는 GPU를 어떻게 나누는가](../articles/hami-core-deep-dive.ko.md)
-- [DRA와 HAMi로 보는 Kubernetes GPU 분할](../articles/hami-dra-gpu-sharing.ko.md)
-- [Keeping GPU Workloads NUMA-Local in Kubernetes](../articles/keeping-gpu-workloads-numa-local-in-kubernetes.ko.md)
+- [같은 SM에서 반복되는 GPU 오류는 하드웨어 불량의 증거일까?](../blog/2026-11-01-gpu-sm-warp-memory-and-cudnn-rtx5090.ko.md)
+- [rm -rf 사고로 손상된 DGX B200 노드 복구기](../blog/2026-10-28-dgx-b200-rm-rf-recovery.ko.md) · [English](../blog/2026-10-28-dgx-b200-rm-rf-recovery.md)
+- [GPU 인프라 운영과 플랫폼 설계: 하드웨어 장애 분석부터 멀티테넌시까지](../blog/2026-10-21-gpu-infrastructure-operations-and-platform-design.ko.md)
+- [HAMi-core 심층 분석: `libvgpu.so`는 GPU를 어떻게 나누는가](../blog/2026-07-07-hami-core-deep-dive.ko.md)
+- [DRA와 HAMi로 보는 Kubernetes GPU 분할](../blog/2026-07-07-hami-dra-gpu-sharing.ko.md)
+- [Keeping GPU Workloads NUMA-Local in Kubernetes](../blog/2026-06-28-keeping-gpu-workloads-numa-local-in-kubernetes.ko.md)
 
-<!-- articles:end -->
+<!-- blog:end -->
 
 ## 강좌와 강의 노트
 
@@ -73,4 +73,4 @@ CPU 병렬성, SIMD, 스케줄링, 메모리와 GPU 실행을 연결하는 시�
 2. **시스템 기초:** [CS149](cs149/README.md)로 병렬성, 스케줄링, locality, 동기화와 DNN 실행을 연결합니다.
 3. **반복 실습:** 개념을 배울 때마다 [커널을 구현](labs/kernels/README.md)하고 [프로파일링](labs/profiling/README.md)으로 동작을 확인합니다.
 4. **복습과 참고:** [Heterogeneous Systems](heterogeneous-systems/README.md)로 병렬 패턴을 복습하고, [아키텍처](appendix/architecture/README.md)와 [CUDA 참고자료](appendix/cuda/README.md)에서 세부 사항을 확인합니다.
-5. **심화와 운영:** [GPU MODE](gpu-mode/README.md)로 최적화를 확장하고, [기술 아티클](../articles/README.md)로 공유·격리·플랫폼 운영 문제를 살펴봅니다.
+5. **심화와 운영:** [GPU MODE](gpu-mode/README.md)로 최적화를 확장하고, [블로그](../blog/README.md) 글로 공유·격리·플랫폼 운영 문제를 살펴봅니다.

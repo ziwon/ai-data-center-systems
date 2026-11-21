@@ -22,15 +22,15 @@
 - [GPU Cluster Failure Analysis: ECC, Xid, RDMA, and NCCL Hang](./gpu-cluster-failure-analysis/README.md)
 - [Clos Fabric Lab Series](./clos-ebgp-lab/README.md)
 
-## 기술 아티클
+## 블로그
 
-AI 데이터센터 네트워크의 설계와 운영을 다룬 글입니다. [전체 아티클](../articles/README.md)
+AI 데이터센터 네트워크의 설계와 운영을 다룬 글입니다. [블로그 전체 글](../blog/README.md)
 
-<!-- articles:start (generated from article frontmatter by `npm run articles:index` in .site; do not edit by hand) -->
+<!-- blog:start (generated from post frontmatter by `npm run blog:index` in .site; do not edit by hand) -->
 
-- [Cloud Data Center Network의 지금과 앞으로](../articles/cloud-data-center-network-now-and-next.ko.md)
+- [Cloud Data Center Network의 지금과 앞으로](../blog/2026-06-28-cloud-data-center-network-now-and-next.ko.md)
 
-<!-- articles:end -->
+<!-- blog:end -->
 
 ## Resources
 

@@ -1,5 +1,4 @@
 ---
-date: 2026-07-07
 topics: [gpu]
 description: "Kubernetes DRA가 맡는 GPU 할당과, HAMi가 맡는 GPU 안의 메모리·연산 제한을 나눠서 비교한다."
 ---
@@ -448,7 +447,7 @@ SKU 설계, 전환 계획이 실제 운영 품질을 좌우한다.
 | 주제 | 다룰 내용 |
 | --- | --- |
 | HAMi 스케줄러 상세 분석 | `fitInDevices`, binpack·spread 점수 계산, Node annotation 프로토콜 |
-| [HAMi-core 상세 분석](hami-core-deep-dive.ko.md) | `libvgpu.so`, CUDA/NVML 훅, 메모리 사용량 집계, 잠금 경합 |
+| [HAMi-core 상세 분석](2026-07-07-hami-core-deep-dive.ko.md) | `libvgpu.so`, CUDA/NVML 훅, 메모리 사용량 집계, 잠금 경합 |
 | HAMi와 MIG 벤치마크 | 같은 워크로드를 non-MIG HAMi, MIG, time-slicing으로 비교 |
 | GPU SKU 설계 노트 | 4GB·8GB·16GB SKU, quota, 과금, admission 정책 설계 |
 | DRA 전환 계획 | HAMi 자원 모델을 DRA `DeviceClass`·`ResourceClaim`으로 옮기는 방법 |

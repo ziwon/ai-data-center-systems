@@ -1,5 +1,4 @@
 ---
-date: 2026-10-21
 topics: [gpu]
 description: "하드웨어 장애 진단부터 노드 등록·검증, 멀티테넌트 운영까지 GPU 플랫폼을 반복 가능하게 운영하는 방법을 정리한다."
 ---
@@ -1257,9 +1256,9 @@ GPU 운영에서는 장치 하나의 오류를 깊게 파고드는 능력과 그
 
 이 저장소의 다음 글은 개별 주제를 더 깊게 다룬다.
 
-- [DRA와 HAMi로 보는 Kubernetes GPU 분할](hami-dra-gpu-sharing.ko.md): 할당과 runtime enforcement의 관계.
-- [HAMi-core Deep Dive](hami-core-deep-dive.ko.md): 사용자 공간에서 GPU 자원을 제어하는 구현 경로.
-- [Keeping GPU Workloads NUMA-Local in Kubernetes](keeping-gpu-workloads-numa-local-in-kubernetes.ko.md): 노드 내부 locality 정책.
+- [DRA와 HAMi로 보는 Kubernetes GPU 분할](2026-07-07-hami-dra-gpu-sharing.ko.md): 할당과 runtime enforcement의 관계.
+- [HAMi-core Deep Dive](2026-07-07-hami-core-deep-dive.ko.md): 사용자 공간에서 GPU 자원을 제어하는 구현 경로.
+- [Keeping GPU Workloads NUMA-Local in Kubernetes](2026-06-28-keeping-gpu-workloads-numa-local-in-kubernetes.ko.md): 노드 내부 locality 정책.
 - [GPU 클러스터 장애 분석](../network/gpu-cluster-failure-analysis/README.md): ECC·Xid·RDMA·NCCL 장애의 연결.
 - [MLOps](../mlops/README.md): artifact의 출처 추적과 검증을 통한 배포 관리.
 

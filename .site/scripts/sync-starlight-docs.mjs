@@ -2,7 +2,7 @@ import { copyFile, mkdir, readdir, readFile, rm, stat, writeFile } from 'node:fs
 import { execFile } from 'node:child_process';
 import path from 'node:path';
 import { promisify } from 'node:util';
-import { articleTopics, loadArticles, parseFrontmatter, topicLabels } from './lib/articles.mjs';
+import { articleTopics, blogDirectory, loadArticles, parseFrontmatter, postSlug, topicLabels } from './lib/blog.mjs';
 import { embedDocuments, isEmbeddingEnabled } from './lib/embeddings.mjs';
 
 const execFileAsync = promisify(execFile);
@@ -18,7 +18,7 @@ const ogImageRevision = '2';
 const repositoryEditBase = 'https://github.com/ziwon/ai-data-center-systems/edit/main/';
 
 const docRoots = [
-  'articles',
+  'blog',
   'network',
   'gpu',
   'training',
@@ -75,7 +75,7 @@ const ignoredDirs = new Set([
 
 const publishedAssetRoots = [
   'fabric.svg',
-  'articles',
+  'blog',
   'network',
   'gpu',
   'training',
@@ -88,6 +88,7 @@ const publishedAssetRoots = [
 ];
 
 const staleGeneratedPublicRoots = [
+  'articles',
   'ai-data-center-network',
   'efficient-llm-inference-systems',
   'deep-learning-for-network-engineers',
@@ -102,8 +103,8 @@ const pages = [];
 
 const defaultDescriptionsBySource = new Map([
   [
-    'articles/README.md',
-    'Technical articles on AI data center systems: GPU operations, failure analysis, networking, and performance engineering.',
+    'blog/README.md',
+    'Technical blog posts on AI data center systems: GPU operations, failure analysis, networking, and performance engineering.',
   ],
   [
     'network/README.md',
@@ -229,7 +230,7 @@ const weakSingleHitAliases = new Set([
   'tail latency',
 ]);
 
-// Articles are sorted newest first; their position drives the sidebar order and the RSS feed.
+// Blog posts are sorted newest first; their position drives the sidebar order and the RSS feed.
 const articles = await loadArticles(sourceRoot);
 const articleByRelative = new Map(articles.map((article, index) => [article.relative, { ...article, order: index + 1 }]));
 
@@ -376,9 +377,9 @@ async function sourceLastUpdated(relative, absolute) {
   return sourceStats.mtime.toISOString();
 }
 
-// The articles index leads the Articles sidebar; articles follow newest first.
+// The blog index leads the Blog sidebar; posts follow newest first.
 function sidebarFrontmatterLines(relative, article) {
-  if (relative === 'articles/README.md') return ['sidebar:', '  order: 0', '  label: "전체 아티클"'];
+  if (relative === 'blog/README.md') return ['sidebar:', '  order: 0', '  label: "전체 글"'];
   if (article) {
     // Sidebar labels are plain text, so drop inline-code backticks from the title.
     const label = article.title.includes('`') ? [`  label: ${JSON.stringify(article.title.replaceAll('`', ''))}`] : [];
@@ -387,7 +388,7 @@ function sidebarFrontmatterLines(relative, article) {
   return [];
 }
 
-// Date and topics under an article's title, with each topic linking to its topic page.
+// Date and topics under a post's title, with each topic linking to its topic page.
 function articleMetaLine(article) {
   if (!article) return '';
   const topics = article.topics
@@ -407,7 +408,7 @@ function escapeHtml(value) {
 async function writeArticleFeed() {
   const items = articles.map((article) => {
     const url = `${siteUrl}${routeFromOutput(markdownOutputPath(article.relative))}`;
-    // Articles carry a date only; publish them at 09:00 KST.
+    // Posts carry a date only; publish them at 09:00 KST.
     const published = new Date(`${article.date}T09:00:00+09:00`).toUTCString();
     return [
       '    <item>',
@@ -425,10 +426,10 @@ async function writeArticleFeed() {
     '<?xml version="1.0" encoding="UTF-8"?>',
     '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">',
     '  <channel>',
-    '    <title>AI Data Center Systems · Articles</title>',
-    `    <link>${siteUrl}/articles/</link>`,
-    `    <atom:link href="${siteUrl}/articles/rss.xml" rel="self" type="application/rss+xml"/>`,
-    '    <description>Technical articles on AI data center systems: GPU operations, failure analysis, networking, and performance engineering.</description>',
+    '    <title>AI Data Center Systems · Blog</title>',
+    `    <link>${siteUrl}/blog/</link>`,
+    `    <atom:link href="${siteUrl}/blog/rss.xml" rel="self" type="application/rss+xml"/>`,
+    '    <description>Technical blog posts on AI data center systems: GPU operations, failure analysis, networking, and performance engineering.</description>',
     '    <language>ko</language>',
     ...(articles[0] ? [`    <lastBuildDate>${new Date(`${articles[0].date}T09:00:00+09:00`).toUTCString()}</lastBuildDate>`] : []),
     ...items,
@@ -437,8 +438,8 @@ async function writeArticleFeed() {
     '',
   ].join('\n');
 
-  await mkdir(path.join(publicOut, 'articles'), { recursive: true });
-  await writeFile(path.join(publicOut, 'articles', 'rss.xml'), feed);
+  await mkdir(path.join(publicOut, 'blog'), { recursive: true });
+  await writeFile(path.join(publicOut, 'blog', 'rss.xml'), feed);
 }
 
 function pageHeadEntries(route, isSiteHome) {
@@ -484,8 +485,8 @@ function siteHomeBody() {
 </section>
 
 <section class="adcs-track-grid" aria-label="Study tracks">
-  <a class="adcs-track-card" href="/articles/">
-    <span>Articles</span>
+  <a class="adcs-track-card" href="/blog/">
+    <span>Blog</span>
     <small>Field notes on GPU operations, failure analysis, networking, and performance.</small>
   </a>
   <a class="adcs-track-card" href="/network/">
@@ -550,6 +551,9 @@ function markdownOutputPath(relative) {
   if (relative === 'README.md') return 'index.md';
   if (relative.endsWith('/README.md')) {
     return `${relative.slice(0, -'/README.md'.length)}/index.md`;
+  }
+  if (path.posix.dirname(relative) === blogDirectory) {
+    return `${blogDirectory}/${postSlug(path.posix.basename(relative))}/index.md`;
   }
   if (relative.endsWith('.md')) {
     return `${relative.slice(0, -'.md'.length)}/index.md`;

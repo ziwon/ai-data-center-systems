@@ -7,16 +7,16 @@
 - [Chapter 5: GPU-Based Storage I/O Optimizations](./chap05/README.md)
 - [Chapter 6: GPU Architecture, CUDA Programming, and Maximizing Occupancy](./chap06/README.md)
 
-## 기술 아티클
+## 블로그
 
-GPU 시스템의 성능 문제를 운영 관점에서 다룬 글입니다. [전체 아티클](../articles/README.md)
+GPU 시스템의 성능 문제를 운영 관점에서 다룬 글입니다. [블로그 전체 글](../blog/README.md)
 
-<!-- articles:start (generated from article frontmatter by `npm run articles:index` in .site; do not edit by hand) -->
+<!-- blog:start (generated from post frontmatter by `npm run blog:index` in .site; do not edit by hand) -->
 
-- [Keeping GPU Workloads NUMA-Local in Kubernetes](../articles/keeping-gpu-workloads-numa-local-in-kubernetes.ko.md)
-- [Never Underestimate Memory Architecture](../articles/never-underestimate-memory-architecture.ko.md)
+- [Keeping GPU Workloads NUMA-Local in Kubernetes](../blog/2026-06-28-keeping-gpu-workloads-numa-local-in-kubernetes.ko.md)
+- [Never Underestimate Memory Architecture](../blog/2026-06-28-never-underestimate-memory-architecture.ko.md)
 
-<!-- articles:end -->
+<!-- blog:end -->
 
 ## Resources
 

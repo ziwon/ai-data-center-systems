@@ -124,28 +124,29 @@ When adding a `Practical Tips and Notes` section to a chapter README, keep it cl
 - When discussing external images or references, prefer official sources for embedded images. Use third-party articles as additional references unless there is a strong reason to embed them.
 - If a referenced image is similar but not the same system, add an explicit note explaining the difference.
 
-## Articles
+## Blog
 
-Standalone, dated articles live in the top-level `articles/` folder, not inside topic folders. The site shows them under the **Articles** menu, newest first, and publishes an RSS feed at `/articles/rss.xml`.
+Standalone, dated posts live in the top-level `blog/` folder, not inside topic folders. The site shows them under the **Blog** menu, newest first, and publishes an RSS feed at `/blog/rss.xml`.
 
-- Start each article with frontmatter, then the `# Title` heading:
+- Name each post `YYYY-MM-DD-slug.md`, where the date is the publish date, e.g. `2026-11-01-gpu-sm-warp-memory-and-cudnn-rtx5090.ko.md`. The file name is the only place the date is written; the site URL drops it (`/blog/gpu-sm-warp-memory-and-cudnn-rtx5090.ko/`), so keep the slug stable once published.
+- Start each post with frontmatter, then the `# Title` heading:
 
   ```markdown
   ---
-  date: 2026-11-01
   topics: [gpu, systems-performance]
-  description: "One-sentence summary shown in the article lists and the RSS feed."
+  description: "One-sentence summary shown in the blog lists and the RSS feed."
   ---
 
   # Title
   ```
 
 - `topics` must use topic folder names: `network`, `gpu`, `storage`, `training`, `inference`, `mlops`, `systems-performance`.
-- A Korean and English pair uses `name.ko.md` and `name.md`, with the language toggle line under each H1.
-- Put figures in `articles/assets/` with a topic prefix, e.g. `gpu-sm-warp-cudnn-plans.svg`.
-- Cite sources with GFM footnotes (`[^id]`) and end the article with a visible `## 참고 자료` (or `## References`) heading above the footnote definitions.
-- After adding an article or changing its title, date, topics, or description, run `npm run articles:index` in `.site`. It rewrites `articles/README.md` and the lists in topic READMEs between `<!-- articles:start ... -->` and `<!-- articles:end -->`. Do not edit those lists by hand. CI runs `npm run articles:check` and fails when they are stale.
-- A topic README needs those markers once the topic has an article.
+- A Korean and English pair uses the same date and slug, `YYYY-MM-DD-name.ko.md` and `YYYY-MM-DD-name.md`, with the language toggle line under each H1.
+- Put figures in `blog/assets/` with a topic prefix, e.g. `gpu-sm-warp-cudnn-plans.svg`.
+- Cite sources with GFM footnotes (`[^id]`) and end the post with a visible `## 참고 자료` (or `## References`) heading above the footnote definitions.
+- Every Markdown file in `blog/` is published. Keep drafts and source exports outside the folder.
+- After adding a post or changing its file name, title, topics, or description, run `npm run blog:index` in `.site`. It rewrites `blog/README.md` and the lists in topic READMEs between `<!-- blog:start ... -->` and `<!-- blog:end -->`. Do not edit those lists by hand. CI runs `npm run blog:check` and fails when they are stale.
+- A topic README needs those markers once the topic has a post.
 
 ## Git Commits
 

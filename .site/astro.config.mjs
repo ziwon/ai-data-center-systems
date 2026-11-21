@@ -131,11 +131,11 @@ export default defineConfig({
         starlightSidebarTopics(
           [
             {
-              label: 'Articles',
-              link: '/articles/',
+              label: 'Blog',
+              link: '/blog/',
               icon: 'pencil',
-              attrs: { 'aria-label': 'Articles', title: 'Articles' },
-              items: [{ autogenerate: { directory: 'articles' } }],
+              attrs: { 'aria-label': 'Blog', title: 'Blog' },
+              items: [{ autogenerate: { directory: 'blog' } }],
             },
             {
               label: 'Network',
@@ -225,8 +225,8 @@ export default defineConfig({
           attrs: {
             rel: 'alternate',
             type: 'application/rss+xml',
-            title: 'AI Data Center Systems · Articles',
-            href: '/articles/rss.xml',
+            title: 'AI Data Center Systems · Blog',
+            href: '/blog/rss.xml',
           },
         },
         ...googleAdSenseHeadEntries(googleAdSenseClient),
