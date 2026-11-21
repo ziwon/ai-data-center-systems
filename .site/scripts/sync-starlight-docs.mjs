@@ -468,7 +468,7 @@ function siteHomeBody() {
 <section class="adcs-home-hero">
   <div class="adcs-home-hero-copy">
     <p class="adcs-home-kicker">Study wiki</p>
-    <h2>AI infrastructure notes for the places where models meet machines.</h2>
+    <h2>Where models meet machines.</h2>
     <p>
       Networking, inference, training, MLOps, storage, and performance engineering notes organized as
       connected study tracks.
