@@ -9,10 +9,12 @@ routes = [
 
 [vars]
 ALLOWED_ORIGIN = "https://adcs.restack.tech"
-GITHUB_MODELS_ENDPOINT = "https://models.github.ai/inference/chat/completions"
-GITHUB_MODELS_MODEL = "openai/gpt-4.1-mini"
+WORKERS_AI_MODEL = "@cf/google/gemma-4-26b-a4b-it"
 RATE_LIMIT_REQUESTS = "20"
 RATE_LIMIT_WINDOW_SECONDS = "3600"
+
+[ai]
+binding = "AI"
 
 [[kv_namespaces]]
 binding = "ASK_DOCS_RATE_LIMIT"

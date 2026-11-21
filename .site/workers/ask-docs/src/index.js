@@ -1,5 +1,6 @@
 const memoryBuckets = new Map();
 const PAGE_SIZE = 20;
+const DEFAULT_MODEL = '@cf/google/gemma-4-26b-a4b-it';
 
 export default {
   async fetch(request, env, ctx) {
@@ -63,8 +64,8 @@ export default {
       );
     }
 
-    if (!env.GITHUB_MODELS_TOKEN) {
-      return json({ error: 'GITHUB_MODELS_TOKEN is not configured' }, 500, corsHeaders);
+    if (!env.AI) {
+      return json({ error: 'Workers AI binding is not configured' }, 500, corsHeaders);
     }
 
     let payload;
@@ -84,7 +85,18 @@ export default {
       return json({ error: 'At least one source is required' }, 400, corsHeaders);
     }
 
-    const answer = await askGitHubModels({ env, question, sources });
+    let answer;
+    try {
+      answer = await askModel({ env, question, sources });
+    } catch (err) {
+      // Keep the upstream detail in the Worker logs; show the reader a plain message.
+      console.error('ask-docs model call failed:', err?.message || String(err));
+      return json(
+        { error: '답변 생성 서비스에 일시적인 문제가 있습니다. 잠시 후 다시 시도해주세요.' },
+        502,
+        corsHeaders,
+      );
+    }
 
     if (env.QA_DB) {
       const ip = request.headers.get('cf-connecting-ip') || 'unknown';
@@ -297,7 +309,7 @@ async function handleLogs(request, env, corsHeaders) {
   }, 200, corsHeaders);
 }
 
-async function askGitHubModels({ env, question, sources }) {
+async function askModel({ env, question, sources }) {
   const context = sources
     .map((source, index) => {
       return [
@@ -308,58 +320,61 @@ async function askGitHubModels({ env, question, sources }) {
     })
     .join('\n\n---\n\n');
 
-  const response = await fetch(env.GITHUB_MODELS_ENDPOINT, {
-    method: 'POST',
-    headers: {
-      authorization: `Bearer ${env.GITHUB_MODELS_TOKEN}`,
-      'content-type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: env.GITHUB_MODELS_MODEL || 'openai/gpt-4.1-mini',
-      temperature: 0.2,
-      max_tokens: 1400,
-      messages: [
-        {
-          role: 'system',
-          content: [
-            'You are a patient technical tutor for the AI Data Center Systems documentation.',
-            'Answer in Korean unless the user asks for another language.',
-            'Use the provided documentation sources as the anchor for the answer, but you may add generally accepted background knowledge when it helps a beginner understand the topic.',
-            'Clearly separate what the document says from extra explanatory context when the distinction matters.',
-            'Do not fabricate document-specific claims, numbers, commands, product behavior, or citations that are not in the sources.',
-            'Prefer teaching: define key terms, explain why they matter, connect cause and effect, then give practical checks or examples.',
-            'If the sources are thin, say that the document only gives limited evidence and then provide a careful general explanation.',
-          ].join(' '),
-        },
-        {
-          role: 'user',
-          content: [
-            `Question:\n${question}`,
-            `Sources:\n${context}`,
-            [
-              'Write a helpful teaching answer.',
-              'Structure it as:',
-              '1. Short direct answer.',
-              '2. Explanation for a reader who is new to the topic.',
-              '3. How this connects to the provided document, citing source numbers like [1] where useful.',
-              '4. Practical checks, examples, or caveats when relevant.',
-              'Keep it focused, but do not be so terse that the reader has to already know the background.',
-            ].join('\n'),
-          ].join('\n\n'),
-        },
-      ],
-    }),
+  const result = await env.AI.run(env.WORKERS_AI_MODEL || DEFAULT_MODEL, {
+    temperature: 0.2,
+    max_tokens: 1400,
+    messages: [
+      {
+        role: 'system',
+        content: [
+          'You are a patient technical tutor for the AI Data Center Systems documentation.',
+          'Answer in Korean unless the user asks for another language.',
+          'Use the provided documentation sources as the anchor for the answer, but you may add generally accepted background knowledge when it helps a beginner understand the topic.',
+          'Clearly separate what the document says from extra explanatory context when the distinction matters.',
+          'Do not fabricate document-specific claims, numbers, commands, product behavior, or citations that are not in the sources.',
+          'Prefer teaching: define key terms, explain why they matter, connect cause and effect, then give practical checks or examples.',
+          'If the sources are thin, say that the document only gives limited evidence and then provide a careful general explanation.',
+        ].join(' '),
+      },
+      {
+        role: 'user',
+        content: [
+          `Question:\n${question}`,
+          `Sources:\n${context}`,
+          [
+            'Write a helpful teaching answer.',
+            'Structure it as:',
+            '1. Short direct answer.',
+            '2. Explanation for a reader who is new to the topic.',
+            '3. How this connects to the provided document, citing source numbers like [1] where useful.',
+            '4. Practical checks, examples, or caveats when relevant.',
+            'Keep it focused, but do not be so terse that the reader has to already know the background.',
+          ].join('\n'),
+        ].join('\n\n'),
+      },
+    ],
   });
 
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    const message = data?.error?.message || data?.message || `GitHub Models error: ${response.status}`;
-    throw new Error(message);
-  }
-
-  const answer = data?.choices?.[0]?.message?.content;
-  if (!answer) throw new Error('GitHub Models returned an empty answer');
+  const answer = extractAnswer(result);
+  if (!answer) throw new Error('Workers AI returned an empty answer');
   return answer;
+}
+
+// Workers AI models answer in one of a few shapes depending on the model family.
+function extractAnswer(result) {
+  if (typeof result === 'string') return result.trim();
+  const candidates = [
+    result?.response,
+    result?.choices?.[0]?.message?.content,
+    result?.output_text,
+    result?.output
+      ?.flatMap((item) => item?.content ?? [])
+      .filter((part) => part?.type === 'output_text')
+      .map((part) => part.text)
+      .join(''),
+  ];
+  const text = candidates.find((value) => typeof value === 'string' && value.trim());
+  return text ? text.trim() : '';
 }
 
 async function logQA({ db, ip, question, answer, sources }) {
