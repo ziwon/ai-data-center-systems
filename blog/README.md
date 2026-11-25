@@ -8,12 +8,6 @@ AI 데이터센터 시스템을 다루는 기술 블로그입니다. 분야별 �
 
 <!-- blog:start (generated from post frontmatter by `npm run blog:index` in .site; do not edit by hand) -->
 
-### [같은 SM에서 반복되는 GPU 오류는 하드웨어 불량의 증거일까?](2026-11-01-gpu-sm-warp-memory-and-cudnn-rtx5090.ko.md)
-
-2026-11-01 · GPU
-
-RTX 5090 학습 장애를 따라가며 SM·warp 실행 구조, GPU 메모리 계층, cuDNN의 커널 선택, Nsight로 실패 지점을 좁히는 방법과 장비 교체 후 재검증까지 살펴본다.
-
 ### [rm -rf 사고로 손상된 DGX B200 노드 복구기](2026-10-28-dgx-b200-rm-rf-recovery.ko.md)
 
 2026-10-28 · GPU · [English](2026-10-28-dgx-b200-rm-rf-recovery.md)

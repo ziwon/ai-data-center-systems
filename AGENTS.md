@@ -128,7 +128,7 @@ When adding a `Practical Tips and Notes` section to a chapter README, keep it cl
 
 Standalone, dated posts live in the top-level `blog/` folder, not inside topic folders. The site shows them under the **Blog** menu, newest first, and publishes an RSS feed at `/blog/rss.xml`.
 
-- Name each post `YYYY-MM-DD-slug.md`, where the date is the publish date, e.g. `2026-11-01-gpu-sm-warp-memory-and-cudnn-rtx5090.ko.md`. The file name is the only place the date is written; the site URL drops it (`/blog/gpu-sm-warp-memory-and-cudnn-rtx5090.ko/`), so keep the slug stable once published.
+- Name each post `YYYY-MM-DD-slug.md`, where the date is the publish date, e.g. `2026-10-28-dgx-b200-rm-rf-recovery.ko.md`. The file name is the only place the date is written; the site URL drops it (`/blog/dgx-b200-rm-rf-recovery.ko/`), so keep the slug stable once published.
 - Start each post with frontmatter, then the `# Title` heading:
 
   ```markdown
@@ -142,7 +142,7 @@ Standalone, dated posts live in the top-level `blog/` folder, not inside topic f
 
 - `topics` must use topic folder names: `network`, `gpu`, `storage`, `training`, `inference`, `mlops`, `systems-performance`.
 - A Korean and English pair uses the same date and slug, `YYYY-MM-DD-name.ko.md` and `YYYY-MM-DD-name.md`, with the language toggle line under each H1.
-- Put figures in `blog/assets/` with a topic prefix, e.g. `gpu-sm-warp-cudnn-plans.svg`.
+- Put figures in `blog/assets/` with a topic prefix, e.g. `gpu-platform-numa-paths.svg`.
 - Cite sources with GFM footnotes (`[^id]`) and end the post with a visible `## 참고 자료` (or `## References`) heading above the footnote definitions.
 - Every Markdown file in `blog/` is published. Keep drafts and source exports outside the folder.
 - After adding a post or changing its file name, title, topics, or description, run `npm run blog:index` in `.site`. It rewrites `blog/README.md` and the lists in topic READMEs between `<!-- blog:start ... -->` and `<!-- blog:end -->`. Do not edit those lists by hand. CI runs `npm run blog:check` and fails when they are stale.

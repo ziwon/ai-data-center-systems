@@ -11,7 +11,7 @@ const errors = [];
 const canonicalRoutes = [
   '/',
   '/blog/',
-  '/blog/gpu-sm-warp-memory-and-cudnn-rtx5090.ko/',
+  '/blog/dgx-b200-rm-rf-recovery.ko/',
   '/network/',
   '/network/chap01/',
   '/gpu/',
