@@ -17,6 +17,7 @@ GPU 자원 공유와 격리, 장애 분석, 반복 가능한 플랫폼 운영을
 
 <!-- blog:start (generated from post frontmatter by `npm run blog:index` in .site; do not edit by hand) -->
 
+- [GPU는 바쁜데 내 응답은 왜 멈췄을까? — 긴 LLM 추론과 KV 캐시 선점](../blog/2026-11-26-llm-kv-cache-thrashing.ko.md)
 - [rm -rf 사고로 손상된 DGX B200 노드 복구기](../blog/2026-10-28-dgx-b200-rm-rf-recovery.ko.md) · [English](../blog/2026-10-28-dgx-b200-rm-rf-recovery.md)
 - [GPU 인프라 운영과 플랫폼 설계: 하드웨어 장애 분석부터 멀티테넌시까지](../blog/2026-10-21-gpu-infrastructure-operations-and-platform-design.ko.md)
 - [HAMi-core 심층 분석: `libvgpu.so`는 GPU를 어떻게 나누는가](../blog/2026-07-07-hami-core-deep-dive.ko.md)

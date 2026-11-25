@@ -8,6 +8,12 @@ AI 데이터센터 시스템을 다루는 기술 블로그입니다. 분야별 �
 
 <!-- blog:start (generated from post frontmatter by `npm run blog:index` in .site; do not edit by hand) -->
 
+### [GPU는 바쁜데 내 응답은 왜 멈췄을까? — 긴 LLM 추론과 KV 캐시 선점](2026-11-26-llm-kv-cache-thrashing.ko.md)
+
+2026-11-26 · Inference, GPU
+
+LLM 서버가 토큰을 계속 만들어도 한 사용자의 응답은 몇 분씩 멈출 수 있다. Stint 논문의 장문 추론 실험으로 KV 캐시 선점이 출력 공백으로 이어지는 과정과, 이를 가려낼 운영 지표를 살펴본다.
+
 ### [rm -rf 사고로 손상된 DGX B200 노드 복구기](2026-10-28-dgx-b200-rm-rf-recovery.ko.md)
 
 2026-10-28 · GPU · [English](2026-10-28-dgx-b200-rm-rf-recovery.md)

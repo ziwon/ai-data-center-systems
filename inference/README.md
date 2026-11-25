@@ -10,6 +10,17 @@ LLM 추론의 성능 지표와 하드웨어부터 커널 최적화, 모델 구�
 | Transformer와 추론 실행의 기초 | [기초 참고자료](#기초-참고자료) |
 | Roofline과 GPU·TPU·NPU 비교 | [하드웨어 아키텍처](#하드웨어-아키텍처) |
 | 모델별 구조와 서빙 특성 | [모델 아키텍처](#모델-아키텍처) |
+| 서빙 운영 사례와 논문 해설 | [블로그](#블로그) |
+
+## 블로그
+
+추론 서빙의 운영 문제와 관련 연구를 다룬 글입니다. 다른 분야의 글까지 모두 보려면 [블로그 전체 글](../blog/README.md)을 확인하세요.
+
+<!-- blog:start (generated from post frontmatter by `npm run blog:index` in .site; do not edit by hand) -->
+
+- [GPU는 바쁜데 내 응답은 왜 멈췄을까? — 긴 LLM 추론과 KV 캐시 선점](../blog/2026-11-26-llm-kv-cache-thrashing.ko.md)
+
+<!-- blog:end -->
 
 ## 추론 시스템 강좌
 
