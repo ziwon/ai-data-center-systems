@@ -1,4 +1,5 @@
 import { copyFile, mkdir, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
+import { readdirSync } from 'node:fs';
 import { execFile } from 'node:child_process';
 import path from 'node:path';
 import { promisify } from 'node:util';
@@ -14,7 +15,7 @@ const pagesOut = path.join(projectRoot, 'src', 'pages');
 const publicOut = path.join(projectRoot, 'public');
 const conceptsPath = path.join(projectRoot, 'kb', 'concepts.json');
 const siteUrl = 'https://aidc.restack.tech';
-const ogImageRevision = '2';
+const ogImageRevision = '3';
 const repositoryEditBase = 'https://github.com/ziwon/ai-data-center-systems/edit/main/';
 
 const docRoots = [
@@ -236,6 +237,7 @@ const articleByRelative = new Map(articles.map((article, index) => [article.rela
 
 await cleanGeneratedOutput();
 await walk(sourceRoot);
+await writeNotFoundPage();
 await writeLlmsFiles();
 await writeArticleFeed();
 await writeKnowledgeGraph();
@@ -377,6 +379,43 @@ async function sourceLastUpdated(relative, absolute) {
   return sourceStats.mtime.toISOString();
 }
 
+async function writeNotFoundPage() {
+  // Custom 404 stays off `pages`, so llms.txt, the graph, and RSS never see it.
+  // Hero title/tagline are HTML (Starlight set:html); the top-level title and
+  // description stay plain so <title> and OG tags do not contain markup.
+  await writeFile(path.join(docsOut, '404.md'), notFoundPage());
+}
+
+function notFoundPage() {
+  return String.raw`---
+title: "404"
+description: "The page you requested could not be found."
+template: splash
+pagefind: false
+editUrl: false
+lastUpdated: false
+sidebar:
+  hidden: true
+prev: false
+next: false
+head:
+  - tag: meta
+    attrs:
+      name: robots
+      content: noindex
+hero:
+  title: '<span class="adcs-home-kicker">Page not found</span> 404'
+  tagline: |
+    <p>The page you requested could not be found.</p>
+    <div class="adcs-home-actions">
+      <a href="/">Home</a>
+      <a href="/blog/">Blog</a>
+      <a href="/knowledge-graph-3d/">3D graph</a>
+    </div>
+---
+`;
+}
+
 // The blog index leads the Blog sidebar; posts follow newest first.
 function sidebarFrontmatterLines(relative, article) {
   if (relative === 'blog/README.md') return ['sidebar:', '  order: 0', '  label: "전체 글"'];
@@ -463,6 +502,60 @@ function ogImageSlugFromRoute(route) {
   return slug || 'index';
 }
 
+// Home page track cards: link, title, summary. The meta line counts what a
+// reader will find there, computed from the published sources. These are
+// functions because the top-level sync runs before later declarations.
+function homeTracks() {
+  return [
+    ['/blog/', 'Blog', 'Field notes on GPU operations, failure analysis, networking, and performance.'],
+    ['/network/', 'Network', 'RDMA, InfiniBand, RoCE, Clos fabrics, telemetry, and congestion control.'],
+    ['/gpu/', 'GPU &amp; Accelerator Systems', 'GPU architecture, CUDA, PMPP, profiling, and kernel case studies.'],
+    ['/storage/', 'Storage', 'AI workload storage, ZFS, MLPerf Storage, and checkpoint data paths.'],
+    ['/training/', 'Training', 'MLPerf Training, distributed training workloads, LLMs, MoE, and LoRA.'],
+    ['/inference/', 'Inference', 'KV cache, batching, quantization, GPU profiling, and serving trade-offs.'],
+    ['/mlops/', 'MLOps', 'Lifecycle control, lineage, CI/CD/CT, progressive delivery, and model monitoring.'],
+    ['/systems-performance/', 'Systems Performance', 'GPU hardware, OS and container tuning, CUDA, PyTorch, and distributed communication.'],
+    ['/courses/', 'Courses', 'CME295 and deep learning systems courses organized as sequential learning tracks.'],
+  ];
+}
+
+function trackCards() {
+  return homeTracks()
+    .map(([href, title, summary]) => {
+      const topic = href.replaceAll('/', '');
+      // A Korean and English pair of one post counts once, as in the blog lists.
+      const count = topic === 'blog'
+        ? new Set(articles.map((article) => postSlug(article.file).replace(/\.ko$/, ''))).size
+        : countPublishedPages(topic);
+      const noun = topic === 'blog' ? 'post' : 'page';
+      const meta = `${count} ${noun}${count === 1 ? '' : 's'}`;
+      return [
+        `  <a class="adcs-track-card" href="${href}">`,
+        `    <span class="adcs-track-title">${title}</span>`,
+        `    <small>${summary}</small>`,
+        `    <span class="adcs-track-meta">${meta}</span>`,
+        '  </a>',
+      ].join('\n');
+    })
+    .join('\n');
+}
+
+function countPublishedPages(topic) {
+  let count = 0;
+  const visit = (directory) => {
+    for (const entry of readdirSync(path.join(sourceRoot, directory), { withFileTypes: true })) {
+      const relative = `${directory}/${entry.name}`;
+      if (entry.isDirectory()) {
+        if (!shouldIgnoreDirectory(entry.name) && relative !== 'network/ib-packets') visit(relative);
+      } else if (entry.isFile() && entry.name.endsWith('.md') && shouldPublishMarkdown(relative)) {
+        count += 1;
+      }
+    }
+  };
+  visit(topic);
+  return count;
+}
+
 function siteHomeBody() {
   return String.raw`
 <section class="adcs-home-hero">
@@ -485,42 +578,7 @@ function siteHomeBody() {
 </section>
 
 <section class="adcs-track-grid" aria-label="Study tracks">
-  <a class="adcs-track-card" href="/blog/">
-    <span>Blog</span>
-    <small>Field notes on GPU operations, failure analysis, networking, and performance.</small>
-  </a>
-  <a class="adcs-track-card" href="/network/">
-    <span>Network</span>
-    <small>RDMA, InfiniBand, RoCE, Clos fabrics, telemetry, and congestion control.</small>
-  </a>
-  <a class="adcs-track-card" href="/gpu/">
-    <span>GPU &amp; Accelerator Systems</span>
-    <small>GPU architecture, CUDA, PMPP, profiling, and kernel case studies.</small>
-  </a>
-  <a class="adcs-track-card" href="/storage/">
-    <span>Storage</span>
-    <small>AI workload storage, ZFS, MLPerf Storage, and checkpoint data paths.</small>
-  </a>
-  <a class="adcs-track-card" href="/training/">
-    <span>Training</span>
-    <small>MLPerf Training, distributed training workloads, LLMs, MoE, and LoRA.</small>
-  </a>
-  <a class="adcs-track-card" href="/inference/">
-    <span>Inference</span>
-    <small>KV cache, batching, quantization, GPU profiling, and serving trade-offs.</small>
-  </a>
-  <a class="adcs-track-card" href="/mlops/">
-    <span>MLOps</span>
-    <small>Lifecycle control, lineage, CI/CD/CT, progressive delivery, and model monitoring.</small>
-  </a>
-  <a class="adcs-track-card" href="/systems-performance/">
-    <span>Systems Performance</span>
-    <small>GPU hardware, OS and container tuning, CUDA, PyTorch, and distributed communication.</small>
-  </a>
-  <a class="adcs-track-card" href="/courses/">
-    <span>Courses</span>
-    <small>CME295 and deep learning systems courses organized as sequential learning tracks.</small>
-  </a>
+${trackCards()}
 </section>
 
 ## Labs and Talks
