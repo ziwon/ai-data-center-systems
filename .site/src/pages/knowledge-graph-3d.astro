@@ -1,5 +1,10 @@
 ---
-// Standalone 3D knowledge graph page.
+// Standalone 3D knowledge graph page. It does not load the Starlight theme, so it
+// imports the restack tokens directly; the page is always the dark face.
+import '../styles/restack/fonts.css';
+import '../styles/restack/color.css';
+import '../styles/restack/typography.css';
+import '../styles/restack/space.css';
 ---
 <!doctype html>
 <html lang="en">
@@ -20,22 +25,22 @@
       }
 
       :root {
-        --bg: #020817;
-        --panel: rgba(5, 12, 24, 0.82);
-        --panel-strong: rgba(9, 18, 34, 0.94);
-        --line: rgba(216, 209, 199, 0.18);
-        --text: #f8f4ed;
-        --muted: #a49c92;
-        --soft: #d8d1c7;
-        --cyan: #25f4ff;
-        --blue: #1684ff;
-        --violet: #735cff;
-        --red: #d9392e;
-        --green: #34d399;
-        --amber: #fbbf24;
-        --radius: 8px;
-        --font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
-          "Segoe UI", sans-serif;
+        --bg: var(--restack-color-canvas);
+        --panel: color-mix(in srgb, var(--restack-color-surface) 88%, transparent);
+        --panel-strong: color-mix(in srgb, var(--restack-color-surface) 97%, transparent);
+        --line: var(--restack-color-border);
+        --text: var(--restack-color-text);
+        --muted: var(--restack-color-text-muted);
+        --soft: var(--restack-color-text-secondary);
+        /* Lime marks what is active or selected; it is the only interaction colour. */
+        --cyan: var(--restack-color-primary-strong);
+        --blue: var(--restack-color-accent);
+        --violet: var(--restack-color-viz-4);
+        --red: var(--restack-color-danger);
+        --green: var(--restack-color-success);
+        --amber: var(--restack-color-warning);
+        --radius: var(--restack-radius-md);
+        --font: var(--restack-font-family-sans);
       }
 
       html,
@@ -69,12 +74,7 @@
         inset: 0;
         display: grid;
         grid-template-rows: auto minmax(0, 1fr);
-        background:
-          linear-gradient(115deg, transparent 0 48%, rgba(24, 132, 255, 0.08) 48.2% 48.7%, transparent 49%),
-          linear-gradient(24deg, transparent 0 53%, rgba(37, 244, 255, 0.07) 53.2% 53.5%, transparent 53.8%),
-          radial-gradient(circle at 18% 12%, rgba(24, 132, 255, 0.16), transparent 19rem),
-          radial-gradient(circle at 84% 18%, rgba(37, 244, 255, 0.12), transparent 20rem),
-          var(--bg);
+        background: var(--bg);
       }
 
       #graph-canvas {
@@ -93,7 +93,7 @@
         align-items: center;
         border-bottom: 1px solid var(--line);
         padding: 0.75rem max(1rem, env(safe-area-inset-right)) 0.75rem max(1rem, env(safe-area-inset-left));
-        background: linear-gradient(90deg, rgba(37, 244, 255, 0.08), transparent 30rem), var(--panel);
+        background: var(--restack-color-surface-sunken);
         backdrop-filter: blur(14px);
       }
 
@@ -105,18 +105,20 @@
       }
 
       .brand span {
-        color: var(--cyan);
-        font-size: 0.72rem;
-        font-weight: 800;
-        letter-spacing: 0.08em;
+        color: var(--muted);
+        font-family: var(--restack-font-family-mono);
+        font-size: var(--restack-font-size-micro);
+        font-weight: var(--restack-font-weight-medium);
+        letter-spacing: var(--restack-letter-spacing-caps);
         text-transform: uppercase;
       }
 
       .brand h1 {
         margin: 0;
         overflow: hidden;
-        color: var(--text);
+        color: var(--restack-color-text-strong);
         font-size: 1.05rem;
+        font-weight: var(--restack-font-weight-semibold);
         line-height: 1.2;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -173,7 +175,7 @@
       .search-results button:hover,
       .search-results button:first-child {
         color: var(--text);
-        background: rgba(37, 244, 255, 0.1);
+        background: var(--restack-color-surface-hover);
       }
 
       .search-results small {
@@ -201,9 +203,9 @@
       .search {
         display: flex;
         min-width: 0;
-        border: 1px solid rgba(216, 209, 199, 0.24);
+        border: 1px solid var(--restack-color-border-strong);
         border-radius: var(--radius);
-        background: rgba(2, 8, 23, 0.78);
+        background: var(--restack-color-surface-sunken);
       }
 
       .search input {
@@ -218,7 +220,7 @@
       }
 
       .search input::placeholder {
-        color: #7c746b;
+        color: var(--restack-color-text-subtle);
       }
 
       .controls {
@@ -231,10 +233,10 @@
       .icon-button,
       .select {
         min-height: 2.35rem;
-        border: 1px solid rgba(216, 209, 199, 0.24);
+        border: 1px solid var(--restack-color-border-strong);
         border-radius: var(--radius);
         color: var(--text);
-        background: rgba(2, 8, 23, 0.76);
+        background: var(--restack-color-surface-sunken);
       }
 
       .icon-button {
@@ -254,9 +256,9 @@
       }
 
       .icon-button[data-active="true"] {
-        border-color: rgba(37, 244, 255, 0.78);
+        border-color: var(--restack-color-primary-subtle);
         color: var(--cyan);
-        background: rgba(37, 244, 255, 0.1);
+        background: var(--restack-color-primary-surface);
       }
 
       .icon-button:disabled {
@@ -313,7 +315,7 @@
       }
 
       .metric-button[aria-pressed="true"] {
-        border-color: rgba(37, 244, 255, 0.78);
+        border-color: var(--restack-color-primary-subtle);
         color: var(--cyan);
       }
 
@@ -344,11 +346,11 @@
 
       .legend .concept {
         border-radius: 2px;
-        background: var(--violet);
+        background: var(--soft);
       }
 
       .legend .selected {
-        border: 2px solid #fff5e6;
+        border: 2px solid var(--restack-color-primary-strong);
         background: transparent;
       }
 
@@ -428,11 +430,11 @@
         display: inline-flex;
         align-items: center;
         gap: 0.4rem;
-        border: 1px solid rgba(216, 209, 199, 0.18);
+        border: 1px solid var(--restack-color-border);
         border-radius: 999px;
         padding: 0.28rem 0.5rem;
         color: var(--soft);
-        background: rgba(2, 8, 23, 0.54);
+        background: var(--restack-color-surface-raised);
         font-size: 0.72rem;
       }
 
@@ -441,7 +443,7 @@
       }
 
       .neighbor-list button:hover {
-        border-color: rgba(37, 244, 255, 0.6);
+        border-color: var(--restack-color-primary-subtle);
         color: var(--text);
       }
 
@@ -454,13 +456,13 @@
         display: none;
         justify-content: center;
         min-height: 2.35rem;
-        border: 1px solid rgba(37, 244, 255, 0.64);
+        border: 1px solid var(--restack-color-primary-edge);
         border-radius: var(--radius);
         padding: 0.55rem 0.75rem;
-        color: var(--cyan);
-        background: rgba(37, 244, 255, 0.08);
+        color: var(--restack-color-on-primary);
+        background: var(--restack-color-primary);
         font-size: 0.82rem;
-        font-weight: 800;
+        font-weight: var(--restack-font-weight-semibold);
         text-decoration: none;
       }
 
@@ -482,7 +484,7 @@
         place-items: center;
         padding: 1rem;
         color: var(--soft);
-        background: rgba(2, 8, 23, 0.62);
+        background: color-mix(in srgb, var(--restack-color-canvas) 62%, transparent);
       }
 
       .status[hidden] {
@@ -709,21 +711,26 @@
           showStatus('Viewer error', String(event.reason?.message ?? event.reason ?? 'Unexpected error.'));
       });
 
-      // Tracks with only a few nodes share one neutral colour so every colour on
-      // screen maps to exactly one legend entry.
-      const trackColors = {
-        network: '#25f4ff',
-        inference: '#4c8dff',
-        gpu: '#34d399',
-        'systems-performance': '#fbbf24',
-        courses: '#f472b6',
-        blog: '#fb923c',
-        storage: '#a3e635',
-      };
-      const spareTrackColors = ['#7dd3fc', '#fb7185', '#c084fc'];
-      const otherTrackColor = '#8b93a3';
+      // Scene colours come from the restack tokens on :root, so the 3D view and its
+      // HTML chrome share one palette. The fallbacks are the dark-face values.
+      function token(name, fallback) {
+        return getComputedStyle(document.documentElement).getPropertyValue(`--restack-color-${name}`).trim() || fallback;
+      }
+
+      // Reserve lime for selection; only the six largest tracks get data colours.
+      const trackColors = [
+        token('viz-2', '#70c5d0'),
+        token('viz-3', '#e1ad7d'),
+        token('viz-4', '#cf9be0'),
+        token('viz-5', '#d8cf89'),
+        token('viz-6', '#d89dbd'),
+        token('viz-7', '#94aaa8'),
+      ];
+      // Other is the quietest series: a dark slate, far below sage in lightness.
+      const otherTrackColor = token('gray-600', '#3a4052');
       const minTrackSize = 4;
-      const conceptColor = '#735cff';
+      // Concepts are told apart by shape (a box), so they stay neutral.
+      const conceptColor = token('text-secondary', '#b5bbca');
       const neighborPreview = 8;
       const inactiveOpacity = 0.08;
       const bgmVideoId = 'eo1gKGt6h9M';
@@ -757,8 +764,8 @@
       };
 
       const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x020817);
-      scene.fog = new THREE.FogExp2(0x020817, 0.0012);
+      scene.background = new THREE.Color(token('canvas', '#0c0d12'));
+      scene.fog = new THREE.FogExp2(new THREE.Color(token('canvas', '#0c0d12')), 0.0012);
 
       const camera = new THREE.PerspectiveCamera(48, 1, 0.1, 2800);
       camera.position.set(0, 120, 760);
@@ -791,7 +798,7 @@
         composer.setSize(window.innerWidth, window.innerHeight);
         composer.addPass(new RenderPass(scene, camera));
         composer.addPass(
-          new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.45, 0.4, 0.3),
+          new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.22, 0.4, 0.5),
         );
       } catch {
         composer = null;
@@ -954,17 +961,23 @@
       }
 
       function addAmbientScene() {
-        scene.add(new THREE.AmbientLight(0x9ccfff, 1.55));
+        scene.add(new THREE.AmbientLight(0xffffff, 1.45));
 
-        const key = new THREE.DirectionalLight(0x25f4ff, 2.2);
+        const key = new THREE.DirectionalLight(0xffffff, 1.5);
         key.position.set(180, 280, 220);
         scene.add(key);
 
-        const fill = new THREE.DirectionalLight(0xd9392e, 0.88);
+        // The signature indigo is atmosphere only: a soft fill from below.
+        const fill = new THREE.DirectionalLight(new THREE.Color(token('signature', '#485cf9')), 0.8);
         fill.position.set(-240, -120, -180);
         scene.add(fill);
 
-        const grid = new THREE.GridHelper(620, 24, 0x174062, 0x0d2236);
+        const grid = new THREE.GridHelper(
+          620,
+          24,
+          new THREE.Color(token('border', '#303545')),
+          new THREE.Color(token('border-subtle', '#252935')),
+        );
         grid.position.y = -170;
         grid.material.transparent = true;
         grid.material.opacity = 0.2;
@@ -986,7 +999,7 @@
         const stars = new THREE.Points(
           starGeometry,
           new THREE.PointsMaterial({
-            color: 0x8fc7ff,
+            color: new THREE.Color(token('signature-strong', '#8595fa')),
             size: 1.5,
             sizeAttenuation: true,
             transparent: true,
@@ -1108,8 +1121,7 @@
         applyFilters();
       }
 
-      // A track is the top-level folder of a document. Tracks too small to read
-      // as a cluster are merged into "Other".
+      // Small tracks and tracks beyond the palette capacity share Other.
       function assignTracks(nodes) {
         const family = (node) => {
           const top = String(node.group || 'other').split('/')[0];
@@ -1118,15 +1130,15 @@
         const counts = new Map();
         for (const node of nodes) counts.set(family(node), (counts.get(family(node)) || 0) + 1);
 
-        const spare = [...spareTrackColors];
         const tracks = [...counts.entries()]
           .filter(([key, count]) => key !== 'other' && count >= minTrackSize)
-          .sort((a, b) => b[1] - a[1])
-          .map(([key, count]) => ({
+          .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+          .slice(0, trackColors.length)
+          .map(([key, count], index) => ({
             key,
             count,
             label: groupLabel(key),
-            color: trackColors[key] || spare.shift() || otherTrackColor,
+            color: trackColors[index],
           }));
         const named = new Set(tracks.map((track) => track.key));
         const otherCount = nodes.filter((node) => !named.has(family(node))).length;
@@ -1357,15 +1369,19 @@
         ringCanvas.width = size;
         ringCanvas.height = size;
         const context = ringCanvas.getContext('2d');
-        context.strokeStyle = '#fff5e6';
-        context.lineWidth = 7;
         context.beginPath();
-        context.arc(size / 2, size / 2, size / 2 - 8, 0, Math.PI * 2);
+        context.arc(size / 2, size / 2, size / 2 - 10, 0, Math.PI * 2);
+        // A dark keyline separates the lime ring from bright nodes and links.
+        context.strokeStyle = token('canvas', '#0c0d12');
+        context.lineWidth = 15;
+        context.stroke();
+        context.strokeStyle = token('primary-strong', '#b2e879');
+        context.lineWidth = 7;
         context.stroke();
         const texture = new THREE.CanvasTexture(ringCanvas);
         texture.colorSpace = THREE.SRGBColorSpace;
         const ring = new THREE.Sprite(
-          new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false, depthTest: false, toneMapped: false }),
+          new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false, depthTest: false, toneMapped: false, fog: false }),
         );
         ring.renderOrder = 3;
         ring.visible = false;
@@ -1388,7 +1404,10 @@
         state.labelOrder = ranked.map((node) => node.id);
 
         for (const node of nodes) {
-          const label = makeLabel(shortTitle(node.title), node.kind === 'concept' ? '#c9bcff' : '#ece5da');
+          const label = makeLabel(
+            shortTitle(node.title),
+            node.kind === 'concept' ? token('text-secondary', '#b5bbca') : token('text', '#e6e8ef'),
+          );
           label.position.set(node.x, node.y + nodeRadius(node) + 7, node.z);
           label.userData.node = node;
           label.material.opacity = 0;
@@ -1434,7 +1453,7 @@
         context.font = font;
         context.textBaseline = 'middle';
         context.lineJoin = 'round';
-        context.strokeStyle = 'rgba(2, 8, 23, 0.92)';
+        context.strokeStyle = token('canvas', '#0c0d12');
         context.lineWidth = 7;
         context.strokeText(text, pad, height / 2);
         context.fillStyle = color;
@@ -1921,11 +1940,11 @@
       }
 
       function edgeColor(type) {
-        if (type.includes('mentions')) return '#735cff';
-        if (type.includes('link')) return '#25f4ff';
-        if (type.includes('semantic')) return '#34d399';
-        if (type.includes('section')) return '#fbbf24';
-        return '#d8d1c7';
+        if (type.includes('mentions')) return token('viz-4', '#cf9be0');
+        if (type.includes('link')) return token('accent', '#70c5d0');
+        if (type.includes('semantic')) return token('viz-7', '#94aaa8');
+        if (type.includes('section')) return token('viz-5', '#d8cf89');
+        return token('text-subtle', '#8d94a8');
       }
 
       function shortTitle(title) {

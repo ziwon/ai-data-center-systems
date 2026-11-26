@@ -1,0 +1,344 @@
+/* Restack design system — color tokens
+ *
+ * The palette began as the restack labs' — nccl-lab, parallel-training-lab and
+ * rdma-fabric-lab — and was then tuned toward the restack ai banner: the
+ * neutrals carry a trace of the banner's indigo and the page sits deeper, so
+ * the signature glow belongs to the ground instead of lying on top of it.
+ * The labs share this world: cool, deep surfaces,
+ * slate text and hairlines, one pale lime accent, and muted pastels that say
+ * what kind of thing something is. Every hex in the two ramps below is a value
+ * here is this system's own; the labs are expected to follow it, not the reverse.
+ *
+ * Three layers, and the layer is the contract:
+ *
+ *   primitives   the ramps. Fixed, face-independent. Never reference these from
+ *                product code — they do not change when the face does.
+ *   faces        the semantic roles, declared once per face. Dark is the default
+ *                and lives on :root; light is opted into with
+ *                data-restack-theme="light" on any element (ThemeProvider sets it).
+ *   derived      tokens built from semantic roles. A var() inside a custom
+ *                property resolves where it is declared, so these are restated on
+ *                every themed root — otherwise a light subtree would inherit a
+ *                focus ring computed against the dark face.
+ */
+
+/* ── Primitives ───────────────────────────────────────────────────────── */
+
+:root {
+  /* Charcoal — the neutral ramp, light to dark. The dark face is built from the
+   * 500–900 end (surfaces, lines and control edges); the light face from the
+   * 000–200 end. Every step sits on one hue — about 230°, the banner's — at low
+   * chroma, so the ramp reads as charcoal until it is beside a true grey. */
+  --restack-color-gray-000: #ffffff;
+  --restack-color-gray-025: #fafafc; /* light canvas */
+  --restack-color-gray-050: #f6f7fa;
+  --restack-color-gray-075: #f3f4f8;
+  --restack-color-gray-100: #eef0f5;
+  --restack-color-gray-125: #eaecf2;
+  --restack-color-gray-150: #e6e8ef; /* dark-face body text */
+  --restack-color-gray-175: #e3e5ec; /* light hairline */
+  --restack-color-gray-200: #d9dce5; /* light line */
+  --restack-color-gray-250: #cfd3de;
+  --restack-color-gray-300: #b5bbca;
+  --restack-color-gray-350: #9fa6b8;
+  --restack-color-gray-400: #8d94a8;
+  /* The light-face control edge: 3.84:1 on white. */
+  --restack-color-gray-450: #7b8296;
+  --restack-color-gray-500: #626a80; /* the dark-face control edge */
+  --restack-color-gray-550: #5a6175;
+  --restack-color-gray-600: #3a4052;
+  --restack-color-gray-650: #303545; /* line */
+  --restack-color-gray-700: #252935; /* hover, hairline */
+  --restack-color-gray-750: #1c1f29; /* raised */
+  --restack-color-gray-800: #15171f; /* panel */
+  --restack-color-gray-850: #101218; /* inset: sidebar, topbar, wells */
+  --restack-color-gray-900: #0c0d12; /* dark canvas */
+
+  /* Lime — the one accent. 300 is the brand: every primary action, selection,
+   * focus ring and readiness cue in the labs resolves to it. */
+  --restack-color-lime-050: #ecfadc;
+  --restack-color-lime-100: #d4f5b3;
+  --restack-color-lime-200: #c6f59b; /* hover on the dark face */
+  --restack-color-lime-300: #b2e879; /* the brand */
+  --restack-color-lime-350: #9dd969; /* derived: 15% toward lime-600, light-face hover / dark-face press */
+  --restack-color-lime-500: #46a01f; /* the selected edge on paper (3.33:1) */
+  --restack-color-lime-600: #257a0c; /* the clear green that can be text on paper (5.43:1) */
+  --restack-color-lime-700: #1f6b12;
+  --restack-color-lime-800: #185510;
+  --restack-color-lime-850: #4f7a2e; /* dark-face selected edge */
+  --restack-color-lime-900: #1f3316; /* dark-face selected fill */
+  --restack-color-lime-925: #18260f; /* dark-face success ground */
+  --restack-color-lime-950: #1b2a0d; /* ink on a lime fill */
+
+  /* Indigo — the signature. Sampled from the restack ai banner, where it is the
+   * glow behind the wordmark. It is atmosphere, never action: nothing indigo is
+   * clickable, selected or a status. */
+  --restack-color-indigo-050: #eef0ff;
+  --restack-color-indigo-300: #8595fa; /* the banner's light edge; 6.54:1 on a panel */
+  --restack-color-indigo-500: #485cf9; /* the glow's core */
+  --restack-color-indigo-700: #3449a6; /* 7.93:1 on white */
+  --restack-color-indigo-900: #1c1f3a;
+
+  /* Pastels — the labs' categorical accents. The 300 is the dark-face colour;
+   * 600/700 are its light-face counterparts; 050 and 900 are the tinted grounds. */
+  --restack-color-cyan-050: #e6f4f6;
+  --restack-color-cyan-200: #a9e1e8;
+  --restack-color-cyan-300: #70c5d0;
+  --restack-color-cyan-600: #2b7f8a;
+  --restack-color-cyan-700: #1d5960;
+  --restack-color-cyan-900: #14282d;
+
+  --restack-color-orange-050: #f8efe6;
+  --restack-color-orange-200: #f0d0b0;
+  --restack-color-orange-300: #e1ad7d;
+  --restack-color-orange-600: #a86224;
+  --restack-color-orange-700: #7a4518;
+  --restack-color-orange-900: #2c2118;
+
+  /* Amber — warning. Kept well clear of red in both hue and lightness, so a
+   * small warning dot and a small danger dot are told apart at a glance. */
+  --restack-color-amber-050: #fbf3dc;
+  --restack-color-amber-300: #ecc35f;
+  --restack-color-amber-600: #8a5a00; /* 5.93:1 on white */
+  --restack-color-amber-700: #6f4a00;
+  --restack-color-amber-900: #2b2412;
+
+  --restack-color-red-050: #fbeceb;
+  --restack-color-red-200: #f8c0b8;
+  --restack-color-red-300: #f2867a;
+  --restack-color-red-600: #b9473b;
+  --restack-color-red-700: #8a3128;
+  --restack-color-red-900: #2e1c1e;
+
+  --restack-color-purple-050: #f7eefa;
+  --restack-color-purple-300: #cf9be0;
+  --restack-color-purple-600: #8a4a9e;
+  --restack-color-purple-900: #2a1f30;
+
+  /* Data-only pastels from parallel-training-lab's memory categories. */
+  --restack-color-yellow-300: #d8cf89;
+  --restack-color-yellow-600: #8a7d1f; /* derived: the paper-face step */
+  --restack-color-pink-300: #d89dbd;
+  --restack-color-pink-600: #a24f7c; /* derived */
+  --restack-color-sage-300: #94aaa8;
+  --restack-color-sage-600: #5b706e; /* derived */
+}
+
+/* ── Face: dark (the default) ─────────────────────────────────────────── */
+
+:root,
+[data-restack-theme='dark'] {
+  --restack-color-scheme: dark;
+
+  /* Brand. Two roles, because lime is a fill colour first:
+   *   primary          the fill — a primary button, a checked box, a progress bar
+   *   primary-strong   lime that must be legible — a link, a focus ring, an icon
+   * On the dark face they are the same hex; on the light face they split. */
+  --restack-color-primary: var(--restack-color-lime-300);
+  --restack-color-primary-hover: var(--restack-color-lime-200);
+  --restack-color-primary-active: var(--restack-color-lime-350);
+  --restack-color-primary-strong: var(--restack-color-lime-300);
+  --restack-color-primary-subtle: var(--restack-color-lime-850); /* the selected edge */
+  --restack-color-primary-surface: var(--restack-color-lime-900); /* the selected fill */
+  --restack-color-on-primary: var(--restack-color-lime-950);
+  --restack-color-on-primary-strong: var(--restack-color-lime-950);
+  /* The edge of a lime fill. Invisible here; on paper it is what gives a lime
+   * button or a checked box a boundary. */
+  --restack-color-primary-edge: var(--restack-color-lime-300);
+
+  /* Signature: indigo, for brand moments only — a hero, a splash, an empty
+   * state, the logo. Three roles like everything else. */
+  --restack-color-signature: var(--restack-color-indigo-500);
+  --restack-color-signature-strong: var(--restack-color-indigo-300);
+  --restack-color-signature-surface: var(--restack-color-indigo-900);
+  /* How hard the glow is laid on. Full on charcoal; on paper the same light
+   * would wash the page lavender, so it is held to under half. */
+  --restack-signature-strength: 1;
+
+  /* The second voice: cyan. Information, gather/broadcast, parameters. */
+  --restack-color-accent: var(--restack-color-cyan-300);
+  --restack-color-accent-strong: var(--restack-color-cyan-300);
+  --restack-color-accent-surface: var(--restack-color-cyan-900);
+
+  /* Surfaces, darkest to lightest. The page is the darkest thing on screen and
+   * every container steps up from it — depth is tone, not shadow. */
+  --restack-color-canvas: var(--restack-color-gray-900);
+  --restack-color-surface: var(--restack-color-gray-800);
+  --restack-color-surface-sunken: var(--restack-color-gray-850);
+  --restack-color-surface-raised: var(--restack-color-gray-750);
+  --restack-color-surface-hover: var(--restack-color-gray-700);
+  --restack-color-surface-muted: var(--restack-color-gray-750);
+  --restack-color-surface-inverse: var(--restack-color-gray-150);
+
+  /* Text. Body is off-white, not white; headings take the one step brighter. */
+  --restack-color-text: var(--restack-color-gray-150);          /* 14.61:1 on surface */
+  --restack-color-text-strong: var(--restack-color-gray-075);
+  --restack-color-text-secondary: var(--restack-color-gray-300); /* 9.30:1 */
+  --restack-color-text-muted: var(--restack-color-gray-350);     /* 7.34:1 */
+  --restack-color-text-subtle: var(--restack-color-gray-400);    /* 5.91:1 */
+  --restack-color-text-inverse: var(--restack-color-gray-900);
+  --restack-color-text-inverse-secondary: var(--restack-color-gray-600);
+  --restack-color-text-link: var(--restack-color-lime-300);
+
+  /* Borders. The split between the first two is a contrast rule, not taste:
+   *   border         container chrome — panel, card, table rule, divider. 1.47:1.
+   *                  Decorative edges have no contrast floor, and the look
+   *                  is exactly this faint line.
+   *   border-strong  the boundary of an interactive control — input, select,
+   *                  checkbox, radio, secondary button. WCAG 1.4.11 puts 3:1 on
+   *                  a control's visible edge; this stroke is 3.32:1 on a
+   *                  panel and 3.60:1 on the page.
+   * A control's edge never takes `border`. */
+  --restack-color-border: var(--restack-color-gray-650);
+  --restack-color-border-subtle: var(--restack-color-gray-700);
+  --restack-color-border-strong: var(--restack-color-gray-500);
+  --restack-color-border-focus: var(--restack-color-lime-300);
+  --restack-color-control-knob: var(--restack-color-gray-150);
+
+  /* Status. Three roles per status, as everywhere in the system:
+   *   <status>          the fill — a progress bar, a chart series, a dot
+   *   <status>-strong   legible: text, an icon, an edge, a solid badge ground
+   *   <status>-surface  the tinted ground a -strong label sits on
+   * `on-status` is the text set on any -strong fill.
+   *
+   * Success is lime. In the labs a passing check, a ready state and a primary
+   * action share one hue because all three mean "go" — and the label beside it
+   * always says which one it is. */
+  --restack-color-info: var(--restack-color-cyan-300);
+  --restack-color-info-strong: var(--restack-color-cyan-300);
+  --restack-color-info-surface: var(--restack-color-cyan-900);
+  --restack-color-success: var(--restack-color-lime-300);
+  --restack-color-success-strong: var(--restack-color-lime-300);
+  --restack-color-success-surface: var(--restack-color-lime-925);
+  --restack-color-warning: var(--restack-color-amber-300);
+  --restack-color-warning-strong: var(--restack-color-amber-300);
+  --restack-color-warning-surface: var(--restack-color-amber-900);
+  --restack-color-danger: var(--restack-color-red-300);
+  --restack-color-danger-strong: var(--restack-color-red-300);
+  --restack-color-danger-surface: var(--restack-color-red-900);
+  --restack-color-on-status: var(--restack-color-gray-900);
+
+  /* Data. Ordered: lime and cyan first — the two phase colours of the labs —
+   * then the categorical pastels. Take them in sequence. */
+  --restack-color-viz-1: var(--restack-color-lime-300);
+  --restack-color-viz-2: var(--restack-color-cyan-300);
+  --restack-color-viz-3: var(--restack-color-orange-300);
+  --restack-color-viz-4: var(--restack-color-purple-300);
+  --restack-color-viz-5: var(--restack-color-yellow-300);
+  --restack-color-viz-6: var(--restack-color-pink-300);
+  --restack-color-viz-7: var(--restack-color-sage-300);
+
+  /* Elevation lives here, not in space.css, because a shadow that reads on
+   * charcoal is a smudge on paper. The dark face barely uses it: the sticky
+   * bar and the dialog are the only things that float. */
+  --restack-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --restack-shadow-md: 0 5px 12px rgba(18, 20, 22, 0.5);
+  --restack-shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+/* ── Face: light ──────────────────────────────────────────────────────── */
+
+[data-restack-theme='light'],
+:root[data-theme='light'] {
+  --restack-color-scheme: light;
+
+  /* The lime fill survives the switch — it is the brand, and dark ink on it is
+   * 10.63:1. What cannot survive is lime as text or as an edge (1.43:1 on white),
+   * so primary-strong becomes a clear green on the same hue — fresh, not olive. */
+  --restack-color-primary: var(--restack-color-lime-300);
+  --restack-color-primary-hover: var(--restack-color-lime-350);
+  --restack-color-primary-active: var(--restack-color-lime-200);
+  --restack-color-primary-strong: var(--restack-color-lime-600);  /* 5.43:1 on white, 4.98:1 on the selected ground */
+  --restack-color-primary-subtle: var(--restack-color-lime-500);
+  --restack-color-primary-surface: var(--restack-color-lime-050);
+  --restack-color-on-primary: var(--restack-color-lime-950);
+  --restack-color-on-primary-strong: var(--restack-color-gray-000);
+  --restack-color-primary-edge: var(--restack-color-lime-600);
+
+  --restack-color-signature: var(--restack-color-indigo-500);
+  --restack-color-signature-strong: var(--restack-color-indigo-700);
+  --restack-color-signature-surface: var(--restack-color-indigo-050);
+  --restack-signature-strength: 0.42;
+
+  --restack-color-accent: var(--restack-color-cyan-600);
+  --restack-color-accent-strong: var(--restack-color-cyan-700);
+  --restack-color-accent-surface: var(--restack-color-cyan-050);
+
+  --restack-color-canvas: var(--restack-color-gray-025);
+  --restack-color-surface: var(--restack-color-gray-000);
+  --restack-color-surface-sunken: var(--restack-color-gray-050);
+  --restack-color-surface-raised: var(--restack-color-gray-075);
+  --restack-color-surface-hover: var(--restack-color-gray-125);
+  --restack-color-surface-muted: var(--restack-color-gray-100);
+  --restack-color-surface-inverse: var(--restack-color-gray-800);
+
+  --restack-color-text: var(--restack-color-gray-800);           /* 17.16:1 */
+  --restack-color-text-strong: var(--restack-color-gray-900);
+  --restack-color-text-secondary: var(--restack-color-gray-600);  /* 9.90:1 */
+  --restack-color-text-muted: var(--restack-color-gray-550);      /* 5.92:1 */
+  --restack-color-text-subtle: var(--restack-color-gray-550);
+  --restack-color-text-inverse: var(--restack-color-gray-150);
+  --restack-color-text-inverse-secondary: var(--restack-color-gray-350);
+  --restack-color-text-link: var(--restack-color-lime-700);       /* 6.62:1 */
+
+  --restack-color-border: var(--restack-color-gray-200);
+  --restack-color-border-subtle: var(--restack-color-gray-175);
+  --restack-color-border-strong: var(--restack-color-gray-450);   /* 3.84:1 */
+  --restack-color-border-focus: var(--restack-color-lime-600);
+  --restack-color-control-knob: var(--restack-color-gray-000);
+
+  --restack-color-info: var(--restack-color-cyan-600);
+  --restack-color-info-strong: var(--restack-color-cyan-700);
+  --restack-color-info-surface: var(--restack-color-cyan-050);
+  --restack-color-success: var(--restack-color-lime-600);
+  --restack-color-success-strong: var(--restack-color-lime-800);
+  --restack-color-success-surface: var(--restack-color-lime-050);
+  --restack-color-warning: var(--restack-color-amber-600);
+  --restack-color-warning-strong: var(--restack-color-amber-700);
+  --restack-color-warning-surface: var(--restack-color-amber-050);
+  --restack-color-danger: var(--restack-color-red-600);
+  --restack-color-danger-strong: var(--restack-color-red-700);
+  --restack-color-danger-surface: var(--restack-color-red-050);
+  --restack-color-on-status: var(--restack-color-gray-000);
+
+  --restack-color-viz-1: var(--restack-color-lime-600);
+  --restack-color-viz-2: var(--restack-color-cyan-600);
+  --restack-color-viz-3: var(--restack-color-orange-600);
+  --restack-color-viz-4: var(--restack-color-purple-600);
+  --restack-color-viz-5: var(--restack-color-yellow-600);
+  --restack-color-viz-6: var(--restack-color-pink-600);
+  --restack-color-viz-7: var(--restack-color-sage-600);
+
+  --restack-shadow-sm: 0 1px 2px rgba(18, 20, 22, 0.08);
+  --restack-shadow-md: 0 4px 12px rgba(18, 20, 22, 0.1);
+  --restack-shadow-lg: 0 16px 48px rgba(18, 20, 22, 0.16);
+}
+
+/* ── Derived ──────────────────────────────────────────────────────────── */
+
+:root,
+[data-restack-theme],
+.restack-root {
+  /* Focus is an outline, not a glow: two pixels of the legible lime, held off
+   * the control by a gap, as the labs draw it. */
+  --restack-focus-outline: var(--restack-border-width-thick) solid var(--restack-color-border-focus);
+  --restack-focus-offset: 2px;
+  /* For the few places an outline cannot go (a field's focus-within edge). */
+  --restack-focus-ring: 0 0 0 1px var(--restack-color-border-focus);
+  /* A selected panel brightens its edge and adds a whisper of lime around it. */
+  --restack-shadow-selected: 0 0 0 1px color-mix(in srgb, var(--restack-color-primary-strong) 12%, transparent);
+  /* The banner's glow: two soft indigo lights over the canvas. Used by
+   * Surface tone="signature" and nowhere a control sits directly on top. */
+  --restack-gradient-signature:
+    radial-gradient(18% 26% at 14% 58%, color-mix(in srgb, var(--restack-color-signature-strong) calc(30% * var(--restack-signature-strength)), transparent), transparent 100%),
+    radial-gradient(55% 85% at 10% 60%, color-mix(in srgb, var(--restack-color-signature) calc(38% * var(--restack-signature-strength)), transparent), transparent 72%),
+    radial-gradient(22% 30% at 94% 104%, color-mix(in srgb, var(--restack-color-signature-strong) calc(34% * var(--restack-signature-strength)), transparent), transparent 100%),
+    radial-gradient(48% 70% at 96% 100%, color-mix(in srgb, var(--restack-color-signature) calc(30% * var(--restack-signature-strength)), transparent), transparent 72%);
+  /* The banner's other motif: a field of fine vertical rules that fades out.
+   * Drawn in the signature's legible step at low strength. */
+  --restack-pattern-signature: repeating-linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--restack-color-signature-strong) 26%, transparent) 0 1px,
+    transparent 1px 13px
+  );
+}

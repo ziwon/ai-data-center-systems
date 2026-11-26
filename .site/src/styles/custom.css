@@ -1,78 +1,205 @@
 @import "katex/dist/katex.min.css";
+/* The restack design system's tokens and typefaces, vendored from
+   github.com/restack-ai/design-system (src/tokens, src/css/fonts.css).
+   color.css also maps the light face onto Starlight's data-theme="light". */
+@import "./restack/fonts.css";
+@import "./restack/color.css";
+@import "./restack/typography.css";
+@import "./restack/space.css";
+/* Hangul face. DM Sans has no Hangul, so Korean text needs its own sans;
+   Pretendard is the one the design system names. The dynamic subset is split
+   by unicode-range, so a page downloads only the blocks it uses. */
+@import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
 
-:root {
-  --sl-font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
-    "Segoe UI", sans-serif;
-  --sl-font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-  --sl-color-accent-low: #d5f7fb;
-  --sl-color-accent: #007f94;
-  --sl-color-accent-high: #004a57;
-  --sl-color-text-accent: #006f82;
-  --sl-color-white: #050505;
-  --sl-color-gray-1: #25211d;
-  --sl-color-gray-2: #3c3833;
-  --sl-color-gray-3: #6f6a63;
-  --sl-color-gray-4: #a49c92;
-  --sl-color-gray-5: #d8d1c7;
-  --sl-color-gray-6: #ebe5dc;
-  --sl-color-black: #f5f1ea;
-  --fabric-bg-deep: #020817;
-  --fabric-bg-mid: #03152d;
-  --fabric-grid: #12345d;
-  --fabric-line: rgba(30, 94, 255, 0.105);
-  --fabric-line-soft: rgba(0, 138, 160, 0.075);
-  --fabric-glow-blue: rgba(24, 132, 255, 0.08);
-  --fabric-glow-cyan: rgba(0, 138, 160, 0.075);
-  --fabric-node-blue: #1684ff;
-  --fabric-node-cyan: #008aa0;
-  --fabric-node-violet: #735cff;
-  --fabric-node-hot: #25f4ff;
+/* ── Starlight, re-pointed at the restack roles ──────────────────────
+   Every value is a semantic role, so the dark face (the default) and the
+   light face follow Starlight's theme switch without a second block. */
+:root,
+:root[data-theme='dark'],
+:root[data-theme='light'] {
+  /* Pretendard moves up to sit right after DM Sans. In the design system's
+     stack it follows system-ui, which already carries Hangul on Windows and
+     Linux, so the browser would stop there and never reach Pretendard. */
+  --restack-font-family-sans: 'DM Sans', 'Pretendard Variable', Pretendard, ui-sans-serif,
+    system-ui, -apple-system, 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+
+  --sl-font: var(--restack-font-family-sans);
+  --sl-font-mono: var(--restack-font-family-mono);
+
+  --sl-color-white: var(--restack-color-text-strong);
+  --sl-color-gray-1: var(--restack-color-text);
+  --sl-color-gray-2: var(--restack-color-text-secondary);
+  --sl-color-gray-3: var(--restack-color-text-muted);
+  --sl-color-gray-4: var(--restack-color-border-strong);
+  --sl-color-gray-5: var(--restack-color-border);
+  --sl-color-gray-6: var(--restack-color-surface-raised);
+  --sl-color-gray-7: var(--restack-color-surface-sunken);
+  --sl-color-black: var(--restack-color-canvas);
+
+  --sl-color-accent-low: var(--restack-color-primary-surface);
+  --sl-color-accent: var(--restack-color-primary-strong);
+  --sl-color-accent-high: var(--restack-color-primary-strong);
+  --sl-color-text: var(--restack-color-text);
+  --sl-color-text-accent: var(--restack-color-primary-strong);
+  --sl-color-text-invert: var(--restack-color-on-primary-strong);
+  --sl-color-bg: var(--restack-color-canvas);
+  --sl-color-bg-nav: var(--restack-color-surface-sunken);
+  --sl-color-bg-sidebar: var(--restack-color-surface-sunken);
+  --sl-color-bg-inline-code: var(--restack-color-surface-raised);
+  --sl-color-bg-accent: var(--restack-color-primary);
+  --sl-color-hairline-light: var(--restack-color-border);
+  --sl-color-hairline: var(--restack-color-border-subtle);
+  --sl-color-hairline-shade: var(--restack-color-canvas);
+  --sl-color-backdrop-overlay: color-mix(in srgb, var(--restack-color-canvas) 72%, transparent);
+
+  /* Asides and badges take the status roles. Tip shares info: neither is
+     lime, which stays reserved for action and selection. */
+  --sl-color-blue-low: var(--restack-color-info-surface);
+  --sl-color-blue: var(--restack-color-info);
+  --sl-color-blue-high: var(--restack-color-info-strong);
+  --sl-color-purple-low: var(--restack-color-info-surface);
+  --sl-color-purple: var(--restack-color-info);
+  --sl-color-purple-high: var(--restack-color-info-strong);
+  --sl-color-green-low: var(--restack-color-success-surface);
+  --sl-color-green: var(--restack-color-success);
+  --sl-color-green-high: var(--restack-color-success-strong);
+  --sl-color-orange-low: var(--restack-color-warning-surface);
+  --sl-color-orange: var(--restack-color-warning);
+  --sl-color-orange-high: var(--restack-color-warning-strong);
+  --sl-color-red-low: var(--restack-color-danger-surface);
+  --sl-color-red: var(--restack-color-danger);
+  --sl-color-red-high: var(--restack-color-danger-strong);
+
+  --sl-shadow-sm: var(--restack-shadow-sm);
+  --sl-shadow-md: var(--restack-shadow-md);
+  --sl-shadow-lg: var(--restack-shadow-lg);
+
+  /* restack hierarchy: display, title, heading, subheading. */
+  --sl-text-h1: var(--restack-font-size-display);
+  --sl-text-h2: var(--restack-font-size-title);
+  --sl-text-h3: var(--restack-font-size-heading);
+  --sl-text-h4: var(--restack-font-size-subheading);
+
+  /* Older component styles still name these; they now resolve to roles.
+     Cyan is the information voice, orchid the concept series. */
+  --fabric-node-cyan: var(--restack-color-accent-strong);
+  --fabric-node-violet: var(--restack-color-viz-4);
 }
 
-:root[data-theme="dark"] {
-  --sl-color-accent-low: #062337;
-  --sl-color-accent: #25f4ff;
-  --sl-color-accent-high: #bdf8ff;
-  --sl-color-text-accent: #25f4ff;
-  --sl-color-white: #f8f4ed;
-  --sl-color-gray-1: #ebe5dc;
-  --sl-color-gray-2: #d8d1c7;
-  --sl-color-gray-3: #a49c92;
-  --sl-color-gray-4: #6f6a63;
-  --sl-color-gray-5: #3c3833;
-  --sl-color-gray-6: #25211d;
-  --sl-color-black: #020817;
-  --fabric-node-cyan: #18cfff;
-  --fabric-line: rgba(24, 132, 255, 0.2);
-  --fabric-line-soft: rgba(19, 233, 255, 0.14);
-  --fabric-glow-blue: rgba(24, 132, 255, 0.16);
-  --fabric-glow-cyan: rgba(19, 233, 255, 0.14);
+/* The light face reads lighter than the design system's default body ink.
+   Near-black body text, links and nav labels made long pages feel heavy on
+   paper, so body copy and page lists take text-secondary (9.9:1 on the
+   canvas) while headings keep text-strong. The indigo glow is also halved. */
+:root[data-theme='light'] {
+  --sl-color-text: var(--restack-color-text-secondary);
+  --restack-signature-strength: 0.24;
+}
+
+:root[data-theme='light'] .sl-markdown-content :is(p, li, td, th, dd, blockquote) > a:not([class]) {
+  color: inherit;
+}
+
+:root[data-theme='light'] .sidebar-content :is(a.large, .group-label .large) {
+  color: var(--restack-color-text-secondary);
 }
 
 body {
+  background: var(--restack-color-canvas);
   letter-spacing: 0;
-  background:
-    linear-gradient(115deg, transparent 0 48%, var(--fabric-line-soft) 48.2% 48.7%, transparent 49%),
-    linear-gradient(24deg, transparent 0 53%, var(--fabric-line) 53.2% 53.5%, transparent 53.8%),
-    radial-gradient(circle at 18% 12%, var(--fabric-glow-blue), transparent 16rem),
-    radial-gradient(circle at 84% 18%, var(--fabric-glow-cyan), transparent 18rem),
-    var(--sl-color-black);
-  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+:focus-visible {
+  outline: var(--restack-focus-outline);
+  outline-offset: var(--restack-focus-offset);
+}
+
+/* ── Shell: depth is tone and hairline, not glow ─────────────────── */
+
 .header {
-  border-bottom-color: color-mix(in srgb, var(--sl-color-gray-5), transparent 35%);
-  background:
-    linear-gradient(90deg, color-mix(in srgb, var(--fabric-node-cyan), transparent 90%), transparent 24rem),
-    color-mix(in srgb, var(--sl-color-black), transparent 7%);
-  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--restack-color-border-subtle);
+  background: var(--restack-color-surface-sunken);
+}
+
+.header .social-icons a {
+  color: var(--restack-color-text-secondary);
+}
+
+.header .social-icons a:is(:hover, :focus-visible) {
+  color: var(--restack-color-text-strong);
 }
 
 .sidebar-pane {
-  border-inline-end-color: color-mix(in srgb, var(--sl-color-gray-5), transparent 35%);
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--fabric-node-blue), transparent 91%), transparent 18rem),
-    color-mix(in srgb, var(--sl-color-black), transparent 4%);
+  border-inline-end: 1px solid var(--restack-color-border-subtle);
+  background: var(--restack-color-surface-sunken);
+}
+
+.right-sidebar {
+  border-inline-start-color: var(--restack-color-border-subtle);
+}
+
+/* Page lists sit one step quieter than the topic menu above them. */
+.sidebar-content a.large {
+  color: var(--restack-color-text);
+  font-size: var(--restack-font-size-body);
+  font-weight: var(--restack-font-weight-medium);
+}
+
+.sidebar-content a.large:hover {
+  color: var(--restack-color-text-strong);
+}
+
+/* The current page is a selection: lime ground, lime edge, lime text and a
+   trailing signal dot. */
+.sidebar-content a[aria-current='page'],
+.sidebar-content a[aria-current='page']:hover,
+.sidebar-content a[aria-current='page']:focus {
+  border-radius: var(--restack-radius-md);
+  color: var(--restack-color-primary-strong);
+  background: var(--restack-color-primary-surface);
+  box-shadow: inset 0 0 0 1px var(--restack-color-primary-subtle);
+}
+
+.sidebar-content a[aria-current='page']::after {
+  content: '';
+  display: inline-block;
+  width: 0.4em;
+  height: 0.4em;
+  margin-inline-start: 0.4em;
+  border-radius: var(--restack-radius-pill);
+  background: var(--restack-color-primary-strong);
+  vertical-align: 0.12em;
+}
+
+:root .sidebar-pane .starlight-sidebar-topics a {
+  color: var(--restack-color-text);
+  font-weight: var(--restack-font-weight-semibold);
+}
+
+:root .sidebar-pane .starlight-sidebar-topics a:is(:hover, :focus-visible) {
+  color: var(--restack-color-text-strong);
+}
+
+:root .sidebar-pane .starlight-sidebar-topics a.starlight-sidebar-topics-current {
+  color: var(--restack-color-primary-strong);
+}
+
+:root .sidebar-pane .starlight-sidebar-topics .starlight-sidebar-topics-icon {
+  border-color: var(--restack-color-border-strong);
+  border-radius: var(--restack-radius-md);
+}
+
+:root .sidebar-pane .starlight-sidebar-topics a:is(:hover, :focus-visible) .starlight-sidebar-topics-icon {
+  border-color: var(--restack-color-text-muted);
+  color: var(--restack-color-text-strong);
+  background: var(--restack-color-surface-hover);
+}
+
+:root .sidebar-pane .starlight-sidebar-topics a.starlight-sidebar-topics-current .starlight-sidebar-topics-icon {
+  border-color: var(--restack-color-primary-subtle);
+  color: var(--restack-color-primary-strong);
+  background: var(--restack-color-primary-surface);
 }
 
 .starlight-sidebar-topics a[data-topic-icon] .starlight-sidebar-topics-icon svg {
@@ -102,45 +229,66 @@ body {
   --adcs-topic-icon-mask: url("/icons/sidebar-cycle.svg");
 }
 
-.right-sidebar {
-  border-inline-start-color: color-mix(in srgb, var(--sl-color-gray-5), transparent 45%);
-}
-
-.site-title {
-  color: var(--sl-color-white);
-  letter-spacing: 0;
-}
-
-.site-title::before {
-  content: "";
-  display: inline-block;
-  width: 0.62rem;
-  height: 0.62rem;
-  margin-inline-end: 0.5rem;
-  border-radius: 999px;
-  background: var(--fabric-node-cyan);
-  box-shadow:
-    0.7rem -0.18rem 0 var(--fabric-node-hot),
-    1.18rem 0.36rem 0 var(--fabric-node-violet);
-  vertical-align: 0.02rem;
-}
+/* ── Reading surface ─────────────────────────────────────────────── */
 
 a {
-  text-underline-offset: 0.18em;
+  text-underline-offset: 0.2em;
 }
 
-.sl-markdown-content :is(h1, h2) {
-  color: #172032;
+/* Links inside running text read as text with a lime underline, so a
+   paragraph full of references does not turn spotty. Lime takes over on
+   hover. Buttons and cards (anchors with a class or outside prose) keep
+   their own styles. */
+.sl-markdown-content :is(p, li, td, th, dd, blockquote) > a:not([class]) {
+  color: var(--restack-color-text-strong);
+  text-decoration-color: color-mix(in srgb, var(--restack-color-primary-strong) 70%, transparent);
+  text-decoration-thickness: 1px;
+  transition:
+    color var(--restack-duration-fast) var(--restack-easing-standard),
+    text-decoration-color var(--restack-duration-fast) var(--restack-easing-standard);
 }
 
-:root[data-theme="dark"] .sl-markdown-content :is(h1, h2) {
-  color: var(--sl-color-white);
+.sl-markdown-content :is(p, li, td, th, dd, blockquote) > a:not([class]):hover {
+  color: var(--restack-color-primary-strong);
+  text-decoration-color: var(--restack-color-primary-strong);
 }
 
+.sl-markdown-content :is(h1, h2, h3, h4, h5, h6),
+h1#_top {
+  color: var(--restack-color-text-strong);
+  font-weight: var(--restack-font-weight-semibold);
+  letter-spacing: var(--restack-letter-spacing-snug);
+}
+
+.sl-markdown-content h2,
+h1#_top {
+  letter-spacing: var(--restack-letter-spacing-tight);
+}
+
+/* Blog (and similar) headings wrap a title link. Keep that link as a heading
+   at rest; lime plus an underline is the hover/focus cue. Starlight's
+   a.sl-anchor-link has a class and is left alone. */
+.sl-markdown-content :is(h2, h3, h4, h5, h6) > a:not([class]) {
+  color: inherit;
+  text-decoration: none;
+}
+
+.sl-markdown-content :is(h2, h3, h4, h5, h6) > a:not([class]) :is(code, strong, em) {
+  color: inherit;
+}
+
+.sl-markdown-content :is(h2, h3, h4, h5, h6) > a:not([class]):is(:hover, :focus-visible) {
+  color: var(--restack-color-primary-strong);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+}
+
+/* The repository's figures are drawn on the editorial paper ground
+   (AGENTS.md), so they keep it in both faces and sit in a panel frame. */
 .sl-markdown-content img,
 .sl-markdown-content svg {
-  border: 1px solid var(--sl-color-gray-5);
-  border-radius: 6px;
+  border: 1px solid var(--restack-color-border);
+  border-radius: var(--restack-radius-lg);
   background: #f5f1ea;
 }
 
@@ -171,86 +319,272 @@ a {
   background: transparent;
 }
 
-/* Apply Mermaid's configured sans-serif stack before it measures HTML labels.
-   Starlight otherwise lends <pre> its monospace font after Mermaid has sized
-   each foreignObject, which clips the final characters of node labels. */
-.sl-markdown-content pre.mermaid {
-  font-family: Inter, Arial, sans-serif;
+/* Mermaid sizes each label box with the page's sans face, so labels must be
+   drawn in that same face; a different one (the sources ask for Inter/Arial)
+   is wider and clips the last characters. :is(…, #restack-mermaid) lends
+   ID-level specificity to beat the font rule Mermaid writes into each SVG. */
+.sl-markdown-content pre.mermaid,
+.sl-markdown-content pre.mermaid svg :is(.nodeLabel, .nodeLabel p, .edgeLabel, .edgeLabel p, .cluster-label, text, tspan, #restack-mermaid) {
+  font-family: var(--restack-font-family-sans) !important;
 }
 
-/* Mermaid's portable source uses light connectors for a dark canvas, while
-   the Pages figure surface is cream. Give optional and feedback paths enough
-   contrast without changing the diagram source used by GitHub. */
-.sl-markdown-content pre.mermaid[data-processed] svg
-  :is(.edge-pattern-dashed, .edge-pattern-dotted) {
-  stroke: #6f6a63 !important;
-  stroke-width: 2px !important;
+/* Mermaid diagrams sit in a sunken panel and take the restack roles.
+   Node colours are rewritten by MermaidTheme.astro (they are inline);
+   the rules below cover what Mermaid writes into each SVG's <style>.
+   :is(…, #restack-mermaid) lends ID-level specificity so these outrank
+   Mermaid's own #mermaid-… rules; the ID never has to match. */
+.sl-markdown-content pre.mermaid {
+  border: 1px solid var(--restack-color-border);
+  border-radius: var(--restack-radius-lg);
+  padding: var(--restack-space-4);
+  background: var(--restack-color-surface-sunken);
+}
+
+/* astro-mermaid sets data-processed after it replaces the source with SVG
+   (or an error box). Hide the raw source until then; if render never
+   happens, restore the text after a short delay. */
+:root .sl-markdown-content pre.mermaid:not([data-processed]) {
+  color: transparent;
+  background: var(--restack-color-surface-sunken);
+  justify-content: flex-start;
+  align-items: flex-start;
+  white-space: pre-wrap;
+  animation: mermaid-source-fallback 0s 5s forwards;
+}
+
+:root .sl-markdown-content pre.mermaid[data-processed] {
+  color: var(--restack-color-text);
+  animation: none;
+}
+
+@keyframes mermaid-source-fallback {
+  to { color: var(--restack-color-text); }
+}
+
+.sl-markdown-content pre.mermaid svg {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--restack-color-text-strong);
+}
+
+.sl-markdown-content pre.mermaid svg :is(.node rect, .node polygon, .node circle, .node path, #restack-mermaid) {
+  fill: var(--restack-color-surface-raised) !important;
+  stroke: var(--restack-color-border-strong) !important;
+  stroke-width: 1px !important;
+}
+
+.sl-markdown-content pre.mermaid svg :is(.nodeLabel, .nodeLabel p, .node text, #restack-mermaid) {
+  color: var(--restack-color-text-strong) !important;
+  fill: var(--restack-color-text-strong) !important;
+}
+
+.sl-markdown-content pre.mermaid svg :is(.flowchart-link, .relation, #restack-mermaid) {
+  stroke: var(--restack-color-border-strong) !important;
+}
+
+.sl-markdown-content pre.mermaid svg :is(.arrowheadPath, marker path, #restack-mermaid) {
+  fill: var(--restack-color-border-strong) !important;
+  stroke: var(--restack-color-border-strong) !important;
+}
+
+.sl-markdown-content pre.mermaid svg :is(.edgeLabel, .edgeLabel p, .edgeLabel span, .labelBkg, #restack-mermaid) {
+  color: var(--restack-color-text-secondary) !important;
+  background-color: var(--restack-color-surface-sunken) !important;
+}
+
+.sl-markdown-content pre.mermaid svg :is(.edgeLabel rect, #restack-mermaid) {
+  fill: var(--restack-color-surface-sunken) !important;
+}
+
+.sl-markdown-content pre.mermaid svg :is(.cluster rect, #restack-mermaid) {
+  fill: var(--restack-color-surface) !important;
+  stroke: var(--restack-color-border) !important;
+}
+
+.sl-markdown-content pre.mermaid svg :is(.cluster-label, .cluster-label span, .cluster text, #restack-mermaid) {
+  color: var(--restack-color-text-muted) !important;
+  fill: var(--restack-color-text-muted) !important;
+}
+
+/* Optional and feedback paths stay readable as dashed or dotted lines. */
+.sl-markdown-content pre.mermaid svg :is(.edge-pattern-dashed, .edge-pattern-dotted, #restack-mermaid) {
+  stroke: var(--restack-color-text-muted) !important;
+  stroke-width: 1.5px !important;
   opacity: 1;
 }
 
-.sl-markdown-content pre.mermaid[data-processed] svg .edge-pattern-dashed {
+.sl-markdown-content pre.mermaid svg :is(.edge-pattern-dashed, #restack-mermaid) {
   stroke-dasharray: 7 5 !important;
 }
 
-.sl-markdown-content pre.mermaid[data-processed] svg .edge-pattern-dotted {
+.sl-markdown-content pre.mermaid svg :is(.edge-pattern-dotted, #restack-mermaid) {
   stroke-dasharray: 2 4 !important;
   stroke-linecap: round;
 }
 
-.sl-markdown-content pre.mermaid[data-processed] svg marker path {
-  fill: #6f6a63 !important;
-  stroke: #6f6a63 !important;
+/* Sequence diagrams: actors are panels, messages are slate lines, notes
+   take the information voice. */
+.sl-markdown-content pre.mermaid svg :is(rect.actor, #restack-mermaid) {
+  fill: var(--restack-color-surface-raised) !important;
+  stroke: var(--restack-color-border-strong) !important;
 }
 
+.sl-markdown-content pre.mermaid svg :is(text.actor, text.actor tspan, .actor-man, #restack-mermaid) {
+  fill: var(--restack-color-text-strong) !important;
+  stroke: none !important;
+}
+
+.sl-markdown-content pre.mermaid svg :is(.actor-line, #restack-mermaid) {
+  stroke: var(--restack-color-border) !important;
+}
+
+.sl-markdown-content pre.mermaid svg :is(.messageLine0, .messageLine1, .loopLine, #restack-mermaid) {
+  stroke: var(--restack-color-border-strong) !important;
+}
+
+.sl-markdown-content pre.mermaid svg :is(.messageText, .labelText, .labelText tspan, .loopText, .loopText tspan, #restack-mermaid) {
+  fill: var(--restack-color-text) !important;
+  stroke: none !important;
+}
+
+.sl-markdown-content pre.mermaid svg :is(rect.note, #restack-mermaid) {
+  fill: var(--restack-color-accent-surface) !important;
+  stroke: var(--restack-color-accent-strong) !important;
+}
+
+.sl-markdown-content pre.mermaid svg :is(.noteText, .noteText tspan, #restack-mermaid) {
+  fill: var(--restack-color-text) !important;
+}
+
+.sl-markdown-content pre.mermaid svg :is(.labelBox, #restack-mermaid) {
+  fill: var(--restack-color-surface) !important;
+  stroke: var(--restack-color-border-strong) !important;
+}
+
+.sl-markdown-content pre.mermaid svg :is(.activation0, .activation1, .activation2, #restack-mermaid) {
+  fill: var(--restack-color-surface-hover) !important;
+  stroke: var(--restack-color-border-strong) !important;
+}
+
+/* A quotation is a note: a 2px rule, not a box. */
 .sl-markdown-content blockquote {
-  border-inline-start-color: var(--fabric-node-cyan);
-  background: color-mix(in srgb, var(--fabric-node-cyan), transparent 92%);
+  border-inline-start: var(--restack-rule-width) solid var(--restack-color-accent-strong);
+  color: var(--restack-color-text-secondary);
+  background: transparent;
 }
 
 .sl-markdown-content code:not(:where(.expressive-code *)) {
-  border: 1px solid color-mix(in srgb, var(--fabric-node-cyan), transparent 78%);
-  background: color-mix(in srgb, var(--fabric-node-cyan), transparent 92%);
+  border: 1px solid var(--restack-color-border-subtle);
+  border-radius: var(--restack-radius-sm);
+  background: var(--restack-color-surface-raised);
 }
 
 .sl-markdown-content table {
   font-size: 0.92rem;
 }
 
-.sl-markdown-content :is(h2, h3, h4) {
-  letter-spacing: 0;
+.sl-markdown-content th {
+  color: var(--restack-color-text-strong);
+  background: var(--restack-color-surface-sunken);
+  font-weight: var(--restack-font-weight-semibold);
+}
+
+.sl-markdown-content :is(th, td) {
+  border-color: var(--restack-color-border);
+}
+
+.starlight-aside {
+  border-inline-start-width: var(--restack-rule-width);
+  border-radius: 0 var(--restack-radius-lg) var(--restack-radius-lg) 0;
 }
 
 .pagination-links a {
-  border-color: color-mix(in srgb, var(--fabric-node-cyan), transparent 68%);
+  border: 1px solid var(--restack-color-border);
+  border-radius: var(--restack-radius-lg);
+  background: var(--restack-color-surface);
+  box-shadow: none;
 }
 
+.pagination-links a:hover {
+  border-color: var(--restack-color-border-strong);
+}
+
+/* Starlight 0.40 wraps "Previous"/"Next" and the page title in a > span,
+   with the title in an inner .link-title. */
+.pagination-links a > span {
+  color: var(--restack-color-text-muted);
+  font-size: var(--restack-font-size-caption);
+}
+
+.pagination-links .link-title {
+  color: var(--restack-color-text-strong);
+  font-size: var(--restack-font-size-subheading);
+  font-weight: var(--restack-font-weight-semibold);
+}
+
+/* Date and topics line generated under each article title. */
+.sl-markdown-content .adcs-article-meta {
+  margin-block: 0 1.5rem;
+  color: var(--restack-color-text-muted);
+  font-family: var(--restack-font-family-mono);
+  font-size: var(--restack-font-size-caption);
+}
+
+.sl-markdown-content p.adcs-article-meta > a {
+  color: inherit;
+  text-decoration-color: currentColor;
+}
+
+/* ── Home ────────────────────────────────────────────────────────── */
+
+/* The hero is the one signature surface: the banner's indigo glow over the
+   inset ground, holding text and a single lime action. */
 .adcs-home-hero {
   display: grid;
   grid-template-columns: minmax(0, 0.95fr) minmax(18rem, 1.05fr);
   gap: clamp(1.5rem, 4vw, 4rem);
   align-items: center;
-  margin-block: 0 3rem;
-  padding-block: clamp(1.25rem, 4vw, 3rem);
+  margin-block: 0 var(--restack-space-12);
+  border: 1px solid var(--restack-color-border);
+  border-radius: var(--restack-radius-xl);
+  padding: clamp(1.5rem, 4vw, 3rem);
+  background: var(--restack-gradient-signature), var(--restack-color-surface-sunken);
 }
 
 .adcs-home-hero-copy {
   max-width: 42rem;
 }
 
+/* The section eyebrow: mono, uppercase, led by the signal dot. */
 .adcs-home-kicker {
-  margin: 0 0 0.8rem;
-  color: #d9392e;
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  margin: 0 0 var(--restack-space-4);
+  color: var(--restack-color-text-secondary);
+  font-family: var(--restack-font-family-mono);
+  font-size: var(--restack-font-size-micro);
+  font-weight: var(--restack-font-weight-medium);
+  letter-spacing: var(--restack-letter-spacing-caps);
   text-transform: uppercase;
+}
+
+.adcs-home-kicker::before {
+  content: '';
+  width: 0.55em;
+  height: 0.55em;
+  border-radius: var(--restack-radius-pill);
+  background: var(--restack-color-primary-strong);
 }
 
 .sl-markdown-content .adcs-home-hero h2 {
   margin: 0;
-  color: var(--sl-color-white);
-  font-size: clamp(2.2rem, 5vw, 4.7rem);
-  line-height: 0.96;
+  color: var(--restack-color-text-strong);
+  font-size: clamp(2.2rem, 5vw, 4.2rem);
+  font-weight: var(--restack-font-weight-semibold);
+  letter-spacing: var(--restack-letter-spacing-tight);
+  line-height: 1.04;
   /* Starlight markdown sets overflow-wrap: anywhere, which breaks words
      mid-character. The headline wraps between whole words only. */
   overflow-wrap: normal;
@@ -273,35 +607,55 @@ main:has(.adcs-home-hero) .content-panel:has(h1#_top) {
 
 .adcs-home-hero-copy > p:not(.adcs-home-kicker) {
   max-width: 36rem;
-  margin-block: 1.2rem 0;
-  color: var(--sl-color-gray-2);
-  font-size: clamp(1rem, 2vw, 1.22rem);
+  margin-block: var(--restack-space-5) 0;
+  color: var(--restack-color-text-secondary);
+  font-size: var(--restack-font-size-lead);
 }
 
 .adcs-home-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-block-start: 1.65rem;
+  gap: var(--restack-space-3);
+  margin-block-start: var(--restack-space-8);
 }
 
+/* Secondary buttons: raised fill, control edge. */
 .adcs-home-actions a,
 .adcs-link-band a {
   display: inline-flex;
   align-items: center;
-  min-height: 2.6rem;
-  border: 1px solid color-mix(in srgb, var(--fabric-node-cyan), transparent 50%);
-  border-radius: 6px;
-  padding: 0.58rem 0.9rem;
-  color: var(--sl-color-white);
-  background: color-mix(in srgb, var(--sl-color-black), var(--fabric-node-cyan) 6%);
-  font-weight: 700;
+  min-height: var(--restack-size-control-lg);
+  border: 1px solid var(--restack-color-border-strong);
+  border-radius: var(--restack-radius-md);
+  padding: 0 var(--restack-space-4);
+  color: var(--restack-color-text);
+  background: var(--restack-color-surface-raised);
+  font-size: var(--restack-font-size-small);
+  font-weight: var(--restack-font-weight-semibold);
   text-decoration: none;
+  transition:
+    border-color var(--restack-duration-fast) var(--restack-easing-standard),
+    background-color var(--restack-duration-fast) var(--restack-easing-standard);
 }
 
+.adcs-home-actions a:hover,
+.adcs-link-band a:hover {
+  border-color: var(--restack-color-text-muted);
+  color: var(--restack-color-text-strong);
+  background: var(--restack-color-surface-hover);
+}
+
+/* The one lime fill on the page. */
 .adcs-home-actions a:first-child {
-  border-color: color-mix(in srgb, #d9392e, transparent 18%);
-  background: color-mix(in srgb, #d9392e, var(--sl-color-black) 88%);
+  border-color: var(--restack-color-primary-edge);
+  color: var(--restack-color-on-primary);
+  background: var(--restack-color-primary);
+}
+
+.adcs-home-actions a:first-child:hover {
+  border-color: var(--restack-color-primary-edge);
+  color: var(--restack-color-on-primary);
+  background: var(--restack-color-primary-hover);
 }
 
 .adcs-home-hero-visual {
@@ -312,101 +666,84 @@ main:has(.adcs-home-hero) .content-panel:has(h1#_top) {
   width: 100%;
   aspect-ratio: 1.5;
   object-fit: cover;
-  border-color: color-mix(in srgb, var(--fabric-node-cyan), transparent 45%);
-  border-radius: 8px;
-}
-
-:root:not([data-theme="dark"]) .adcs-home-hero-visual {
-  border: 1px solid color-mix(in srgb, var(--fabric-node-cyan), transparent 72%);
-  border-radius: 12px;
-  padding: 0.5rem;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.58), transparent 52%),
-    color-mix(in srgb, var(--sl-color-black), var(--fabric-node-cyan) 3%);
-}
-
-:root:not([data-theme="dark"]) .sl-markdown-content .adcs-home-hero-visual img {
-  border-color: color-mix(in srgb, var(--fabric-node-cyan), transparent 62%);
-}
-
-:root:not([data-theme="dark"]) .adcs-home-actions a:first-child {
-  color: #66180f;
-  background: color-mix(in srgb, #d9392e, var(--sl-color-black) 91%);
-}
-
-:root:not([data-theme="dark"]) .adcs-home-actions a:nth-child(2),
-:root:not([data-theme="dark"]) .adcs-link-band a {
-  color: var(--sl-color-accent-high);
-  background: color-mix(in srgb, var(--sl-color-black), var(--fabric-node-cyan) 4%);
-}
-
-:root:not([data-theme="dark"]) .adcs-track-card {
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--fabric-node-cyan), transparent 95%), transparent 54%),
-    color-mix(in srgb, var(--sl-color-black), white 26%);
-}
-
-/* Date and topics line generated under each article title. */
-.sl-markdown-content .adcs-article-meta {
-  margin-block: 0 1.5rem;
-  color: var(--sl-color-gray-3);
-  font-size: var(--sl-text-sm);
-}
-
-.sl-markdown-content .adcs-article-meta a {
-  color: inherit;
+  border-color: var(--restack-color-border);
+  border-radius: var(--restack-radius-lg);
 }
 
 .adcs-track-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.9rem;
-  margin-block: 1rem 2.5rem;
+  gap: var(--restack-space-3);
+  margin-block: var(--restack-space-4) var(--restack-space-10);
 }
 
 .adcs-track-card {
   display: flex;
-  min-height: 11rem;
   flex-direction: column;
-  justify-content: space-between;
-  border: 1px solid color-mix(in srgb, var(--sl-color-gray-5), transparent 18%);
-  border-radius: 8px;
-  padding: 1rem;
-  color: var(--sl-color-white);
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--fabric-node-cyan), transparent 92%), transparent 54%),
-    color-mix(in srgb, var(--sl-color-black), var(--sl-color-white) 2%);
+  gap: var(--restack-space-2);
+  border: 1px solid var(--restack-color-border);
+  border-radius: var(--restack-radius-lg);
+  padding: var(--restack-space-5);
+  color: var(--restack-color-text);
+  background: var(--restack-color-surface);
   text-decoration: none;
+  transition:
+    border-color var(--restack-duration-fast) var(--restack-easing-standard),
+    background-color var(--restack-duration-fast) var(--restack-easing-standard);
 }
 
-.adcs-track-card:nth-child(3n + 1) {
-  border-top-color: #d9392e;
-}
-
-.adcs-track-card span {
-  font-size: 1.05rem;
-  font-weight: 800;
-  line-height: 1.2;
+.adcs-track-card .adcs-track-title {
+  color: var(--restack-color-text-strong);
+  font-size: var(--restack-font-size-subheading);
+  font-weight: var(--restack-font-weight-semibold);
+  letter-spacing: var(--restack-letter-spacing-snug);
+  line-height: var(--restack-line-height-tight);
 }
 
 .adcs-track-card small {
-  color: var(--sl-color-gray-2);
-  font-size: 0.88rem;
-  line-height: 1.45;
+  color: var(--restack-color-text-secondary);
+  font-size: var(--restack-font-size-small);
+  line-height: var(--restack-line-height-normal);
 }
 
-.adcs-track-card:hover,
-.adcs-home-actions a:hover,
-.adcs-link-band a:hover {
-  border-color: var(--fabric-node-cyan);
-  color: var(--sl-color-white);
+/* Page count in mono, with the arrow that says the card opens a track. */
+.adcs-track-card .adcs-track-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-block-start: auto;
+  padding-block-start: var(--restack-space-3);
+  color: var(--restack-color-text-muted);
+  font-family: var(--restack-font-family-mono);
+  font-size: var(--restack-font-size-caption);
+}
+
+.adcs-track-card .adcs-track-meta::after {
+  content: '→';
+  color: var(--restack-color-text-subtle);
+  font-family: var(--restack-font-family-sans);
+  font-size: var(--restack-font-size-body);
+  transition:
+    color var(--restack-duration-fast) var(--restack-easing-standard),
+    transform var(--restack-duration-fast) var(--restack-easing-standard);
+}
+
+.adcs-track-card:hover {
+  border-color: var(--restack-color-border-strong);
+  color: var(--restack-color-text);
+  background: var(--restack-color-surface-raised);
+}
+
+.adcs-track-card:hover .adcs-track-meta::after {
+  color: var(--restack-color-primary-strong);
+  transform: translateX(2px);
 }
 
 .adcs-link-band {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-block: 1rem 2.5rem;
+  gap: var(--restack-space-3);
+  margin-block: var(--restack-space-4) var(--restack-space-10);
 }
 
 @media (max-width: 56rem) {
@@ -480,7 +817,7 @@ main:has(.adcs-home-hero) .content-panel:has(h1#_top) {
 
 /* ── Ask Docs Widget ─────────────────────────────────────── */
 
-/* FAB trigger button — always fixed bottom-right */
+/* Trigger: a secondary control that floats, led by the lime mark. */
 .ask-fab {
   position: fixed;
   right: max(1rem, env(safe-area-inset-right));
@@ -488,32 +825,32 @@ main:has(.adcs-home-hero) .content-panel:has(h1#_top) {
   z-index: 900;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  min-height: 2.75rem;
-  border: 1px solid color-mix(in srgb, var(--fabric-node-cyan), transparent 38%);
-  border-radius: 999px;
-  padding: 0.65rem 0.95rem;
-  color: var(--sl-color-white);
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--fabric-node-cyan), transparent 82%), transparent),
-    color-mix(in srgb, var(--sl-color-black), #050505 12%);
-  box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,0.25);
+  gap: var(--restack-space-2);
+  min-height: var(--restack-size-control-lg);
+  border: 1px solid var(--restack-color-border-strong);
+  border-radius: var(--restack-radius-pill);
+  padding: 0 var(--restack-space-4) 0 var(--restack-space-3);
+  color: var(--restack-color-text-strong);
+  background: var(--restack-color-surface-raised);
+  box-shadow: var(--restack-shadow-md);
   font: inherit;
-  font-size: var(--sl-text-sm);
-  font-weight: 700;
+  font-size: var(--restack-font-size-small);
+  font-weight: var(--restack-font-weight-semibold);
   cursor: pointer;
-  transition: box-shadow 0.2s, transform 0.15s;
+  transition:
+    border-color var(--restack-duration-fast) var(--restack-easing-standard),
+    background-color var(--restack-duration-fast) var(--restack-easing-standard);
 }
-.ask-fab:hover { transform: translateY(-1px); box-shadow: 0 0.75rem 2rem rgba(0,0,0,0.32); }
+.ask-fab:hover { border-color: var(--restack-color-text-muted); background: var(--restack-color-surface-hover); }
 .ask-fab-icon {
   display: grid;
   place-items: center;
   width: 1.25rem;
   height: 1.25rem;
-  border-radius: 999px;
-  background: var(--fabric-node-cyan);
-  color: #020817;
-  font-weight: 800;
+  border-radius: var(--restack-radius-pill);
+  background: var(--restack-color-primary);
+  color: var(--restack-color-on-primary);
+  font-weight: var(--restack-font-weight-bold);
   font-size: 0.8rem;
   line-height: 1;
   flex-shrink: 0;
@@ -525,12 +862,11 @@ main:has(.adcs-home-hero) .content-panel:has(h1#_top) {
   z-index: 950;
   display: flex;
   flex-direction: column;
-  background: var(--sl-color-black);
-  color: var(--sl-color-white);
-  border: 1px solid color-mix(in srgb, var(--fabric-node-cyan), transparent 65%);
-  box-shadow: 0 1.5rem 5rem rgba(0,0,0,0.45);
-  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-              opacity  0.25s ease;
+  background: var(--restack-color-surface);
+  color: var(--restack-color-text);
+  border: 1px solid var(--restack-color-border);
+  transition: transform var(--restack-duration-normal) var(--restack-easing-standard),
+              opacity  var(--restack-duration-normal) var(--restack-easing-standard);
 }
 
 /* ── Right panel ── */
@@ -560,7 +896,7 @@ ask-docs-widget[data-mode="right"] .ask-resize-handle {
 }
 ask-docs-widget[data-mode="right"] .ask-resize-handle:hover,
 ask-docs-widget[data-mode="right"] .ask-resize-handle:active {
-  background: color-mix(in srgb, var(--fabric-node-cyan), transparent 60%);
+  background: var(--restack-color-primary-subtle);
 }
 
 /* ── Bottom panel ── */
@@ -569,7 +905,7 @@ ask-docs-widget[data-mode="bottom"] .ask-panel {
   right: 0;
   bottom: 0;
   height: var(--ask-h, 46vh);
-  border-radius: 12px 12px 0 0;
+  border-radius: var(--restack-radius-xl) var(--restack-radius-xl) 0 0;
   border-bottom: none;
   transform: translateY(100%);
   opacity: 0;
@@ -585,17 +921,18 @@ ask-docs-widget[data-mode="bottom"] .ask-resize-handle {
   right: 0;
   height: 4px;
   cursor: ns-resize;
-  border-radius: 12px 12px 0 0;
+  border-radius: var(--restack-radius-xl) var(--restack-radius-xl) 0 0;
 }
 ask-docs-widget[data-mode="bottom"] .ask-resize-handle:hover,
 ask-docs-widget[data-mode="bottom"] .ask-resize-handle:active {
-  background: color-mix(in srgb, var(--fabric-node-cyan), transparent 60%);
+  background: var(--restack-color-primary-subtle);
 }
 
 /* ── Expand (full overlay) ── */
 ask-docs-widget[data-mode="expand"] .ask-panel {
   inset: 2rem;
-  border-radius: 10px;
+  border-radius: var(--restack-radius-xl);
+  box-shadow: var(--restack-shadow-lg);
   transform: scale(0.96);
   opacity: 0;
 }
@@ -616,7 +953,7 @@ html[data-ask-open="bottom"] body { padding-block-end: var(--ask-inset, 46vh); }
   position: fixed;
   inset: 0;
   z-index: 940;
-  background: rgba(2, 8, 23, 0.7);
+  background: color-mix(in srgb, var(--restack-color-canvas) 72%, transparent);
   backdrop-filter: blur(4px);
 }
 
@@ -633,72 +970,77 @@ html[data-ask-open="bottom"] body { padding-block-end: var(--ask-inset, 46vh); }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.9rem 1.1rem 0.75rem;
-  border-bottom: 1px solid var(--sl-color-gray-6);
+  gap: var(--restack-space-3);
+  padding: var(--restack-space-4) var(--restack-space-4) var(--restack-space-3);
+  border-bottom: 1px solid var(--restack-color-border-subtle);
   flex-shrink: 0;
 }
 .ask-eyebrow {
-  margin: 0 0 0.15rem;
-  color: var(--fabric-node-cyan);
-  font-size: var(--sl-text-xs);
-  font-weight: 800;
-  letter-spacing: 0.08em;
+  margin: 0 0 var(--restack-space-1);
+  color: var(--restack-color-text-muted);
+  font-family: var(--restack-font-family-mono);
+  font-size: var(--restack-font-size-micro);
+  font-weight: var(--restack-font-weight-medium);
+  letter-spacing: var(--restack-letter-spacing-caps);
   text-transform: uppercase;
 }
 .ask-title {
   margin: 0;
-  color: var(--sl-color-white);
-  font-size: 1.1rem;
-  line-height: 1.2;
+  color: var(--restack-color-text-strong);
+  font-size: var(--restack-font-size-subheading);
+  font-weight: var(--restack-font-weight-semibold);
+  line-height: var(--restack-line-height-tight);
 }
 .ask-header-controls {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: var(--restack-space-1);
   flex-shrink: 0;
 }
 .ask-mode-btn,
 .ask-close-btn {
   display: grid;
   place-items: center;
-  width: 1.9rem;
-  height: 1.9rem;
+  width: var(--restack-size-control-sm);
+  height: var(--restack-size-control-sm);
   border: 1px solid transparent;
-  border-radius: 6px;
-  color: var(--sl-color-gray-3);
+  border-radius: var(--restack-radius-md);
+  color: var(--restack-color-text-muted);
   background: transparent;
   cursor: pointer;
-  transition: background 0.12s, color 0.12s, border-color 0.12s;
+  transition:
+    background-color var(--restack-duration-fast) var(--restack-easing-standard),
+    color var(--restack-duration-fast) var(--restack-easing-standard),
+    border-color var(--restack-duration-fast) var(--restack-easing-standard);
 }
 .ask-mode-btn svg,
 .ask-close-btn svg { width: 14px; height: 14px; }
 .ask-mode-btn:hover,
-.ask-close-btn:hover { background: var(--sl-color-gray-6); color: var(--sl-color-white); }
+.ask-close-btn:hover { background: var(--restack-color-surface-hover); color: var(--restack-color-text-strong); }
 .ask-mode-btn.active {
-  border-color: color-mix(in srgb, var(--fabric-node-cyan), transparent 50%);
-  color: var(--fabric-node-cyan);
-  background: color-mix(in srgb, var(--fabric-node-cyan), transparent 88%);
+  border-color: var(--restack-color-primary-subtle);
+  color: var(--restack-color-primary-strong);
+  background: var(--restack-color-primary-surface);
 }
-.ask-close-btn { margin-left: 0.25rem; }
+.ask-close-btn { margin-left: var(--restack-space-1); }
 
 /* ── Body (scrollable) ── */
 .ask-body {
   flex: 1;
   overflow-y: auto;
-  padding: 1rem 1.1rem 1.25rem;
+  padding: var(--restack-space-4) var(--restack-space-4) var(--restack-space-5);
   display: grid;
-  gap: 0.9rem;
+  gap: var(--restack-space-4);
   align-content: start;
 }
 
 /* ── Field ── */
 .ask-field {
   display: grid;
-  gap: 0.4rem;
-  color: var(--sl-color-gray-2);
-  font-size: var(--sl-text-sm);
-  font-weight: 700;
+  gap: var(--restack-space-2);
+  color: var(--restack-color-text-secondary);
+  font-size: var(--restack-font-size-small);
+  font-weight: var(--restack-font-weight-semibold);
 }
 .ask-field-row {
   display: flex;
@@ -706,34 +1048,38 @@ html[data-ask-open="bottom"] body { padding-block-end: var(--ask-inset, 46vh); }
   justify-content: space-between;
 }
 .ask-char {
-  font-size: var(--sl-text-xs);
-  font-weight: 500;
-  color: var(--sl-color-gray-4);
+  color: var(--restack-color-text-subtle);
+  font-family: var(--restack-font-family-mono);
+  font-size: var(--restack-font-size-caption);
+  font-weight: var(--restack-font-weight-regular);
   font-variant-numeric: tabular-nums;
-  transition: color 0.15s;
+  transition: color var(--restack-duration-fast) var(--restack-easing-standard);
 }
-.ask-char--warn { color: #e8a838; }
+.ask-char--warn { color: var(--restack-color-warning-strong); }
 .ask-field textarea {
   resize: vertical;
   min-height: 5.5rem;
-  border: 1px solid var(--sl-color-gray-5);
-  border-radius: 6px;
-  padding: 0.7rem 0.8rem;
-  color: var(--sl-color-white);
-  background: color-mix(in srgb, var(--sl-color-black), var(--fabric-node-cyan) 3%);
+  border: 1px solid var(--restack-color-border-strong);
+  border-radius: var(--restack-radius-md);
+  padding: var(--restack-space-3);
+  color: var(--restack-color-text);
+  background: var(--restack-color-surface-sunken);
   font: inherit;
-  font-weight: 500;
-  line-height: 1.55;
-  transition: border-color 0.15s;
+  font-weight: var(--restack-font-weight-regular);
+  line-height: var(--restack-line-height-normal);
+  transition: border-color var(--restack-duration-fast) var(--restack-easing-standard);
 }
+.ask-field textarea:hover { border-color: var(--restack-color-text-muted); }
+/* A field's edge is already a stroke: focus turns it lime and thickens it. */
 .ask-field textarea:focus {
   outline: none;
-  border-color: color-mix(in srgb, var(--fabric-node-cyan), transparent 42%);
+  border-color: var(--restack-color-border-focus);
+  box-shadow: var(--restack-focus-ring);
 }
 .ask-hint {
-  color: var(--sl-color-gray-4);
-  font-size: var(--sl-text-xs);
-  font-weight: 500;
+  color: var(--restack-color-text-muted);
+  font-size: var(--restack-font-size-caption);
+  font-weight: var(--restack-font-weight-regular);
 }
 
 /* ── Actions ── */
@@ -741,26 +1087,28 @@ html[data-ask-open="bottom"] body { padding-block-end: var(--ask-inset, 46vh); }
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 0.75rem;
+  gap: var(--restack-space-3);
 }
+/* The panel's one primary action. */
 .ask-submit {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  min-height: 2.2rem;
-  border: 1px solid color-mix(in srgb, var(--fabric-node-cyan), transparent 22%);
-  border-radius: 6px;
-  padding: 0.45rem 0.9rem;
-  color: #020817;
-  background: color-mix(in srgb, var(--fabric-node-cyan), transparent 8%);
+  gap: var(--restack-space-2);
+  min-height: var(--restack-size-control-md);
+  border: 1px solid var(--restack-color-primary-edge);
+  border-radius: var(--restack-radius-md);
+  padding: 0 var(--restack-space-4);
+  color: var(--restack-color-on-primary);
+  background: var(--restack-color-primary);
   font: inherit;
-  font-size: var(--sl-text-sm);
-  font-weight: 800;
+  font-size: var(--restack-font-size-small);
+  font-weight: var(--restack-font-weight-semibold);
   cursor: pointer;
-  transition: background 0.15s, opacity 0.15s;
+  transition: background-color var(--restack-duration-fast) var(--restack-easing-standard);
 }
-.ask-submit:hover:not(:disabled) { background: var(--fabric-node-cyan); }
-.ask-submit:disabled { cursor: wait; opacity: 0.65; }
+.ask-submit:hover:not(:disabled) { background: var(--restack-color-primary-hover); }
+.ask-submit:active:not(:disabled) { background: var(--restack-color-primary-active); }
+.ask-submit:disabled { cursor: wait; opacity: 0.45; }
 
 @keyframes ask-spin { to { transform: rotate(360deg); } }
 .ask-spinner {
@@ -775,61 +1123,65 @@ html[data-ask-open="bottom"] body { padding-block-end: var(--ask-inset, 46vh); }
 .ask-status {
   min-height: 1.3rem;
   margin: 0;
-  color: var(--sl-color-gray-3);
-  font-size: var(--sl-text-sm);
+  color: var(--restack-color-text-muted);
+  font-size: var(--restack-font-size-small);
 }
-.ask-status[data-type="error"] { color: #e87038; }
+.ask-status[data-type="error"] { color: var(--restack-color-danger-strong); }
 
 /* ── Answer ── */
 .ask-answer {
   display: grid;
-  gap: 0.65rem;
-  border-top: 1px solid var(--sl-color-gray-6);
-  padding-top: 0.9rem;
+  gap: var(--restack-space-3);
+  border-top: 1px solid var(--restack-color-border-subtle);
+  padding-top: var(--restack-space-4);
 }
 .ask-answer p,
-.ask-answer li { margin: 0; color: var(--sl-color-gray-1); line-height: 1.7; font-size: var(--sl-text-sm); }
+.ask-answer li { margin: 0; color: var(--restack-color-text); line-height: var(--restack-line-height-relaxed); font-size: var(--restack-font-size-small); }
 .ask-answer ol,
-.ask-answer ul { margin: 0; padding-inline-start: 1.35rem; display: grid; gap: 0.38rem; }
-.ask-answer h4 { margin: 0.35rem 0 0; color: var(--sl-color-white); font-size: var(--sl-text-base); font-weight: 700; line-height: 1.4; }
-.ask-answer hr { width: 100%; margin: 0.2rem 0; border: 0; border-top: 1px solid var(--sl-color-gray-6); }
-.ask-answer strong { color: var(--sl-color-white); font-weight: 700; }
-.ask-answer em { color: var(--sl-color-gray-2); font-style: italic; }
+.ask-answer ul { margin: 0; padding-inline-start: 1.35rem; display: grid; gap: var(--restack-space-2); }
+.ask-answer h4 { margin: var(--restack-space-2) 0 0; color: var(--restack-color-text-strong); font-size: var(--restack-font-size-body); font-weight: var(--restack-font-weight-semibold); line-height: var(--restack-line-height-snug); }
+.ask-answer hr { width: 100%; margin: var(--restack-space-1) 0; border: 0; border-top: 1px solid var(--restack-color-border-subtle); }
+.ask-answer strong { color: var(--restack-color-text-strong); font-weight: var(--restack-font-weight-semibold); }
+.ask-answer em { color: var(--restack-color-text-secondary); font-style: italic; }
 .ask-answer code {
   padding: 0.1em 0.32em;
-  border-radius: 4px;
-  background: color-mix(in srgb, var(--fabric-node-cyan), transparent 85%);
-  color: var(--fabric-node-cyan);
-  font-family: ui-monospace, monospace;
+  border: 1px solid var(--restack-color-border-subtle);
+  border-radius: var(--restack-radius-sm);
+  background: var(--restack-color-surface-raised);
+  color: var(--restack-color-text-strong);
+  font-family: var(--restack-font-family-mono);
   font-size: 0.875em;
 }
 
 /* ── Sources ── */
-.ask-sources { border-top: 1px solid var(--sl-color-gray-6); padding-top: 0.9rem; }
+.ask-sources { border-top: 1px solid var(--restack-color-border-subtle); padding-top: var(--restack-space-4); }
 .ask-sources h3 {
-  margin: 0 0 0.5rem;
-  color: var(--sl-color-gray-3);
-  font-size: var(--sl-text-xs);
-  font-weight: 700;
-  letter-spacing: 0.07em;
+  margin: 0 0 var(--restack-space-2);
+  color: var(--restack-color-text-muted);
+  font-family: var(--restack-font-family-mono);
+  font-size: var(--restack-font-size-micro);
+  font-weight: var(--restack-font-weight-medium);
+  letter-spacing: var(--restack-letter-spacing-caps);
   text-transform: uppercase;
 }
-.ask-source-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0; padding: 0; list-style: none; }
+.ask-source-chips { display: flex; flex-wrap: wrap; gap: var(--restack-space-2); margin: 0; padding: 0; list-style: none; }
 .ask-source-chips li { padding: 0; }
 .ask-source-chips a {
   display: inline-block;
-  padding: 0.22rem 0.55rem;
-  border: 1px solid var(--sl-color-gray-5);
-  border-radius: 999px;
-  color: var(--sl-color-gray-2);
-  font-size: var(--sl-text-xs);
-  font-weight: 500;
+  padding: var(--restack-space-1) var(--restack-space-2);
+  border: 1px solid var(--restack-color-border-strong);
+  border-radius: var(--restack-radius-sm);
+  color: var(--restack-color-text-secondary);
+  font-size: var(--restack-font-size-caption);
+  font-weight: var(--restack-font-weight-medium);
   text-decoration: none;
-  transition: border-color 0.15s, color 0.15s;
+  transition:
+    border-color var(--restack-duration-fast) var(--restack-easing-standard),
+    color var(--restack-duration-fast) var(--restack-easing-standard);
 }
 .ask-source-chips a:hover {
-  border-color: color-mix(in srgb, var(--fabric-node-cyan), transparent 48%);
-  color: var(--fabric-node-cyan);
+  border-color: var(--restack-color-primary-subtle);
+  color: var(--restack-color-primary-strong);
 }
 
 /* ── Mobile ── */
@@ -837,4 +1189,10 @@ html[data-ask-open="bottom"] body { padding-block-end: var(--ask-inset, 46vh); }
   .ask-fab { right: 0.75rem; bottom: 0.75rem; }
   ask-docs-widget[data-mode="right"] .ask-panel { width: 100vw; }
   ask-docs-widget[data-mode="expand"] .ask-panel { inset: 0.5rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ask-panel,
+  .adcs-track-card,
+  .adcs-home-actions a { transition: none; }
 }

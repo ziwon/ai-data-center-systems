@@ -217,6 +217,7 @@ export default defineConfig({
         PageFrame: './src/components/PageFrame.astro',
         PageSidebar: './src/components/PageSidebar.astro',
         Sidebar: './src/components/Sidebar.astro',
+        SiteTitle: './src/components/SiteTitle.astro',
       },
       head: [
         ...googleAnalyticsHeadEntries(googleAnalyticsId),
@@ -256,6 +257,24 @@ export default defineConfig({
         },
       ],
       customCss: ['./src/styles/custom.css'],
+      // Code frames take the restack sunken ground, hairline and mono face.
+      expressiveCode: {
+        styleOverrides: {
+          borderRadius: '5px',
+          borderColor: 'var(--restack-color-border)',
+          codeFontFamily: 'var(--restack-font-family-mono)',
+          uiFontFamily: 'var(--restack-font-family-sans)',
+          codeBackground: 'var(--restack-color-surface-sunken)',
+          frames: {
+            editorBackground: 'var(--restack-color-surface-sunken)',
+            editorTabBarBackground: 'var(--restack-color-surface)',
+            editorActiveTabBackground: 'var(--restack-color-surface-sunken)',
+            terminalBackground: 'var(--restack-color-surface-sunken)',
+            terminalTitlebarBackground: 'var(--restack-color-surface)',
+            frameBoxShadowCssValue: 'none',
+          },
+        },
+      },
       lastUpdated: true,
       editLink: {
         baseUrl: 'https://github.com/ziwon/ai-data-center-systems/edit/main/.site/',

@@ -1,0 +1,74 @@
+---
+// Re-points Mermaid diagrams at the restack roles on the site.
+//
+// Diagram sources keep the repository's portable dark classDefs (AGENTS.md), so
+// they still render on GitHub. Mermaid writes each classDef onto its node as an
+// inline `!important` style, which no stylesheet can outrank, so this script
+// rewrites those inline styles with role variables after a diagram renders.
+// Links, edge labels, clusters and sequence diagrams are styled in custom.css.
+---
+
+<script>
+  type Role = { fill: string; stroke: string; text: string };
+
+  const v = (name: string) => `var(--restack-color-${name})`;
+  const primary: Role = { fill: v('surface-raised'), stroke: v('border-strong'), text: v('text-strong') };
+  const secondary: Role = { fill: v('surface'), stroke: v('border-strong'), text: v('text') };
+  const note: Role = { fill: v('accent-surface'), stroke: v('accent-strong'), text: v('text') };
+  const accent: Role = { fill: v('primary-surface'), stroke: v('primary-subtle'), text: v('primary-strong') };
+  const raised: Role = { fill: v('surface-raised'), stroke: v('border-strong'), text: v('text') };
+
+  // Keyed by the classDef fill the sources use: the restack palette for new
+  // diagrams, then the earlier dark palette of older ones (AGENTS.md).
+  const roles: Record<string, Role> = {
+    '#1c1f29': primary,
+    '#15171f': secondary,
+    '#14282d': note,
+    '#1f3316': accent,
+    '#232323': primary,
+    '#3b2f20': secondary,
+    '#52676b': note,
+    '#62164d': accent,
+    '#173f32': { fill: v('success-surface'), stroke: v('success-strong'), text: v('text') },
+    '#5a3520': { fill: v('warning-surface'), stroke: v('warning-strong'), text: v('text') },
+    '#f5f1ea': raised,
+    '#f3efe7': raised,
+  };
+
+  function restyle(svg: SVGSVGElement) {
+    if (svg.dataset.restackTheme) return;
+    svg.dataset.restackTheme = 'true';
+
+    for (const group of svg.querySelectorAll<SVGGElement>('g.node, g.cluster')) {
+      let role: Role | undefined;
+      for (const shape of group.querySelectorAll<SVGElement>(':scope > rect, :scope > polygon, :scope > path, :scope > circle, :scope > ellipse, :scope > g > rect, :scope > g > path')) {
+        const fill = (shape.getAttribute('style') ?? '').match(/fill:\s*(#[0-9a-fA-F]{6})/)?.[1];
+        const match = fill ? roles[fill.toLowerCase()] : undefined;
+        if (!match) continue;
+        role = match;
+        shape.style.setProperty('fill', match.fill, 'important');
+        shape.style.setProperty('stroke', match.stroke, 'important');
+        shape.style.setProperty('stroke-width', '1px', 'important');
+      }
+      if (!role) continue;
+      for (const label of group.querySelectorAll<HTMLElement | SVGElement>('.nodeLabel, .nodeLabel *, .cluster-label *, text, tspan')) {
+        label.style.setProperty('color', role.text, 'important');
+        label.style.setProperty('fill', role.text, 'important');
+      }
+    }
+  }
+
+  let queued = false;
+  function scan() {
+    queued = false;
+    document.querySelectorAll<SVGSVGElement>('pre.mermaid svg, .mermaid svg').forEach(restyle);
+  }
+
+  // Diagrams render after load and again when the theme changes.
+  new MutationObserver(() => {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(scan);
+  }).observe(document.body, { childList: true, subtree: true });
+  scan();
+</script>
