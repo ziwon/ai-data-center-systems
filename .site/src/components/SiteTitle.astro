@@ -1,0 +1,57 @@
+---
+// The restack face mark, then the site name set as a restack Wordmark: the
+// last word in the legible lime and the signal dot raised after it. The mark
+// is the design system's alpha mask, tinted with the strong text colour so it
+// reads in both faces (lime stays with the wordmark).
+import mark from '../styles/restack/assets/restack-mark.png';
+---
+
+<a href="/" class="site-title sl-flex">
+  <span class="adcs-logo-mark" aria-hidden="true" style={`--adcs-mark: url(${mark.src})`}></span>
+  <span class="adcs-wordmark">
+    AI Data Center <span class="adcs-wordmark-accent">Systems</span><span class="adcs-signal-dot" aria-hidden="true"></span>
+  </span>
+</a>
+
+<style>
+  .site-title {
+    align-items: center;
+    gap: 0.6rem;
+    min-width: 0;
+    color: var(--restack-color-text-strong);
+    font-size: var(--sl-text-h4);
+    font-weight: var(--restack-font-weight-semibold);
+    letter-spacing: var(--restack-letter-spacing-snug);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .adcs-logo-mark {
+    flex: none;
+    width: calc(1.75rem * 188 / 232);
+    height: 1.75rem;
+    margin-block-start: -0.2rem;
+    background-color: currentColor;
+    -webkit-mask: var(--adcs-mark) center / contain no-repeat;
+    mask: var(--adcs-mark) center / contain no-repeat;
+  }
+
+  .adcs-wordmark {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .adcs-wordmark-accent {
+    color: var(--restack-color-primary-strong);
+  }
+
+  .adcs-signal-dot {
+    display: inline-block;
+    width: 0.4em;
+    height: 0.4em;
+    margin-inline-start: 0.14em;
+    border-radius: var(--restack-radius-pill);
+    background: var(--restack-color-primary-strong);
+    vertical-align: 0.55em;
+  }
+</style>

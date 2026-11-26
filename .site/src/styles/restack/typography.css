@@ -1,0 +1,65 @@
+/* Restack design system — typography tokens
+ *
+ * Two faces, each with one job, as in the labs:
+ *   DM Sans        the interface — headings, labels, prose, controls
+ *   IBM Plex Mono  technical truth — figures, units, identifiers, commands,
+ *                  addresses, computed values, eyebrows
+ * A number a reader might compare or copy is set in mono. Prose never is.
+ *
+ * Headings are semibold (600) and never heavier: the labs title at 580–630,
+ * and weight above that turns a calm console loud. Bold (700) exists for the
+ * rare inline emphasis inside dense mono.
+ *
+ * The family stack carries Korean fallbacks after DM Sans, which has no Hangul:
+ * the browser takes each glyph from the first face that has it, so mixed
+ * Korean/English copy keeps DM Sans for Latin and lands on Pretendard (or the
+ * platform's Korean sans) for Hangul instead of a serif default.
+ */
+
+:root {
+  --restack-font-family-sans: 'DM Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
+    'Pretendard Variable', Pretendard, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+  --restack-font-family-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas,
+    monospace;
+
+  --restack-font-weight-regular: 400;
+  --restack-font-weight-medium: 500;
+  --restack-font-weight-semibold: 600;
+  --restack-font-weight-bold: 700;
+
+  /* Every step is a multiple of this base rather than a rem literal, so
+   * ThemeProvider can rebase a subtree and the whole scale follows. 16px keeps
+   * prose comfortable; a dense console view rebases to 13–14px, which is where
+   * the labs sit. */
+  --restack-font-size-base: 1rem;
+
+  --restack-line-height-tight: 1.15;
+  --restack-line-height-snug: 1.3;
+  --restack-line-height-normal: 1.6;
+  --restack-line-height-relaxed: 1.75;
+
+  /* Negative tracking only on large sizes; uppercase labels open up instead. */
+  --restack-letter-spacing-tight: -0.02em;
+  --restack-letter-spacing-snug: -0.01em;
+  --restack-letter-spacing-normal: 0;
+  --restack-letter-spacing-wide: 0.04em;
+  --restack-letter-spacing-caps: 0.1em;
+}
+
+/* The derived steps are declared again on .restack-root: a var() inside a
+ * custom property is substituted where the declaration lives, so a step
+ * computed on :root inherits as a finished value and a rebased subtree would
+ * never reach it. The base itself stays on :root alone, so a nested root
+ * inherits an outer override instead of resetting it. */
+:root,
+.restack-root {
+  --restack-font-size-display: calc(var(--restack-font-size-base) * 2.125);   /* 34px — rdma h1 */
+  --restack-font-size-title: calc(var(--restack-font-size-base) * 1.5);       /* 24px — page titles */
+  --restack-font-size-heading: calc(var(--restack-font-size-base) * 1.25);    /* 20px */
+  --restack-font-size-subheading: calc(var(--restack-font-size-base) * 1.125); /* 18px — run titles */
+  --restack-font-size-lead: calc(var(--restack-font-size-base) * 1.0625);     /* 17px */
+  --restack-font-size-body: var(--restack-font-size-base);                    /* 16px */
+  --restack-font-size-small: calc(var(--restack-font-size-base) * 0.875);     /* 14px — nav, controls */
+  --restack-font-size-caption: calc(var(--restack-font-size-base) * 0.75);    /* 12px */
+  --restack-font-size-micro: calc(var(--restack-font-size-base) * 0.6875);    /* 11px — the labs' label size */
+}

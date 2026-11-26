@@ -1,0 +1,73 @@
+/* Restack design system — spacing, sizing, radius, motion tokens
+ * (Elevation is face-dependent and lives in color.css.) */
+
+:root {
+  /* One unit drives the whole spacing scale and the control heights, the same
+   * way one base drives the type scale — so a region can be made denser by
+   * moving a single number. 4px is the default grid. */
+  --restack-space-unit: 0.25rem;
+
+  /* Compact rounded rectangles, stepping up with the size of the thing:
+   * the labs use 2px for timeline events, 3px for cells and tags, 5px for
+   * controls, 7px for panels and 9px for dialogs. */
+  --restack-radius-none: 0;
+  --restack-radius-xs: 2px;
+  --restack-radius-sm: 3px;
+  --restack-radius-md: 5px;
+  --restack-radius-lg: 7px;
+  --restack-radius-xl: 9px;
+  --restack-radius-pill: 999px;
+
+  --restack-border-width: 1px;
+  --restack-border-width-thick: 2px;
+  /* The selection rule — the 2px lime underline of an active segment or tab. */
+  --restack-rule-width: 2px;
+
+  --restack-shadow-none: none;
+
+  --restack-duration-fast: 120ms;
+  --restack-duration-normal: 200ms;
+  --restack-duration-slow: 320ms;
+  --restack-duration-ambient: 2.4s;
+  --restack-easing-standard: cubic-bezier(0.2, 0, 0.2, 1);
+  /* Entrances: fast out of the gate, long settle. Never a bounce. */
+  --restack-easing-enter: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --restack-container-max: 75rem;
+}
+
+/* Derived from the unit, and restated on .restack-root for the reason the type
+ * steps are: a calc() over a custom property resolves where it is declared. */
+:root,
+.restack-root {
+  --restack-space-0: 0;
+  --restack-space-1: calc(var(--restack-space-unit) * 1);  /* 4 */
+  --restack-space-2: calc(var(--restack-space-unit) * 2);  /* 8 */
+  --restack-space-3: calc(var(--restack-space-unit) * 3);  /* 12 */
+  --restack-space-4: calc(var(--restack-space-unit) * 4);  /* 16 */
+  --restack-space-5: calc(var(--restack-space-unit) * 5);  /* 20 */
+  --restack-space-6: calc(var(--restack-space-unit) * 6);  /* 24 */
+  --restack-space-8: calc(var(--restack-space-unit) * 8);  /* 32 */
+  --restack-space-10: calc(var(--restack-space-unit) * 10); /* 40 */
+  --restack-space-12: calc(var(--restack-space-unit) * 12); /* 48 */
+  --restack-space-16: calc(var(--restack-space-unit) * 16); /* 64 */
+
+  /* Control heights. md is the labs' 36px field. */
+  --restack-size-control-sm: calc(var(--restack-space-unit) * 7);
+  --restack-size-control-md: calc(var(--restack-space-unit) * 9);
+  --restack-size-control-lg: calc(var(--restack-space-unit) * 11);
+}
+
+/* Density. `compact` is where the labs sit: 14px type on a 3.5px grid, so a
+ * medium control is 31.5px and a panel inset is 14px. One attribute moves type
+ * and space together; ThemeProvider's `density` prop sets it. */
+.restack-root[data-restack-density='compact'] {
+  --restack-space-unit: 0.21875rem;
+  --restack-font-size-base: 0.875rem;
+  font-size: 0.875rem;
+}
+.restack-root[data-restack-density='comfortable'] {
+  --restack-space-unit: 0.25rem;
+  --restack-font-size-base: 1rem;
+  font-size: 1rem;
+}
