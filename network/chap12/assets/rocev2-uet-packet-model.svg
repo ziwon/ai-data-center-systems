@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="560" viewBox="0 0 1120 560" role="img" aria-labelledby="title desc">
+  <title id="title">RoCEv2 and UET packet model</title>
+  <desc id="desc">Comparison of RoCEv2 packet model using BTH and QPair with UET packet model using PDS, SES, JobID, and Resource Index.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .panel { fill: none; stroke: #D8D1C7; stroke-width: 1.2; }
+    .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.4; }
+    .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; }
+    .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.5; }
+    .accent-line { fill: none; stroke: #D9392E; stroke-width: 2.2; }
+    .label { font-family: Inter, Arial, sans-serif; font-size: 16px; font-weight: 700; fill: #050505; }
+    .small { font-family: Inter, Arial, sans-serif; font-size: 12px; fill: #6F6A63; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#111111"/>
+    </marker>
+    <marker id="arrowAccent" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#D9392E"/>
+    </marker>
+  </defs>
+  <rect class="bg" width="1120" height="560"/>
+  <rect class="panel" x="42" y="42" width="1036" height="458" rx="8"/>
+  <g transform="translate(90 92)">
+    <rect class="box" x="0" y="0" width="420" height="90" rx="6"/>
+    <text class="label" x="210" y="34" text-anchor="middle">RoCEv2</text>
+    <text class="small" x="210" y="58" text-anchor="middle">Ethernet / IP / UDP / BTH / IB payload</text>
+
+    <rect class="accent" x="520" y="0" width="420" height="90" rx="6"/>
+    <text class="label" x="730" y="34" text-anchor="middle">UET</text>
+    <text class="small" x="730" y="58" text-anchor="middle">Ethernet / IP / UDP or raw IP / PDS / SES / payload</text>
+
+    <rect class="soft" x="40" y="175" width="150" height="92" rx="6"/>
+    <text class="label" x="115" y="211" text-anchor="middle">BTH</text>
+    <text class="small" x="115" y="237" text-anchor="middle">opcode, QPair</text>
+    <rect class="soft" x="230" y="175" width="150" height="92" rx="6"/>
+    <text class="label" x="305" y="211" text-anchor="middle">QPair</text>
+    <text class="small" x="305" y="237" text-anchor="middle">RDMA context</text>
+
+    <rect class="accent" x="540" y="175" width="150" height="92" rx="6"/>
+    <text class="label" x="615" y="211" text-anchor="middle">PDS</text>
+    <text class="small" x="615" y="237" text-anchor="middle">PSN, ACK, mode</text>
+    <rect class="accent" x="730" y="175" width="150" height="92" rx="6"/>
+    <text class="label" x="805" y="211" text-anchor="middle">SES</text>
+    <text class="small" x="805" y="237" text-anchor="middle">Job, process, resource</text>
+
+    <path class="line" d="M210 90 C181 125 147 147 115 175" marker-end="url(#arrow)"/>
+    <path class="line" d="M210 90 C250 127 284 148 305 175" marker-end="url(#arrow)"/>
+    <path class="accent-line" d="M730 90 C687 126 648 148 615 175" marker-end="url(#arrowAccent)"/>
+    <path class="accent-line" d="M730 90 C756 128 785 149 805 175" marker-end="url(#arrowAccent)"/>
+
+    <rect class="box" x="180" y="350" width="580" height="78" rx="6"/>
+    <text class="label" x="470" y="383" text-anchor="middle">Design shift</text>
+    <text class="small" x="470" y="407" text-anchor="middle">UET exposes workload semantics and delivery behavior instead of relying on BTH/QPair identity.</text>
+  </g>
+</svg>

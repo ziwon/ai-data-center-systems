@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="600" viewBox="0 0 1120 600" role="img" aria-labelledby="title desc">
+  <title id="title">Corrective action feedback loop</title>
+  <desc id="desc">Telemetry data feeds storage, pattern mining, AI analysis, human review, corrective action, and validation.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .panel { fill: none; stroke: #D8D1C7; stroke-width: 1.2; }
+    .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.4; }
+    .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; }
+    .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.5; }
+    .accent-line { fill: none; stroke: #D9392E; stroke-width: 2.2; }
+    .muted-line { fill: none; stroke: #D8D1C7; stroke-width: 1.2; stroke-dasharray: 7 6; }
+    .head { font-family: Inter, Arial, sans-serif; font-size: 23px; font-weight: 700; fill: #050505; }
+    .label { font-family: Inter, Arial, sans-serif; font-size: 15px; font-weight: 700; fill: #050505; }
+    .small { font-family: Inter, Arial, sans-serif; font-size: 12px; fill: #6F6A63; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#111111"/>
+    </marker>
+    <marker id="arrowAccent" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#D9392E"/>
+    </marker>
+  </defs>
+  <rect class="bg" width="1120" height="600"/>
+  <rect class="panel" x="42" y="40" width="1036" height="500" rx="8"/>
+  <g transform="translate(86 84)">
+    <text class="head" x="480" y="0" text-anchor="middle">Corrective actions need evidence, scope, and validation</text>
+
+    <rect class="box" x="0" y="100" width="180" height="88" rx="6"/>
+    <text class="label" x="90" y="135" text-anchor="middle">Telemetry inputs</text>
+    <text class="small" x="90" y="160" text-anchor="middle">SNMP, syslog, IFA</text>
+
+    <rect class="soft" x="230" y="100" width="180" height="88" rx="6"/>
+    <text class="label" x="320" y="135" text-anchor="middle">Data store</text>
+    <text class="small" x="320" y="160" text-anchor="middle">time-series / data lake</text>
+
+    <rect class="soft" x="460" y="100" width="180" height="88" rx="6"/>
+    <text class="label" x="550" y="135" text-anchor="middle">Pattern mining</text>
+    <text class="small" x="550" y="160" text-anchor="middle">correlate symptoms</text>
+
+    <rect class="accent" x="690" y="100" width="180" height="88" rx="6"/>
+    <text class="label" x="780" y="135" text-anchor="middle">AI / LLM analyzer</text>
+    <text class="small" x="780" y="160" text-anchor="middle">recommend action</text>
+
+    <path class="line" d="M180 144 H230" marker-end="url(#arrow)"/>
+    <path class="line" d="M410 144 H460" marker-end="url(#arrow)"/>
+    <path class="accent-line" d="M640 144 H690" marker-end="url(#arrowAccent)"/>
+
+    <rect class="box" x="690" y="300" width="180" height="88" rx="6"/>
+    <text class="label" x="780" y="335" text-anchor="middle">Human review</text>
+    <text class="small" x="780" y="360" text-anchor="middle">risk and blast radius</text>
+
+    <rect class="accent" x="460" y="300" width="180" height="88" rx="6"/>
+    <text class="label" x="550" y="335" text-anchor="middle">Action</text>
+    <text class="small" x="550" y="360" text-anchor="middle">TE, isolate, reschedule</text>
+
+    <rect class="box" x="230" y="300" width="180" height="88" rx="6"/>
+    <text class="label" x="320" y="335" text-anchor="middle">Validate</text>
+    <text class="small" x="320" y="360" text-anchor="middle">JCT, p99, counters</text>
+
+    <path class="line" d="M780 188 V300" marker-end="url(#arrow)"/>
+    <path class="accent-line" d="M690 344 H640" marker-end="url(#arrowAccent)"/>
+    <path class="line" d="M460 344 H410" marker-end="url(#arrow)"/>
+    <path class="muted-line" d="M320 300 C255 247 193 207 90 188" marker-end="url(#arrow)"/>
+  </g>
+</svg>

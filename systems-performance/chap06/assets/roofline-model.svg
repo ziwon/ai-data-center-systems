@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="680" viewBox="0 0 1200 680" role="img" aria-labelledby="title desc">
+  <title id="title">Conceptual GPU roofline model</title>
+  <desc id="desc">A diagonal memory bandwidth roof meets a horizontal compute ceiling at the ridge point, separating memory-bound and compute-bound regions.</desc>
+  <style>
+    .bg { fill: #F3EFE7; }
+    .grid { stroke: #D8D1C7; stroke-width: 1; stroke-dasharray: 4 7; }
+    .axis { stroke: #111111; stroke-width: 2.5; marker-end: url(#arrow); }
+    .roof { fill: none; stroke: #111111; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+    .guide { fill: none; stroke: #D9392E; stroke-width: 2; stroke-dasharray: 7 7; }
+    .point { fill: #D9392E; stroke: #F3EFE7; stroke-width: 4; }
+    .sample { fill: #050505; stroke: #F3EFE7; stroke-width: 3; }
+    .label { fill: #050505; font: 600 20px Inter, Arial, sans-serif; }
+    .small { fill: #6F6A63; font: 16px Inter, Arial, sans-serif; }
+    .axis-label { fill: #050505; font: 600 19px Inter, Arial, sans-serif; }
+    .key { fill: #D9392E; font: 700 16px Inter, Arial, sans-serif; letter-spacing: 1px; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#111111"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1200" height="680" rx="12"/>
+
+  <g aria-hidden="true">
+    <line class="grid" x1="150" y1="130" x2="1100" y2="130"/>
+    <line class="grid" x1="150" y1="250" x2="1100" y2="250"/>
+    <line class="grid" x1="150" y1="370" x2="1100" y2="370"/>
+    <line class="grid" x1="150" y1="490" x2="1100" y2="490"/>
+    <line class="grid" x1="340" y1="70" x2="340" y2="550"/>
+    <line class="grid" x1="530" y1="70" x2="530" y2="550"/>
+    <line class="grid" x1="720" y1="70" x2="720" y2="550"/>
+    <line class="grid" x1="910" y1="70" x2="910" y2="550"/>
+  </g>
+
+  <line class="axis" x1="150" y1="550" x2="1110" y2="550"/>
+  <line class="axis" x1="150" y1="550" x2="150" y2="60"/>
+
+  <path class="roof" d="M190 520 L665 120 L1070 120"/>
+
+  <line class="guide" x1="665" y1="120" x2="665" y2="550"/>
+  <circle class="point" cx="665" cy="120" r="10"/>
+  <text class="key" x="690" y="92">RIDGE POINT</text>
+
+  <text class="label" x="265" y="320" transform="rotate(-40 265 320)">Memory-bandwidth roof</text>
+  <text class="label" x="815" y="98">Compute ceiling</text>
+
+  <circle class="sample" cx="420" cy="405" r="8"/>
+  <text class="label" x="438" y="399">Memory-bound kernel</text>
+  <text class="small" x="438" y="425">Raise reuse or reduce bytes moved</text>
+
+  <circle class="sample" cx="850" cy="175" r="8"/>
+  <text class="label" x="870" y="169">Compute-bound kernel</text>
+  <text class="small" x="870" y="195">Improve math efficiency</text>
+
+  <text class="small" x="185" y="579">Low</text>
+  <text class="small" x="1045" y="579">High</text>
+  <text class="axis-label" x="520" y="605">Arithmetic intensity (FLOP / byte)</text>
+  <text class="axis-label" x="42" y="392" transform="rotate(-90 42 392)">Achieved performance (FLOP/s)</text>
+</svg>

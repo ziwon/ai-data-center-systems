@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="620" viewBox="0 0 1120 620" role="img" aria-labelledby="title desc">
+  <title id="title">Topology-aware NCCL and in-network aggregation</title>
+  <desc id="desc">A diagram showing NCCL reducing inside fast NVLink pairs before crossing a slower link, with SHARP offload on the scale-out fabric.</desc>
+  <defs>
+    <style>
+      text { font-family: Arial, sans-serif; }
+      .bg { fill: #F3EFE7; }
+      .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.4; }
+      .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; }
+      .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+      .line { fill: none; stroke: #111111; stroke-width: 1.8; }
+      .dash { fill: none; stroke: #6F6A63; stroke-width: 1.2; stroke-dasharray: 7 5; }
+      .label { fill: #050505; font-size: 17px; font-weight: 700; }
+      .small { fill: #6F6A63; font-size: 13px; }
+      .red { fill: #D9392E; font-size: 13px; font-weight: 700; }
+      .arrow { fill: #111111; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1120" height="620"/>
+
+  <rect class="box" x="70" y="74" width="430" height="410" rx="8"/>
+  <text class="label" x="96" y="112">Topology-aware hierarchy</text>
+  <text class="small" x="96" y="136">Use fast local links first, then cross slow links once.</text>
+  <rect class="soft" x="118" y="204" width="110" height="64" rx="6"/>
+  <text class="small" x="154" y="242">GPU 0</text>
+  <rect class="soft" x="280" y="204" width="110" height="64" rx="6"/>
+  <text class="small" x="316" y="242">GPU 1</text>
+  <rect class="soft" x="118" y="340" width="110" height="64" rx="6"/>
+  <text class="small" x="154" y="378">GPU 2</text>
+  <rect class="soft" x="280" y="340" width="110" height="64" rx="6"/>
+  <text class="small" x="316" y="378">GPU 3</text>
+  <line class="line" x1="228" y1="236" x2="280" y2="236"/>
+  <line class="line" x1="228" y1="372" x2="280" y2="372"/>
+  <path class="dash" d="M 335 268 C 356 292, 358 318, 335 340"/>
+  <text class="red" x="186" y="186">NVLink pair reduce</text>
+  <text class="small" x="350" y="306">PCIe cross link</text>
+
+  <rect class="box" x="590" y="74" width="430" height="410" rx="8"/>
+  <text class="label" x="616" y="112">SHARP / NVLS offload</text>
+  <text class="small" x="616" y="136">Fabric reduces or replicates data closer to the switch.</text>
+  <rect class="soft" x="638" y="190" width="110" height="58" rx="6"/>
+  <text class="small" x="674" y="224">rank 0</text>
+  <rect class="soft" x="852" y="190" width="110" height="58" rx="6"/>
+  <text class="small" x="888" y="224">rank 1</text>
+  <rect class="soft" x="638" y="390" width="110" height="58" rx="6"/>
+  <text class="small" x="674" y="424">rank 2</text>
+  <rect class="soft" x="852" y="390" width="110" height="58" rx="6"/>
+  <text class="small" x="888" y="424">rank 3</text>
+  <rect class="accent" x="744" y="286" width="116" height="64" rx="6"/>
+  <text class="small" x="772" y="314">switch</text>
+  <text class="small" x="770" y="334">reduce</text>
+  <line class="line" x1="748" y1="219" x2="774" y2="286"/>
+  <line class="line" x1="852" y1="219" x2="830" y2="286"/>
+  <line class="line" x1="748" y1="419" x2="774" y2="350"/>
+  <line class="line" x1="852" y1="419" x2="830" y2="350"/>
+  <text class="red" x="628" y="520">Check NCCL logs for NVLS or SHARP usage and fallback.</text>
+</svg>

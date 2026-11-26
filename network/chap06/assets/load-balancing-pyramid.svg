@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="640" viewBox="0 0 1120 640" role="img" aria-labelledby="title desc">
+  <title id="title">Load-balancing mechanism pyramid for AI data center fabrics</title>
+  <desc id="desc">A pyramid showing SLB, DLB v1, GLB, and DLB v2 as progressively more topology-aware and workload-aware load-balancing mechanisms.</desc>
+  <rect width="1120" height="640" fill="#f8fafc"/>
+
+  <text x="560" y="48" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="700" fill="#0f172a">AI Fabric Load-Balancing Mechanisms</text>
+  <text x="560" y="78" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="15" fill="#475569">From simple packet-header hashing to workload-aware path selection</text>
+
+  <g font-family="Inter, Arial, sans-serif">
+    <polygon points="230,520 890,520 790,410 330,410" fill="#557a1f"/>
+    <polygon points="330,410 790,410 720,315 400,315" fill="#0891b2"/>
+    <polygon points="400,315 720,315 660,230 460,230" fill="#166534"/>
+    <polygon points="460,230 660,230 620,145 500,145" fill="#c2410c"/>
+
+    <line x1="560" y1="145" x2="560" y2="520" stroke="#ffffff" stroke-opacity="0.25"/>
+
+    <text x="560" y="472" text-anchor="middle" font-size="38" font-weight="700" fill="#ffffff">SLB</text>
+    <text x="560" y="497" text-anchor="middle" font-size="15" fill="#ecfccb">static ECMP hash</text>
+
+    <text x="560" y="366" text-anchor="middle" font-size="33" font-weight="700" fill="#ffffff">DLB v1</text>
+    <text x="560" y="389" text-anchor="middle" font-size="14" fill="#cffafe">local link and queue quality</text>
+
+    <text x="560" y="271" text-anchor="middle" font-size="33" font-weight="700" fill="#ffffff">GLB</text>
+    <text x="560" y="293" text-anchor="middle" font-size="14" fill="#dcfce7">local plus downstream path quality</text>
+
+    <text x="560" y="183" text-anchor="middle" font-size="28" font-weight="700" fill="#ffffff">DLB v2</text>
+    <text x="560" y="205" text-anchor="middle" font-size="13" fill="#ffedd5">Selective DLB for elephant flows</text>
+  </g>
+
+  <g font-family="Inter, Arial, sans-serif" font-size="15" fill="#0f172a">
+    <rect x="48" y="142" width="260" height="132" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
+    <text x="68" y="171" font-size="22" font-weight="700">GLB</text>
+    <text x="68" y="200">Extends DLB with downstream</text>
+    <text x="68" y="221">path quality, so ingress leaf</text>
+    <text x="68" y="242">switches can avoid congestion</text>
+    <text x="68" y="263">beyond the first hop.</text>
+
+    <rect x="812" y="142" width="260" height="132" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
+    <text x="832" y="171" font-size="22" font-weight="700">DLB v2</text>
+    <text x="917" y="171" font-size="14" font-weight="700" fill="#475569">Selective DLB</text>
+    <text x="832" y="200">Uses RoCEv2-aware signals</text>
+    <text x="832" y="221">such as BTH fields or opcodes</text>
+    <text x="832" y="242">to identify elephant flows and</text>
+    <text x="832" y="263">balance them selectively.</text>
+
+    <rect x="48" y="390" width="260" height="132" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
+    <text x="68" y="419" font-size="22" font-weight="700">SLB</text>
+    <text x="68" y="448">Uses packet header entropy,</text>
+    <text x="68" y="469">such as 5-tuple fields, to</text>
+    <text x="68" y="490">select one ECMP member.</text>
+    <text x="68" y="511" fill="#475569">Stable ordering, congestion blind.</text>
+
+    <rect x="812" y="390" width="260" height="132" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
+    <text x="832" y="419" font-size="22" font-weight="700">DLB v1</text>
+    <text x="832" y="448">Adds local switch signals:</text>
+    <text x="832" y="469">member link utilization and</text>
+    <text x="832" y="490">queue pressure.</text>
+    <text x="832" y="511" fill="#475569">Improves first-hop path choice.</text>
+  </g>
+
+  <g font-family="Inter, Arial, sans-serif" font-size="13" fill="#64748b">
+    <line x1="308" y1="208" x2="455" y2="272" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="812" y1="208" x2="665" y2="185" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="308" y1="456" x2="340" y2="470" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="812" y1="456" x2="760" y2="370" stroke="#94a3b8" stroke-width="2"/>
+    <text x="560" y="586" text-anchor="middle">Higher layers use more real-time state and more workload-specific packet context.</text>
+  </g>
+</svg>

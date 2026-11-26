@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 390" role="img" aria-labelledby="title desc">
+  <title id="title">Cache line locality</title>
+  <desc id="desc">A first access to address 0 misses and fetches a cache line containing nearby addresses. Later nearby and repeated accesses hit because of spatial and temporal locality.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .panel { fill: none; stroke: #111111; stroke-width: 1.5; }
+    .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.5; }
+    .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.4; }
+    .accent-box { fill: #F3EFE7; stroke: #D9392E; stroke-width: 2; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.8; marker-end: url(#arrow); }
+    .soft-line { fill: none; stroke: #6F6A63; stroke-width: 1.5; stroke-dasharray: 6 5; marker-end: url(#soft-arrow); }
+    .accent-line { fill: none; stroke: #D9392E; stroke-width: 2.2; marker-end: url(#accent-arrow); }
+    .label { fill: #050505; font-family: Inter, Arial, sans-serif; font-size: 18px; font-weight: 700; }
+    .mid { fill: #050505; font-family: Inter, Arial, sans-serif; font-size: 15px; font-weight: 600; }
+    .small { fill: #6F6A63; font-family: Inter, Arial, sans-serif; font-size: 13px; }
+    .mono { fill: #050505; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .accent { fill: #D9392E; font-family: Inter, Arial, sans-serif; font-size: 14px; font-weight: 700; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#111111"/>
+    </marker>
+    <marker id="soft-arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#6F6A63"/>
+    </marker>
+    <marker id="accent-arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#D9392E"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1040" height="390"/>
+
+  <rect class="panel" x="34" y="44" width="238" height="260" rx="6"/>
+  <text class="label" x="62" y="80">Processor request</text>
+  <rect class="accent-box" x="64" y="118" width="82" height="48" rx="5"/>
+  <text class="accent" x="83" y="147">addr 0</text>
+  <rect class="box" x="64" y="196" width="82" height="48" rx="5"/>
+  <text class="mid" x="84" y="225">addr 1</text>
+  <rect class="box" x="164" y="196" width="82" height="48" rx="5"/>
+  <text class="mid" x="184" y="225">addr 2</text>
+  <text class="small" x="64" y="274">Later nearby or repeated accesses</text>
+
+  <path class="accent-line" d="M 146 142 C 194 142 228 142 310 142"/>
+  <path class="soft-line" d="M 205 196 C 264 178 286 164 310 154"/>
+
+  <rect class="panel" x="310" y="44" width="334" height="260" rx="6"/>
+  <text class="label" x="338" y="80">Cache lookup</text>
+  <text class="small" x="338" y="102">First touch is not present</text>
+  <rect class="accent-box" x="344" y="126" width="110" height="52" rx="6"/>
+  <text class="accent" x="369" y="156">cold miss</text>
+  <rect class="box" x="486" y="126" width="116" height="52" rx="6"/>
+  <text class="mid" x="514" y="156">fetch line</text>
+  <path class="line" d="M 454 152 L 486 152"/>
+
+  <g transform="translate(348 220)">
+    <rect class="soft" x="0" y="0" width="54" height="44"/>
+    <rect class="soft" x="54" y="0" width="54" height="44"/>
+    <rect class="soft" x="108" y="0" width="54" height="44"/>
+    <rect class="soft" x="162" y="0" width="54" height="44"/>
+    <text class="mono" x="17" y="28">0</text>
+    <text class="mono" x="71" y="28">1</text>
+    <text class="mono" x="125" y="28">2</text>
+    <text class="mono" x="179" y="28">3</text>
+  </g>
+  <text class="small" x="348" y="284">One cache line covers nearby bytes</text>
+
+  <path class="line" d="M 602 152 C 672 152 704 152 736 152"/>
+
+  <rect class="panel" x="736" y="44" width="270" height="260" rx="6"/>
+  <text class="label" x="764" y="80">After line fill</text>
+  <g transform="translate(770 118)">
+    <rect class="accent-box" x="0" y="0" width="54" height="44"/>
+    <rect class="accent-box" x="54" y="0" width="54" height="44"/>
+    <rect class="accent-box" x="108" y="0" width="54" height="44"/>
+    <rect class="accent-box" x="162" y="0" width="54" height="44"/>
+    <text class="mono" x="17" y="28">0</text>
+    <text class="mono" x="71" y="28">1</text>
+    <text class="mono" x="125" y="28">2</text>
+    <text class="mono" x="179" y="28">3</text>
+  </g>
+  <rect class="box" x="770" y="204" width="90" height="42" rx="5"/>
+  <text class="mid" x="799" y="231">hit</text>
+  <text class="small" x="878" y="221">addr 1 or 2</text>
+  <text class="small" x="878" y="239">spatial locality</text>
+  <rect class="box" x="770" y="260" width="90" height="42" rx="5"/>
+  <text class="mid" x="799" y="287">hit</text>
+  <text class="small" x="878" y="277">addr 0 again</text>
+  <text class="small" x="878" y="295">temporal locality</text>
+
+  <rect class="panel" x="104" y="334" width="836" height="34" rx="6"/>
+  <text class="mono" x="134" y="356">cache line fill converts one miss into future hits only when the access pattern has locality</text>
+</svg>

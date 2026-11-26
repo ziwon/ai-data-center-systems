@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="340" viewBox="0 0 960 340" role="img" aria-labelledby="title desc">
+  <title id="title">선점이 되풀이된 요청 하나의 출력 타임라인</title>
+  <desc id="desc">Stint 논문 그림 2(b)를 바탕으로 다시 그린 타임라인. 세 번째 선점 뒤 6.8초 동안 새 출력이 없고, 22토큰을 낸 뒤 네 번째 선점으로 21.5초, 28토큰을 낸 뒤 다섯 번째 선점으로 26.3초 동안 다시 출력이 없다. 멈춘 구간의 길이는 시간에 비례하고, 토큰을 만든 구간은 시간에 비례하지 않는다.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    text { font-family: Arial, "Noto Sans CJK KR", "Noto Sans KR", sans-serif; }
+    .pause { fill: #D9392E; fill-opacity: 0.12; stroke: #D9392E; stroke-width: 2; }
+    .decode { fill: #111111; }
+    .decode-faded { fill: none; stroke: #111111; stroke-width: 1.8; stroke-dasharray: 6 4; }
+    .key { fill: #D9392E; font-size: 36px; font-weight: 700; text-anchor: middle; }
+    .key-small { fill: #D9392E; font-size: 26px; font-weight: 700; text-anchor: middle; }
+    .tokens { fill: #050505; font-size: 22px; font-weight: 700; text-anchor: middle; }
+    .small { fill: #6F6A63; font-size: 18px; }
+    .center { text-anchor: middle; }
+    .tick { stroke: #6F6A63; stroke-width: 1.4; }
+    .rule { stroke: #D8D1C7; stroke-width: 1.2; }
+  </style>
+  <rect class="bg" width="960" height="340"/>
+
+  <!-- pause durations (scale: 13 px per second) -->
+  <text class="key-small" x="139.2" y="96">6.8초</text>
+  <text class="key" x="353.2" y="98">21.5초</text>
+  <text class="key" x="693.9" y="98">26.3초</text>
+
+  <!-- timeline bar -->
+  <rect class="decode-faded" x="51" y="118" width="44" height="50"/>
+  <rect class="pause" x="95" y="118" width="88.4" height="50"/>
+  <rect class="decode" x="183.4" y="118" width="30" height="50"/>
+  <rect class="pause" x="213.4" y="118" width="279.5" height="50"/>
+  <rect class="decode" x="492.9" y="118" width="30" height="50"/>
+  <rect class="pause" x="522.9" y="118" width="341.9" height="50"/>
+  <rect class="decode-faded" x="864.8" y="118" width="44" height="50"/>
+
+  <!-- preemption markers -->
+  <line class="tick" x1="95" y1="108" x2="95" y2="178"/>
+  <line class="tick" x1="213.4" y1="108" x2="213.4" y2="178"/>
+  <line class="tick" x1="522.9" y1="108" x2="522.9" y2="178"/>
+  <text class="small center" x="95" y="200">3번째 선점</text>
+  <text class="small center" x="213.4" y="200">4번째 선점</text>
+  <text class="small center" x="522.9" y="200">5번째 선점</text>
+
+  <!-- fresh tokens between pauses -->
+  <text class="tokens" x="198.4" y="236">22토큰</text>
+  <text class="tokens" x="507.9" y="236">28토큰</text>
+  <text class="small center" x="73" y="236">이전 출력</text>
+  <text class="small center" x="886.8" y="236">이후</text>
+
+  <!-- legend -->
+  <line class="rule" x1="51" y1="262" x2="909" y2="262"/>
+  <rect class="decode" x="51" y="280" width="24" height="16"/>
+  <text class="small" x="85" y="294">새 토큰을 만든 구간</text>
+  <rect class="pause" x="291" y="280" width="24" height="16"/>
+  <text class="small" x="325" y="294">새 출력 없음 (선점 뒤 대기와 복구)</text>
+  <text class="small" x="51" y="324">멈춘 구간의 길이만 시간에 비례한다. Shi 외(2026) 그림 2(b)를 다시 그림.</text>
+</svg>

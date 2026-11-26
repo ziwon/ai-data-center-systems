@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="400" viewBox="0 0 960 400" role="img" aria-labelledby="title desc">
+  <title id="title">요청별 최장 출력 공백: 재계산과 Stint</title>
+  <desc id="desc">IMO-AnswerBench 실험에서 세 실행의 요청 1,197건을 모은 요청별 최장 출력 공백을 로그 눈금으로 비교한다. 재계산은 중앙값 0.24초, p99 788초, 최댓값 808초이고, Stint는 중앙값 29.9초, p99 47.3초, 최댓값 49.3초다. 1분 넘게 멈춘 요청은 재계산 23.2%, Stint 0%이고, 5분 넘게 멈춘 요청은 재계산 15.9%, Stint 0%다.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    text { font-family: Arial, "Noto Sans CJK KR", "Noto Sans KR", sans-serif; }
+    .grid { stroke: #D8D1C7; stroke-width: 1.2; }
+    .axis { stroke: #111111; stroke-width: 1.4; }
+    .minute { stroke: #6F6A63; stroke-width: 1.4; stroke-dasharray: 6 5; }
+    .range { stroke: #111111; stroke-width: 3.5; }
+    .range-accent { stroke: #D9392E; stroke-width: 3.5; }
+    .median { fill: #F5F1EA; stroke: #111111; stroke-width: 2.6; }
+    .median-accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2.6; }
+    .max { fill: #111111; }
+    .max-accent { fill: #D9392E; }
+    .row { fill: #050505; font-size: 24px; font-weight: 700; }
+    .row-accent { fill: #D9392E; font-size: 24px; font-weight: 700; }
+    /* A background-coloured halo keeps grid lines from running through labels. */
+    .value, .value-accent { font-size: 17px; font-weight: 700; paint-order: stroke; stroke: #F5F1EA; stroke-width: 8px; stroke-linejoin: round; }
+    .value { fill: #050505; }
+    .value-accent { fill: #D9392E; }
+    .share { fill: #050505; font-size: 26px; font-weight: 700; text-anchor: middle; }
+    .share-accent { fill: #D9392E; font-size: 26px; font-weight: 700; text-anchor: middle; }
+    .small { fill: #6F6A63; font-size: 17px; }
+    .center { text-anchor: middle; }
+  </style>
+  <rect class="bg" width="960" height="400"/>
+
+  <!-- log axis: 0.1 s at x=150, 1,000 s at x=730 (145 px per decade) -->
+  <line class="grid" x1="150" y1="70" x2="150" y2="315"/>
+  <line class="grid" x1="295" y1="70" x2="295" y2="315"/>
+  <line class="grid" x1="440" y1="70" x2="440" y2="315"/>
+  <line class="grid" x1="585" y1="70" x2="585" y2="315"/>
+  <line class="grid" x1="730" y1="70" x2="730" y2="315"/>
+  <line class="minute" x1="552.8" y1="70" x2="552.8" y2="315"/>
+  <text class="small center" x="552.8" y="58">1분</text>
+  <line class="axis" x1="150" y1="315" x2="730" y2="315"/>
+  <text class="small center" x="150" y="341">0.1초</text>
+  <text class="small center" x="295" y="341">1초</text>
+  <text class="small center" x="440" y="341">10초</text>
+  <text class="small center" x="585" y="341">100초</text>
+  <text class="small center" x="730" y="341">1,000초</text>
+
+  <!-- share of requests over 1 and 5 minutes -->
+  <text class="small center" x="830" y="58">1분 초과</text>
+  <text class="small center" x="915" y="58">5분 초과</text>
+
+  <!-- recompute: median 0.24 s, p99 788 s, max 808 s -->
+  <text class="row" x="24" y="158">재계산</text>
+  <line class="range" x1="205.1" y1="150" x2="716.6" y2="150"/>
+  <circle class="median" cx="205.1" cy="150" r="9"/>
+  <circle class="max" cx="716.6" cy="150" r="9"/>
+  <text class="value" x="205.1" y="126" text-anchor="middle">중앙값 0.24초</text>
+  <text class="value" x="726" y="126" text-anchor="end">p99 788초 · 최대 808초</text>
+  <text class="share" x="830" y="159">23.2%</text>
+  <text class="share" x="915" y="159">15.9%</text>
+
+  <!-- Stint: median 29.9 s, p99 47.3 s, max 49.3 s -->
+  <text class="row-accent" x="24" y="258">Stint</text>
+  <line class="range-accent" x1="509" y1="250" x2="540.5" y2="250"/>
+  <circle class="median-accent" cx="509" cy="250" r="9"/>
+  <circle class="max-accent" cx="540.5" cy="250" r="9"/>
+  <text class="value-accent" x="492" y="256" text-anchor="end">중앙값 29.9초</text>
+  <text class="value-accent" x="562" y="256">p99 47.3초 · 최대 49.3초</text>
+  <text class="share-accent" x="830" y="259">0%</text>
+  <text class="share-accent" x="915" y="259">0%</text>
+
+  <!-- legend -->
+  <circle class="median" cx="32" cy="378" r="7"/>
+  <text class="small" x="46" y="384">중앙값</text>
+  <circle class="max" cx="124" cy="378" r="7"/>
+  <text class="small" x="138" y="384">최댓값</text>
+  <text class="small" x="936" y="384" text-anchor="end">IMO-AnswerBench, 세 실행의 요청 1,197건 · Shi 외(2026) 표 3</text>
+</svg>

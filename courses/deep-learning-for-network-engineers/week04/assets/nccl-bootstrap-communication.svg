@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="560" viewBox="0 0 1120 560" role="img" aria-labelledby="title desc">
+  <title id="title">NCCL bootstrap and communication paths</title>
+  <desc id="desc">A two-host GPU cluster diagram showing torchrun rank assignment, TCP rendezvous to rank 0, NCCL Unique ID distribution, intra-node NVLink paths, and inter-node RDMA backend paths.</desc>
+  <defs>
+    <style>
+      text { font-family: Arial, sans-serif; }
+      .bg { fill: #F5F1EA; }
+      .host { fill: none; stroke: #111111; stroke-width: 1.4; }
+      .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.1; }
+      .gpu { fill: #F5F1EA; stroke: #111111; stroke-width: 1.3; }
+      .master { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+      .fabric { fill: none; stroke: #D9392E; stroke-width: 2; }
+      .line { fill: none; stroke: #111111; stroke-width: 1.7; }
+      .tcp { fill: none; stroke: #6F6A63; stroke-width: 1.5; stroke-dasharray: 6 5; }
+      .rdma { fill: none; stroke: #D9392E; stroke-width: 2; }
+      .label { font-size: 16px; font-weight: 700; fill: #050505; }
+      .small { font-size: 13px; fill: #6F6A63; }
+      .tiny { font-size: 12px; fill: #6F6A63; }
+      .accent-text { font-size: 13px; font-weight: 700; fill: #D9392E; }
+      .arrow { fill: #111111; }
+      .arrow-accent { fill: #D9392E; }
+      .arrow-gray { fill: #6F6A63; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1120" height="560"/>
+
+  <rect class="host" x="58" y="70" width="430" height="360" rx="10"/>
+  <rect class="host" x="632" y="70" width="430" height="360" rx="10"/>
+  <text class="label" x="84" y="104">Host A</text>
+  <text class="small" x="84" y="126">node_rank 0, master_addr 192.168.10.101</text>
+  <text class="label" x="658" y="104">Host B</text>
+  <text class="small" x="658" y="126">node_rank 1, joins master over TCP</text>
+
+  <rect class="master" x="92" y="166" width="130" height="72" rx="7"/>
+  <text class="label" x="119" y="194">GPU 0</text>
+  <text class="accent-text" x="117" y="214">rank 0</text>
+
+  <rect class="gpu" x="262" y="166" width="130" height="72" rx="7"/>
+  <text class="label" x="289" y="194">GPU 1</text>
+  <text class="small" x="297" y="214">rank 1</text>
+
+  <rect class="gpu" x="92" y="280" width="130" height="72" rx="7"/>
+  <text class="label" x="119" y="308">GPU 2</text>
+  <text class="small" x="127" y="328">rank 2</text>
+
+  <rect class="gpu" x="262" y="280" width="130" height="72" rx="7"/>
+  <text class="label" x="289" y="308">GPU 3</text>
+  <text class="small" x="297" y="328">rank 3</text>
+
+  <rect class="gpu" x="666" y="166" width="130" height="72" rx="7"/>
+  <text class="label" x="693" y="194">GPU 0</text>
+  <text class="small" x="701" y="214">rank 4</text>
+
+  <rect class="gpu" x="836" y="166" width="130" height="72" rx="7"/>
+  <text class="label" x="863" y="194">GPU 1</text>
+  <text class="small" x="871" y="214">rank 5</text>
+
+  <rect class="gpu" x="666" y="280" width="130" height="72" rx="7"/>
+  <text class="label" x="693" y="308">GPU 2</text>
+  <text class="small" x="701" y="328">rank 6</text>
+
+  <rect class="gpu" x="836" y="280" width="130" height="72" rx="7"/>
+  <text class="label" x="863" y="308">GPU 3</text>
+  <text class="small" x="871" y="328">rank 7</text>
+
+  <path class="line" d="M 222 202 L 262 202"/>
+  <path class="line" d="M 157 238 L 157 280"/>
+  <path class="line" d="M 222 316 L 262 316"/>
+  <path class="line" d="M 327 238 L 327 280"/>
+  <text class="tiny" x="216" y="258">NVLink / PCIe</text>
+
+  <path class="line" d="M 796 202 L 836 202"/>
+  <path class="line" d="M 731 238 L 731 280"/>
+  <path class="line" d="M 796 316 L 836 316"/>
+  <path class="line" d="M 901 238 L 901 280"/>
+  <text class="tiny" x="790" y="258">NVLink / PCIe</text>
+
+  <rect class="soft" x="400" y="482" width="220" height="42" rx="7"/>
+  <text class="label" x="432" y="508">TCP bootstrap</text>
+  <rect class="soft" x="642" y="482" width="260" height="42" rx="7"/>
+  <text class="label" x="672" y="508">RDMA collective data path</text>
+
+  <path class="tcp" d="M 327 166 C 292 146, 218 146, 174 166"/>
+  <polygon class="arrow-gray" points="174,166 181,154 187,166"/>
+  <path class="tcp" d="M 666 166 C 560 118, 330 118, 222 166"/>
+  <polygon class="arrow-gray" points="222,166 234,160 234,172"/>
+  <text class="small" x="420" y="54">NCCL Unique ID distributed by rank 0 over TCP</text>
+
+  <rect class="fabric" x="474" y="220" width="152" height="108" rx="10"/>
+  <text class="label" x="510" y="262">Backend</text>
+  <text class="label" x="515" y="284">fabric</text>
+  <text class="tiny" x="501" y="304">IB or RoCEv2</text>
+
+  <path class="rdma" d="M 392 202 C 432 218, 452 235, 474 252"/>
+  <polygon class="arrow-accent" points="474,252 461,249 467,240"/>
+  <path class="rdma" d="M 626 252 C 646 235, 666 218, 666 202"/>
+  <polygon class="arrow-accent" points="666,202 660,214 672,214"/>
+  <path class="rdma" d="M 392 316 C 430 310, 454 298, 474 286"/>
+  <polygon class="arrow-accent" points="474,286 462,287 468,276"/>
+  <path class="rdma" d="M 626 286 C 650 300, 666 310, 666 316"/>
+  <polygon class="arrow-accent" points="666,316 660,304 672,304"/>
+
+  <text class="accent-text" x="424" y="374">Broadcast and AllReduce use the selected NCCL data transport</text>
+</svg>

@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 310" role="img" aria-labelledby="title desc">
+  <title id="title">Task parallelism and data parallelism</title>
+  <desc id="desc">Application work can expose task parallelism or data parallelism. Data parallelism scales with data size and maps naturally to many GPU threads.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.4; }
+    .primary { fill: #F5F1EA; stroke: #111111; stroke-width: 1.8; }
+    .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.5; marker-end: url(#arrow); }
+    .muted-line { fill: none; stroke: #D8D1C7; stroke-width: 1.5; marker-end: url(#muted-arrow); }
+    .label { fill: #050505; font-family: Inter, Arial, sans-serif; font-size: 16px; font-weight: 600; }
+    .small { fill: #6F6A63; font-family: Inter, Arial, sans-serif; font-size: 13px; font-weight: 400; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#111111"/>
+    </marker>
+    <marker id="muted-arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#D8D1C7"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1120" height="310" rx="8"/>
+
+  <rect class="primary" x="54" y="121" width="190" height="68" rx="4"/>
+  <text class="label" x="82" y="150">Application work</text>
+  <text class="small" x="82" y="171">parallel work source</text>
+
+  <rect class="box" x="344" y="52" width="260" height="76" rx="4"/>
+  <text class="label" x="390" y="83">Task parallelism</text>
+  <text class="small" x="392" y="106">different operations</text>
+
+  <rect class="box" x="344" y="182" width="260" height="76" rx="4"/>
+  <text class="label" x="390" y="213">Data parallelism</text>
+  <text class="small" x="405" y="236">same operation</text>
+
+  <rect class="box" x="702" y="52" width="278" height="76" rx="4"/>
+  <text class="label" x="739" y="83">Limited by number</text>
+  <text class="small" x="747" y="106">of independent tasks</text>
+
+  <rect class="accent" x="702" y="182" width="180" height="76" rx="4"/>
+  <text class="label" x="743" y="213">Scales with</text>
+  <text class="small" x="752" y="236">data size</text>
+
+  <rect class="accent" x="934" y="182" width="150" height="76" rx="4"/>
+  <text class="label" x="979" y="213">GPU fit</text>
+  <text class="small" x="970" y="236">many threads</text>
+
+  <path class="muted-line" d="M 244 146 C 282 104 302 90 344 90"/>
+  <path class="muted-line" d="M 244 164 C 282 204 302 220 344 220"/>
+  <path class="muted-line" d="M 604 90 L 702 90"/>
+  <path class="line" d="M 604 220 L 702 220"/>
+  <path class="line" d="M 882 220 L 934 220"/>
+</svg>

@@ -1,0 +1,698 @@
+{
+  "version": 1,
+  "current": {
+    "id": "/blog/hami-dra-gpu-sharing.ko/",
+    "title": "DRA와 HAMi로 보는 Kubernetes GPU 분할",
+    "route": "/blog/hami-dra-gpu-sharing.ko/",
+    "group": "blog",
+    "keywords": [
+      "hami",
+      "dra",
+      "quota",
+      "mig",
+      "gpu",
+      "스케줄러",
+      "메모리",
+      "annotation",
+      "pod",
+      "워크로드"
+    ],
+    "excerpt": "Kubernetes DRA가 맡는 GPU 할당과, HAMi가 맡는 GPU 안의 메모리·연산 제한을 나눠서 비교한다."
+  },
+  "nodes": [
+    {
+      "id": "/blog/hami-dra-gpu-sharing.ko/",
+      "title": "DRA와 HAMi로 보는 Kubernetes GPU 분할",
+      "route": "/blog/hami-dra-gpu-sharing.ko/",
+      "group": "blog",
+      "keywords": [
+        "hami",
+        "dra",
+        "quota",
+        "mig",
+        "gpu",
+        "스케줄러",
+        "메모리",
+        "annotation",
+        "pod",
+        "워크로드"
+      ],
+      "excerpt": "Kubernetes DRA가 맡는 GPU 할당과, HAMi가 맡는 GPU 안의 메모리·연산 제한을 나눠서 비교한다."
+    },
+    {
+      "id": "/blog/",
+      "title": "Blog",
+      "route": "/blog/",
+      "group": "blog",
+      "keywords": [
+        "gpu",
+        "2026-06-28",
+        "2026-07-07",
+        "blog",
+        "방법을",
+        "dgx",
+        "cloud",
+        "메모리",
+        "numa",
+        "kubernetes"
+      ],
+      "excerpt": "Technical blog posts on AI data center systems: GPU operations, failure analysis, networking, and performance engineering."
+    },
+    {
+      "id": "/blog/gpu-infrastructure-operations-and-platform-design.ko/",
+      "title": "GPU 인프라 운영과 플랫폼 설계: 하드웨어 장애 분석부터 멀티테넌시까지",
+      "route": "/blog/gpu-infrastructure-operations-and-platform-design.ko/",
+      "group": "blog",
+      "keywords": [
+        "gpu",
+        "메모리",
+        "호스트",
+        "작업을",
+        "드라이버",
+        "iommu",
+        "재시작",
+        "workload",
+        "서비스",
+        "않는다"
+      ],
+      "excerpt": "하드웨어 장애 진단부터 노드 등록·검증, 멀티테넌트 운영까지 GPU 플랫폼을 반복 가능하게 운영하는 방법을 정리한다."
+    },
+    {
+      "id": "/blog/hami-core-deep-dive.ko/",
+      "title": "HAMi-core 심층 분석: `libvgpu.so`는 GPU를 어떻게 나누는가",
+      "route": "/blog/hami-core-deep-dive.ko/",
+      "group": "blog",
+      "keywords": [
+        "hami-core",
+        "메모리",
+        "quota",
+        "프로세스",
+        "nvml",
+        "cuda",
+        "컨테이너",
+        "사용량",
+        "프레임워크",
+        "gpu"
+      ],
+      "excerpt": "HAMi-core의 libvgpu.so가 CUDA·NVML 호출에 개입해 컨테이너가 보는 GPU 메모리와 연산 자원을 나누는 방식을 따라간다."
+    },
+    {
+      "id": "/gpu/",
+      "title": "GPU Systems",
+      "route": "/gpu/",
+      "group": "gpu",
+      "keywords": [
+        "플랫폼",
+        "참고자료",
+        "cuda",
+        "모델과",
+        "메모리",
+        "gpu",
+        "컴퓨팅",
+        "아키텍처",
+        "익힙니다",
+        "확인합니다"
+      ],
+      "excerpt": "GPU 아키텍처와 CUDA 프로그래밍부터 Kubernetes GPU 플랫폼 운영까지 다루는 문서 모음입니다. 강좌는 실행 원리를 익히는 데, 참고자료는 세부 동작을 확인하는 데, 실습과 블로그 글은 성능 분석과 운영 판단에 활용할 수 있습니다."
+    },
+    {
+      "id": "concept:nccl",
+      "kind": "concept",
+      "title": "NCCL",
+      "label": "NCCL",
+      "group": "distributed-training",
+      "description": "NVIDIA collective communication library used by distributed GPU training.",
+      "keywords": [
+        "NCCL",
+        "collectives",
+        "all-reduce",
+        "allreduce",
+        "reduce-scatter",
+        "all-gather"
+      ]
+    },
+    {
+      "id": "concept:numa",
+      "kind": "concept",
+      "title": "NUMA",
+      "label": "NUMA",
+      "group": "systems",
+      "description": "CPU and memory locality model that matters for GPU, NIC, and memory placement.",
+      "keywords": [
+        "NUMA",
+        "NUMA locality",
+        "NUMA node",
+        "NUMA domain",
+        "remote memory"
+      ]
+    },
+    {
+      "id": "/gpu/pmpp/lec04/",
+      "title": "Lecture 4: GPU Architecture",
+      "route": "/gpu/pmpp/lec04/",
+      "group": "gpu",
+      "keywords": [
+        "block",
+        "warp",
+        "thread",
+        "threads",
+        "sm에",
+        "resident",
+        "instruction",
+        "register",
+        "memory",
+        "v100"
+      ],
+      "excerpt": "이번 강의의 목표는 지금까지 작성한 CUDA kernel이 실제 GPU hardware 위에서 어떻게 실행되는지 이해하는 것이다. 2강과 3강에서는 thread, block, grid를 프로그래밍 모델로 사용했다. 4강은 이 추상화가 GPU의 streaming..."
+    },
+    {
+      "id": "/blog/keeping-gpu-workloads-numa-local-in-kubernetes.ko/",
+      "title": "Keeping GPU Workloads NUMA-Local in Kubernetes",
+      "route": "/blog/keeping-gpu-workloads-numa-local-in-kubernetes.ko/",
+      "group": "blog",
+      "keywords": [
+        "numa",
+        "cpu",
+        "pod",
+        "node",
+        "container",
+        "kubelet",
+        "manager",
+        "memory",
+        "request",
+        "gpu"
+      ],
+      "excerpt": "kubelet 정책, topology-aware scheduling, workload sizing으로 Kubernetes에서 GPU workload의 NUMA locality를 지키는 방법을 다룬다."
+    },
+    {
+      "id": "/blog/never-underestimate-memory-architecture.ko/",
+      "title": "Never Underestimate Memory Architecture",
+      "route": "/blog/never-underestimate-memory-architecture.ko/",
+      "group": "blog",
+      "keywords": [
+        "cpu",
+        "numa",
+        "memory",
+        "manager",
+        "instance",
+        "zone",
+        "node",
+        "uncore",
+        "gpu",
+        "cloud"
+      ],
+      "excerpt": "Grafana Cloud 사례를 바탕으로 NUMA와 shared uncore 자원이 대형 서버와 cloud VM의 성능을 어떻게 좌우하는지 정리한다."
+    },
+    {
+      "id": "/inference/efficient-llm-inference-systems/appendix/hardware-architectures/gpus.ko/",
+      "title": "How to Think About GPUs",
+      "route": "/inference/efficient-llm-inference-systems/appendix/hardware-architectures/gpus.ko/",
+      "group": "inference",
+      "keywords": [
+        "gpu",
+        "tensor",
+        "b300",
+        "core",
+        "nvlink",
+        "dgx",
+        "blackwell",
+        "memory",
+        "scale-up",
+        "parallelism"
+      ],
+      "excerpt": "이 글은 NVIDIA GPU를 LLM scaling 관점에서 설명한다. 핵심은 GPU를 하나의 큰 계산기로 보지 않는 것이다."
+    },
+    {
+      "id": "/courses/deep-learning-for-network-engineers/week03/",
+      "title": "Week 3: Parallelism Strategies in Deep Learning",
+      "route": "/courses/deep-learning-for-network-engineers/week03/",
+      "group": "courses/deep-learning-for-network-engineers",
+      "keywords": [
+        "parallelism",
+        "gpu",
+        "gradient",
+        "pipeline",
+        "expert",
+        "stage",
+        "tensor",
+        "training",
+        "micro-batch",
+        "communication"
+      ],
+      "excerpt": "이번 주 목표는 대규모 deep learning training이 왜 parallelism을 필요로 하는지 , 그리고 각 parallelization strategy가 GPU memory, GPU utilization, backend network design에 어떤 영향을..."
+    },
+    {
+      "id": "/courses/deep-learning-for-network-engineers/week04/",
+      "title": "Week 4: RDMA and GPU Cluster Communication",
+      "route": "/courses/deep-learning-for-network-engineers/week04/",
+      "group": "courses/deep-learning-for-network-engineers",
+      "keywords": [
+        "rank",
+        "rdma",
+        "nccl",
+        "queue",
+        "host",
+        "memory",
+        "transport",
+        "gpu",
+        "path",
+        "bootstrap"
+      ],
+      "excerpt": "이번 주 목표는 Chapter 9와 Chapter 14를 연결해서, RDMA가 GPU memory 사이의 빠른 data movement를 어떻게 만들고, NCCL이 distributed training job 안에서 어떤 communication pattern을 만드는지 이해하는..."
+    },
+    {
+      "id": "/inference/efficient-llm-inference-systems/appendix/hardware-architectures/domain-specific-architectures-for-ai-inference.ko/",
+      "title": "Domain-Specific Architectures for AI Inference",
+      "route": "/inference/efficient-llm-inference-systems/appendix/hardware-architectures/domain-specific-architectures-for-ai-inference.ko/",
+      "group": "inference",
+      "keywords": [
+        "dsa",
+        "cache",
+        "week",
+        "compute",
+        "hardware",
+        "tensor",
+        "inference",
+        "decode",
+        "sram",
+        "scratchpad"
+      ],
+      "excerpt": "저자는 이 질문에 답하기 위해 Transformer inference의 병목을 먼저 분석하고, 거기서 하드웨어 설계 원칙을 끌어낸다. 결론은 다음과 같다."
+    }
+  ],
+  "edges": [
+    {
+      "source": "/blog/",
+      "target": "/blog/gpu-infrastructure-operations-and-platform-design.ko/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": [
+        "gpu",
+        "메모리"
+      ]
+    },
+    {
+      "source": "/blog/",
+      "target": "/blog/hami-core-deep-dive.ko/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": [
+        "메모리",
+        "gpu"
+      ]
+    },
+    {
+      "source": "/blog/",
+      "target": "/blog/hami-dra-gpu-sharing.ko/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": [
+        "gpu",
+        "메모리"
+      ]
+    },
+    {
+      "source": "/blog/",
+      "target": "/blog/keeping-gpu-workloads-numa-local-in-kubernetes.ko/",
+      "type": "link+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/blog/",
+      "target": "/blog/never-underestimate-memory-architecture.ko/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": [
+        "gpu",
+        "cloud",
+        "numa"
+      ]
+    },
+    {
+      "source": "/blog/",
+      "target": "/gpu/",
+      "type": "link",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/blog/gpu-infrastructure-operations-and-platform-design.ko/",
+      "target": "/blog/hami-core-deep-dive.ko/",
+      "type": "link",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/blog/gpu-infrastructure-operations-and-platform-design.ko/",
+      "target": "/blog/hami-dra-gpu-sharing.ko/",
+      "type": "link",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/blog/gpu-infrastructure-operations-and-platform-design.ko/",
+      "target": "/blog/keeping-gpu-workloads-numa-local-in-kubernetes.ko/",
+      "type": "link",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/blog/gpu-infrastructure-operations-and-platform-design.ko/",
+      "target": "/gpu/",
+      "type": "link+semantic",
+      "weight": 1,
+      "terms": [
+        "메모리",
+        "gpu"
+      ]
+    },
+    {
+      "source": "/blog/hami-core-deep-dive.ko/",
+      "target": "/blog/hami-dra-gpu-sharing.ko/",
+      "type": "link+semantic",
+      "weight": 1,
+      "terms": [
+        "quota",
+        "gpu",
+        "메모리"
+      ]
+    },
+    {
+      "source": "/blog/hami-core-deep-dive.ko/",
+      "target": "/gpu/",
+      "type": "link",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/blog/hami-dra-gpu-sharing.ko/",
+      "target": "/gpu/",
+      "type": "link",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/blog/keeping-gpu-workloads-numa-local-in-kubernetes.ko/",
+      "target": "/gpu/",
+      "type": "link",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/gpu/",
+      "target": "/gpu/pmpp/lec04/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/blog/gpu-infrastructure-operations-and-platform-design.ko/",
+      "target": "concept:nccl",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "NCCL",
+        "allreduce"
+      ]
+    },
+    {
+      "source": "/blog/gpu-infrastructure-operations-and-platform-design.ko/",
+      "target": "concept:numa",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "NUMA"
+      ]
+    },
+    {
+      "source": "/blog/keeping-gpu-workloads-numa-local-in-kubernetes.ko/",
+      "target": "concept:numa",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "NUMA",
+        "NUMA node",
+        "NUMA locality",
+        "remote memory"
+      ]
+    },
+    {
+      "source": "/blog/never-underestimate-memory-architecture.ko/",
+      "target": "concept:numa",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "NUMA",
+        "NUMA node",
+        "NUMA domain",
+        "remote memory"
+      ]
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week03/",
+      "target": "concept:nccl",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "allreduce",
+        "NCCL"
+      ]
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week04/",
+      "target": "concept:nccl",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "NCCL",
+        "allreduce"
+      ]
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week04/",
+      "target": "concept:numa",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "remote memory",
+        "NUMA",
+        "NUMA domain"
+      ]
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/appendix/hardware-architectures/domain-specific-architectures-for-ai-inference.ko/",
+      "target": "concept:nccl",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "allreduce",
+        "NCCL",
+        "collectives"
+      ]
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/appendix/hardware-architectures/gpus.ko/",
+      "target": "concept:nccl",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "allreduce",
+        "collectives",
+        "NCCL"
+      ]
+    },
+    {
+      "source": "/blog/never-underestimate-memory-architecture.ko/",
+      "target": "concept:nccl",
+      "type": "mentions",
+      "weight": 0.905,
+      "terms": [
+        "NCCL"
+      ]
+    },
+    {
+      "source": "/blog/",
+      "target": "concept:numa",
+      "type": "mentions",
+      "weight": 0.855,
+      "terms": [
+        "NUMA",
+        "NUMA locality"
+      ]
+    },
+    {
+      "source": "/blog/keeping-gpu-workloads-numa-local-in-kubernetes.ko/",
+      "target": "concept:nccl",
+      "type": "mentions",
+      "weight": 0.83,
+      "terms": [
+        "NCCL"
+      ]
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week03/",
+      "target": "concept:numa",
+      "type": "mentions",
+      "weight": 0.83,
+      "terms": [
+        "NUMA",
+        "remote memory"
+      ]
+    },
+    {
+      "source": "/inference/efficient-llm-inference-systems/appendix/hardware-architectures/gpus.ko/",
+      "target": "concept:numa",
+      "type": "mentions",
+      "weight": 0.83,
+      "terms": [
+        "NUMA",
+        "NUMA locality"
+      ]
+    },
+    {
+      "source": "/blog/hami-dra-gpu-sharing.ko/",
+      "target": "concept:nccl",
+      "type": "mentions",
+      "weight": 0.805,
+      "terms": [
+        "NCCL"
+      ]
+    },
+    {
+      "source": "/blog/hami-dra-gpu-sharing.ko/",
+      "target": "concept:numa",
+      "type": "mentions",
+      "weight": 0.805,
+      "terms": [
+        "NUMA"
+      ]
+    },
+    {
+      "source": "/blog/keeping-gpu-workloads-numa-local-in-kubernetes.ko/",
+      "target": "/blog/never-underestimate-memory-architecture.ko/",
+      "type": "semantic",
+      "weight": 0.716,
+      "terms": [
+        "cpu",
+        "numa",
+        "memory",
+        "manager"
+      ]
+    },
+    {
+      "source": "/gpu/pmpp/lec04/",
+      "target": "/inference/efficient-llm-inference-systems/appendix/hardware-architectures/gpus.ko/",
+      "type": "semantic",
+      "weight": 0.716,
+      "terms": [
+        "memory"
+      ]
+    },
+    {
+      "source": "/blog/",
+      "target": "/inference/efficient-llm-inference-systems/appendix/hardware-architectures/gpus.ko/",
+      "type": "semantic",
+      "weight": 0.675,
+      "terms": [
+        "gpu",
+        "dgx"
+      ]
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week04/",
+      "target": "/gpu/pmpp/lec04/",
+      "type": "semantic",
+      "weight": 0.672,
+      "terms": [
+        "memory"
+      ]
+    },
+    {
+      "source": "/blog/hami-core-deep-dive.ko/",
+      "target": "/inference/efficient-llm-inference-systems/appendix/hardware-architectures/gpus.ko/",
+      "type": "semantic",
+      "weight": 0.661,
+      "terms": [
+        "gpu"
+      ]
+    },
+    {
+      "source": "/blog/gpu-infrastructure-operations-and-platform-design.ko/",
+      "target": "/gpu/pmpp/lec04/",
+      "type": "semantic",
+      "weight": 0.658,
+      "terms": []
+    },
+    {
+      "source": "/blog/keeping-gpu-workloads-numa-local-in-kubernetes.ko/",
+      "target": "/gpu/pmpp/lec04/",
+      "type": "semantic",
+      "weight": 0.653,
+      "terms": [
+        "memory"
+      ]
+    },
+    {
+      "source": "/blog/never-underestimate-memory-architecture.ko/",
+      "target": "/inference/efficient-llm-inference-systems/appendix/hardware-architectures/gpus.ko/",
+      "type": "semantic",
+      "weight": 0.637,
+      "terms": [
+        "gpu",
+        "memory"
+      ]
+    },
+    {
+      "source": "/blog/hami-core-deep-dive.ko/",
+      "target": "/gpu/pmpp/lec04/",
+      "type": "semantic",
+      "weight": 0.627,
+      "terms": []
+    },
+    {
+      "source": "/blog/never-underestimate-memory-architecture.ko/",
+      "target": "/gpu/pmpp/lec04/",
+      "type": "semantic",
+      "weight": 0.627,
+      "terms": [
+        "memory"
+      ]
+    },
+    {
+      "source": "/blog/hami-dra-gpu-sharing.ko/",
+      "target": "/gpu/pmpp/lec04/",
+      "type": "semantic",
+      "weight": 0.601,
+      "terms": []
+    },
+    {
+      "source": "/blog/hami-dra-gpu-sharing.ko/",
+      "target": "/blog/keeping-gpu-workloads-numa-local-in-kubernetes.ko/",
+      "type": "semantic",
+      "weight": 0.597,
+      "terms": [
+        "pod",
+        "gpu"
+      ]
+    },
+    {
+      "source": "/blog/hami-dra-gpu-sharing.ko/",
+      "target": "/blog/never-underestimate-memory-architecture.ko/",
+      "type": "semantic",
+      "weight": 0.596,
+      "terms": [
+        "gpu"
+      ]
+    },
+    {
+      "source": "/blog/hami-dra-gpu-sharing.ko/",
+      "target": "/inference/efficient-llm-inference-systems/appendix/hardware-architectures/gpus.ko/",
+      "type": "semantic",
+      "weight": 0.595,
+      "terms": [
+        "gpu"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 620" role="img" aria-labelledby="title desc">
+  <title id="title">OS, container, and GPU runtime path</title>
+  <desc id="desc">A technical diagram showing the path from a model process through container runtime, driver stack, CUDA runtime, GPU memory, and observability.</desc>
+  <style>
+    svg {
+      background: #F5F1EA;
+      color: #050505;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    .box {
+      fill: none;
+      stroke: #111111;
+      stroke-width: 1.6;
+    }
+    .soft {
+      fill: none;
+      stroke: #D8D1C7;
+      stroke-width: 1.4;
+    }
+    .dash {
+      fill: none;
+      stroke: #6F6A63;
+      stroke-width: 1.3;
+      stroke-dasharray: 7 7;
+    }
+    .arrow {
+      fill: none;
+      stroke: #111111;
+      stroke-width: 1.5;
+      marker-end: url(#arrow);
+    }
+    .arrow-soft {
+      fill: none;
+      stroke: #6F6A63;
+      stroke-width: 1.3;
+      marker-end: url(#arrow-soft);
+    }
+    .arrow-accent {
+      fill: none;
+      stroke: #D9392E;
+      stroke-width: 2.1;
+      marker-end: url(#arrow-accent);
+    }
+    .label {
+      fill: #050505;
+      font-size: 19px;
+      font-weight: 700;
+    }
+    .text {
+      fill: #050505;
+      font-size: 15px;
+      font-weight: 600;
+    }
+    .small {
+      fill: #6F6A63;
+      font-size: 13px;
+    }
+    .warn {
+      fill: #D9392E;
+      font-size: 14px;
+      font-weight: 700;
+    }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#111111"/>
+    </marker>
+    <marker id="arrow-soft" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#6F6A63"/>
+    </marker>
+    <marker id="arrow-accent" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#D9392E"/>
+    </marker>
+  </defs>
+
+  <rect x="60" y="60" width="250" height="120" class="box"/>
+  <text x="88" y="100" class="label">AI process</text>
+  <text x="88" y="130" class="small">training loop, inference server</text>
+  <text x="88" y="154" class="small">PyTorch, CUDA, NCCL</text>
+
+  <rect x="430" y="60" width="250" height="120" class="box"/>
+  <text x="458" y="100" class="label">Container runtime</text>
+  <text x="458" y="130" class="small">Docker / containerd</text>
+  <text x="458" y="154" class="small">NVIDIA container toolkit</text>
+
+  <rect x="800" y="60" width="250" height="120" class="box"/>
+  <text x="828" y="100" class="label">GPU access</text>
+  <text x="828" y="130" class="small">device files, driver ABI</text>
+  <text x="828" y="154" class="small">CUDA visible devices</text>
+
+  <path d="M310 120 H430" class="arrow"/>
+  <path d="M680 120 H800" class="arrow"/>
+
+  <rect x="60" y="250" width="250" height="130" class="soft"/>
+  <text x="88" y="292" class="text">Host kernel</text>
+  <text x="88" y="322" class="small">scheduler, IRQ, NUMA</text>
+  <text x="88" y="346" class="small">cgroup limits, huge pages</text>
+
+  <rect x="430" y="250" width="250" height="130" class="soft"/>
+  <text x="458" y="292" class="text">Driver stack</text>
+  <text x="458" y="322" class="small">NVIDIA driver, CUDA libs</text>
+  <text x="458" y="346" class="small">fabric manager, persistence</text>
+
+  <rect x="800" y="250" width="250" height="130" class="soft"/>
+  <text x="828" y="292" class="text">GPU resources</text>
+  <text x="828" y="322" class="small">SM, HBM, copy engines</text>
+  <text x="828" y="346" class="small">NVLink / PCIe locality</text>
+
+  <path d="M185 180 V250" class="arrow-soft"/>
+  <path d="M555 180 V250" class="arrow-soft"/>
+  <path d="M925 180 V250" class="arrow-soft"/>
+  <path d="M310 315 H430" class="arrow"/>
+  <path d="M680 315 H800" class="arrow"/>
+
+  <rect x="60" y="464" width="990" height="72" class="dash"/>
+  <text x="94" y="492" class="text">Telemetry and controls</text>
+  <text x="94" y="520" class="small">nvidia-smi, DCGM, Nsight Systems, kubelet, device plugin, runtime logs</text>
+
+  <path d="M925 380 V464" class="arrow-soft"/>
+  <path d="M555 380 V464" class="arrow-soft"/>
+  <path d="M185 380 V464" class="arrow-soft"/>
+
+  <path d="M922 380 C922 420 822 432 720 424" class="arrow-accent"/>
+  <text x="728" y="454" class="warn">mismatch here becomes lost goodput</text>
+</svg>

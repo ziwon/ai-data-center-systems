@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="560" viewBox="0 0 960 560" role="img" aria-labelledby="title desc">
+  <title id="title">Matmul byte accounting</title>
+  <desc id="desc">A diagram showing X, W, and Y tensors for matmul and their approximate BF16 byte counts and FLOPs.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .tensor { fill: #F3EFE7; stroke: #111111; stroke-width: 2; }
+    .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2.5; }
+    .line { stroke: #111111; stroke-width: 2; fill: none; }
+    .muted-line { stroke: #D8D1C7; stroke-width: 1.4; fill: none; }
+    .text { fill: #050505; font-family: Arial, Helvetica, sans-serif; }
+    .muted { fill: #6F6A63; font-family: Arial, Helvetica, sans-serif; }
+    .label { font-size: 24px; font-weight: 700; }
+    .small { font-size: 18px; }
+    .formula { font-size: 22px; font-weight: 700; }
+  </style>
+  <rect class="bg" width="960" height="560" />
+
+  <rect class="tensor" x="105" y="140" width="155" height="210" />
+  <text class="text label" x="148" y="128">X[B,D]</text>
+  <text class="muted small" x="127" y="382">read: 2BD bytes</text>
+
+  <text class="text label" x="292" y="258">@</text>
+
+  <rect class="tensor" x="345" y="185" width="250" height="120" />
+  <text class="text label" x="430" y="172">W[D,F]</text>
+  <text class="muted small" x="397" y="337">read: 2DF bytes</text>
+
+  <text class="text label" x="630" y="258">=</text>
+
+  <rect class="accent" x="690" y="140" width="185" height="210" />
+  <text class="text label" x="742" y="128">Y[B,F]</text>
+  <text class="muted small" x="711" y="382">write: 2BF bytes</text>
+
+  <path class="muted-line" d="M182 140 V350" />
+  <path class="muted-line" d="M105 245 H260" />
+  <path class="muted-line" d="M470 185 V305" />
+  <path class="muted-line" d="M345 245 H595" />
+  <path class="muted-line" d="M782 140 V350" />
+  <path class="muted-line" d="M690 245 H875" />
+
+  <rect class="tensor" x="165" y="430" width="630" height="70" />
+  <text class="text formula" x="205" y="474">FLOPs ~= 2BDF</text>
+  <text class="muted small" x="435" y="474">Intensity = 2BDF / (2BD + 2DF + 2BF)</text>
+
+  <path class="line" d="M260 245 H330" />
+  <path class="line" d="M595 245 H675" />
+</svg>

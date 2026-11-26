@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="560" viewBox="0 0 1120 560" role="img" aria-labelledby="title desc">
+  <title id="title">Pipeline bubble timeline</title>
+  <desc id="desc">A four-stage pipeline timeline showing fill, full utilization, backward overlap, and drain phases across ten time steps.</desc>
+  <defs>
+    <style>
+      text { font-family: Arial, sans-serif; }
+      .bg { fill: #F5F1EA; }
+      .title { font-size: 25px; font-weight: 700; fill: #050505; }
+      .subtitle { font-size: 14px; fill: #6F6A63; }
+      .label { font-size: 14px; font-weight: 700; fill: #050505; }
+      .small { font-size: 12px; fill: #6F6A63; }
+      .tiny { font-size: 11px; fill: #6F6A63; }
+      .grid { stroke: #D8D1C7; stroke-width: 1; }
+      .axis { stroke: #111111; stroke-width: 1.2; }
+      .fwd { fill: none; stroke: #111111; stroke-width: 1.2; }
+      .bwd { fill: #D9392E; stroke: #D9392E; stroke-width: 1.2; }
+      .idle { fill: none; stroke: #D8D1C7; stroke-width: 1; }
+      .note { fill: none; stroke: #D8D1C7; stroke-width: 1.2; }
+      .bubble { fill: none; stroke: #D9392E; stroke-width: 1.4; stroke-dasharray: 5 4; }
+      .util { fill: none; stroke: #D8D1C7; stroke-width: 1.2; }
+      .utilbar { fill: #111111; opacity: 0.75; }
+      .utilbar-hot { fill: #D9392E; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1120" height="640"/>
+  <rect class="note" x="44" y="36" width="1032" height="346" rx="10"/>
+  <text class="label" x="74" y="58">Four pipeline stages across time</text>
+
+  <g transform="translate(132 104)">
+    <text class="label" x="-62" y="28">GPU 0a</text>
+    <text class="label" x="-62" y="84">GPU 1a</text>
+    <text class="label" x="-62" y="140">GPU 0b</text>
+    <text class="label" x="-62" y="196">GPU 1b</text>
+
+    <line class="axis" x1="0" y1="-18" x2="880" y2="-18"/>
+    <text class="tiny" x="29" y="-28">t1</text>
+    <text class="tiny" x="117" y="-28">t2</text>
+    <text class="tiny" x="205" y="-28">t3</text>
+    <text class="tiny" x="293" y="-28">t4</text>
+    <text class="tiny" x="381" y="-28">t5</text>
+    <text class="tiny" x="469" y="-28">t6</text>
+    <text class="tiny" x="557" y="-28">t7</text>
+    <text class="tiny" x="645" y="-28">t8</text>
+    <text class="tiny" x="733" y="-28">t9</text>
+    <text class="tiny" x="821" y="-28">t10</text>
+
+    <line class="grid" x1="70" y1="15" x2="910" y2="15"/>
+    <line class="grid" x1="70" y1="58" x2="910" y2="58"/>
+    <line class="grid" x1="70" y1="101" x2="910" y2="101"/>
+    <line class="grid" x1="70" y1="144" x2="910" y2="144"/>
+
+    <rect class="bubble" x="0" y="-7" width="264" height="236" rx="8"/>
+    <text class="tiny" x="82" y="224">pipeline fill</text>
+    <rect class="bubble" x="704" y="-7" width="176" height="236" rx="8"/>
+    <text class="tiny" x="750" y="224">pipeline drain</text>
+
+    <rect class="fwd" x="8" y="8" width="72" height="32" rx="5"/>
+    <rect class="fwd" x="96" y="8" width="72" height="32" rx="5"/>
+    <rect class="fwd" x="184" y="8" width="72" height="32" rx="5"/>
+    <rect class="fwd" x="272" y="8" width="72" height="32" rx="5"/>
+    <rect class="bwd" x="536" y="8" width="72" height="32" rx="5"/>
+    <rect class="bwd" x="624" y="8" width="72" height="32" rx="5"/>
+    <rect class="bwd" x="712" y="8" width="72" height="32" rx="5"/>
+    <rect class="bwd" x="800" y="8" width="72" height="32" rx="5"/>
+
+    <rect class="idle" x="8" y="64" width="72" height="32" rx="5"/>
+    <rect class="fwd" x="96" y="64" width="72" height="32" rx="5"/>
+    <rect class="fwd" x="184" y="64" width="72" height="32" rx="5"/>
+    <rect class="fwd" x="272" y="64" width="72" height="32" rx="5"/>
+    <rect class="fwd" x="360" y="64" width="72" height="32" rx="5"/>
+    <rect class="bwd" x="448" y="64" width="72" height="32" rx="5"/>
+    <rect class="bwd" x="536" y="64" width="72" height="32" rx="5"/>
+    <rect class="bwd" x="624" y="64" width="72" height="32" rx="5"/>
+    <rect class="bwd" x="712" y="64" width="72" height="32" rx="5"/>
+
+    <rect class="idle" x="8" y="120" width="72" height="32" rx="5"/>
+    <rect class="idle" x="96" y="120" width="72" height="32" rx="5"/>
+    <rect class="fwd" x="184" y="120" width="72" height="32" rx="5"/>
+    <rect class="fwd" x="272" y="120" width="72" height="32" rx="5"/>
+    <rect class="fwd" x="360" y="120" width="72" height="32" rx="5"/>
+    <rect class="bwd" x="448" y="120" width="72" height="32" rx="5"/>
+    <rect class="bwd" x="536" y="120" width="72" height="32" rx="5"/>
+    <rect class="bwd" x="624" y="120" width="72" height="32" rx="5"/>
+
+    <rect class="idle" x="8" y="176" width="72" height="32" rx="5"/>
+    <rect class="idle" x="96" y="176" width="72" height="32" rx="5"/>
+    <rect class="idle" x="184" y="176" width="72" height="32" rx="5"/>
+    <rect class="fwd" x="272" y="176" width="72" height="32" rx="5"/>
+    <rect class="fwd" x="360" y="176" width="72" height="32" rx="5"/>
+    <rect class="bwd" x="448" y="176" width="72" height="32" rx="5"/>
+    <rect class="bwd" x="536" y="176" width="72" height="32" rx="5"/>
+
+    <text class="tiny" x="25" y="29">F1</text>
+    <text class="tiny" x="113" y="85">F1</text>
+    <text class="tiny" x="201" y="141">F1</text>
+    <text class="tiny" x="289" y="197">F1</text>
+    <text class="tiny" x="465" y="85" fill="#F5F1EA">B1</text>
+    <text class="tiny" x="553" y="29" fill="#F5F1EA">B1</text>
+  </g>
+
+  <rect class="util" x="44" y="412" width="1032" height="92" rx="10"/>
+  <text class="label" x="74" y="445">Active GPU ratio</text>
+  <g transform="translate(212 434)">
+    <rect class="utilbar" x="0" y="30" width="48" height="13" rx="3"/>
+    <rect class="utilbar" x="84" y="20" width="48" height="23" rx="3"/>
+    <rect class="utilbar" x="168" y="10" width="48" height="33" rx="3"/>
+    <rect class="utilbar-hot" x="252" y="0" width="48" height="43" rx="3"/>
+    <rect class="utilbar" x="336" y="10" width="48" height="33" rx="3"/>
+    <rect class="utilbar" x="420" y="10" width="48" height="33" rx="3"/>
+    <rect class="utilbar-hot" x="504" y="0" width="48" height="43" rx="3"/>
+    <rect class="utilbar" x="588" y="10" width="48" height="33" rx="3"/>
+    <rect class="utilbar" x="672" y="20" width="48" height="23" rx="3"/>
+    <rect class="utilbar" x="756" y="30" width="48" height="13" rx="3"/>
+    <text class="tiny" x="-2" y="59">25%</text>
+    <text class="tiny" x="82" y="59">50%</text>
+    <text class="tiny" x="166" y="59">75%</text>
+    <text class="tiny" x="247" y="59">100%</text>
+    <text class="tiny" x="334" y="59">75%</text>
+    <text class="tiny" x="418" y="59">75%</text>
+    <text class="tiny" x="499" y="59">100%</text>
+    <text class="tiny" x="586" y="59">75%</text>
+    <text class="tiny" x="670" y="59">50%</text>
+    <text class="tiny" x="754" y="59">25%</text>
+  </g>
+</svg>

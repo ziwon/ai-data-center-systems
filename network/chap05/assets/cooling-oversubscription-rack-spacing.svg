@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="430" viewBox="0 0 980 430" role="img" aria-labelledby="title desc">
+  <title id="title">Cooling oversubscription and rack spacing</title>
+  <desc id="desc">A dense rack layout can exceed local cooling capacity. Spacing racks or reducing rack density can increase effective cooling capacity per populated rack area.</desc>
+  <rect width="980" height="430" fill="#ffffff"/>
+  <style>
+    .title { font: 700 24px Arial, sans-serif; fill: #0f172a; }
+    .label { font: 700 16px Arial, sans-serif; fill: #0f172a; }
+    .small { font: 13px Arial, sans-serif; fill: #334155; }
+    .floor { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 1.5; rx: 10; }
+    .rack { fill: #eef6ff; stroke: #2563eb; stroke-width: 2; rx: 5; }
+    .empty { fill: #ffffff; stroke: #94a3b8; stroke-width: 2; stroke-dasharray: 6 5; rx: 5; }
+    .bad { fill: #fff1f2; stroke: #e11d48; stroke-width: 2; rx: 10; }
+    .good { fill: #ecfdf5; stroke: #059669; stroke-width: 2; rx: 10; }
+    .arrow { stroke: #64748b; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b"/>
+    </marker>
+  </defs>
+
+  <text x="38" y="42" class="title">Cooling Oversubscription Mitigation</text>
+  <text x="38" y="68" class="small">When rack heat load exceeds local cooling capacity, spacing racks or reducing density can trade floor space for cooling headroom.</text>
+
+  <rect x="42" y="105" width="380" height="250" class="bad"/>
+  <text x="72" y="137" class="label">Dense layout</text>
+  <text x="72" y="160" class="small">Heat load can exceed cooling available in the same footprint.</text>
+  <g transform="translate(76,195)">
+    <rect x="0" y="0" width="45" height="95" class="rack"/><text x="12" y="118" class="small">R1</text>
+    <rect x="55" y="0" width="45" height="95" class="rack"/><text x="67" y="118" class="small">R2</text>
+    <rect x="110" y="0" width="45" height="95" class="rack"/><text x="122" y="118" class="small">R3</text>
+    <rect x="165" y="0" width="45" height="95" class="rack"/><text x="177" y="118" class="small">R4</text>
+    <rect x="220" y="0" width="45" height="95" class="rack"/><text x="232" y="118" class="small">R5</text>
+  </g>
+  <text x="72" y="330" class="small">Example: cooling demand &gt; available capacity</text>
+
+  <path class="arrow" d="M 440 230 C 470 230 500 230 530 230"/>
+  <text x="452" y="210" class="small">mitigate</text>
+
+  <rect x="558" y="105" width="380" height="250" class="good"/>
+  <text x="588" y="137" class="label">Spaced or lower-density layout</text>
+  <text x="588" y="160" class="small">Empty footprints can contribute cooling capacity to populated racks.</text>
+  <g transform="translate(592,195)">
+    <rect x="0" y="0" width="45" height="95" class="rack"/><text x="12" y="118" class="small">R1</text>
+    <rect x="55" y="0" width="45" height="95" class="empty"/><text x="65" y="118" class="small">gap</text>
+    <rect x="110" y="0" width="45" height="95" class="rack"/><text x="122" y="118" class="small">R2</text>
+    <rect x="165" y="0" width="45" height="95" class="empty"/><text x="175" y="118" class="small">gap</text>
+    <rect x="220" y="0" width="45" height="95" class="rack"/><text x="232" y="118" class="small">R3</text>
+  </g>
+  <text x="588" y="330" class="small">Trade-off: more floor space and potentially longer cable runs</text>
+
+  <text x="42" y="392" class="small">Use precise rack heat-load and facility cooling data; example layouts are conceptual, not a substitute for CFD or site engineering.</text>
+</svg>

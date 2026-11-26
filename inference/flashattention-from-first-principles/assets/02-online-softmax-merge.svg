@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="780" viewBox="0 0 1400 780" role="img" aria-labelledby="title desc">
+  <title id="title">Mergeable online softmax state</title>
+  <desc id="desc">Two score and value tiles produce local max, normalizer, and weighted numerator states. The states are merged with exponential rescaling to obtain the exact full-row result in real arithmetic.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f8fafc"/>
+      <stop offset="1" stop-color="#f0fdf4"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0f172a" flood-opacity="0.12"/>
+    </filter>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#334155"/>
+    </marker>
+    <style>
+      .title{font:700 30px Inter,Segoe UI,Arial,sans-serif;fill:#0f172a}
+      .subtitle{font:500 16px Inter,Segoe UI,Arial,sans-serif;fill:#475569}
+      .head{font:700 21px Inter,Segoe UI,Arial,sans-serif;fill:#0f172a}
+      .label{font:600 17px Inter,Segoe UI,Arial,sans-serif;fill:#0f172a}
+      .math{font:500 17px 'STIX Two Math','Cambria Math',Georgia,serif;fill:#0f172a}
+      .small{font:500 14px Inter,Segoe UI,Arial,sans-serif;fill:#475569}
+      .arrow{stroke:#334155;stroke-width:2.5;fill:none;marker-end:url(#arrow)}
+      .box{filter:url(#shadow)}
+    </style>
+  </defs>
+  <rect width="1400" height="780" fill="url(#bg)"/>
+  <text x="700" y="50" text-anchor="middle" class="title">Online softmax works because each block has a mergeable state</text>
+  <text x="700" y="80" text-anchor="middle" class="subtitle">For one query row, carry a maximum m, a normalizer ℓ, and an unnormalized weighted sum U</text>
+
+  <!-- Tile A -->
+  <rect x="60" y="135" width="360" height="490" rx="22" fill="#ffffff" stroke="#93c5fd" stroke-width="2" class="box"/>
+  <text x="240" y="177" text-anchor="middle" class="head">Block A</text>
+  <rect x="100" y="210" width="280" height="85" rx="14" fill="#dbeafe" stroke="#60a5fa"/>
+  <text x="240" y="242" text-anchor="middle" class="label">scores xᴬ and values Vᴬ</text>
+  <text x="240" y="269" text-anchor="middle" class="small">a contiguous key/value tile</text>
+
+  <rect x="100" y="335" width="280" height="205" rx="14" fill="#eff6ff" stroke="#93c5fd"/>
+  <text x="125" y="374" class="math">mᴬ = max(xᴬ)</text>
+  <text x="125" y="421" class="math">ℓᴬ = Σ exp(xᴬ − mᴬ)</text>
+  <text x="125" y="468" class="math">Uᴬ = Σ exp(xᴬ − mᴬ) v</text>
+  <text x="240" y="515" text-anchor="middle" class="small">local state: (mᴬ, ℓᴬ, Uᴬ)</text>
+  <path d="M240 295 L240 335" class="arrow"/>
+
+  <!-- Tile B -->
+  <rect x="980" y="135" width="360" height="490" rx="22" fill="#ffffff" stroke="#c4b5fd" stroke-width="2" class="box"/>
+  <text x="1160" y="177" text-anchor="middle" class="head">Block B</text>
+  <rect x="1020" y="210" width="280" height="85" rx="14" fill="#ede9fe" stroke="#8b5cf6"/>
+  <text x="1160" y="242" text-anchor="middle" class="label">scores xᴮ and values Vᴮ</text>
+  <text x="1160" y="269" text-anchor="middle" class="small">the next key/value tile</text>
+
+  <rect x="1020" y="335" width="280" height="205" rx="14" fill="#f5f3ff" stroke="#c4b5fd"/>
+  <text x="1045" y="374" class="math">mᴮ = max(xᴮ)</text>
+  <text x="1045" y="421" class="math">ℓᴮ = Σ exp(xᴮ − mᴮ)</text>
+  <text x="1045" y="468" class="math">Uᴮ = Σ exp(xᴮ − mᴮ) v</text>
+  <text x="1160" y="515" text-anchor="middle" class="small">local state: (mᴮ, ℓᴮ, Uᴮ)</text>
+  <path d="M1160 295 L1160 335" class="arrow"/>
+
+  <!-- Merge -->
+  <rect x="475" y="150" width="450" height="450" rx="24" fill="#ffffff" stroke="#34d399" stroke-width="2.5" class="box"/>
+  <text x="700" y="192" text-anchor="middle" class="head">Merge A and B</text>
+  <text x="515" y="245" class="math">m = max(mᴬ, mᴮ)</text>
+  <text x="515" y="303" class="math">α = exp(mᴬ − m)</text>
+  <text x="515" y="345" class="math">β = exp(mᴮ − m)</text>
+  <line x1="515" y1="372" x2="885" y2="372" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="515" y="421" class="math">ℓ = αℓᴬ + βℓᴮ</text>
+  <text x="515" y="473" class="math">U = αUᴬ + βUᴮ</text>
+  <rect x="545" y="510" width="310" height="58" rx="14" fill="#dcfce7" stroke="#22c55e"/>
+  <text x="700" y="546" text-anchor="middle" class="math">output = U / ℓ</text>
+
+  <path d="M420 410 C450 410 455 355 475 340" class="arrow"/>
+  <path d="M980 410 C950 410 945 355 925 340" class="arrow"/>
+
+  <rect x="145" y="665" width="1110" height="72" rx="18" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="2"/>
+  <text x="700" y="695" text-anchor="middle" class="label">Why this is the key to FlashAttention</text>
+  <text x="700" y="721" text-anchor="middle" class="small">The full score row never has to coexist in memory. Any partition can be reduced tile by tile, then normalized once.</text>
+</svg>

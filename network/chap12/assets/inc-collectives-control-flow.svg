@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="620" viewBox="0 0 1120 620" role="img" aria-labelledby="title desc">
+  <title id="title">In-Network Collectives control flow</title>
+  <desc id="desc">PyTorch and collective libraries communicate through Libfabric and an INC manager to switch agents that optimize collective traffic in the fabric.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .panel { fill: none; stroke: #D8D1C7; stroke-width: 1.2; }
+    .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.4; }
+    .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; }
+    .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.5; }
+    .accent-line { fill: none; stroke: #D9392E; stroke-width: 2.2; }
+    .muted-line { fill: none; stroke: #D8D1C7; stroke-width: 1.2; stroke-dasharray: 7 6; }
+    .label { font-family: Inter, Arial, sans-serif; font-size: 16px; font-weight: 700; fill: #050505; }
+    .small { font-family: Inter, Arial, sans-serif; font-size: 12px; fill: #6F6A63; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#111111"/>
+    </marker>
+    <marker id="arrowAccent" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#D9392E"/>
+    </marker>
+  </defs>
+  <rect class="bg" width="1120" height="620"/>
+  <rect class="panel" x="42" y="40" width="1036" height="520" rx="8"/>
+  <g transform="translate(90 84)">
+    <rect class="box" x="0" y="0" width="250" height="84" rx="6"/>
+    <text class="label" x="125" y="33" text-anchor="middle">AI application</text>
+    <text class="small" x="125" y="58" text-anchor="middle">PyTorch collective call</text>
+    <rect class="soft" x="330" y="0" width="250" height="84" rx="6"/>
+    <text class="label" x="455" y="33" text-anchor="middle">xCCL / MPI</text>
+    <text class="small" x="455" y="58" text-anchor="middle">AllReduce, AllGather, Broadcast</text>
+    <rect class="soft" x="660" y="0" width="250" height="84" rx="6"/>
+    <text class="label" x="785" y="33" text-anchor="middle">Libfabric</text>
+    <text class="small" x="785" y="58" text-anchor="middle">collective group semantics</text>
+    <path class="line" d="M250 42 H330" marker-end="url(#arrow)"/>
+    <path class="line" d="M580 42 H660" marker-end="url(#arrow)"/>
+
+    <rect class="accent" x="330" y="170" width="250" height="84" rx="6"/>
+    <text class="label" x="455" y="203" text-anchor="middle">INC Manager</text>
+    <text class="small" x="455" y="228" text-anchor="middle">group and root coordination</text>
+    <path class="accent-line" d="M785 84 C740 130 609 155 580 185" marker-end="url(#arrowAccent)"/>
+
+    <rect class="accent" x="50" y="355" width="190" height="84" rx="6"/>
+    <text class="label" x="145" y="388" text-anchor="middle">Leaf agent</text>
+    <text class="small" x="145" y="413" text-anchor="middle">INC-capable switch</text>
+    <rect class="accent" x="365" y="355" width="190" height="84" rx="6"/>
+    <text class="label" x="460" y="388" text-anchor="middle">Spine root</text>
+    <text class="small" x="460" y="413" text-anchor="middle">aggregate / replicate</text>
+    <rect class="accent" x="680" y="355" width="190" height="84" rx="6"/>
+    <text class="label" x="775" y="388" text-anchor="middle">Leaf agent</text>
+    <text class="small" x="775" y="413" text-anchor="middle">deliver to group</text>
+    <path class="accent-line" d="M455 254 C352 300 243 329 145 355" marker-end="url(#arrowAccent)"/>
+    <path class="accent-line" d="M455 254 V355" marker-end="url(#arrowAccent)"/>
+    <path class="accent-line" d="M455 254 C558 300 667 329 775 355" marker-end="url(#arrowAccent)"/>
+    <path class="muted-line" d="M240 397 H365" marker-end="url(#arrow)"/>
+    <path class="muted-line" d="M555 397 H680" marker-end="url(#arrow)"/>
+  </g>
+</svg>

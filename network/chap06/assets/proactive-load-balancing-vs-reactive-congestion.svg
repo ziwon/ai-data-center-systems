@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="520" viewBox="0 0 1120 520" role="img" aria-labelledby="title desc">
+  <title id="title">Proactive load balancing and reactive congestion management in RoCEv2 fabrics</title>
+  <desc id="desc">A two-column diagram contrasting proactive path selection mechanisms such as SLB, DLB, DLB v2, and GLB with reactive congestion management mechanisms such as ECN, PFC, and DCQCN.</desc>
+  <rect width="1120" height="520" fill="#f8fafc"/>
+
+  <line x1="560" y1="82" x2="560" y2="452" stroke="#94a3b8" stroke-width="2"/>
+
+  <g font-family="Inter, Arial, sans-serif">
+    <text x="280" y="58" text-anchor="middle" font-size="28" font-weight="700" fill="#3f6212">Proactive</text>
+    <line x1="210" y1="68" x2="350" y2="68" stroke="#84cc16" stroke-width="2"/>
+    <text x="280" y="112" text-anchor="middle" font-size="22" font-weight="700" fill="#0f172a">Efficient Load Balancing</text>
+    <text x="280" y="144" text-anchor="middle" font-size="19" fill="#334155">SLB -> DLB v1 -> GLB -> DLB v2</text>
+    <text x="280" y="174" text-anchor="middle" font-size="15" fill="#64748b">Choose better paths before queues grow.</text>
+
+    <text x="840" y="58" text-anchor="middle" font-size="28" font-weight="700" fill="#3f6212">Reactive</text>
+    <line x1="778" y1="68" x2="902" y2="68" stroke="#84cc16" stroke-width="2"/>
+    <text x="840" y="112" text-anchor="middle" font-size="22" font-weight="700" fill="#0f172a">Congestion Management</text>
+    <text x="840" y="144" text-anchor="middle" font-size="19" fill="#334155">ECN + PFC + DCQCN</text>
+    <text x="840" y="174" text-anchor="middle" font-size="15" fill="#64748b">React when queues signal congestion.</text>
+  </g>
+
+  <g transform="translate(95 240)" font-family="Inter, Arial, sans-serif">
+    <rect x="0" y="34" width="66" height="12" fill="#65a30d"/>
+    <rect x="-18" y="34" width="12" height="12" fill="#65a30d"/>
+    <rect x="-36" y="34" width="12" height="12" fill="#65a30d"/>
+    <rect x="-54" y="34" width="12" height="12" fill="#65a30d"/>
+    <path d="M72 40 L120 40" stroke="#475569" stroke-width="3" fill="none" marker-end="url(#arrowDark)"/>
+
+    <rect x="130" y="8" width="76" height="64" rx="6" fill="#ffffff" stroke="#64748b" stroke-width="2"/>
+    <line x1="150" y1="28" x2="187" y2="28" stroke="#334155" stroke-width="2" marker-end="url(#arrowDark)"/>
+    <line x1="150" y1="40" x2="177" y2="40" stroke="#334155" stroke-width="2" marker-end="url(#arrowDark)"/>
+    <line x1="150" y1="52" x2="187" y2="52" stroke="#334155" stroke-width="2" marker-end="url(#arrowDark)"/>
+
+    <path d="M215 40 C250 30 268 20 300 0" stroke="#65a30d" stroke-width="7" fill="none" marker-end="url(#arrowGreen)"/>
+    <path d="M215 40 C250 40 270 40 312 40" stroke="#65a30d" stroke-width="7" fill="none" marker-end="url(#arrowGreen)"/>
+    <path d="M215 40 C250 50 268 60 300 80" stroke="#65a30d" stroke-width="7" fill="none" marker-end="url(#arrowGreen)"/>
+    <text x="165" y="118" text-anchor="middle" font-size="14" fill="#475569">Path choice spreads elephant flows.</text>
+  </g>
+
+  <g transform="translate(650 220)" font-family="Inter, Arial, sans-serif">
+    <rect x="134" y="12" width="66" height="52" rx="5" fill="#ffffff" stroke="#64748b" stroke-width="2"/>
+    <text x="167" y="78" text-anchor="middle" font-size="12" fill="#475569">spine</text>
+    <line x1="154" y1="28" x2="184" y2="28" stroke="#334155" stroke-width="2" marker-end="url(#arrowDark)"/>
+    <line x1="184" y1="38" x2="154" y2="38" stroke="#334155" stroke-width="2" marker-end="url(#arrowDark)"/>
+    <line x1="154" y1="48" x2="184" y2="48" stroke="#334155" stroke-width="2" marker-end="url(#arrowDark)"/>
+
+    <rect x="44" y="142" width="66" height="52" rx="5" fill="#ffffff" stroke="#64748b" stroke-width="2"/>
+    <rect x="224" y="142" width="66" height="52" rx="5" fill="#ffffff" stroke="#64748b" stroke-width="2"/>
+    <text x="77" y="208" text-anchor="middle" font-size="12" fill="#475569">leaf</text>
+    <text x="257" y="208" text-anchor="middle" font-size="12" fill="#475569">leaf</text>
+
+    <path d="M77 142 L155 64" stroke="#0284c7" stroke-width="3" fill="none" marker-end="url(#arrowBlue)"/>
+    <path d="M257 142 L179 64" stroke="#ef4444" stroke-width="3" fill="none" marker-end="url(#arrowRed)"/>
+    <path d="M179 64 L257 142" stroke="#f59e0b" stroke-width="3" stroke-dasharray="7 5" fill="none" marker-end="url(#arrowOrange)"/>
+    <path d="M155 64 L77 142" stroke="#f59e0b" stroke-width="3" stroke-dasharray="7 5" fill="none" marker-end="url(#arrowOrange)"/>
+
+    <text x="15" y="102" font-size="13" fill="#475569">CNP / rate signal</text>
+    <text x="206" y="102" font-size="13" fill="#475569">PFC pause</text>
+    <text x="166" y="236" text-anchor="middle" font-size="14" fill="#475569">Signals throttle or pause traffic after congestion appears.</text>
+  </g>
+
+  <defs>
+    <marker id="arrowDark" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#475569"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#65a30d"/>
+    </marker>
+    <marker id="arrowBlue" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#0284c7"/>
+    </marker>
+    <marker id="arrowRed" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#ef4444"/>
+    </marker>
+    <marker id="arrowOrange" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#f59e0b"/>
+    </marker>
+  </defs>
+</svg>

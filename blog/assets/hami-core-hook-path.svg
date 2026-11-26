@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="620" viewBox="0 0 1200 620" role="img" aria-labelledby="title desc">
+  <title id="title">HAMi-core libvgpu hook path</title>
+  <desc id="desc">A technical flow diagram showing how libvgpu.so intercepts CUDA and NVML calls, applies memory accounting or kernel rate limiting, and then forwards calls to the real NVIDIA libraries.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .panel { fill: none; stroke: #D8D1C7; stroke-width: 1.4; }
+    .box { fill: none; stroke: #111111; stroke-width: 1.4; }
+    .accent-box { fill: none; stroke: #D9392E; stroke-width: 2.2; }
+    .label { fill: #050505; font: 700 22px Arial, sans-serif; }
+    .text { fill: #050505; font: 600 16px Arial, sans-serif; }
+    .small { fill: #6F6A63; font: 13px Arial, sans-serif; }
+    .mono { fill: #050505; font: 600 14px "Courier New", monospace; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.5; marker-end: url(#arrow); }
+    .accent-line { fill: none; stroke: #D9392E; stroke-width: 2; marker-end: url(#arrow-red); }
+    .dash { fill: none; stroke: #6F6A63; stroke-width: 1.2; stroke-dasharray: 5 5; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#111111" />
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#D9392E" />
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1200" height="620" />
+
+  <text class="label" x="56" y="64">HAMi-core hook path</text>
+  <text class="small" x="56" y="88">libvgpu.so sits between CUDA/NVML callers and the real NVIDIA driver libraries.</text>
+
+  <rect class="box" x="58" y="142" width="186" height="84" />
+  <text class="text" x="86" y="174">Application</text>
+  <text class="small" x="86" y="197">PyTorch, vLLM,</text>
+  <text class="small" x="86" y="214">TensorFlow, nvidia-smi</text>
+
+  <rect class="box" x="306" y="142" width="186" height="84" />
+  <text class="text" x="334" y="174">Dynamic linker</text>
+  <text class="small" x="334" y="197">LD_PRELOAD or</text>
+  <text class="small" x="334" y="214">ld.so.preload</text>
+
+  <rect class="accent-box" x="554" y="130" width="236" height="108" />
+  <text class="text" x="584" y="164">libvgpu.so</text>
+  <text class="small" x="584" y="187">overrides dlsym</text>
+  <text class="small" x="584" y="206">hooks CUDA/NVML symbols</text>
+
+  <rect class="box" x="862" y="142" width="220" height="84" />
+  <text class="text" x="892" y="174">Real NVIDIA libs</text>
+  <text class="mono" x="892" y="198">libcuda.so.1</text>
+  <text class="mono" x="892" y="216">libnvidia-ml.so</text>
+
+  <path class="line" d="M244 184 H306" />
+  <path class="line" d="M492 184 H554" />
+  <path class="line" d="M790 184 H862" />
+
+  <rect class="panel" x="74" y="304" width="322" height="204" />
+  <text class="text" x="104" y="338">Memory path</text>
+  <text class="mono" x="104" y="368">cuMemAlloc_v2</text>
+  <text class="mono" x="104" y="390">cuMemAllocManaged</text>
+  <text class="mono" x="104" y="412">cuDeviceTotalMem_v2</text>
+  <text class="small" x="104" y="446">quota lookup</text>
+  <text class="small" x="104" y="466">OOM pre-check</text>
+  <text class="small" x="104" y="486">shared memory accounting</text>
+
+  <rect class="panel" x="438" y="304" width="322" height="204" />
+  <text class="text" x="468" y="338">Kernel path</text>
+  <text class="mono" x="468" y="368">cuLaunchKernel</text>
+  <text class="mono" x="468" y="390">cuLaunchKernelEx</text>
+  <text class="small" x="468" y="424">ensure postInit</text>
+  <text class="small" x="468" y="444">process PID mapping</text>
+  <text class="small" x="468" y="464">rate_limiter token control</text>
+
+  <rect class="panel" x="802" y="304" width="322" height="204" />
+  <text class="text" x="832" y="338">Observation path</text>
+  <text class="mono" x="832" y="368">nvmlDeviceGetMemoryInfo</text>
+  <text class="mono" x="832" y="390">nvmlDeviceGetUtilizationRates</text>
+  <text class="small" x="832" y="424">virtualized memory view</text>
+  <text class="small" x="832" y="444">per-process utilization</text>
+  <text class="small" x="832" y="464">nvidia-smi sees the illusion</text>
+
+  <path class="accent-line" d="M672 238 V276 C672 292, 236 292, 236 304" />
+  <path class="accent-line" d="M672 238 V276 C672 292, 599 292, 599 304" />
+  <path class="accent-line" d="M672 238 V276 C672 292, 963 292, 963 304" />
+
+  <line class="dash" x1="56" y1="548" x2="1144" y2="548" />
+  <text class="small" x="56" y="578">The memory limit is enforced before allocation; the compute limit is a software rate limiter, not a hardware SM partition.</text>
+</svg>

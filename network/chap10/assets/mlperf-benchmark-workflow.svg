@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="620" viewBox="0 0 1120 620" role="img" aria-labelledby="title desc">
+  <title id="title">MLPerf benchmark workflow</title>
+  <desc id="desc">MLPerf benchmarking workflow from suite and division selection through system setup, execution, accuracy validation, submission, review, and publication.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .panel { fill: none; stroke: #D8D1C7; stroke-width: 1.2; }
+    .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.4; }
+    .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; }
+    .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.5; }
+    .accent-line { fill: none; stroke: #D9392E; stroke-width: 2.2; }
+    .muted-line { fill: none; stroke: #D8D1C7; stroke-width: 1.2; stroke-dasharray: 7 6; }
+    .head { font-family: Inter, Arial, sans-serif; font-size: 23px; font-weight: 700; fill: #050505; }
+    .label { font-family: Inter, Arial, sans-serif; font-size: 15px; font-weight: 700; fill: #050505; }
+    .small { font-family: Inter, Arial, sans-serif; font-size: 12px; fill: #6F6A63; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#111111"/>
+    </marker>
+    <marker id="arrowAccent" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#D9392E"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1120" height="620"/>
+  <rect class="panel" x="42" y="40" width="1036" height="520" rx="8"/>
+
+  <g transform="translate(72 88)">
+    <text class="head" x="488" y="0" text-anchor="middle">MLPerf turns speed claims into reviewed results</text>
+
+    <rect class="box" x="0" y="70" width="176" height="86" rx="6"/>
+    <text class="label" x="88" y="104" text-anchor="middle">Select suite</text>
+    <text class="small" x="88" y="130" text-anchor="middle">training, inference, storage</text>
+
+    <rect class="box" x="214" y="70" width="176" height="86" rx="6"/>
+    <text class="label" x="302" y="104" text-anchor="middle">Choose division</text>
+    <text class="small" x="302" y="130" text-anchor="middle">closed or open</text>
+
+    <rect class="soft" x="428" y="70" width="176" height="86" rx="6"/>
+    <text class="label" x="516" y="104" text-anchor="middle">Set up system</text>
+    <text class="small" x="516" y="130" text-anchor="middle">GPU, CPU, network, storage</text>
+
+    <rect class="soft" x="642" y="70" width="176" height="86" rx="6"/>
+    <text class="label" x="730" y="104" text-anchor="middle">Run benchmark</text>
+    <text class="small" x="730" y="130" text-anchor="middle">reference harness and logs</text>
+
+    <rect class="accent" x="856" y="70" width="176" height="86" rx="6"/>
+    <text class="label" x="944" y="104" text-anchor="middle">Validate quality</text>
+    <text class="small" x="944" y="130" text-anchor="middle">accuracy target required</text>
+
+    <path class="line" d="M176 113 H214" marker-end="url(#arrow)"/>
+    <path class="line" d="M390 113 H428" marker-end="url(#arrow)"/>
+    <path class="line" d="M604 113 H642" marker-end="url(#arrow)"/>
+    <path class="accent-line" d="M818 113 H856" marker-end="url(#arrowAccent)"/>
+
+    <rect class="soft" x="108" y="296" width="210" height="92" rx="6"/>
+    <text class="label" x="213" y="330" text-anchor="middle">Training</text>
+    <text class="small" x="213" y="356" text-anchor="middle">time to target quality</text>
+
+    <rect class="soft" x="408" y="296" width="210" height="92" rx="6"/>
+    <text class="label" x="513" y="330" text-anchor="middle">Inference</text>
+    <text class="small" x="513" y="356" text-anchor="middle">QPS plus latency target</text>
+
+    <rect class="soft" x="708" y="296" width="210" height="92" rx="6"/>
+    <text class="label" x="813" y="330" text-anchor="middle">Storage</text>
+    <text class="small" x="813" y="356" text-anchor="middle">training data supply</text>
+
+    <path class="muted-line" d="M730 156 C617 224 336 247 213 296" marker-end="url(#arrow)"/>
+    <path class="muted-line" d="M730 156 C640 229 567 248 513 296" marker-end="url(#arrow)"/>
+    <path class="muted-line" d="M730 156 C754 224 786 250 813 296" marker-end="url(#arrow)"/>
+
+    <rect class="accent" x="322" y="438" width="388" height="82" rx="6"/>
+    <text class="label" x="516" y="472" text-anchor="middle">Submit, peer review, publish</text>
+    <text class="small" x="516" y="497" text-anchor="middle">Configuration and code are reviewed so results are comparable and reproducible.</text>
+
+    <path class="accent-line" d="M944 156 C913 238 775 392 710 462" marker-end="url(#arrowAccent)"/>
+    <path class="line" d="M213 388 C282 424 318 438 378 458" marker-end="url(#arrow)"/>
+    <path class="line" d="M513 388 V438" marker-end="url(#arrow)"/>
+    <path class="line" d="M813 388 C744 424 708 438 648 458" marker-end="url(#arrow)"/>
+  </g>
+</svg>

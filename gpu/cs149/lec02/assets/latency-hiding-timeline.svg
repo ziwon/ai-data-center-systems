@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 430" role="img" aria-labelledby="title desc">
+  <title id="title">Latency hiding timeline</title>
+  <desc id="desc">A single thread leaves the execution unit idle during a long memory load, while multiple hardware threads interleave arithmetic instructions to hide that load latency.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .panel { fill: none; stroke: #111111; stroke-width: 1.5; }
+    .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.5; }
+    .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.4; }
+    .accent-box { fill: #F3EFE7; stroke: #D9392E; stroke-width: 2; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.6; marker-end: url(#arrow); }
+    .accent-line { fill: none; stroke: #D9392E; stroke-width: 2.2; marker-end: url(#accent-arrow); }
+    .label { fill: #050505; font-family: Inter, Arial, sans-serif; font-size: 18px; font-weight: 700; }
+    .mid { fill: #050505; font-family: Inter, Arial, sans-serif; font-size: 15px; font-weight: 600; }
+    .small { fill: #6F6A63; font-family: Inter, Arial, sans-serif; font-size: 13px; }
+    .mono { fill: #050505; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .accent { fill: #D9392E; font-family: Inter, Arial, sans-serif; font-size: 14px; font-weight: 700; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#111111"/>
+    </marker>
+    <marker id="accent-arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#D9392E"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1120" height="430"/>
+
+  <text class="label" x="54" y="52">Single hardware thread</text>
+  <rect class="panel" x="44" y="78" width="1032" height="112" rx="6"/>
+  <text class="small" x="64" y="104">Execution unit timeline</text>
+  <g transform="translate(214 118)">
+    <rect class="box" x="0" y="0" width="52" height="44" rx="4"/>
+    <rect class="box" x="58" y="0" width="52" height="44" rx="4"/>
+    <rect class="box" x="116" y="0" width="52" height="44" rx="4"/>
+    <rect class="accent-box" x="174" y="0" width="70" height="44" rx="4"/>
+    <rect class="soft" x="250" y="0" width="312" height="44" rx="4"/>
+    <text class="mono" x="15" y="28">A0</text>
+    <text class="mono" x="73" y="28">A1</text>
+    <text class="mono" x="131" y="28">A2</text>
+    <text class="accent" x="193" y="28">load</text>
+    <text class="small" x="350" y="28">idle while memory responds</text>
+  </g>
+  <path class="accent-line" d="M 454 168 C 508 200 612 200 714 168"/>
+  <text class="accent" x="532" y="212">visible stall</text>
+
+  <text class="label" x="54" y="258">Multiple hardware threads</text>
+  <rect class="panel" x="44" y="284" width="1032" height="112" rx="6"/>
+  <text class="small" x="64" y="310">Ready thread selected each cycle</text>
+  <g transform="translate(214 324)">
+    <rect class="box" x="0" y="0" width="52" height="44" rx="4"/>
+    <rect class="box" x="58" y="0" width="52" height="44" rx="4"/>
+    <rect class="box" x="116" y="0" width="52" height="44" rx="4"/>
+    <rect class="accent-box" x="174" y="0" width="70" height="44" rx="4"/>
+    <rect class="box" x="250" y="0" width="52" height="44" rx="4"/>
+    <rect class="box" x="308" y="0" width="52" height="44" rx="4"/>
+    <rect class="box" x="366" y="0" width="52" height="44" rx="4"/>
+    <rect class="box" x="424" y="0" width="52" height="44" rx="4"/>
+    <rect class="box" x="482" y="0" width="52" height="44" rx="4"/>
+    <rect class="box" x="540" y="0" width="52" height="44" rx="4"/>
+    <rect class="box" x="598" y="0" width="52" height="44" rx="4"/>
+    <text class="mono" x="15" y="28">T0</text>
+    <text class="mono" x="73" y="28">T0</text>
+    <text class="mono" x="131" y="28">T0</text>
+    <text class="accent" x="193" y="28">load</text>
+    <text class="mono" x="265" y="28">T1</text>
+    <text class="mono" x="323" y="28">T2</text>
+    <text class="mono" x="381" y="28">T3</text>
+    <text class="mono" x="439" y="28">T4</text>
+    <text class="mono" x="497" y="28">T1</text>
+    <text class="mono" x="555" y="28">T2</text>
+    <text class="mono" x="613" y="28">T0</text>
+  </g>
+  <text class="accent" x="858" y="316">load returns</text>
+  <path class="accent-line" d="M 458 346 C 548 286 744 286 824 330"/>
+
+  <rect class="panel" x="44" y="398" width="1032" height="24" rx="6"/>
+  <text class="mono" x="92" y="414">latency is not reduced; useful work from other threads fills the waiting window</text>
+</svg>

@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1360" height="660" viewBox="0 0 1360 660" role="img" aria-labelledby="title desc">
+  <title id="title">Prefill-decode disaggregation request flow</title>
+  <desc id="desc">A client request is admitted by the Model Gateway, prefill computes prompt KV, KV pages transfer to a reserved decode worker, and generated tokens stream back through the gateway.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#111111"/>
+    </marker>
+    <marker id="arrow-accent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#D9392E"/>
+    </marker>
+  </defs>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .participant { fill: #F5F1EA; stroke: #111111; stroke-width: 1.7; rx: 8; }
+    .participant-accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2.3; rx: 8; }
+    .name { fill: #050505; font: 600 17px Inter, Arial, sans-serif; text-anchor: middle; }
+    .role { fill: #6F6A63; font: 12px Inter, Arial, sans-serif; text-anchor: middle; }
+    .lifeline { stroke: #D8D1C7; stroke-width: 1.4; stroke-dasharray: 5 6; }
+    .message { fill: none; stroke: #111111; stroke-width: 1.8; marker-end: url(#arrow); }
+    .message-accent { fill: none; stroke: #D9392E; stroke-width: 2.7; marker-end: url(#arrow-accent); }
+    .message-return { fill: none; stroke: #111111; stroke-width: 1.6; stroke-dasharray: 7 5; marker-end: url(#arrow); }
+    .message-label { fill: #050505; font: 14px Inter, Arial, sans-serif; text-anchor: middle; }
+    .message-note { fill: #6F6A63; font: 12px Inter, Arial, sans-serif; text-anchor: middle; }
+    .step { fill: #F5F1EA; stroke: #111111; stroke-width: 1.3; }
+    .step-accent { fill: #D9392E; stroke: #D9392E; stroke-width: 1.3; }
+    .step-text { fill: #050505; font: 600 11px Inter, Arial, sans-serif; text-anchor: middle; dominant-baseline: middle; }
+    .step-text-light { fill: #F5F1EA; font: 600 11px Inter, Arial, sans-serif; text-anchor: middle; dominant-baseline: middle; }
+    .phase { fill: #6F6A63; font: 600 12px Inter, Arial, sans-serif; letter-spacing: 1.4px; }
+  </style>
+
+  <rect class="bg" width="1360" height="660"/>
+  <text class="phase" x="54" y="31">REQUEST LIFECYCLE</text>
+
+  <rect class="participant" x="54" y="48" width="180" height="66"/>
+  <text class="name" x="144" y="77">Client</text>
+  <text class="role" x="144" y="98">caller and stream consumer</text>
+
+  <rect class="participant-accent" x="348" y="48" width="204" height="66"/>
+  <text class="name" x="450" y="77">Model Gateway</text>
+  <text class="role" x="450" y="98">admission and routing</text>
+
+  <rect class="participant" x="672" y="48" width="196" height="66"/>
+  <text class="name" x="770" y="77">Prefill worker</text>
+  <text class="role" x="770" y="98">prompt KV generation</text>
+
+  <rect class="participant" x="1030" y="48" width="196" height="66"/>
+  <text class="name" x="1128" y="77">Decode worker</text>
+  <text class="role" x="1128" y="98">token generation</text>
+
+  <line class="lifeline" x1="144" y1="114" x2="144" y2="632"/>
+  <line class="lifeline" x1="450" y1="114" x2="450" y2="632"/>
+  <line class="lifeline" x1="770" y1="114" x2="770" y2="632"/>
+  <line class="lifeline" x1="1128" y1="114" x2="1128" y2="632"/>
+
+  <circle class="step" cx="174" cy="155" r="13"/>
+  <text class="step-text" x="174" y="155">1</text>
+  <path class="message" d="M144 155 H450"/>
+  <text class="message-label" x="297" y="146">Generate request</text>
+
+  <circle class="step" cx="480" cy="215" r="13"/>
+  <text class="step-text" x="480" y="215">2</text>
+  <path class="message" d="M450 215 H1128"/>
+  <text class="message-label" x="789" y="206">Select and reserve decode capacity</text>
+
+  <circle class="step" cx="480" cy="275" r="13"/>
+  <text class="step-text" x="480" y="275">3</text>
+  <path class="message" d="M450 275 H770"/>
+  <text class="message-label" x="610" y="266">Route prompt</text>
+
+  <circle class="step" cx="800" cy="335" r="13"/>
+  <text class="step-text" x="800" y="335">4</text>
+  <path class="message" d="M770 320 H892 V365 H770"/>
+  <text class="message-label" x="900" y="338">Compute prompt KV</text>
+  <text class="message-note" x="900" y="357">TTFT compute surface</text>
+
+  <circle class="step-accent" cx="800" cy="415" r="13"/>
+  <text class="step-text-light" x="800" y="415">5</text>
+  <path class="message-accent" d="M770 415 H1128"/>
+  <text class="message-label" x="949" y="400">Transfer KV pages</text>
+  <text class="message-note" x="949" y="435">NVLink / RDMA · queue · timeout</text>
+
+  <circle class="step" cx="1158" cy="485" r="13"/>
+  <text class="step-text" x="1158" y="485">6</text>
+  <path class="message" d="M1128 470 H1250 V515 H1128"/>
+  <text class="message-label" x="1016" y="488">Decode tokens</text>
+  <text class="message-note" x="1003" y="507">TPOT surface</text>
+
+  <circle class="step" cx="1098" cy="555" r="13"/>
+  <text class="step-text" x="1098" y="555">7</text>
+  <path class="message-return" d="M1128 555 H450"/>
+  <text class="message-label" x="789" y="546">Stream output tokens</text>
+
+  <circle class="step" cx="420" cy="615" r="13"/>
+  <text class="step-text" x="420" y="615">8</text>
+  <path class="message-return" d="M450 615 H144"/>
+  <text class="message-label" x="297" y="606">Stream response</text>
+</svg>

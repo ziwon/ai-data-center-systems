@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 620" role="img" aria-labelledby="title desc">
+  <title id="title">Convolution to explicit and implicit GEMM mapping</title>
+  <desc id="desc">A tensor window is viewed as a virtual im2col matrix. The explicit path materializes the whole matrix in off-chip memory, while the implicit path constructs only one tile in shared memory before GEMM.</desc>
+  <style>
+    .bg { fill: #F3EFE7; }
+    .box { fill: none; stroke: #111111; stroke-width: 2; }
+    .subtle { fill: none; stroke: #D8D1C7; stroke-width: 1.5; }
+    .main { fill: none; stroke: #111111; stroke-width: 2; marker-end: url(#arrow); }
+    .critical { fill: none; stroke: #D9392E; stroke-width: 3; marker-end: url(#arrow-red); }
+    .dash { fill: none; stroke: #6F6A63; stroke-width: 1.5; stroke-dasharray: 7 6; }
+    .label { fill: #050505; font-family: Inter, Arial, sans-serif; font-size: 21px; font-weight: 600; }
+    .small { fill: #6F6A63; font-family: Inter, Arial, sans-serif; font-size: 15px; }
+    .tiny { fill: #6F6A63; font-family: Inter, Arial, sans-serif; font-size: 13px; }
+    .key { fill: #D9392E; font-family: Inter, Arial, sans-serif; font-size: 17px; font-weight: 700; }
+    .cell { fill: #F5F1EA; stroke: #D8D1C7; stroke-width: 1; }
+    .active { fill: #D9392E; fill-opacity: 0.13; stroke: #D9392E; stroke-width: 1.5; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#111111"/>
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#D9392E"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1200" height="620"/>
+
+  <g transform="translate(45 72)">
+    <text class="label" x="0" y="-22">Input tensor X</text>
+    <text class="small" x="0" y="2">N × H × W × C</text>
+    <rect class="box" x="0" y="25" width="220" height="220"/>
+    <g transform="translate(26 51)">
+      <rect class="cell" x="0" y="0" width="42" height="42"/><rect class="cell" x="42" y="0" width="42" height="42"/><rect class="cell" x="84" y="0" width="42" height="42"/><rect class="cell" x="126" y="0" width="42" height="42"/>
+      <rect class="cell" x="0" y="42" width="42" height="42"/><rect class="active" x="42" y="42" width="42" height="42"/><rect class="active" x="84" y="42" width="42" height="42"/><rect class="cell" x="126" y="42" width="42" height="42"/>
+      <rect class="cell" x="0" y="84" width="42" height="42"/><rect class="active" x="42" y="84" width="42" height="42"/><rect class="active" x="84" y="84" width="42" height="42"/><rect class="cell" x="126" y="84" width="42" height="42"/>
+      <rect class="cell" x="0" y="126" width="42" height="42"/><rect class="cell" x="42" y="126" width="42" height="42"/><rect class="cell" x="84" y="126" width="42" height="42"/><rect class="cell" x="126" y="126" width="42" height="42"/>
+    </g>
+    <text class="tiny" x="0" y="272">Overlapping windows reuse activation values</text>
+  </g>
+
+  <path class="main" d="M 278 205 L 365 205"/>
+  <text class="small" x="292" y="187">window rows</text>
+
+  <g transform="translate(380 72)">
+    <text class="label" x="0" y="-22">Virtual matrix A</text>
+    <text class="small" x="0" y="2">(N·P·Q) × (C·R·S)</text>
+    <rect class="box" x="0" y="25" width="260" height="220"/>
+    <g transform="translate(18 45)">
+      <rect class="active" x="0" y="0" width="224" height="34"/>
+      <rect class="cell" x="0" y="34" width="224" height="34"/>
+      <rect class="cell" x="0" y="68" width="224" height="34"/>
+      <rect class="cell" x="0" y="102" width="224" height="34"/>
+      <rect class="cell" x="0" y="136" width="224" height="34"/>
+      <text class="tiny" x="12" y="23">one activation-window row</text>
+      <text class="tiny" x="12" y="57">neighbor window: repeated values</text>
+      <text class="tiny" x="12" y="91">…</text>
+      <text class="tiny" x="12" y="125">output-position rows</text>
+      <text class="tiny" x="12" y="159">…</text>
+    </g>
+  </g>
+
+  <text class="label" x="676" y="197">×</text>
+
+  <g transform="translate(720 72)">
+    <text class="label" x="0" y="-22">Filter matrix B</text>
+    <text class="small" x="0" y="2">(C·R·S) × K</text>
+    <rect class="box" x="0" y="25" width="155" height="220"/>
+    <line class="subtle" x1="38" y1="25" x2="38" y2="245"/>
+    <line class="subtle" x1="76" y1="25" x2="76" y2="245"/>
+    <line class="subtle" x1="114" y1="25" x2="114" y2="245"/>
+    <text class="tiny" x="15" y="268">K filters as columns</text>
+  </g>
+
+  <path class="main" d="M 888 205 L 957 205"/>
+
+  <g transform="translate(970 72)">
+    <text class="label" x="0" y="-22">Output C</text>
+    <text class="small" x="0" y="2">(N·P·Q) × K</text>
+    <rect class="box" x="0" y="25" width="180" height="220"/>
+    <line class="subtle" x1="0" y1="80" x2="180" y2="80"/>
+    <line class="subtle" x1="0" y1="135" x2="180" y2="135"/>
+    <line class="subtle" x1="0" y1="190" x2="180" y2="190"/>
+    <text class="tiny" x="0" y="268">reshape to N × P × Q × K</text>
+  </g>
+
+  <line class="dash" x1="365" y1="350" x2="1150" y2="350"/>
+
+  <g transform="translate(80 410)">
+    <text class="key" x="0" y="0">EXPLICIT PATH</text>
+    <text class="small" x="0" y="28">Materialize all of A in off-chip memory</text>
+    <path class="critical" d="M 325 18 L 555 18"/>
+    <rect class="box" x="575" y="-20" width="210" height="70"/>
+    <text class="small" x="595" y="9">large workspace</text>
+    <text class="small" x="595" y="32">R·S expansion traffic</text>
+  </g>
+
+  <g transform="translate(80 525)">
+    <text class="label" x="0" y="0">IMPLICIT PATH</text>
+    <text class="small" x="0" y="28">Gather one A tile directly from X</text>
+    <path class="main" d="M 325 18 L 555 18"/>
+    <rect class="box" x="575" y="-20" width="210" height="70"/>
+    <text class="small" x="595" y="9">shared-memory tile</text>
+    <text class="small" x="595" y="32">consume in GEMM</text>
+    <path class="main" d="M 798 18 L 952 18"/>
+    <text class="small" x="816" y="-2">next tile</text>
+  </g>
+</svg>

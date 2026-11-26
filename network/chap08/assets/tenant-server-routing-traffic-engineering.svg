@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="640" viewBox="0 0 1120 640" role="img" aria-labelledby="title desc">
+  <title id="title">Tenant isolation, server routing, telemetry, and SRv6 traffic engineering</title>
+  <desc id="desc">A GPU server with MIG instances maps tenants into VLAN, VNI, and VRF objects, advertises routes to the fabric, and can receive controller-driven policy or SRv6 path instructions from telemetry.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.4; }
+    .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; }
+    .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.5; }
+    .accent-line { fill: none; stroke: #D9392E; stroke-width: 2.2; }
+    .muted-line { fill: none; stroke: #D8D1C7; stroke-width: 1.2; stroke-dasharray: 7 6; }
+    .label { font-family: Inter, Arial, sans-serif; font-size: 16px; font-weight: 700; fill: #050505; }
+    .small { font-family: Inter, Arial, sans-serif; font-size: 12px; fill: #6F6A63; }
+    .tiny { font-family: Inter, Arial, sans-serif; font-size: 11px; fill: #6F6A63; }
+    .red { fill: #D9392E; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#111111"/>
+    </marker>
+    <marker id="arrowAccent" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#D9392E"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1120" height="640"/>
+
+  <g transform="translate(64 70)">
+    <rect class="box" x="0" y="126" width="170" height="190" rx="6"/>
+    <text class="label" x="85" y="158" text-anchor="middle">GPU server</text>
+    <rect class="soft" x="28" y="180" width="114" height="28" rx="4"/>
+    <text class="tiny" x="85" y="199" text-anchor="middle">MIG / tenant A</text>
+    <rect class="soft" x="28" y="218" width="114" height="28" rx="4"/>
+    <text class="tiny" x="85" y="237" text-anchor="middle">MIG / tenant B</text>
+    <rect class="soft" x="28" y="256" width="114" height="28" rx="4"/>
+    <text class="tiny" x="85" y="275" text-anchor="middle">MIG / tenant C</text>
+
+    <rect class="box" x="245" y="118" width="175" height="206" rx="6"/>
+    <text class="label" x="332.5" y="151" text-anchor="middle">ToR / leaf</text>
+    <text class="small" x="332.5" y="176" text-anchor="middle">server-to-ToR eBGP</text>
+    <text class="small" x="332.5" y="196" text-anchor="middle">VLAN and policy edge</text>
+    <rect class="accent" x="270" y="228" width="125" height="48" rx="4"/>
+    <text class="tiny red" x="332.5" y="248" text-anchor="middle">host/service route</text>
+    <text class="tiny red" x="332.5" y="265" text-anchor="middle">advertise / withdraw</text>
+
+    <rect class="box" x="505" y="118" width="190" height="206" rx="6"/>
+    <text class="label" x="600" y="151" text-anchor="middle">EVPN-VXLAN</text>
+    <text class="small" x="600" y="176" text-anchor="middle">VLAN to VNI to VRF</text>
+    <rect class="soft" x="532" y="208" width="136" height="34" rx="4"/>
+    <text class="tiny" x="600" y="230" text-anchor="middle">MAC-VRF / IP-VRF A</text>
+    <rect class="soft" x="532" y="252" width="136" height="34" rx="4"/>
+    <text class="tiny" x="600" y="274" text-anchor="middle">MAC-VRF / IP-VRF B</text>
+
+    <rect class="box" x="790" y="118" width="175" height="206" rx="6"/>
+    <text class="label" x="877.5" y="151" text-anchor="middle">AI fabric</text>
+    <text class="small" x="877.5" y="176" text-anchor="middle">BGP, DPF, SRv6,</text>
+    <text class="small" x="877.5" y="196" text-anchor="middle">or policy forwarding</text>
+    <rect class="accent" x="818" y="228" width="119" height="48" rx="4"/>
+    <text class="tiny red" x="877.5" y="248" text-anchor="middle">explicit path</text>
+    <text class="tiny red" x="877.5" y="265" text-anchor="middle">when needed</text>
+
+    <path class="line" d="M170 220 H245" marker-end="url(#arrow)"/>
+    <path class="accent-line" d="M420 220 H505" marker-end="url(#arrowAccent)"/>
+    <path class="line" d="M695 220 H790" marker-end="url(#arrow)"/>
+
+    <rect class="soft" x="145" y="420" width="240" height="82" rx="6"/>
+    <text class="label" x="265" y="452" text-anchor="middle">Job scheduler intent</text>
+    <text class="small" x="265" y="476" text-anchor="middle">placement, tenant, SLA,</text>
+    <text class="small" x="265" y="496" text-anchor="middle">GPU group membership</text>
+
+    <rect class="soft" x="440" y="420" width="240" height="82" rx="6"/>
+    <text class="label" x="560" y="452" text-anchor="middle">Fabric telemetry</text>
+    <text class="small" x="560" y="476" text-anchor="middle">links, queues, ECN/PFC,</text>
+    <text class="small" x="560" y="496" text-anchor="middle">route churn, probes</text>
+
+    <rect class="accent" x="735" y="420" width="240" height="82" rx="6"/>
+    <text class="label" x="855" y="452" text-anchor="middle">Controller TE</text>
+    <text class="small" x="855" y="476" text-anchor="middle">route policy, color,</text>
+    <text class="small" x="855" y="496" text-anchor="middle">or SRv6 SID list</text>
+
+    <path class="muted-line" d="M385 461 H440" marker-end="url(#arrow)"/>
+    <path class="muted-line" d="M680 461 H735" marker-end="url(#arrow)"/>
+    <path class="accent-line" d="M855 420 C878 379 881 348 878 324" marker-end="url(#arrowAccent)"/>
+    <text class="tiny red" x="910" y="382">policy feedback</text>
+  </g>
+</svg>

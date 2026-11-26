@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 640" role="img" aria-labelledby="title desc">
+  <title id="title">Kubernetes GPU placement and locality</title>
+  <desc id="desc">A diagram showing how Kubernetes placement decisions map pods to GPU topology, NIC locality, and useful throughput.</desc>
+  <style>
+    svg {
+      background: #F3EFE7;
+      color: #050505;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    .box {
+      fill: none;
+      stroke: #111111;
+      stroke-width: 1.6;
+    }
+    .soft {
+      fill: none;
+      stroke: #D8D1C7;
+      stroke-width: 1.4;
+    }
+    .dash {
+      fill: none;
+      stroke: #6F6A63;
+      stroke-width: 1.3;
+      stroke-dasharray: 7 7;
+    }
+    .arrow {
+      fill: none;
+      stroke: #111111;
+      stroke-width: 1.5;
+      marker-end: url(#arrow);
+    }
+    .arrow-soft {
+      fill: none;
+      stroke: #6F6A63;
+      stroke-width: 1.3;
+      marker-end: url(#arrow-soft);
+    }
+    .arrow-accent {
+      fill: none;
+      stroke: #D9392E;
+      stroke-width: 2.1;
+      marker-end: url(#arrow-accent);
+    }
+    .label {
+      fill: #050505;
+      font-size: 19px;
+      font-weight: 700;
+    }
+    .text {
+      fill: #050505;
+      font-size: 15px;
+      font-weight: 600;
+    }
+    .small {
+      fill: #6F6A63;
+      font-size: 13px;
+    }
+    .warn {
+      fill: #D9392E;
+      font-size: 14px;
+      font-weight: 700;
+    }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#111111"/>
+    </marker>
+    <marker id="arrow-soft" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#6F6A63"/>
+    </marker>
+    <marker id="arrow-accent" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#D9392E"/>
+    </marker>
+  </defs>
+
+  <rect x="56" y="58" width="248" height="116" class="box"/>
+  <text x="84" y="96" class="label">GPU workload</text>
+  <text x="84" y="126" class="small">pod requests GPU, CPU, memory</text>
+  <text x="84" y="150" class="small">may need NIC and topology</text>
+
+  <rect x="432" y="58" width="248" height="116" class="box"/>
+  <text x="460" y="96" class="label">Scheduler</text>
+  <text x="460" y="126" class="small">resource fit plus constraints</text>
+  <text x="460" y="150" class="small">affinity, taints, priority</text>
+
+  <rect x="808" y="58" width="248" height="116" class="box"/>
+  <text x="836" y="96" class="label">Node placement</text>
+  <text x="836" y="126" class="small">kubelet admits workload</text>
+  <text x="836" y="150" class="small">device plugin assigns GPU</text>
+
+  <path d="M304 116 H432" class="arrow"/>
+  <path d="M680 116 H808" class="arrow"/>
+
+  <rect x="74" y="252" width="460" height="248" class="soft"/>
+  <text x="102" y="290" class="label">Good placement</text>
+  <text x="102" y="320" class="small">same NUMA island, local NIC, fast GPU links</text>
+  <rect x="106" y="360" width="64" height="50" class="box"/>
+  <text x="122" y="391" class="small">CPU</text>
+  <rect x="216" y="350" width="68" height="70" class="box"/>
+  <text x="232" y="390" class="small">GPU0</text>
+  <rect x="312" y="350" width="68" height="70" class="box"/>
+  <text x="328" y="390" class="small">GPU1</text>
+  <rect x="426" y="360" width="66" height="50" class="box"/>
+  <text x="444" y="391" class="small">NIC</text>
+  <path d="M170 385 H216" class="arrow-soft"/>
+  <path d="M284 385 H312" class="arrow-soft"/>
+  <path d="M380 385 H426" class="arrow-soft"/>
+
+  <rect x="586" y="252" width="460" height="248" class="soft"/>
+  <text x="614" y="290" class="label">Poor placement</text>
+  <text x="614" y="320" class="small">GPU allocated, but traffic crosses slow path</text>
+  <rect x="626" y="360" width="64" height="50" class="box"/>
+  <text x="642" y="391" class="small">CPU</text>
+  <rect x="736" y="350" width="68" height="70" class="box"/>
+  <text x="752" y="390" class="small">GPU0</text>
+  <rect x="914" y="360" width="66" height="50" class="box"/>
+  <text x="932" y="391" class="small">NIC</text>
+  <path d="M690 385 H736" class="arrow-soft"/>
+  <path d="M804 385 H914" class="arrow-accent"/>
+  <text x="808" y="444" class="warn">cross-NUMA / PCIe bottleneck</text>
+
+  <path d="M556 174 V224" class="arrow-soft"/>
+  <path d="M304 224 H816" class="dash"/>
+  <path d="M304 224 V252" class="arrow-soft"/>
+  <path d="M816 224 V252" class="arrow-soft"/>
+
+  <rect x="74" y="552" width="972" height="48" class="dash"/>
+  <text x="236" y="582" class="small">GPU scheduling is performance placement: allocation alone does not guarantee useful throughput.</text>
+</svg>

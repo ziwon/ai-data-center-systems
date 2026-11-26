@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="620" viewBox="0 0 1120 620" role="img" aria-labelledby="title desc">
+  <title id="title">UEC motivation and scope</title>
+  <desc id="desc">UEC connects AI and HPC workload needs to Ethernet fabric improvements across software, transport, link, and management layers.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .panel { fill: none; stroke: #D8D1C7; stroke-width: 1.2; }
+    .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.4; }
+    .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; }
+    .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.5; }
+    .accent-line { fill: none; stroke: #D9392E; stroke-width: 2.2; }
+    .muted-line { fill: none; stroke: #D8D1C7; stroke-width: 1.2; stroke-dasharray: 7 6; }
+    .head { font-family: Inter, Arial, sans-serif; font-size: 23px; font-weight: 700; fill: #050505; }
+    .label { font-family: Inter, Arial, sans-serif; font-size: 16px; font-weight: 700; fill: #050505; }
+    .small { font-family: Inter, Arial, sans-serif; font-size: 12px; fill: #6F6A63; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#111111"/>
+    </marker>
+    <marker id="arrowAccent" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#D9392E"/>
+    </marker>
+  </defs>
+  <rect class="bg" width="1120" height="620"/>
+  <rect class="panel" x="42" y="40" width="1036" height="520" rx="8"/>
+  <g transform="translate(80 82)">
+    <rect class="box" x="330" y="0" width="300" height="86" rx="6"/>
+    <text class="head" x="480" y="35" text-anchor="middle">UEC target</text>
+    <text class="small" x="480" y="60" text-anchor="middle">Ethernet for AI/HPC scale-out fabrics</text>
+
+    <rect class="soft" x="0" y="170" width="210" height="126" rx="6"/>
+    <text class="label" x="105" y="205" text-anchor="middle">RoCEv2 pain</text>
+    <text class="small" x="105" y="232" text-anchor="middle">PFC, ECN, DCQCN</text>
+    <text class="small" x="105" y="254" text-anchor="middle">buffer and NIC tuning</text>
+
+    <rect class="accent" x="250" y="170" width="210" height="126" rx="6"/>
+    <text class="label" x="355" y="205" text-anchor="middle">Transport</text>
+    <text class="small" x="355" y="232" text-anchor="middle">UET, PDS, SES</text>
+    <text class="small" x="355" y="254" text-anchor="middle">delivery modes</text>
+
+    <rect class="box" x="500" y="170" width="210" height="126" rx="6"/>
+    <text class="label" x="605" y="205" text-anchor="middle">Link layer</text>
+    <text class="small" x="605" y="232" text-anchor="middle">CBFC, LLR</text>
+    <text class="small" x="605" y="254" text-anchor="middle">credit and retry</text>
+
+    <rect class="soft" x="750" y="170" width="210" height="126" rx="6"/>
+    <text class="label" x="855" y="205" text-anchor="middle">Software</text>
+    <text class="small" x="855" y="232" text-anchor="middle">Libfabric, MPI</text>
+    <text class="small" x="855" y="254" text-anchor="middle">xCCL and INC</text>
+
+    <path class="muted-line" d="M420 86 C317 122 173 140 105 170" marker-end="url(#arrow)"/>
+    <path class="accent-line" d="M458 86 C424 125 386 143 355 170" marker-end="url(#arrowAccent)"/>
+    <path class="line" d="M520 86 C550 125 585 143 605 170" marker-end="url(#arrow)"/>
+    <path class="line" d="M560 86 C666 122 790 140 855 170" marker-end="url(#arrow)"/>
+
+    <rect class="accent" x="250" y="410" width="460" height="88" rx="6"/>
+    <text class="head" x="480" y="446" text-anchor="middle">Goal: larger fabrics with less manual tuning</text>
+    <text class="small" x="480" y="472" text-anchor="middle">Workload-aware transport, endpoint congestion control, link-level reliability, and collective optimization.</text>
+
+    <path class="muted-line" d="M105 296 C188 358 265 390 300 410" marker-end="url(#arrow)"/>
+    <path class="accent-line" d="M355 296 C386 352 420 383 440 410" marker-end="url(#arrowAccent)"/>
+    <path class="line" d="M605 296 C575 352 541 383 520 410" marker-end="url(#arrow)"/>
+    <path class="muted-line" d="M855 296 C770 358 694 390 660 410" marker-end="url(#arrow)"/>
+  </g>
+</svg>

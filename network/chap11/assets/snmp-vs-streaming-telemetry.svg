@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="560" viewBox="0 0 1120 560" role="img" aria-labelledby="title desc">
+  <title id="title">SNMP polling and streaming telemetry comparison</title>
+  <desc id="desc">SNMP polling uses collector pull while streaming telemetry uses device push into a collector, database, dashboard, and analyzer pipeline.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .panel { fill: none; stroke: #D8D1C7; stroke-width: 1.2; }
+    .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.4; }
+    .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; }
+    .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.5; }
+    .accent-line { fill: none; stroke: #D9392E; stroke-width: 2.2; }
+    .muted-line { fill: none; stroke: #D8D1C7; stroke-width: 1.2; stroke-dasharray: 7 6; }
+    .head { font-family: Inter, Arial, sans-serif; font-size: 22px; font-weight: 700; fill: #050505; }
+    .label { font-family: Inter, Arial, sans-serif; font-size: 15px; font-weight: 700; fill: #050505; }
+    .small { font-family: Inter, Arial, sans-serif; font-size: 12px; fill: #6F6A63; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#111111"/>
+    </marker>
+    <marker id="arrowAccent" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#D9392E"/>
+    </marker>
+  </defs>
+  <rect class="bg" width="1120" height="560"/>
+  <rect class="panel" x="42" y="42" width="1036" height="458" rx="8"/>
+  <g transform="translate(86 86)">
+    <text class="head" x="474" y="0" text-anchor="middle">Pull counters for baseline; push telemetry for fast fabric signals</text>
+
+    <rect class="soft" x="0" y="82" width="210" height="96" rx="6"/>
+    <text class="label" x="105" y="118" text-anchor="middle">SNMP collector</text>
+    <text class="small" x="105" y="144" text-anchor="middle">periodic GET</text>
+
+    <rect class="box" x="338" y="82" width="210" height="96" rx="6"/>
+    <text class="label" x="443" y="118" text-anchor="middle">Switch / router</text>
+    <text class="small" x="443" y="144" text-anchor="middle">MIB counters</text>
+
+    <path class="line" d="M210 113 H338" marker-end="url(#arrow)"/>
+    <path class="muted-line" d="M338 148 H210" marker-end="url(#arrow)"/>
+
+    <rect class="box" x="338" y="268" width="210" height="96" rx="6"/>
+    <text class="label" x="443" y="304" text-anchor="middle">Telemetry exporter</text>
+    <text class="small" x="443" y="330" text-anchor="middle">queue, buffer, ECN, PFC</text>
+
+    <rect class="accent" x="674" y="268" width="210" height="96" rx="6"/>
+    <text class="label" x="779" y="304" text-anchor="middle">Telemetry collector</text>
+    <text class="small" x="779" y="330" text-anchor="middle">gNMI / gRPC stream</text>
+
+    <path class="accent-line" d="M548 316 H674" marker-end="url(#arrowAccent)"/>
+
+    <rect class="soft" x="674" y="82" width="210" height="96" rx="6"/>
+    <text class="label" x="779" y="118" text-anchor="middle">Time-series DB</text>
+    <text class="small" x="779" y="144" text-anchor="middle">history and correlation</text>
+
+    <rect class="soft" x="674" y="408" width="210" height="96" rx="6"/>
+    <text class="label" x="779" y="444" text-anchor="middle">Dashboard / AI analyzer</text>
+    <text class="small" x="779" y="470" text-anchor="middle">alerts and actions</text>
+
+    <path class="line" d="M779 268 V178" marker-end="url(#arrow)"/>
+    <path class="accent-line" d="M779 364 V408" marker-end="url(#arrowAccent)"/>
+
+    <text class="small" x="105" y="224" text-anchor="middle">Good for slower trends</text>
+    <text class="small" x="779" y="224" text-anchor="middle">Better for real-time queue and congestion signals</text>
+  </g>
+</svg>

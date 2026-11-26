@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="560" viewBox="0 0 1200 560" role="img" aria-labelledby="title desc">
+  <title id="title">DRA and HAMi responsibility comparison</title>
+  <desc id="desc">A two-column comparison showing DRA as a standard device allocation API and HAMi as a GPU sharing platform with scheduling, injection, and runtime enforcement.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .panel { fill: none; stroke: #D8D1C7; stroke-width: 1.4; }
+    .box { fill: none; stroke: #111111; stroke-width: 1.4; }
+    .accent-box { fill: none; stroke: #D9392E; stroke-width: 2.2; }
+    .label { fill: #050505; font: 700 24px Arial, sans-serif; }
+    .text { fill: #050505; font: 600 16px Arial, sans-serif; }
+    .small { fill: #6F6A63; font: 13px Arial, sans-serif; }
+    .mono { fill: #050505; font: 600 14px "Courier New", monospace; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.5; marker-end: url(#arrow); }
+    .accent-line { fill: none; stroke: #D9392E; stroke-width: 2; marker-end: url(#arrow-red); }
+    .dash { fill: none; stroke: #6F6A63; stroke-width: 1.2; stroke-dasharray: 5 5; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#111111" />
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#D9392E" />
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1200" height="560" />
+
+  <rect class="panel" x="48" y="48" width="504" height="440" />
+  <rect class="panel" x="648" y="48" width="504" height="440" />
+  <line class="dash" x1="600" y1="66" x2="600" y2="470" />
+
+  <text class="label" x="78" y="92">DRA</text>
+  <text class="small" x="78" y="116">standard Kubernetes allocation API</text>
+  <text class="label" x="678" y="92">HAMi</text>
+  <text class="small" x="678" y="116">GPU sharing and runtime enforcement platform</text>
+
+  <rect class="box" x="92" y="154" width="170" height="70" />
+  <text class="text" x="116" y="185">DeviceClass</text>
+  <text class="small" x="116" y="206">device category</text>
+
+  <rect class="box" x="334" y="154" width="170" height="70" />
+  <text class="text" x="356" y="185">ResourceSlice</text>
+  <text class="small" x="356" y="206">device inventory</text>
+
+  <rect class="accent-box" x="186" y="286" width="224" height="82" />
+  <text class="text" x="216" y="319">ResourceClaim</text>
+  <text class="small" x="216" y="342">attribute-based request</text>
+
+  <rect class="box" x="214" y="410" width="168" height="54" />
+  <text class="text" x="244" y="443">Allocation</text>
+
+  <path class="line" d="M262 190 H334" />
+  <path class="line" d="M419 224 V256 H326 V286" />
+  <path class="line" d="M177 224 V256 H270 V286" />
+  <path class="accent-line" d="M298 368 V410" />
+
+  <rect class="box" x="690" y="146" width="180" height="64" />
+  <text class="text" x="718" y="174">gpumem</text>
+  <text class="small" x="718" y="193">memory quota</text>
+
+  <rect class="box" x="936" y="146" width="180" height="64" />
+  <text class="text" x="964" y="174">gpucores</text>
+  <text class="small" x="964" y="193">compute quota</text>
+
+  <rect class="box" x="690" y="254" width="180" height="70" />
+  <text class="text" x="718" y="284">Scheduler</text>
+  <text class="small" x="718" y="305">fit, score, bind</text>
+
+  <rect class="box" x="936" y="254" width="180" height="70" />
+  <text class="text" x="964" y="284">Allocate</text>
+  <text class="small" x="964" y="305">env and mount</text>
+
+  <rect class="accent-box" x="812" y="388" width="190" height="76" />
+  <text class="text" x="842" y="420">libvgpu.so</text>
+  <text class="small" x="842" y="443">CUDA/NVML enforcement</text>
+
+  <path class="line" d="M780 210 V254" />
+  <path class="line" d="M1026 210 V254" />
+  <path class="line" d="M870 289 H936" />
+  <path class="accent-line" d="M1026 324 V356 H908 V388" />
+
+  <text class="small" x="94" y="520">DRA standardizes how workloads claim devices.</text>
+  <text class="small" x="674" y="520">HAMi also implements GPU quota enforcement.</text>
+</svg>

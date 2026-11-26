@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="620" viewBox="0 0 1120 620" role="img" aria-labelledby="title desc">
+  <title id="title">IFA hop metadata flow</title>
+  <desc id="desc">IFA initiator, transit, and termination nodes adding and exporting per-hop metadata for a cloned probe flow.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .panel { fill: none; stroke: #D8D1C7; stroke-width: 1.2; }
+    .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.4; }
+    .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; }
+    .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.5; }
+    .accent-line { fill: none; stroke: #D9392E; stroke-width: 2.2; }
+    .muted-line { fill: none; stroke: #D8D1C7; stroke-width: 1.2; stroke-dasharray: 7 6; }
+    .head { font-family: Inter, Arial, sans-serif; font-size: 23px; font-weight: 700; fill: #050505; }
+    .label { font-family: Inter, Arial, sans-serif; font-size: 15px; font-weight: 700; fill: #050505; }
+    .small { font-family: Inter, Arial, sans-serif; font-size: 12px; fill: #6F6A63; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#111111"/>
+    </marker>
+    <marker id="arrowAccent" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#D9392E"/>
+    </marker>
+  </defs>
+  <rect class="bg" width="1120" height="620"/>
+  <rect class="panel" x="42" y="40" width="1036" height="520" rx="8"/>
+  <g transform="translate(78 86)">
+    <text class="head" x="482" y="0" text-anchor="middle">IFA localizes latency by appending metadata at each hop</text>
+
+    <rect class="soft" x="0" y="96" width="140" height="82" rx="6"/>
+    <text class="label" x="70" y="130" text-anchor="middle">Source server</text>
+    <text class="small" x="70" y="154" text-anchor="middle">original flow</text>
+
+    <rect class="accent" x="190" y="96" width="150" height="82" rx="6"/>
+    <text class="label" x="265" y="130" text-anchor="middle">Initiator leaf</text>
+    <text class="small" x="265" y="154" text-anchor="middle">clone + tag</text>
+
+    <rect class="box" x="390" y="96" width="150" height="82" rx="6"/>
+    <text class="label" x="465" y="130" text-anchor="middle">Transit spine</text>
+    <text class="small" x="465" y="154" text-anchor="middle">append metadata</text>
+
+    <rect class="box" x="590" y="96" width="150" height="82" rx="6"/>
+    <text class="label" x="665" y="130" text-anchor="middle">Transit spine</text>
+    <text class="small" x="665" y="154" text-anchor="middle">append metadata</text>
+
+    <rect class="accent" x="790" y="96" width="150" height="82" rx="6"/>
+    <text class="label" x="865" y="130" text-anchor="middle">Termination leaf</text>
+    <text class="small" x="865" y="154" text-anchor="middle">export stack</text>
+
+    <rect class="soft" x="990" y="96" width="110" height="82" rx="6"/>
+    <text class="label" x="1045" y="130" text-anchor="middle">Server</text>
+    <text class="small" x="1045" y="154" text-anchor="middle">destination</text>
+
+    <path class="line" d="M140 137 H190" marker-end="url(#arrow)"/>
+    <path class="accent-line" d="M340 137 H390" marker-end="url(#arrowAccent)"/>
+    <path class="accent-line" d="M540 137 H590" marker-end="url(#arrowAccent)"/>
+    <path class="accent-line" d="M740 137 H790" marker-end="url(#arrowAccent)"/>
+    <path class="line" d="M940 137 H990" marker-end="url(#arrow)"/>
+
+    <rect class="box" x="120" y="292" width="210" height="112" rx="6"/>
+    <text class="label" x="225" y="326" text-anchor="middle">Metadata fields</text>
+    <text class="small" x="225" y="352" text-anchor="middle">device, ingress, egress</text>
+    <text class="small" x="225" y="374" text-anchor="middle">queue, timestamp, speed</text>
+
+    <rect class="accent" x="445" y="292" width="210" height="112" rx="6"/>
+    <text class="label" x="550" y="326" text-anchor="middle">Latency signals</text>
+    <text class="small" x="550" y="352" text-anchor="middle">residence time</text>
+    <text class="small" x="550" y="374" text-anchor="middle">per-hop delay, congestion</text>
+
+    <rect class="box" x="770" y="292" width="210" height="112" rx="6"/>
+    <text class="label" x="875" y="326" text-anchor="middle">Collector export</text>
+    <text class="small" x="875" y="352" text-anchor="middle">IPFIX or telemetry pipeline</text>
+    <text class="small" x="875" y="374" text-anchor="middle">path reconstruction</text>
+
+    <path class="muted-line" d="M465 178 C392 234 289 260 225 292" marker-end="url(#arrow)"/>
+    <path class="accent-line" d="M665 178 C643 231 595 264 550 292" marker-end="url(#arrowAccent)"/>
+    <path class="accent-line" d="M865 178 V292" marker-end="url(#arrowAccent)"/>
+  </g>
+</svg>

@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="620" viewBox="0 0 1120 620" role="img" aria-labelledby="title desc">
+  <title id="title">GPUDirect Storage direct-path verification</title>
+  <desc id="desc">An application submits cuFile IO, platform checks select a direct DMA path or a CPU compatibility path, and measurement tools verify the result.</desc>
+  <defs>
+    <style>
+      text { font-family: Arial, sans-serif; }
+      .bg { fill: #F5F1EA; }
+      .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.4; }
+      .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; }
+      .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+      .line { fill: none; stroke: #111111; stroke-width: 1.8; }
+      .dash { fill: none; stroke: #6F6A63; stroke-width: 1.2; stroke-dasharray: 7 5; }
+      .label { fill: #050505; font-size: 17px; font-weight: 700; }
+      .small { fill: #6F6A63; font-size: 13px; }
+      .red { fill: #D9392E; font-size: 13px; font-weight: 700; }
+      .arrow { fill: #111111; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1120" height="620"/>
+
+  <rect class="box" x="64" y="82" width="202" height="106" rx="8"/>
+  <text class="label" x="102" y="122">GPU application</text>
+  <text class="small" x="100" y="150">cuFileRead / Write</text>
+  <text class="small" x="100" y="170">aligned request</text>
+
+  <rect class="box" x="354" y="82" width="202" height="106" rx="8"/>
+  <text class="label" x="418" y="122">cuFile</text>
+  <text class="small" x="393" y="150">route + registration</text>
+  <text class="small" x="393" y="170">submission + control</text>
+
+  <rect class="soft" x="644" y="64" width="412" height="142" rx="8"/>
+  <text class="label" x="674" y="100">Capability and topology checks</text>
+  <text class="small" x="674" y="128">filesystem / mount supports direct I/O</text>
+  <text class="small" x="674" y="150">GPU buffer, offset, and size alignment</text>
+  <text class="small" x="674" y="172">driver path and PCIe / RDMA reachability</text>
+
+  <line class="line" x1="266" y1="135" x2="354" y2="135"/>
+  <polygon class="arrow" points="354,135 342,129 342,141"/>
+  <line class="line" x1="556" y1="135" x2="644" y2="135"/>
+  <polygon class="arrow" points="644,135 632,129 632,141"/>
+
+  <rect class="box" x="166" y="322" width="310" height="142" rx="8"/>
+  <text class="label" x="208" y="360">Direct payload path</text>
+  <text class="small" x="208" y="390">NVMe / storage NIC → GPU HBM</text>
+  <text class="small" x="208" y="414">CPU retains orchestration</text>
+  <text class="small" x="208" y="438">no CPU-memory bounce buffer</text>
+
+  <rect class="accent" x="644" y="322" width="310" height="142" rx="8"/>
+  <text class="label" x="686" y="360">Compatibility / staged path</text>
+  <text class="small" x="686" y="390">storage → CPU buffer → GPU HBM</text>
+  <text class="small" x="686" y="414">functional, but not direct</text>
+  <text class="small" x="686" y="438">alignment or platform check failed</text>
+
+  <path class="line" d="M 850 206 C 812 254, 470 258, 332 322"/>
+  <polygon class="arrow" points="332,322 341,312 346,324"/>
+  <path class="line" d="M 850 206 C 872 248, 820 280, 800 322"/>
+  <polygon class="arrow" points="800,322 799,309 811,315"/>
+  <text class="small" x="492" y="264">direct checks pass</text>
+  <text class="red" x="842" y="272">fallback</text>
+
+  <rect class="soft" x="166" y="526" width="788" height="54" rx="6"/>
+  <text class="small" x="198" y="558">Verify with gdscheck, gdsio transfer type, cuFile statistics / logs, Nsight GDS trace, and application goodput.</text>
+  <line class="dash" x1="321" y1="464" x2="321" y2="526"/>
+  <line class="dash" x1="799" y1="464" x2="799" y2="526"/>
+</svg>

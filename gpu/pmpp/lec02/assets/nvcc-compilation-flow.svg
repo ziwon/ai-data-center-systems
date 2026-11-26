@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 330" role="img" aria-labelledby="title desc">
+  <title id="title">nvcc host and device compilation flow</title>
+  <desc id="desc">nvcc splits a CUDA source file into host C/C++ code and device CUDA code, compiling them through host and GPU compilation paths before producing an executable.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.5; }
+    .primary { fill: #F5F1EA; stroke: #111111; stroke-width: 1.8; }
+    .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.5; marker-end: url(#arrow); }
+    .soft { fill: none; stroke: #D8D1C7; stroke-width: 1.4; marker-end: url(#soft-arrow); }
+    .label { fill: #050505; font-family: Inter, Arial, sans-serif; font-size: 16px; font-weight: 600; }
+    .small { fill: #6F6A63; font-family: Inter, Arial, sans-serif; font-size: 13px; font-weight: 400; }
+    .mono { fill: #050505; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 15px; font-weight: 400; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#111111"/>
+    </marker>
+    <marker id="soft-arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#D8D1C7"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1180" height="330" rx="8"/>
+
+  <rect class="primary" x="48" y="128" width="160" height="72" rx="4"/>
+  <text class="mono" x="84" y="169">vec_add.cu</text>
+
+  <rect class="box" x="308" y="56" width="230" height="72" rx="4"/>
+  <text class="label" x="358" y="88">Host C/C++</text>
+  <text class="small" x="393" y="111">code</text>
+
+  <rect class="box" x="308" y="206" width="230" height="72" rx="4"/>
+  <text class="label" x="349" y="238">Device CUDA</text>
+  <text class="small" x="393" y="261">code</text>
+
+  <rect class="box" x="646" y="56" width="240" height="72" rx="4"/>
+  <text class="label" x="704" y="88">Host compiler</text>
+  <text class="small" x="725" y="111">CPU binary</text>
+
+  <rect class="box" x="650" y="206" width="150" height="72" rx="4"/>
+  <text class="label" x="704" y="238">PTX</text>
+  <text class="small" x="680" y="261">virtual ISA</text>
+
+  <rect class="box" x="906" y="206" width="222" height="72" rx="4"/>
+  <text class="label" x="968" y="238">JIT compile</text>
+  <text class="small" x="961" y="261">device assembly</text>
+
+  <rect class="accent" x="976" y="113" width="150" height="72" rx="4"/>
+  <text class="label" x="1009" y="154">Executable</text>
+
+  <path class="soft" d="M 208 146 C 246 82 264 92 308 92"/>
+  <path class="soft" d="M 208 181 C 250 232 264 242 308 242"/>
+  <path class="line" d="M 538 92 L 646 92"/>
+  <path class="line" d="M 538 242 L 650 242"/>
+  <path class="line" d="M 800 242 L 906 242"/>
+  <path class="soft" d="M 886 92 C 934 96 956 120 976 140"/>
+  <path class="soft" d="M 1128 242 C 1162 196 1146 162 1126 150"/>
+</svg>

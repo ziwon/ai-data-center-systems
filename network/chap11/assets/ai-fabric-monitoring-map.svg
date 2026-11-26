@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="620" viewBox="0 0 1120 620" role="img" aria-labelledby="title desc">
+  <title id="title">AI fabric monitoring map</title>
+  <desc id="desc">Monitoring options for AI fabrics, connecting SNMP, syslog, streaming telemetry, flow data, IFA, and corrective actions.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .panel { fill: none; stroke: #D8D1C7; stroke-width: 1.2; }
+    .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.4; }
+    .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; }
+    .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.5; }
+    .accent-line { fill: none; stroke: #D9392E; stroke-width: 2.2; }
+    .muted-line { fill: none; stroke: #D8D1C7; stroke-width: 1.2; stroke-dasharray: 7 6; }
+    .head { font-family: Inter, Arial, sans-serif; font-size: 23px; font-weight: 700; fill: #050505; }
+    .label { font-family: Inter, Arial, sans-serif; font-size: 16px; font-weight: 700; fill: #050505; }
+    .small { font-family: Inter, Arial, sans-serif; font-size: 12px; fill: #6F6A63; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#111111"/>
+    </marker>
+    <marker id="arrowAccent" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#D9392E"/>
+    </marker>
+  </defs>
+  <rect class="bg" width="1120" height="620"/>
+  <rect class="panel" x="42" y="40" width="1036" height="520" rx="8"/>
+  <g transform="translate(80 82)">
+    <rect class="box" x="330" y="0" width="300" height="84" rx="6"/>
+    <text class="head" x="480" y="34" text-anchor="middle">AI fabric visibility</text>
+    <text class="small" x="480" y="58" text-anchor="middle">Explain JCT, GPU idle, tail latency, and drops</text>
+
+    <rect class="soft" x="0" y="155" width="180" height="108" rx="6"/>
+    <text class="label" x="90" y="190" text-anchor="middle">SNMP</text>
+    <text class="small" x="90" y="216" text-anchor="middle">poll counters</text>
+    <text class="small" x="90" y="238" text-anchor="middle">baseline trends</text>
+
+    <rect class="soft" x="205" y="155" width="180" height="108" rx="6"/>
+    <text class="label" x="295" y="190" text-anchor="middle">Traps / Syslog</text>
+    <text class="small" x="295" y="216" text-anchor="middle">threshold events</text>
+    <text class="small" x="295" y="238" text-anchor="middle">fault messages</text>
+
+    <rect class="accent" x="410" y="155" width="180" height="108" rx="6"/>
+    <text class="label" x="500" y="190" text-anchor="middle">Streaming</text>
+    <text class="small" x="500" y="216" text-anchor="middle">queue / buffer</text>
+    <text class="small" x="500" y="238" text-anchor="middle">push telemetry</text>
+
+    <rect class="soft" x="615" y="155" width="180" height="108" rx="6"/>
+    <text class="label" x="705" y="190" text-anchor="middle">Flow data</text>
+    <text class="small" x="705" y="216" text-anchor="middle">sFlow / IPFIX</text>
+    <text class="small" x="705" y="238" text-anchor="middle">fat flows</text>
+
+    <rect class="accent" x="820" y="155" width="180" height="108" rx="6"/>
+    <text class="label" x="910" y="190" text-anchor="middle">IFA</text>
+    <text class="small" x="910" y="216" text-anchor="middle">per-hop metadata</text>
+    <text class="small" x="910" y="238" text-anchor="middle">latency + queue</text>
+
+    <path class="line" d="M400 84 C318 111 166 126 90 155" marker-end="url(#arrow)"/>
+    <path class="line" d="M440 84 C397 116 338 130 295 155" marker-end="url(#arrow)"/>
+    <path class="accent-line" d="M480 84 C488 112 495 132 500 155" marker-end="url(#arrowAccent)"/>
+    <path class="line" d="M520 84 C567 116 655 130 705 155" marker-end="url(#arrow)"/>
+    <path class="accent-line" d="M560 84 C660 112 835 126 910 155" marker-end="url(#arrowAccent)"/>
+
+    <rect class="box" x="80" y="378" width="240" height="90" rx="6"/>
+    <text class="label" x="200" y="413" text-anchor="middle">Historical analysis</text>
+    <text class="small" x="200" y="438" text-anchor="middle">capacity, trend, recurring pattern</text>
+
+    <rect class="accent" x="360" y="378" width="240" height="90" rx="6"/>
+    <text class="label" x="480" y="413" text-anchor="middle">Real-time analysis</text>
+    <text class="small" x="480" y="438" text-anchor="middle">PFC, ECN, queue drop, tail latency</text>
+
+    <rect class="box" x="640" y="378" width="240" height="90" rx="6"/>
+    <text class="label" x="760" y="413" text-anchor="middle">Corrective action</text>
+    <text class="small" x="760" y="438" text-anchor="middle">TE, isolate, reschedule, expand</text>
+
+    <path class="muted-line" d="M180 263 C189 314 195 342 200 378" marker-end="url(#arrow)"/>
+    <path class="muted-line" d="M295 263 C272 326 241 354 230 378" marker-end="url(#arrow)"/>
+    <path class="accent-line" d="M500 263 C494 319 487 350 480 378" marker-end="url(#arrowAccent)"/>
+    <path class="muted-line" d="M705 263 C654 330 568 352 520 378" marker-end="url(#arrow)"/>
+    <path class="accent-line" d="M910 263 C873 333 805 352 760 378" marker-end="url(#arrowAccent)"/>
+    <path class="line" d="M600 423 H640" marker-end="url(#arrow)"/>
+  </g>
+</svg>

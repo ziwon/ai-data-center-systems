@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="560" viewBox="0 0 1120 560" role="img" aria-labelledby="title desc">
+  <title id="title">AI data center storage network map</title>
+  <desc id="desc">Storage network choices across the AI data lifecycle, from ingestion and training reads to checkpoint writes, model storage, inference, RAG, and archival tiers.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .panel { fill: none; stroke: #D8D1C7; stroke-width: 1.2; }
+    .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.4; }
+    .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; }
+    .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.5; }
+    .accent-line { fill: none; stroke: #D9392E; stroke-width: 2.2; }
+    .muted-line { fill: none; stroke: #D8D1C7; stroke-width: 1.2; stroke-dasharray: 7 6; }
+    .label { font-family: Inter, Arial, sans-serif; font-size: 16px; font-weight: 700; fill: #050505; }
+    .small { font-family: Inter, Arial, sans-serif; font-size: 12px; fill: #6F6A63; }
+    .key { font-family: Inter, Arial, sans-serif; font-size: 24px; font-weight: 700; fill: #050505; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#111111"/>
+    </marker>
+    <marker id="arrowAccent" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#D9392E"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1120" height="560"/>
+  <rect class="panel" x="42" y="38" width="1036" height="484" rx="8"/>
+
+  <g transform="translate(82 88)">
+    <rect class="soft" x="0" y="50" width="160" height="86" rx="6"/>
+    <text class="label" x="80" y="82" text-anchor="middle">Ingestion</text>
+    <text class="small" x="80" y="106" text-anchor="middle">raw data read</text>
+    <text class="small" x="80" y="125" text-anchor="middle">cleanup / curation</text>
+
+    <rect class="box" x="210" y="50" width="160" height="86" rx="6"/>
+    <text class="label" x="290" y="82" text-anchor="middle">Training</text>
+    <text class="small" x="290" y="106" text-anchor="middle">batch reads</text>
+    <text class="small" x="290" y="125" text-anchor="middle">shared datasets</text>
+
+    <rect class="accent" x="420" y="50" width="170" height="86" rx="6"/>
+    <text class="label" x="505" y="82" text-anchor="middle">Checkpoint</text>
+    <text class="small" x="505" y="106" text-anchor="middle">fast sustained writes</text>
+    <text class="small" x="505" y="125" text-anchor="middle">pause-sensitive path</text>
+
+    <rect class="box" x="640" y="50" width="160" height="86" rx="6"/>
+    <text class="label" x="720" y="82" text-anchor="middle">Model store</text>
+    <text class="small" x="720" y="106" text-anchor="middle">versions, artifacts</text>
+    <text class="small" x="720" y="125" text-anchor="middle">local or replicated</text>
+
+    <rect class="soft" x="850" y="50" width="160" height="86" rx="6"/>
+    <text class="label" x="930" y="82" text-anchor="middle">Inference / RAG</text>
+    <text class="small" x="930" y="106" text-anchor="middle">fresh files</text>
+    <text class="small" x="930" y="125" text-anchor="middle">object or file access</text>
+
+    <path class="line" d="M160 93 H210" marker-end="url(#arrow)"/>
+    <path class="line" d="M370 93 H420" marker-end="url(#arrow)"/>
+    <path class="accent-line" d="M590 93 H640" marker-end="url(#arrowAccent)"/>
+    <path class="line" d="M800 93 H850" marker-end="url(#arrow)"/>
+
+    <text class="key" x="505" y="216" text-anchor="middle">Storage access choices</text>
+
+    <rect class="box" x="75" y="260" width="180" height="92" rx="6"/>
+    <text class="label" x="165" y="294" text-anchor="middle">Block</text>
+    <text class="small" x="165" y="318" text-anchor="middle">NVMe-oF, SAN</text>
+    <text class="small" x="165" y="338" text-anchor="middle">low latency volumes</text>
+
+    <rect class="box" x="305" y="260" width="180" height="92" rx="6"/>
+    <text class="label" x="395" y="294" text-anchor="middle">File</text>
+    <text class="small" x="395" y="318" text-anchor="middle">POSIX, NFS, Lustre,</text>
+    <text class="small" x="395" y="338" text-anchor="middle">WekaFS, VAST, GPFS</text>
+
+    <rect class="box" x="535" y="260" width="180" height="92" rx="6"/>
+    <text class="label" x="625" y="294" text-anchor="middle">Object</text>
+    <text class="small" x="625" y="318" text-anchor="middle">S3, archive, cloud</text>
+    <text class="small" x="625" y="338" text-anchor="middle">RAG and cold data</text>
+
+    <rect class="accent" x="765" y="260" width="180" height="92" rx="6"/>
+    <text class="label" x="855" y="294" text-anchor="middle">GPU direct path</text>
+    <text class="small" x="855" y="318" text-anchor="middle">GDS over RDMA</text>
+    <text class="small" x="855" y="338" text-anchor="middle">bypass CPU memory</text>
+
+    <path class="muted-line" d="M505 136 V236" marker-end="url(#arrow)"/>
+    <path class="muted-line" d="M505 236 C430 236 250 238 165 260" marker-end="url(#arrow)"/>
+    <path class="muted-line" d="M505 236 C467 238 426 246 395 260" marker-end="url(#arrow)"/>
+    <path class="muted-line" d="M505 236 C555 238 596 246 625 260" marker-end="url(#arrow)"/>
+    <path class="accent-line" d="M505 236 C626 229 763 238 855 260" marker-end="url(#arrowAccent)"/>
+  </g>
+</svg>

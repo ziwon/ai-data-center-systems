@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="760" viewBox="0 0 1500 760" role="img" aria-labelledby="title desc">
+  <title id="title">Evolution of FlashAttention from version 1 to 4</title>
+  <desc id="desc">A four-stage timeline showing how the dominant optimization target moves from HBM traffic to work partitioning, asynchronous scheduling, and Blackwell-specific non-matmul bottlenecks.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f8fafc"/>
+      <stop offset="1" stop-color="#fff7ed"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="5" stdDeviation="7" flood-color="#0f172a" flood-opacity="0.12"/>
+    </filter>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="4" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,8 L11,4 z" fill="#475569"/>
+    </marker>
+    <style>
+      .title{font:700 31px Inter,Segoe UI,Arial,sans-serif;fill:#0f172a}
+      .subtitle{font:500 16px Inter,Segoe UI,Arial,sans-serif;fill:#475569}
+      .version{font:800 25px Inter,Segoe UI,Arial,sans-serif;fill:#ffffff}
+      .head{font:700 19px Inter,Segoe UI,Arial,sans-serif;fill:#0f172a}
+      .body{font:500 15px Inter,Segoe UI,Arial,sans-serif;fill:#334155}
+      .small{font:500 13px Inter,Segoe UI,Arial,sans-serif;fill:#64748b}
+      .arrow{stroke:#475569;stroke-width:4;fill:none;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect width="1500" height="760" fill="url(#bg)"/>
+  <text x="750" y="50" text-anchor="middle" class="title">FlashAttention evolves by following the bottleneck</text>
+  <text x="750" y="80" text-anchor="middle" class="subtitle">Each generation preserves the tiled online-softmax core, then remaps it to a new hardware balance</text>
+
+  <line x1="185" y1="185" x2="1315" y2="185" class="arrow"/>
+
+  <!-- FA1 -->
+  <circle cx="210" cy="185" r="38" fill="#2563eb" stroke="#1d4ed8" stroke-width="2"/>
+  <text x="210" y="194" text-anchor="middle" class="version">FA1</text>
+  <rect x="55" y="255" width="310" height="370" rx="22" fill="#ffffff" stroke="#93c5fd" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="55" y="255" width="310" height="54" rx="22" fill="#dbeafe"/>
+  <text x="210" y="289" text-anchor="middle" class="head">I/O-aware algorithm</text>
+  <text x="83" y="345" class="head">Observed bottleneck</text>
+  <text x="83" y="376" class="body">N² score/probability matrices</text>
+  <text x="83" y="398" class="body">repeatedly cross HBM.</text>
+  <text x="83" y="445" class="head">Main response</text>
+  <text x="83" y="476" class="body">Tiling + online softmax</text>
+  <text x="83" y="498" class="body">+ backward recomputation.</text>
+  <text x="83" y="545" class="head">Resulting mental model</text>
+  <text x="83" y="576" class="body">Keep S and P transient;</text>
+  <text x="83" y="598" class="body">move fewer bytes, not fewer FLOPs.</text>
+
+  <!-- FA2 -->
+  <circle cx="570" cy="185" r="38" fill="#7c3aed" stroke="#6d28d9" stroke-width="2"/>
+  <text x="570" y="194" text-anchor="middle" class="version">FA2</text>
+  <rect x="415" y="255" width="310" height="370" rx="22" fill="#ffffff" stroke="#c4b5fd" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="415" y="255" width="310" height="54" rx="22" fill="#ede9fe"/>
+  <text x="570" y="289" text-anchor="middle" class="head">Better GPU mapping</text>
+  <text x="443" y="345" class="head">Observed bottleneck</text>
+  <text x="443" y="376" class="body">Low occupancy and excessive</text>
+  <text x="443" y="398" class="body">warp-to-warp SMEM traffic.</text>
+  <text x="443" y="445" class="head">Main response</text>
+  <text x="443" y="476" class="body">Parallelize over Q blocks;</text>
+  <text x="443" y="498" class="body">partition Q across warps;</text>
+  <text x="443" y="520" class="body">reduce non-matmul work.</text>
+  <text x="443" y="567" class="head">Resulting mental model</text>
+  <text x="443" y="598" class="body">The algorithm is fast only when</text>
+  <text x="443" y="620" class="body">the SMs and warps stay useful.</text>
+
+  <!-- FA3 -->
+  <circle cx="930" cy="185" r="38" fill="#0f766e" stroke="#115e59" stroke-width="2"/>
+  <text x="930" y="194" text-anchor="middle" class="version">FA3</text>
+  <rect x="775" y="255" width="310" height="370" rx="22" fill="#ffffff" stroke="#5eead4" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="775" y="255" width="310" height="54" rx="22" fill="#ccfbf1"/>
+  <text x="930" y="289" text-anchor="middle" class="head">Hopper asynchrony</text>
+  <text x="803" y="345" class="head">Observed bottleneck</text>
+  <text x="803" y="376" class="body">Synchronous issue leaves TMA,</text>
+  <text x="803" y="398" class="body">Tensor Cores, and MUFU idle.</text>
+  <text x="803" y="445" class="head">Main response</text>
+  <text x="803" y="476" class="body">Warp specialization, circular</text>
+  <text x="803" y="498" class="body">SMEM buffers, ping-pong,</text>
+  <text x="803" y="520" class="body">GEMM–softmax overlap, FP8.</text>
+  <text x="803" y="567" class="head">Resulting mental model</text>
+  <text x="803" y="598" class="body">Schedule independent engines</text>
+  <text x="803" y="620" class="body">concurrently, across iterations.</text>
+
+  <!-- FA4 -->
+  <circle cx="1290" cy="185" r="38" fill="#c2410c" stroke="#9a3412" stroke-width="2"/>
+  <text x="1290" y="194" text-anchor="middle" class="version">FA4</text>
+  <rect x="1135" y="255" width="310" height="370" rx="22" fill="#ffffff" stroke="#fdba74" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="1135" y="255" width="310" height="54" rx="22" fill="#ffedd5"/>
+  <text x="1290" y="289" text-anchor="middle" class="head">Blackwell co-design</text>
+  <text x="1163" y="345" class="head">Observed bottleneck</text>
+  <text x="1163" y="376" class="body">Tensor Cores scale faster than</text>
+  <text x="1163" y="398" class="body">SMEM and exponential units.</text>
+  <text x="1163" y="445" class="head">Main response</text>
+  <text x="1163" y="476" class="body">TMEM, fully async MMA, larger</text>
+  <text x="1163" y="498" class="body">tiles, software exp, conditional</text>
+  <text x="1163" y="520" class="body">rescaling, 2-CTA backward.</text>
+  <text x="1163" y="567" class="head">Resulting mental model</text>
+  <text x="1163" y="598" class="body">When one unit gets much faster,</text>
+  <text x="1163" y="620" class="body">everything around it becomes visible.</text>
+
+  <rect x="260" y="674" width="980" height="42" rx="21" fill="#ffffff" stroke="#cbd5e1"/>
+  <text x="750" y="700" text-anchor="middle" class="small">HBM traffic → occupancy/communication → asynchronous overlap → SMEM, exp throughput, and register pressure</text>
+</svg>

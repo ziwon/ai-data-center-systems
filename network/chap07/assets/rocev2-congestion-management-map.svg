@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="560" viewBox="0 0 1120 560" role="img" aria-labelledby="title desc">
+  <title id="title">RoCEv2 congestion management map</title>
+  <desc id="desc">RoCEv2 traffic flows through an Ethernet AI fabric, where congestion can trigger ECN and CNP, PFC, watchdog protection, DCQCN rate control, and newer SFC or CSIG signals.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .panel { fill: none; stroke: #D8D1C7; stroke-width: 1.2; }
+    .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.4; }
+    .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; }
+    .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.6; }
+    .muted-line { fill: none; stroke: #D8D1C7; stroke-width: 1.4; }
+    .accent-line { fill: none; stroke: #D9392E; stroke-width: 2; }
+    .dash { stroke-dasharray: 7 6; }
+    .label { font-family: Inter, Arial, sans-serif; font-size: 17px; font-weight: 700; fill: #050505; }
+    .small { font-family: Inter, Arial, sans-serif; font-size: 13px; fill: #6F6A63; }
+    .tiny { font-family: Inter, Arial, sans-serif; font-size: 12px; fill: #6F6A63; }
+    .key { font-family: Inter, Arial, sans-serif; font-size: 28px; font-weight: 700; fill: #050505; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#111111"/>
+    </marker>
+    <marker id="arrowAccent" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#D9392E"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1120" height="560"/>
+  <rect class="panel" x="36" y="34" width="1048" height="492" rx="8"/>
+
+  <g transform="translate(72 90)">
+    <rect class="box" x="0" y="92" width="150" height="88" rx="6"/>
+    <text class="label" x="75" y="126" text-anchor="middle">GPU server</text>
+    <text class="small" x="75" y="151" text-anchor="middle">RDMA buffers</text>
+    <text class="small" x="75" y="171" text-anchor="middle">NCCL / storage</text>
+
+    <rect class="box" x="205" y="92" width="150" height="88" rx="6"/>
+    <text class="label" x="280" y="126" text-anchor="middle">RoCEv2 NIC</text>
+    <text class="small" x="280" y="151" text-anchor="middle">UDP/IP RDMA</text>
+    <text class="small" x="280" y="171" text-anchor="middle">QP rate control</text>
+
+    <rect class="box" x="410" y="72" width="190" height="128" rx="6"/>
+    <text class="label" x="505" y="111" text-anchor="middle">Ethernet fabric</text>
+    <text class="small" x="505" y="137" text-anchor="middle">leaf / spine /</text>
+    <text class="small" x="505" y="157" text-anchor="middle">super-spine</text>
+    <text class="small" x="505" y="179" text-anchor="middle">queues and buffers</text>
+
+    <rect class="accent" x="672" y="72" width="190" height="128" rx="6"/>
+    <text class="label" x="767" y="107" text-anchor="middle">Congestion</text>
+    <text class="small" x="767" y="133" text-anchor="middle">hot output link</text>
+    <text class="small" x="767" y="153" text-anchor="middle">incast, collision,</text>
+    <text class="small" x="767" y="173" text-anchor="middle">or burst pressure</text>
+
+    <path class="line" d="M150 136 H205" marker-end="url(#arrow)"/>
+    <path class="line" d="M355 136 H410" marker-end="url(#arrow)"/>
+    <path class="accent-line" d="M600 136 H672" marker-end="url(#arrowAccent)"/>
+  </g>
+
+  <g transform="translate(92 330)">
+    <text class="key" x="0" y="0">Signals after queue pressure appears</text>
+    <text class="small" x="0" y="28">The useful design question is which signal fires first, how precise it is, and how far its side effects spread.</text>
+
+    <rect class="soft" x="0" y="66" width="150" height="80" rx="6"/>
+    <text class="label" x="75" y="99" text-anchor="middle">ECN + CNP</text>
+    <text class="tiny" x="75" y="123" text-anchor="middle">end-to-end</text>
+
+    <rect class="soft" x="184" y="66" width="150" height="80" rx="6"/>
+    <text class="label" x="259" y="99" text-anchor="middle">DCQCN</text>
+    <text class="tiny" x="259" y="123" text-anchor="middle">sender rate loop</text>
+
+    <rect class="accent" x="368" y="66" width="150" height="80" rx="6"/>
+    <text class="label" x="443" y="99" text-anchor="middle">PFC</text>
+    <text class="tiny" x="443" y="123" text-anchor="middle">hop-by-hop pause</text>
+
+    <rect class="soft" x="552" y="66" width="150" height="80" rx="6"/>
+    <text class="label" x="627" y="99" text-anchor="middle">Watchdog</text>
+    <text class="tiny" x="627" y="123" text-anchor="middle">storm guard</text>
+
+    <rect class="soft" x="736" y="66" width="150" height="80" rx="6"/>
+    <text class="label" x="811" y="99" text-anchor="middle">SFC / CSIG</text>
+    <text class="tiny" x="811" y="123" text-anchor="middle">newer signals</text>
+
+    <path class="line" d="M150 106 H184" marker-end="url(#arrow)"/>
+    <path class="line" d="M334 106 H368" marker-end="url(#arrow)"/>
+    <path class="line" d="M518 106 H552" marker-end="url(#arrow)"/>
+    <path class="muted-line dash" d="M702 106 H736" marker-end="url(#arrow)"/>
+  </g>
+</svg>

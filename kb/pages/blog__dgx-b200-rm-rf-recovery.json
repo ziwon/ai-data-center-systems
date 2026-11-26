@@ -1,0 +1,352 @@
+{
+  "version": 1,
+  "current": {
+    "id": "/blog/dgx-b200-rm-rf-recovery/",
+    "title": "Recovering a DGX B200 Node After an Accidental rm -rf",
+    "route": "/blog/dgx-b200-rm-rf-recovery/",
+    "group": "blog",
+    "keywords": [
+      "files",
+      "recovery",
+      "shell",
+      "boot",
+      "node",
+      "ssh",
+      "directory",
+      "healthy",
+      "file",
+      "environment"
+    ],
+    "excerpt": "How a DGX B200 node that lost its system files to an accidental rm -rf was brought back with a DGX OS rescue environment and chroot."
+  },
+  "nodes": [
+    {
+      "id": "/blog/dgx-b200-rm-rf-recovery/",
+      "title": "Recovering a DGX B200 Node After an Accidental rm -rf",
+      "route": "/blog/dgx-b200-rm-rf-recovery/",
+      "group": "blog",
+      "keywords": [
+        "files",
+        "recovery",
+        "shell",
+        "boot",
+        "node",
+        "ssh",
+        "directory",
+        "healthy",
+        "file",
+        "environment"
+      ],
+      "excerpt": "How a DGX B200 node that lost its system files to an accidental rm -rf was brought back with a DGX OS rescue environment and chroot."
+    },
+    {
+      "id": "/blog/",
+      "title": "Blog",
+      "route": "/blog/",
+      "group": "blog",
+      "keywords": [
+        "gpu",
+        "2026-06-28",
+        "2026-07-07",
+        "blog",
+        "방법을",
+        "dgx",
+        "cloud",
+        "메모리",
+        "numa",
+        "kubernetes"
+      ],
+      "excerpt": "Technical blog posts on AI data center systems: GPU operations, failure analysis, networking, and performance engineering."
+    },
+    {
+      "id": "/blog/dgx-b200-rm-rf-recovery.ko/",
+      "title": "rm -rf 사고로 손상된 DGX B200 노드 복구기",
+      "route": "/blog/dgx-b200-rm-rf-recovery.ko/",
+      "group": "blog",
+      "keywords": [
+        "파일을",
+        "디렉터리",
+        "ssh",
+        "디스크",
+        "노드의",
+        "시스템",
+        "파일이",
+        "lib",
+        "라이브러리",
+        "마운트"
+      ],
+      "excerpt": "rm -rf 실수로 시스템 파일이 지워진 DGX B200 노드를 DGX OS 복구 환경과 chroot로 되살린 과정을 돌아본다."
+    },
+    {
+      "id": "/blog/gpu-infrastructure-operations-and-platform-design.ko/",
+      "title": "GPU 인프라 운영과 플랫폼 설계: 하드웨어 장애 분석부터 멀티테넌시까지",
+      "route": "/blog/gpu-infrastructure-operations-and-platform-design.ko/",
+      "group": "blog",
+      "keywords": [
+        "gpu",
+        "메모리",
+        "호스트",
+        "작업을",
+        "드라이버",
+        "iommu",
+        "재시작",
+        "workload",
+        "서비스",
+        "않는다"
+      ],
+      "excerpt": "하드웨어 장애 진단부터 노드 등록·검증, 멀티테넌트 운영까지 GPU 플랫폼을 반복 가능하게 운영하는 방법을 정리한다."
+    },
+    {
+      "id": "/gpu/",
+      "title": "GPU Systems",
+      "route": "/gpu/",
+      "group": "gpu",
+      "keywords": [
+        "플랫폼",
+        "참고자료",
+        "cuda",
+        "모델과",
+        "메모리",
+        "gpu",
+        "컴퓨팅",
+        "아키텍처",
+        "익힙니다",
+        "확인합니다"
+      ],
+      "excerpt": "GPU 아키텍처와 CUDA 프로그래밍부터 Kubernetes GPU 플랫폼 운영까지 다루는 문서 모음입니다. 강좌는 실행 원리를 익히는 데, 참고자료는 세부 동작을 확인하는 데, 실습과 블로그 글은 성능 분석과 운영 판단에 활용할 수 있습니다."
+    },
+    {
+      "id": "concept:rdma",
+      "kind": "concept",
+      "title": "RDMA",
+      "label": "RDMA",
+      "group": "network",
+      "description": "Remote direct memory access data path for low-latency GPU and storage communication.",
+      "keywords": [
+        "RDMA",
+        "Remote Direct Memory Access",
+        "InfiniBand verbs"
+      ]
+    },
+    {
+      "id": "/blog/cloud-data-center-network-now-and-next.ko/",
+      "title": "Cloud Data Center Network의 지금과 앞으로",
+      "route": "/blog/cloud-data-center-network-now-and-next.ko/",
+      "group": "blog",
+      "keywords": [
+        "network",
+        "ethernet",
+        "fabric",
+        "ai/ml",
+        "rdma",
+        "routing",
+        "frontend",
+        "adaptive",
+        "traffic",
+        "rack"
+      ],
+      "excerpt": "web-scale 클라우드 네트워크에서 AI/ML용 backend fabric으로 넘어가는 흐름을 compute와 storage 구조의 변화에서 짚는다."
+    },
+    {
+      "id": "/courses/deep-learning-for-network-engineers/week03/",
+      "title": "Week 3: Parallelism Strategies in Deep Learning",
+      "route": "/courses/deep-learning-for-network-engineers/week03/",
+      "group": "courses/deep-learning-for-network-engineers",
+      "keywords": [
+        "parallelism",
+        "gpu",
+        "gradient",
+        "pipeline",
+        "expert",
+        "stage",
+        "tensor",
+        "training",
+        "micro-batch",
+        "communication"
+      ],
+      "excerpt": "이번 주 목표는 대규모 deep learning training이 왜 parallelism을 필요로 하는지 , 그리고 각 parallelization strategy가 GPU memory, GPU utilization, backend network design에 어떤 영향을..."
+    },
+    {
+      "id": "/courses/deep-learning-for-network-engineers/week04/",
+      "title": "Week 4: RDMA and GPU Cluster Communication",
+      "route": "/courses/deep-learning-for-network-engineers/week04/",
+      "group": "courses/deep-learning-for-network-engineers",
+      "keywords": [
+        "rank",
+        "rdma",
+        "nccl",
+        "queue",
+        "host",
+        "memory",
+        "transport",
+        "gpu",
+        "path",
+        "bootstrap"
+      ],
+      "excerpt": "이번 주 목표는 Chapter 9와 Chapter 14를 연결해서, RDMA가 GPU memory 사이의 빠른 data movement를 어떻게 만들고, NCCL이 distributed training job 안에서 어떤 communication pattern을 만드는지 이해하는..."
+    }
+  ],
+  "edges": [
+    {
+      "source": "/blog/",
+      "target": "/blog/cloud-data-center-network-now-and-next.ko/",
+      "type": "link+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/blog/",
+      "target": "/blog/dgx-b200-rm-rf-recovery.ko/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/blog/",
+      "target": "/blog/dgx-b200-rm-rf-recovery/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/blog/",
+      "target": "/blog/gpu-infrastructure-operations-and-platform-design.ko/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": [
+        "gpu",
+        "메모리"
+      ]
+    },
+    {
+      "source": "/blog/",
+      "target": "/gpu/",
+      "type": "link",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/blog/dgx-b200-rm-rf-recovery.ko/",
+      "target": "/blog/dgx-b200-rm-rf-recovery/",
+      "type": "link+semantic+section",
+      "weight": 1,
+      "terms": [
+        "ssh"
+      ]
+    },
+    {
+      "source": "/blog/dgx-b200-rm-rf-recovery.ko/",
+      "target": "/blog/gpu-infrastructure-operations-and-platform-design.ko/",
+      "type": "link+section",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/blog/dgx-b200-rm-rf-recovery.ko/",
+      "target": "/gpu/",
+      "type": "link",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/blog/dgx-b200-rm-rf-recovery/",
+      "target": "/blog/gpu-infrastructure-operations-and-platform-design.ko/",
+      "type": "link",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/blog/dgx-b200-rm-rf-recovery/",
+      "target": "/gpu/",
+      "type": "link",
+      "weight": 1,
+      "terms": []
+    },
+    {
+      "source": "/blog/gpu-infrastructure-operations-and-platform-design.ko/",
+      "target": "/gpu/",
+      "type": "link+semantic",
+      "weight": 1,
+      "terms": [
+        "메모리",
+        "gpu"
+      ]
+    },
+    {
+      "source": "/blog/cloud-data-center-network-now-and-next.ko/",
+      "target": "concept:rdma",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "RDMA"
+      ]
+    },
+    {
+      "source": "/blog/gpu-infrastructure-operations-and-platform-design.ko/",
+      "target": "concept:rdma",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "RDMA"
+      ]
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week03/",
+      "target": "concept:rdma",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "RDMA"
+      ]
+    },
+    {
+      "source": "/courses/deep-learning-for-network-engineers/week04/",
+      "target": "concept:rdma",
+      "type": "mentions",
+      "weight": 0.93,
+      "terms": [
+        "RDMA",
+        "Remote Direct Memory Access"
+      ]
+    },
+    {
+      "source": "/blog/dgx-b200-rm-rf-recovery.ko/",
+      "target": "concept:rdma",
+      "type": "mentions",
+      "weight": 0.83,
+      "terms": [
+        "RDMA"
+      ]
+    },
+    {
+      "source": "/blog/dgx-b200-rm-rf-recovery/",
+      "target": "concept:rdma",
+      "type": "mentions",
+      "weight": 0.83,
+      "terms": [
+        "RDMA"
+      ]
+    },
+    {
+      "source": "/blog/cloud-data-center-network-now-and-next.ko/",
+      "target": "/blog/dgx-b200-rm-rf-recovery.ko/",
+      "type": "section",
+      "weight": 0.297,
+      "terms": []
+    },
+    {
+      "source": "/blog/cloud-data-center-network-now-and-next.ko/",
+      "target": "/blog/dgx-b200-rm-rf-recovery/",
+      "type": "section",
+      "weight": 0.297,
+      "terms": []
+    },
+    {
+      "source": "/blog/cloud-data-center-network-now-and-next.ko/",
+      "target": "/blog/gpu-infrastructure-operations-and-platform-design.ko/",
+      "type": "section",
+      "weight": 0.18,
+      "terms": []
+    }
+  ]
+}

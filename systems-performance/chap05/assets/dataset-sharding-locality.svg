@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="620" viewBox="0 0 1120 620" role="img" aria-labelledby="title desc">
+  <title id="title">Dataset sharding and node-local storage locality</title>
+  <desc id="desc">A shared durable dataset is staged into balanced shards on node-local NVMe and consumed by distinct training ranks.</desc>
+  <defs>
+    <style>
+      text { font-family: Arial, sans-serif; }
+      .bg { fill: #F3EFE7; }
+      .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.4; }
+      .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; }
+      .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+      .line { fill: none; stroke: #111111; stroke-width: 1.8; }
+      .dash { fill: none; stroke: #6F6A63; stroke-width: 1.2; stroke-dasharray: 7 5; }
+      .label { fill: #050505; font-size: 17px; font-weight: 700; }
+      .small { fill: #6F6A63; font-size: 13px; }
+      .red { fill: #D9392E; font-size: 13px; font-weight: 700; }
+      .arrow { fill: #111111; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1120" height="620"/>
+
+  <rect class="box" x="72" y="214" width="220" height="148" rx="8"/>
+  <text class="label" x="110" y="250">Durable source</text>
+  <text class="small" x="108" y="282">Object store / parallel FS</text>
+  <text class="small" x="108" y="308">versioned manifest</text>
+  <text class="small" x="108" y="334">checksum + provenance</text>
+
+  <rect class="accent" x="388" y="238" width="184" height="100" rx="8"/>
+  <text class="label" x="431" y="276">Shard planner</text>
+  <text class="small" x="423" y="304">balance bytes + decode cost</text>
+
+  <rect class="box" x="674" y="72" width="360" height="142" rx="8"/>
+  <text class="label" x="700" y="108">Node 0</text>
+  <rect class="soft" x="700" y="132" width="130" height="52" rx="6"/>
+  <text class="small" x="724" y="163">local NVMe A</text>
+  <rect class="soft" x="870" y="132" width="130" height="52" rx="6"/>
+  <text class="small" x="901" y="163">ranks 0–7</text>
+  <line class="line" x1="830" y1="158" x2="870" y2="158"/>
+  <polygon class="arrow" points="870,158 858,152 858,164"/>
+
+  <rect class="box" x="674" y="238" width="360" height="142" rx="8"/>
+  <text class="label" x="700" y="274">Node 1</text>
+  <rect class="soft" x="700" y="298" width="130" height="52" rx="6"/>
+  <text class="small" x="724" y="329">local NVMe B</text>
+  <rect class="soft" x="870" y="298" width="130" height="52" rx="6"/>
+  <text class="small" x="897" y="329">ranks 8–15</text>
+  <line class="line" x1="830" y1="324" x2="870" y2="324"/>
+  <polygon class="arrow" points="870,324 858,318 858,330"/>
+
+  <rect class="box" x="674" y="404" width="360" height="142" rx="8"/>
+  <text class="label" x="700" y="440">Node N</text>
+  <rect class="soft" x="700" y="464" width="130" height="52" rx="6"/>
+  <text class="small" x="724" y="495">local NVMe N</text>
+  <rect class="soft" x="870" y="464" width="130" height="52" rx="6"/>
+  <text class="small" x="901" y="495">distinct ranks</text>
+  <line class="line" x1="830" y1="490" x2="870" y2="490"/>
+  <polygon class="arrow" points="870,490 858,484 858,496"/>
+
+  <line class="line" x1="292" y1="288" x2="388" y2="288"/>
+  <polygon class="arrow" points="388,288 376,282 376,294"/>
+  <path class="line" d="M 572 288 C 620 288, 620 143, 674 143"/>
+  <polygon class="arrow" points="674,143 662,137 662,149"/>
+  <line class="line" x1="572" y1="288" x2="674" y2="309"/>
+  <polygon class="arrow" points="674,309 661,312 664,300"/>
+  <path class="line" d="M 572 288 C 620 288, 620 475, 674 475"/>
+  <polygon class="arrow" points="674,475 662,469 662,481"/>
+
+  <path class="dash" d="M 612 70 L 612 548"/>
+  <text class="red" x="330" y="574">Critical check: rank-level batch-ready time must remain balanced.</text>
+  <text class="small" x="90" y="606">shared capacity plane</text>
+  <text class="small" x="850" y="606">node-local hot-data plane</text>
+</svg>

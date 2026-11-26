@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="430" viewBox="0 0 960 430" role="img" aria-labelledby="title desc">
+  <title id="title">Power Usage Effectiveness calculation</title>
+  <desc id="desc">PUE is total facility power divided by IT equipment power. Total facility power includes IT load plus cooling, power delivery, lighting, and other overhead.</desc>
+  <rect width="960" height="430" fill="#ffffff"/>
+  <style>
+    .title { font: 700 24px Arial, sans-serif; fill: #0f172a; }
+    .label { font: 700 17px Arial, sans-serif; fill: #0f172a; }
+    .small { font: 14px Arial, sans-serif; fill: #334155; }
+    .tiny { font: 12px Arial, sans-serif; fill: #475569; }
+    .box { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 1.5; rx: 10; }
+    .it { fill: #eef6ff; stroke: #2563eb; stroke-width: 2; rx: 10; }
+    .cool { fill: #ecfdf5; stroke: #059669; stroke-width: 2; rx: 10; }
+    .power { fill: #fff7ed; stroke: #ea580c; stroke-width: 2; rx: 10; }
+    .other { fill: #f5f3ff; stroke: #7c3aed; stroke-width: 2; rx: 10; }
+    .arrow { stroke: #64748b; stroke-width: 2.5; fill: none; marker-end: url(#arrowhead); }
+    .fraction { stroke: #0f172a; stroke-width: 3; }
+  </style>
+  <defs>
+    <marker id="arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b"/>
+    </marker>
+  </defs>
+
+  <text x="40" y="42" class="title">Power Usage Effectiveness, PUE</text>
+  <text x="40" y="68" class="small">A lower PUE means less facility overhead is needed to support the same IT load.</text>
+
+  <rect x="42" y="105" width="238" height="245" class="box"/>
+  <text x="70" y="138" class="label">Total Facility Power</text>
+  <text x="70" y="162" class="small">Everything entering the</text>
+  <text x="70" y="182" class="small">data center boundary</text>
+
+  <rect x="70" y="208" width="180" height="40" class="it"/>
+  <text x="92" y="233" class="small">IT equipment load</text>
+  <rect x="70" y="258" width="180" height="40" class="cool"/>
+  <text x="116" y="283" class="small">Cooling</text>
+  <rect x="70" y="308" width="180" height="40" class="power"/>
+  <text x="93" y="333" class="small">Power delivery</text>
+
+  <rect x="350" y="105" width="238" height="245" class="it"/>
+  <text x="386" y="143" class="label">IT Equipment Power</text>
+  <text x="382" y="172" class="small">Servers, storage,</text>
+  <text x="382" y="194" class="small">network switches,</text>
+  <text x="382" y="216" class="small">GPUs, NICs, and</text>
+  <text x="382" y="238" class="small">other compute gear</text>
+  <text x="382" y="288" class="tiny">Measured as close as practical</text>
+  <text x="382" y="306" class="tiny">to the IT load, such as at</text>
+  <text x="382" y="324" class="tiny">rack PDU or UPS/PDU output.</text>
+
+  <path class="arrow" d="M 282 228 C 306 228 324 228 348 228"/>
+
+  <g transform="translate(645,128)">
+    <text x="0" y="35" class="title">PUE =</text>
+    <text x="104" y="18" class="label">Total Facility Power</text>
+    <line x1="100" y1="42" x2="298" y2="42" class="fraction"/>
+    <text x="118" y="74" class="label">IT Equipment Power</text>
+  </g>
+
+  <rect x="660" y="255" width="250" height="84" class="other"/>
+  <text x="684" y="284" class="label">Example</text>
+  <text x="684" y="309" class="small">2.0 MW facility / 1.5 MW IT</text>
+  <text x="684" y="331" class="small">PUE = 1.33</text>
+
+  <text x="42" y="390" class="tiny">Facility overhead includes cooling, UPS losses, transformers, PDUs, lighting, controls, and other non-IT loads.</text>
+</svg>

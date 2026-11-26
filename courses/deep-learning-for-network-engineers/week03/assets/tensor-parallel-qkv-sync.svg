@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="560" viewBox="0 0 1120 560" role="img" aria-labelledby="title desc">
+  <title id="title">Tensor parallel Q K V synchronization</title>
+  <desc id="desc">A transformer self-attention tensor parallelism diagram showing embedding broadcast, Q and K AllGather, local V shards, attention SoftMax, and backward gradient synchronization.</desc>
+  <defs>
+    <style>
+      text { font-family: Arial, sans-serif; }
+      .bg { fill: #F3EFE7; }
+      .title { font-size: 25px; font-weight: 700; fill: #050505; }
+      .subtitle { font-size: 14px; fill: #6F6A63; }
+      .label { font-size: 14px; font-weight: 700; fill: #050505; }
+      .small { font-size: 12px; fill: #6F6A63; }
+      .tiny { font-size: 11px; fill: #6F6A63; }
+      .box { fill: none; stroke: #111111; stroke-width: 1.5; }
+      .soft-box { fill: none; stroke: #D8D1C7; stroke-width: 1.25; }
+      .sync { fill: none; stroke: #D9392E; stroke-width: 1.5; }
+      .line { stroke: #111111; stroke-width: 2; fill: none; }
+      .dashed { stroke: #D9392E; stroke-width: 2; stroke-dasharray: 6 5; fill: none; }
+      .arrow { fill: #111111; }
+      .orange { fill: #D9392E; font-weight: 700; }
+      .green { fill: #050505; font-weight: 700; }
+      .purple { fill: #D9392E; font-weight: 700; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1120" height="650"/>
+  <rect class="soft-box" x="44" y="36" width="1032" height="104" rx="10"/>
+  <rect class="box" x="78" y="59" width="188" height="58" rx="8"/>
+  <text class="label" x="111" y="83">Embedding Lookup</text>
+  <text class="tiny" x="122" y="102">usually one GPU</text>
+
+  <rect class="sync" x="344" y="59" width="188" height="58" rx="8"/>
+  <text class="label" x="393" y="83">Broadcast</text>
+  <text class="tiny" x="377" y="102">input vectors to shards</text>
+
+  <rect class="box" x="610" y="59" width="160" height="58" rx="8"/>
+  <text class="label" x="659" y="83">GPU A1</text>
+  <text class="tiny" x="640" y="102">Q/K/V shard 0</text>
+
+  <rect class="box" x="838" y="59" width="160" height="58" rx="8"/>
+  <text class="label" x="887" y="83">GPU A2</text>
+  <text class="tiny" x="868" y="102">Q/K/V shard 1</text>
+
+  <line class="line" x1="266" y1="88" x2="338" y2="88"/>
+  <polygon class="arrow" points="338,88 326,81 326,95"/>
+  <line class="line" x1="532" y1="88" x2="572" y2="88"/>
+  <line class="line" x1="572" y1="88" x2="572" y2="70"/>
+  <line class="line" x1="572" y1="70" x2="604" y2="70"/>
+  <polygon class="arrow" points="604,70 592,63 592,77"/>
+  <line class="line" x1="572" y1="88" x2="572" y2="106"/>
+  <line class="line" x1="572" y1="106" x2="832" y2="106"/>
+  <polygon class="arrow" points="832,106 820,99 820,113"/>
+
+  <rect class="box" x="78" y="180" width="430" height="210" rx="10"/>
+  <text class="label" x="108" y="212">GPU A1 local compute</text>
+  <rect class="soft-box" x="112" y="252" width="100" height="44" rx="7"/>
+  <text class="small" x="139" y="279">Q0</text>
+  <rect class="soft-box" x="232" y="252" width="100" height="44" rx="7"/>
+  <text class="small" x="260" y="279">K0</text>
+  <rect class="soft-box" x="352" y="252" width="100" height="44" rx="7"/>
+  <text class="small" x="380" y="279">V0</text>
+
+  <rect class="sync" x="112" y="326" width="220" height="48" rx="7"/>
+  <text class="label" x="161" y="355">AllGather Q/K</text>
+  <rect class="soft-box" x="352" y="326" width="100" height="48" rx="7"/>
+  <text class="small" x="374" y="347">local V</text>
+  <text class="tiny" x="371" y="364">stays shard</text>
+
+  <rect class="box" x="612" y="180" width="430" height="210" rx="10"/>
+  <text class="label" x="642" y="212">GPU A2 local compute</text>
+  <rect class="soft-box" x="646" y="252" width="100" height="44" rx="7"/>
+  <text class="small" x="673" y="279">Q1</text>
+  <rect class="soft-box" x="766" y="252" width="100" height="44" rx="7"/>
+  <text class="small" x="794" y="279">K1</text>
+  <rect class="soft-box" x="886" y="252" width="100" height="44" rx="7"/>
+  <text class="small" x="914" y="279">V1</text>
+
+  <rect class="sync" x="646" y="326" width="220" height="48" rx="7"/>
+  <text class="label" x="695" y="355">AllGather Q/K</text>
+  <rect class="soft-box" x="886" y="326" width="100" height="48" rx="7"/>
+  <text class="small" x="908" y="347">local V</text>
+  <text class="tiny" x="905" y="364">stays shard</text>
+
+  <path class="dashed" d="M 332 350 C 440 300, 540 300, 646 350"/>
+  <path class="dashed" d="M 646 350 C 540 400, 440 400, 332 350"/>
+  <text class="orange" x="480" y="314">Q/K exchange</text>
+  <text class="tiny" x="476" y="408">each GPU reconstructs complete Q and K</text>
+
+  <rect class="box" x="220" y="460" width="280" height="62" rx="9"/>
+  <text class="label" x="267" y="485">Scaled Dot-Product</text>
+  <text class="tiny" x="278" y="504">complete Q x complete K</text>
+
+  <rect class="box" x="560" y="460" width="220" height="62" rx="9"/>
+  <text class="label" x="620" y="485">SoftMax</text>
+  <text class="tiny" x="604" y="504">attention weights, not final token</text>
+
+  <rect class="sync" x="840" y="460" width="170" height="62" rx="9"/>
+  <text class="label" x="878" y="485">Backward</text>
+  <text class="tiny" x="865" y="504">AllGather + AllReduce</text>
+
+  <line class="line" x1="500" y1="491" x2="554" y2="491"/>
+  <polygon class="arrow" points="554,491 542,484 542,498"/>
+  <line class="line" x1="780" y1="491" x2="834" y2="491"/>
+  <polygon class="arrow" points="834,491 822,484 822,498"/>
+
+  <text class="green" x="104" y="430">V shards remain local in this forward-pass example.</text>
+  <text class="purple" x="700" y="424">Q/K require synchronization before</text>
+  <text class="purple" x="700" y="442">attention score computation.</text>
+</svg>

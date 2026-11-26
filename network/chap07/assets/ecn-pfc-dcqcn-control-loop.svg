@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="620" viewBox="0 0 1120 620" role="img" aria-labelledby="title desc">
+  <title id="title">ECN, PFC, and DCQCN control loop</title>
+  <desc id="desc">A RoCEv2 sender sends traffic through a congested queue. ECN marks packets first, the receiver returns CNP, DCQCN reduces sender rate, and PFC pauses a priority class only when queue pressure reaches XOFF.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .box { fill: #F5F1EA; stroke: #111111; stroke-width: 1.4; }
+    .soft { fill: #F3EFE7; stroke: #D8D1C7; stroke-width: 1.2; }
+    .accent { fill: #F5F1EA; stroke: #D9392E; stroke-width: 2; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.5; }
+    .muted-line { fill: none; stroke: #D8D1C7; stroke-width: 1.3; }
+    .accent-line { fill: none; stroke: #D9392E; stroke-width: 2; }
+    .dash { stroke-dasharray: 7 6; }
+    .label { font-family: Inter, Arial, sans-serif; font-size: 16px; font-weight: 700; fill: #050505; }
+    .small { font-family: Inter, Arial, sans-serif; font-size: 12px; fill: #6F6A63; }
+    .key { font-family: Inter, Arial, sans-serif; font-size: 22px; font-weight: 700; fill: #050505; }
+    .red { fill: #D9392E; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#111111"/>
+    </marker>
+    <marker id="arrowAccent" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#D9392E"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1120" height="620"/>
+
+  <g transform="translate(70 88)">
+    <rect class="box" x="0" y="135" width="150" height="82" rx="6"/>
+    <text class="label" x="75" y="168" text-anchor="middle">Sender NIC</text>
+    <text class="small" x="75" y="191" text-anchor="middle">RoCEv2 QP</text>
+
+    <rect class="box" x="245" y="135" width="150" height="82" rx="6"/>
+    <text class="label" x="320" y="168" text-anchor="middle">Leaf A</text>
+    <text class="small" x="320" y="191" text-anchor="middle">ingress</text>
+
+    <rect class="accent" x="490" y="112" width="170" height="128" rx="6"/>
+    <text class="label" x="575" y="150" text-anchor="middle">Congested queue</text>
+    <text class="small" x="575" y="176" text-anchor="middle">ECN threshold</text>
+    <text class="small" x="575" y="196" text-anchor="middle">then PFC XOFF</text>
+    <text class="small" x="575" y="216" text-anchor="middle">if pressure grows</text>
+
+    <rect class="box" x="755" y="135" width="150" height="82" rx="6"/>
+    <text class="label" x="830" y="168" text-anchor="middle">Receiver NIC</text>
+    <text class="small" x="830" y="191" text-anchor="middle">generates CNP</text>
+
+    <path class="line" d="M150 176 H245" marker-end="url(#arrow)"/>
+    <path class="line" d="M395 176 H490" marker-end="url(#arrow)"/>
+    <path class="accent-line" d="M660 176 H755" marker-end="url(#arrowAccent)"/>
+    <text class="small" x="700" y="158" text-anchor="middle">CE-marked packet</text>
+
+    <path class="accent-line dash" d="M830 135 C782 64 500 35 145 126" marker-end="url(#arrowAccent)"/>
+    <text class="label red" x="480" y="52" text-anchor="middle">CNP returns congested QP information</text>
+
+    <path class="muted-line dash" d="M490 209 C405 286 250 286 150 210" marker-end="url(#arrow)"/>
+    <text class="small" x="303" y="300" text-anchor="middle">PFC XOFF can pause upstream priority class</text>
+  </g>
+
+  <g transform="translate(120 400)">
+    <text class="key" x="0" y="0">Queue threshold ordering</text>
+
+    <line class="line" x1="10" y1="76" x2="850" y2="76"/>
+    <rect class="soft" x="0" y="44" width="170" height="64" rx="6"/>
+    <text class="label" x="85" y="70" text-anchor="middle">Normal</text>
+    <text class="small" x="85" y="91" text-anchor="middle">no marking</text>
+
+    <rect class="soft" x="230" y="44" width="190" height="64" rx="6"/>
+    <text class="label" x="325" y="70" text-anchor="middle">ECN mark</text>
+    <text class="small" x="325" y="91" text-anchor="middle">CE=11, CNP follows</text>
+
+    <rect class="accent" x="480" y="44" width="190" height="64" rx="6"/>
+    <text class="label" x="575" y="70" text-anchor="middle">PFC XOFF</text>
+    <text class="small" x="575" y="91" text-anchor="middle">lossless pause fallback</text>
+
+    <rect class="soft" x="730" y="44" width="190" height="64" rx="6"/>
+    <text class="label" x="825" y="70" text-anchor="middle">Watchdog</text>
+    <text class="small" x="825" y="91" text-anchor="middle">storm mitigation</text>
+
+    <path class="line" d="M170 76 H230" marker-end="url(#arrow)"/>
+    <path class="line" d="M420 76 H480" marker-end="url(#arrow)"/>
+    <path class="line" d="M670 76 H730" marker-end="url(#arrow)"/>
+
+    <text class="small" x="0" y="148">A healthy operating point sees ECN/CNP and DCQCN activity before frequent PFC pauses.</text>
+  </g>
+</svg>

@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="560" viewBox="0 0 1200 560" role="img" aria-labelledby="title desc">
+  <title id="title">HAMi control plane to runtime enforcement boundary</title>
+  <desc id="desc">A flow diagram showing how HAMi moves from Kubernetes scheduling through Pod annotations and device plugin allocation to libvgpu runtime enforcement on a physical GPU.</desc>
+  <style>
+    .bg { fill: #F5F1EA; }
+    .panel { fill: none; stroke: #D8D1C7; stroke-width: 1.4; }
+    .box { fill: none; stroke: #111111; stroke-width: 1.4; }
+    .accent-box { fill: none; stroke: #D9392E; stroke-width: 2.2; }
+    .label { fill: #050505; font: 700 20px Arial, sans-serif; }
+    .text { fill: #050505; font: 600 16px Arial, sans-serif; }
+    .small { fill: #6F6A63; font: 13px Arial, sans-serif; }
+    .mono { fill: #050505; font: 600 14px "Courier New", monospace; }
+    .line { fill: none; stroke: #111111; stroke-width: 1.5; marker-end: url(#arrow); }
+    .accent-line { fill: none; stroke: #D9392E; stroke-width: 2; marker-end: url(#arrow-red); }
+    .dash { fill: none; stroke: #6F6A63; stroke-width: 1.2; stroke-dasharray: 5 5; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#111111" />
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#D9392E" />
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1200" height="560" />
+
+  <rect class="panel" x="40" y="46" width="530" height="454" rx="0" />
+  <rect class="panel" x="630" y="46" width="530" height="454" rx="0" />
+  <line class="dash" x1="600" y1="40" x2="600" y2="508" />
+
+  <text class="label" x="62" y="82">Kubernetes control plane</text>
+  <text class="small" x="62" y="106">placement, quota intent, and allocation protocol</text>
+  <text class="label" x="652" y="82">Container runtime plane</text>
+  <text class="small" x="652" y="106">device injection and CUDA/NVML enforcement</text>
+
+  <rect class="box" x="74" y="144" width="170" height="76" />
+  <text class="text" x="98" y="176">Pod spec</text>
+  <text class="mono" x="98" y="199">gpu/gpumem</text>
+
+  <rect class="box" x="304" y="144" width="190" height="76" />
+  <text class="text" x="330" y="176">MutatingWebhook</text>
+  <text class="small" x="330" y="199">routes GPU Pod</text>
+
+  <rect class="box" x="74" y="296" width="190" height="88" />
+  <text class="text" x="100" y="328">HAMi scheduler</text>
+  <text class="small" x="100" y="351">filter, score, bind</text>
+
+  <rect class="accent-box" x="322" y="292" width="196" height="96" />
+  <text class="text" x="348" y="325">Pod annotation</text>
+  <text class="small" x="348" y="348">selected GPU UUID</text>
+  <text class="small" x="348" y="367">memory and core quota</text>
+
+  <rect class="box" x="672" y="144" width="202" height="86" />
+  <text class="text" x="700" y="177">Device Plugin</text>
+  <text class="small" x="700" y="200">Allocate response</text>
+
+  <rect class="box" x="922" y="144" width="190" height="86" />
+  <text class="text" x="950" y="176">env + mount</text>
+  <text class="small" x="950" y="199">quota vars</text>
+  <text class="small" x="950" y="216">libvgpu.so</text>
+
+  <rect class="accent-box" x="672" y="306" width="202" height="88" />
+  <text class="text" x="700" y="338">libvgpu.so</text>
+  <text class="small" x="700" y="361">CUDA/NVML hook</text>
+
+  <rect class="box" x="922" y="306" width="190" height="88" />
+  <text class="text" x="950" y="338">Physical GPU</text>
+  <text class="small" x="950" y="361">shared hardware</text>
+
+  <path class="line" d="M244 182 H304" />
+  <path class="line" d="M399 220 V252 H169 V296" />
+  <path class="line" d="M264 340 H322" />
+  <path class="accent-line" d="M518 340 C570 340, 604 188, 672 188" />
+  <path class="line" d="M874 188 H922" />
+  <path class="line" d="M1017 230 V274 C1017 294, 960 306, 874 342" />
+  <path class="accent-line" d="M874 350 H922" />
+
+  <text class="small" x="536" y="326">annotation boundary</text>
+  <text class="small" x="694" y="444">Quota is enforced in user space, not by hardware partitioning.</text>
+  <line class="accent-line" x1="694" y1="424" x2="694" y2="396" />
+</svg>
